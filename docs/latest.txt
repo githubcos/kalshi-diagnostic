@@ -1,40 +1,62 @@
-===== SERVER HEALTH =====
-Tue Aug 25 01:38:33 UTC 2026
- 01:38:33 up 2 days,  9:05,  5 users,  load average: 0.02, 0.08, 0.08
+===== KALSHI NO-FAKE-FILL PATCH =====
+Tue Aug 25 01:40:54 UTC 2026
 
-===== MEMORY =====
-               total        used        free      shared  buff/cache   available
-Mem:           911Mi       442Mi       121Mi       2.8Mi       517Mi       468Mi
-Swap:             0B          0B          0B
-
-===== DISK =====
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/root        19G  6.5G   12G  36% /
-
-===== BOT =====
 BOT_STOPPED
 
-===== PROJECT =====
-/home/ubuntu/KalshiArbo/kalshiarbo
+===== PATCH =====
+1317-		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
+1318-	}
+1319-	if actualShares <= 0 {
+1320-		// KALSHI SAFETY: never manufacture filled inventory from requested size.
+1321-		// Require authoritative SizeMatched/fills evidence.
+1322:		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
+1323-			zap.String("request", requestName),
+1324-			zap.String("order_id", orderID),
+1325-			zap.Float64("gross_fill_shares", grossFillShares),
+1326-		)
+1327-		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
+1328:			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
+1329-	}
+1330-
+1331-	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
+1332-	// which may be lower than the limit ceiling used for the preflight estimate).
+1333-	// This ensures the journal cost basis and PnL are accurate.
+1334-	effectiveShares := grossFillShares
+1335-	if effectiveShares <= 0 {
+1336-		effectiveShares = rawShares
+1337-	}
+1338-	usdSpent = marketBuyOrderNotional(effectiveShares, fillPrice)
+1339-	if !t.cfg.PaperTrade {
+1340-		// Doc-backed execution model: insert status/trade rows can appear before the
+1341-		// settled token balance is visible, so ownership is only finalized after wallet credit.
+1342-		minExpected := actualShares - 0.02
+1343-		if minExpected < pairArbShareDust {
+1344-			minExpected = pairArbShareDust
+1345-		}
+1346-		// Fast path: fills API already confirmed the trade (non-zero avg + gross).
 
-===== RECENT KERNEL =====
-[Sun Aug 23 06:22:38 2026] systemd[1]: systemd-journald.service: Deactivated successfully.
-[Sun Aug 23 06:22:38 2026] systemd[1]: Stopped systemd-journald.service - Journal Service.
-[Sun Aug 23 06:22:38 2026] systemd[1]: Starting systemd-journald.service - Journal Service...
-[Sun Aug 23 06:22:38 2026] systemd[1]: Finished systemd-networkd-wait-online.service - Wait for Network to be Configured.
-[Sun Aug 23 06:22:38 2026] systemd-journald[17130]: Collecting audit messages is disabled.
-[Sun Aug 23 06:22:38 2026] systemd[1]: Started systemd-journald.service - Journal Service.
-[Sun Aug 23 06:22:47 2026] audit: type=1400 audit(1787466167.759:147): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="rsyslogd" pid=20988 comm="apparmor_parser"
-[Sun Aug 23 06:22:59 2026] audit: type=1400 audit(1787466179.414:148): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="rsyslogd" pid=21676 comm="apparmor_parser"
-[Sun Aug 23 06:23:00 2026] audit: type=1400 audit(1787466180.262:149): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="rsyslogd" pid=21755 comm="apparmor_parser"
-[Sun Aug 23 08:20:02 2026] workqueue: drm_fb_helper_damage_work hogged CPU for >10000us 11 times, consider switching to WQ_UNBOUND
-[Sun Aug 23 10:30:01 2026] workqueue: psi_avgs_work hogged CPU for >10000us 19 times, consider switching to WQ_UNBOUND
-[Sun Aug 23 15:56:17 2026] loop4: detected capacity change from 0 to 102608
-[Sun Aug 23 15:56:17 2026] audit: type=1400 audit(1787500578.088:150): apparmor="STATUS" operation="profile_load" profile="unconfined" name="/snap/snapd/27710/usr/lib/snapd/snap-confine" pid=41203 comm="apparmor_parser"
-[Sun Aug 23 15:56:22 2026] loop5: detected capacity change from 0 to 8
-[Sun Aug 23 15:56:22 2026] audit: type=1400 audit(1787500583.008:151): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="/snap/snapd/27710/usr/lib/snapd/snap-confine" pid=41291 comm="apparmor_parser"
-[Sun Aug 23 15:56:22 2026] audit: type=1400 audit(1787500583.041:152): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="snap-update-ns.amazon-ssm-agent" pid=41293 comm="apparmor_parser"
-[Sun Aug 23 15:56:22 2026] audit: type=1400 audit(1787500583.048:153): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="snap.amazon-ssm-agent.amazon-ssm-agent" pid=41294 comm="apparmor_parser"
-[Sun Aug 23 15:56:22 2026] audit: type=1400 audit(1787500583.054:154): apparmor="STATUS" operation="profile_replace" profile="unconfined" name="snap.amazon-ssm-agent.ssm-cli" pid=41295 comm="apparmor_parser"
-[Sun Aug 23 15:56:23 2026] audit: type=1400 audit(1787500583.300:155): apparmor="STATUS" operation="profile_replace" info="same as current profile, skipping" profile="unconfined" name="/snap/snapd/27710/usr/lib/snapd/snap-confine" pid=41309 comm="apparmor_parser"
-[Sun Aug 23 20:01:01 2026] workqueue: drm_fb_helper_damage_work hogged CPU for >10000us 19 times, consider switching to WQ_UNBOUND
+===== OLD FALLBACK CHECK =====
+1102:				fillSource = "preflight_fallback"
+1353:		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
+1358:		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+
+===== TEST =====
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	(cached)
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+ok  	github.com/polyarb/strategy	0.019s
+ok  	github.com/polyarb/web	(cached)
+TEST_RC=0
+
+===== BUILD =====
+BUILD_RC=0
