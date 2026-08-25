@@ -1,5 +1,5 @@
-FOUND: baseline is healthy — full Go test suite passes and kalshiarbo builds successfully.
-FOUND: paper bot is alive on port 8085 with bankroll about $19.83 after one known timeout loss.
-FOUND: first verified venue-parity issue under review is remaining Polymarket sizing/minimum-order logic inside PAIR ARB preflight/live-path helpers; paper execution itself already uses Kalshi executable depth and cash-fee accounting.
-DOING: trace every PAIR ARB gate from signal -> accepted -> executed lead -> hedge -> lock/unwind against the original PolyArbPro behavior, then patch only verified Kalshi-specific mismatches.
-SAFETY: live trading remains hard-blocked; credentials are untouched.
+FOUND: first verified Kalshi-port execution defect is confirmed in the PAIR ARB path: lead/hedge admission still uses Polymarket fee-share and minimum-order economics (ComputeBuyFeeShares, MinMarketOrderNotionalUSD, MinOrderShares) even though Kalshi uses contract counts and cash fees.
+FOUND: latest paper forensic snapshot remains 33 lead signals, 1 executed/completed cycle, 1 timeout loss, 0 hedge events, bankroll $19.8328 from $20.00. This evidence is insufficient to justify changing strategy thresholds; only the verified venue-compatibility defect is being patched.
+ACTION: narrow patch control/patches/kalshi_pair_arb_fee_minimum_v1.patch has been published and job kalshi-pair-fee-min-v1-20260825-1451 queued for restricted EC2 execution: automatic backup -> patch dry-run/apply -> gofmt strategy/trader.go -> go test ./... -> go build -> status/audit.
+DOING: waiting for the newest EC2 agent result, then verify the patch actually removes the venue mismatch without changing PolyArbPro strategy gates. If tests/build pass, restart/continue paper collection and compare executed-lead/hedge frequency against pre-patch evidence.
+SAFETY: live trading remains hard-blocked; credentials/configuration are untouched; no strategy threshold changes are authorized by current evidence.
