@@ -1,0 +1,15 @@
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -1214,8 +1214,10 @@
+ 				)
+ 				rawShares = resizedShares
+ 				usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
+-				feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+-				actualShares = math.Floor((rawShares-feeShares)*100) / 100
++				// Kalshi collateral-resize retries preserve the resized contract
++				// quantity; venue fees are cash charges, never share deductions.
++				feeShares = 0
++				actualShares = math.Floor((rawShares+1e-9)*100) / 100
+ 				if actualShares <= 0 {
+ 					return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: collateral-resized buy has non-positive shares")
+ 				}
