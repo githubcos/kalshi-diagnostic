@@ -1,6 +1,6 @@
 --- a/strategy/trader.go
 +++ b/strategy/trader.go
-@@
+@@ -8000,8 +8000,13 @@
  func pairArbExactHedgeSizing(targetActualShares, hedgePrice float64, feeRateBps string) (rawShares, notional float64, ok bool) {
 -	rawShares = solveRawSharesForTargetActual(targetActualShares, hedgePrice, feeRateBps)
 -	if rawShares <= 0 {
@@ -17,7 +17,7 @@
 -	return rawShares, notional, notional+0.0000001 >= polymarket.MinMarketOrderNotionalUSD && rawShares >= polymarket.MinOrderShares
 +	return rawShares, notional, true
  }
-@@
+@@ -8300,10 +8300,12 @@
 -	usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
 -	if usdSpent+0.0000001 < polymarket.MinMarketOrderNotionalUSD {
 -		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: limit buy notional $%.4f below $%.2f minimum", usdSpent, polymarket.MinMarketOrderNotionalUSD)
@@ -36,7 +36,7 @@
 -		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
 +		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: invalid Kalshi contract quantity")
  	}
-@@
+@@ -8800,14 +8800,11 @@
 -	rawShares := math.Round((tradeSize/limitPrice)*100) / 100
 -	if t.cfg.PaperTrade {
 -		rawShares = pairKalshiSharesForBudget(tradeSize, limitPrice)
@@ -57,13 +57,13 @@
 -		return fmt.Errorf("pair arb: fee eats all lead shares")
 +		return fmt.Errorf("pair arb: invalid estimated Kalshi lead contracts")
  	}
-@@
+@@ -9000,4 +9000,4 @@
  	_, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(estimatedActualShares, hedgePrice, t.feeRateBps)
  	if !hedgeAllowed {
 -		return fmt.Errorf("pair arb: exact %s hedge would be $%.4f at %.4f, below $%.2f FAK minimum", hedgeSide, hedgeNotional, hedgePrice, polymarket.MinMarketOrderNotionalUSD)
 +		return fmt.Errorf("pair arb: exact %s hedge %.4f contracts at %.4f is below Kalshi 0.01-contract granularity", hedgeSide, estimatedActualShares, hedgePrice)
  	}
-@@
+@@ -9100,6 +9100,5 @@
  	leadCost := marketBuyOrderNotional(rawShares, limitPrice)
 -	if t.cfg.PaperTrade {
 -		leadCost += kalshiTakerFeeUSD(rawShares, limitPrice)
