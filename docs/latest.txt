@@ -1,34 +1,20 @@
-==================================================
-KALSHIARBO POLY PARITY PATCH APPLY + BUILD
-UTC: 2026-08-25T12:34:40+00:00
-==================================================
+===== KALSHI PARITY V3 =====
+UTC=2026-08-25T12:43:44+00:00
 
-=== APPLY PATCH ===
-patching file kalshi/feed.go
-patching file main.go
-patching file strategy/kalshi_pair_parity_test.go
-patching file strategy/pair_arb_test.go
-Hunk #1 succeeded at 241 (offset -1 lines).
-patching file strategy/signal.go
+=== DRY RUN ===
+checking file strategy/trader.go
+checking file strategy/pair_arb_test.go
+DRY_RUN=PASS
+
+=== APPLY ===
 patching file strategy/trader.go
-Hunk #8 succeeded at 8630 (offset 3 lines).
-Hunk #9 succeeded at 8683 (offset 3 lines).
-Hunk #10 succeeded at 8711 (offset 3 lines).
-Hunk #11 succeeded at 8745 (offset 3 lines).
-Hunk #12 succeeded at 8859 (offset 3 lines).
-Hunk #13 succeeded at 8879 (offset 3 lines).
-Hunk #14 succeeded at 9063 (offset 3 lines).
-Hunk #15 succeeded at 9102 (offset 3 lines).
-Hunk #16 succeeded at 9333 (offset 3 lines).
-Hunk #17 succeeded at 9367 (offset 3 lines).
-Hunk #18 succeeded at 9406 (offset 3 lines).
-Hunk #19 succeeded at 9728 (offset 3 lines).
-PATCH_RC=0
+patching file strategy/pair_arb_test.go
+PATCH=PASS
 
 === GOFMT ===
-GOFMT_RC=0
+GOFMT=PASS
 
-=== GO TEST ./... ===
+=== TEST ===
 ?   	github.com/polyarb	[no test files]
 ?   	github.com/polyarb/binance	[no test files]
 ?   	github.com/polyarb/bybit	[no test files]
@@ -36,79 +22,17 @@ GOFMT_RC=0
 ?   	github.com/polyarb/coinbase	[no test files]
 ?   	github.com/polyarb/config	[no test files]
 ?   	github.com/polyarb/deribit	[no test files]
-ok  	github.com/polyarb/discord	0.026s
+ok  	github.com/polyarb/discord	(cached)
 ?   	github.com/polyarb/display	[no test files]
 ?   	github.com/polyarb/exchangefeed	[no test files]
 ?   	github.com/polyarb/kalshi	[no test files]
 ?   	github.com/polyarb/market	[no test files]
 ok  	github.com/polyarb/polymarket	(cached)
---- FAIL: TestMaybeRebalancePairArbBalancesPaperLead (0.00s)
-    pair_arb_test.go:63: expected pair to be balanced, got yes=10.00 no=0.00
+ok  	github.com/polyarb/strategy	0.018s
+ok  	github.com/polyarb/web	(cached)
+TEST_RC=0
 
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY [92mYES [PAIR LEAD][1m[92m EXECUTED [0m
-  [32m▸[0m  [1m[33m│ PAPER [0m  [97m11.16[0m shares @ [97m$0.4300[0m    fee: [93m0.0000 sh[0m    cost: [97m$5.00[0m
-  [32m▸[0m  Target → [92m$0.4900[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
-  [91m◂[0m  [1m[33m│ PAPER [0m  [97m11.16[0m shares  │  buy [37m$0.4479[0m → sell [97m$0.4300[0m  │  fee [93m$0.2000[0m
-  [91m◂[0m  ▼ [91mP&L  -$-0.4000  (--8.00%)[0m  │  Reason: pair_fill_leg_timeout  │  Held: 5s
-  [91m◂[0m  [91m████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
---- FAIL: TestOnPairArbSignalRejectsWhenStrictOrderbookUnavailable (5.01s)
-    pair_arb_test.go:182: expected strict pair arb to reject when independent orderbook executor is unavailable
-
-  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
-  [91m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$0.4300[0m → sell [97m$0.2000[0m  │  fee [93m$0.1200[0m
-  [91m◂[0m  ▼ [91mP&L  -$-2.4200  (--56.28%)[0m  │  Reason: pair_fill_leg_timeout  │  Held: 6s
-  [91m◂[0m  [91m████████████████████████████████████████[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
---- FAIL: TestManagePairArbPositionTimesOutUnhedgedLead (0.00s)
-    pair_arb_test.go:287: expected pnl -2.30, got -2.5400
-
-  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
-  [91m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$0.5200[0m → sell [97m$0.4400[0m  │  fee [93m$0.1800[0m
-  [91m◂[0m  ▼ [91mP&L  -$-0.9800  (--18.85%)[0m  │  Reason: pair_unprofitable_abort  │  Held: 10s
-  [91m◂[0m  [91m███████████████████░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$9.1000[0m → sell [97m$0.9900[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.8000  (+0.88%)[0m  │  Reason: pair_sell_at_99  │  Held: 20s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
---- FAIL: TestEvaluatePairArbRequiresPositiveGrossCompleteSetEdge (0.00s)
-    pair_arb_test.go:530: expected no signal when YES+NO=1.00, got PAIR_ARB_LEAD_NO
-FAIL
-FAIL	github.com/polyarb/strategy	5.037s
-ok  	github.com/polyarb/web	0.017s
-FAIL
-TEST_RC=1
-
-=== GO BUILD ===
+=== BUILD ===
 BUILD_RC=0
 
-=== FINAL ===
-PATCH_RC=0
-GOFMT_RC=0
-TEST_RC=1
-BUILD_RC=0
+FINAL_STATUS=PASS
