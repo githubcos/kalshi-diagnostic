@@ -1,10 +1,10 @@
 {
-  "id": "kalshi-pair-tests-v4-20260825-1635",
+  "id": "kalshi-pair-collateral-resize-v1-20260825-1637",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_tests_v3.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/pair_arb_test.go"]},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_collateral_resize_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "STATUS"},
