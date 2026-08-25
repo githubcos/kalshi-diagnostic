@@ -1,8 +1,8 @@
-CURRENT PHASE: PAPER_EVIDENCE at 95%, preparing FINAL_PARITY_REVIEW.
-LATEST VERIFIED AGENT STATE: kalshi-parity-observe-v4-20260825-2154 PASS. Agent is idle with last_result=PASS; KalshiArbo PAPER is the active listener on port 8085; LIVE_ALLOWED=false.
-FINITE PARITY GATES: PARTIAL_FILL, HEDGE_TIMING, TIMEOUT_UNWIND, and SETTLEMENT evidence have all been captured. No additional Kalshi-port execution/accounting mismatch is verified from the newest source/runtime evidence.
-SETTLEMENT / MARK-TO-MARKET: DEFECT_PATCHED. Active PAIR snapshots use authoritative Kalshi YES+NO marks; the 1-YES fallback is no longer used by the patched active snapshot caller chain. Backup, patch, gofmt, full go test ./..., go build, and paper restart verification passed.
-LATEST RUNTIME: PAPER remains healthy on :8085 after the v4 observation job. The agent refreshed 40 live parity-source excerpts and status without restarting or modifying trading code.
-PAPER FORENSICS: docs/latest.txt remains stale at 2026-08-25T14:25:49Z: $20.0000 -> $19.8328, realized -$0.1672, 33 lead attempts, 0 hedge events, 1 completed cycle, 1 timeout exit. This is not post-patch evidence and cannot support strategy-threshold changes or final parity certification.
-ACTION THIS RUN: no trading-code patch forced because no new verified defect exists. Keep PAPER running continuously and wait for a fresh completed-cycle forensic economics snapshot before FINAL_PARITY_REVIEW. The stale forensic publisher/evidence path is now the limiting item, not a proven trading defect.
-SAFETY: credentials untouched; LIVE=false; no changes to PolyArbPro entry signals, sizing, hedge targets, timeout thresholds, or strategy semantics.
+CURRENT PHASE: EXECUTION_STATE_VALIDATION at 97%, before FINAL_PARITY_REVIEW.
+LATEST VERIFIED TEST: kalshi-deterministic-parity-v2-20260825-2212 PASS. Deterministic Kalshi PAIR economics passed three consecutive runs: balanced pair, partial hedge/residual, fractional contracts, and cash-fee inventory semantics. Full go test ./... PASS and go build PASS.
+PAPER HEALTH: KalshiArbo remains the active listener on port 8085 (PID 3381136 in the latest agent result); LIVE_ALLOWED=false.
+WHAT IS PROVEN: Kalshi contract/cash accounting is repeatable and repository regression/build are clean.
+WHAT IS NOT YET PROVEN: the deterministic harness does not yet exercise the real PAIR execution state-machine functions through lead fill -> hedge admission -> hedge fill/reconciliation -> timeout/residual transitions. Do not mislabel arithmetic fixtures as end-to-end execution proof.
+ACTION NOW: inspect the actual strategy execution seams and construct the narrowest offline test that invokes production transition/reconciliation logic with controlled fill states. No network orders, no live mode, no credentials, and no strategy-threshold changes.
+PATCH POLICY: patch trading code only if this production-path test exposes a verified Kalshi-port defect. Testability-only scaffolding must not alter runtime semantics.
+SAFETY: PAPER remains running; LIVE=false; credentials untouched; PolyArbPro signal/threshold semantics unchanged.
