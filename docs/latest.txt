@@ -1,8 +1,8 @@
 ╔══════════════════════════════════════════════════════════════════════╗
 ║              KALSHIARBO INDEPENDENT FORENSIC AUDITOR              ║
 ╚══════════════════════════════════════════════════════════════════════╝
- UTC                  2026-08-25T13:32:26+00:00
- Runtime              00:26:30
+ UTC                  2026-08-25T13:32:57+00:00
+ Runtime              00:27:01
  Bot                  ALIVE  kalshiarbo pid=103223
  Port                 8085
 
@@ -15,7 +15,7 @@
  Maximum drawdown      $    0.1672
 
 ──────────────────── PAIR-ARB PERFORMANCE ──────────────────────────
- Lead attempts                 22
+ Lead attempts                 26
  Hedge events                   0
  Hedge-event rate            0.00%
  Locked events                  0
@@ -30,30 +30,30 @@
  Net realized P&L         -$0.1672
 
 ──────────────────── CURRENT OPEN ATTEMPT ──────────────────────────
- Attempt               #22
+ Attempt               #26
  Lead side             YES
- BTC                    $78780.68
+ BTC                    $78808.03
  Window open            $78649.79
- BTC gap                $+130.90
+ BTC gap                $+158.20
  YES at signal          0.6500
  Quantity               N/A
  Entry                  N/A
  Capital                N/A
- Age                    17.10s
+ Age                    1.01s
  Hedge seen             NO
  Locked                 NO
 
 ──────────────────────── RECENT EVENTS ─────────────────────────────
+ LEAD #26 YES gap=+158.20 YES=0.6500
+ LEAD #25 YES gap=+116.60 YES=0.6500
+ LEAD #24 YES gap=+108.40 YES=0.6500
+ LEAD #23 YES gap=+103.20 YES=0.6300
  LEAD #22 YES gap=+130.90 YES=0.6500
  LEAD #21 YES gap=+91.00 YES=0.6400
  LEAD #20 YES gap=+102.90 YES=0.6400
  LEAD #19 YES gap=+91.10 YES=0.6300
  LEAD #18 YES gap=+100.90 YES=0.6300
  LEAD #17 YES gap=+95.00 YES=0.6300
- LEAD #16 YES gap=+62.60 YES=0.6000
- LEAD #15 YES gap=+81.90 YES=0.6300
- LEAD #14 YES gap=+55.20 YES=0.6300
- LEAD #13 YES gap=+59.90 YES=0.6500
 
 ──────────────────────── DIAGNOSIS ─────────────────────────────────
  WARNING: HEDGE/TIMEOUT LOSSES DOMINATE
