@@ -11,12 +11,14 @@ WATCH_SERVICE="/etc/systemd/system/kalshi-agent-watchdog.service"
 WATCH_TIMER="/etc/systemd/system/kalshi-agent-watchdog.timer"
 
 echo "=== KALSHI AGENT BOOTSTRAP ==="
-cd "$REPO"
-git pull --rebase --autostash
 
+# Deliberately do NOT git pull here. Bootstrap must remain independent of
+# dirty working-tree/autostash conflicts. The caller installs known-good
+# control files from origin/main before invoking this script.
 cp "$AGENT_SRC" "$AGENT_DST"
 cp "$WATCH_SRC" "$WATCH_DST"
 chmod 700 "$AGENT_DST" "$WATCH_DST"
+python3 -m py_compile "$AGENT_DST"
 
 sudo tee "$SERVICE" >/dev/null <<EOF
 [Unit]
