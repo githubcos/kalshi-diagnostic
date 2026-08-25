@@ -1,9 +1,8 @@
 {
-  "id": "kalshi-paper-restart-verify-v1-20260825-2054",
+  "id": "kalshi-parity-observe-v4-20260825-2154",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "START_PAPER"},
     {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
