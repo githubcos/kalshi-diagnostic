@@ -1,32 +1,34 @@
 {
-  "overall_percent": 46,
-  "overall_basis": "First Kalshi venue-parity fix passed; second verified Polymarket fee-share leak found in adaptive collateral-resize execution",
+  "overall_percent": 50,
+  "overall_basis": "Two verified Kalshi venue-accounting defects are fixed and regression-verified; continuous autopilot audit/test/build/paper-health loop is active",
   "phase": "PAIR ARB execution-path parity audit",
-  "phase_percent": 54,
-  "current_patch": "Kalshi adaptive collateral-resize contract accounting",
-  "patch_percent": 55,
-  "patch_state": "QUEUED — EC2 APPLY/TEST/BUILD",
-  "doing": "I found another live-path venue leak in executePairLimitBuy: when a lead order is resized after a collateral-shortfall response, the code still recalculates actual Kalshi inventory with polymarket.ComputeBuyFeeShares. I generated a narrow patch that preserves the resized Kalshi contract count and treats fees as cash, then queued backup -> patch dry-run/apply -> gofmt -> go test ./... -> go build -> audit.",
-  "why": "Normal Kalshi lead/hedge sizing was fixed in the prior patch, but this adaptive retry branch could still understate filled Kalshi contracts and distort the subsequent hedge quantity. It must use the same cash-fee semantics as the rest of the Kalshi execution path.",
+  "phase_percent": 60,
+  "current_patch": "No new verified defect — classifying remaining venue-reference candidates",
+  "patch_percent": 100,
+  "patch_state": "OBSERVATION / CONTEXT AUDIT",
+  "doing": "The adaptive collateral-resize Kalshi accounting patch passed patch/apply, gofmt, full go test ./..., and go build. Autonomous cycle 1 also passed tests/build and confirmed the paper bot running on port 8085. The remaining raw Polymarket symbol occurrences are being treated as audit candidates only until their execution context proves a Kalshi behavior mismatch.",
+  "why": "The parity loop must preserve PolyArbPro strategy intent. Raw shared Polymarket references are not sufficient evidence for a patch; only references that change Kalshi contract quantity, cash-fee accounting, venue minimums, partial-fill reconciliation, hedge timing/admission, timeout/unwind, or settlement should be changed.",
   "done": [
     "Source/telemetry bridge complete",
+    "Continuous EC2 autopilot active",
     "Normal PAIR ARB fee-share leak fixed",
     "Polymarket minimum-notional leak fixed",
+    "Adaptive collateral-resize fee-share leak fixed",
     "Regression tests updated",
-    "Full tests/build passed after first venue fix",
-    "Second fee-share leak verified in collateral-resize branch",
-    "Second patch queued"
+    "Full tests/build PASS after both venue fixes",
+    "Paper bot confirmed running on port 8085",
+    "Autopilot cycle 1 PASS"
   ],
   "remaining": [
-    "Complete collateral-resize patch/test/build",
+    "Classify remaining Polymarket symbol references by live execution context",
     "Audit authoritative partial-fill quantity handling",
     "Verify hedge timing/admission parity",
     "Separate signals from actual executed leads in forensic accounting",
     "Verify timeout/unwind semantics",
     "Verify settlement behavior",
-    "Audit remaining Polymarket execution dependencies",
+    "Collect a fresh post-patch paper forensic economics snapshot",
     "Repeated paper validation",
     "Final parity certification"
   ],
-  "next": "Read the EC2 result for kalshi-pair-collateral-resize-v1-20260825-1637 immediately; if it passes, continue directly into partial-fill quantity and hedge-timing audit without waiting for user input."
+  "next": "Keep autopilot cycling continuously. Patch nothing from raw symbol counts alone. Prioritize partial-fill quantity and hedge timing context; if no verified mismatch is found, leave the paper bot running and continue observation until fresh forensic evidence arrives."
 }
