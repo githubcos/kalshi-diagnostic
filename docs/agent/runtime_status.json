@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-25T22:09:01+00:00",
+  "utc": "2026-08-25T22:09:09+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-25T22:08:59+00:00",
-    "epoch": 1787695739.5784466,
+    "utc": "2026-08-25T22:09:06+00:00",
+    "epoch": 1787695746.480034,
     "pid": 2004638,
-    "status": "working",
-    "job_id": "kalshi-authoritative-fill-inventory-v1-20260825-2230"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-deterministic-parity-v2-20260825-2212",
+    "last_job_id": "kalshi-authoritative-fill-inventory-v1-20260825-2230",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_220832.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-25T22:03:48+00:00"
+    "last_run_utc": "2026-08-25T22:09:05+00:00"
   },
   "autopilot": {
     "gate_index": 4,

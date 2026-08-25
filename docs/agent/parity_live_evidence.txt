@@ -1,4 +1,4 @@
-LIVE PARITY SOURCE EVIDENCE UTC=2026-08-25T21:55:25+00:00
+LIVE PARITY SOURCE EVIDENCE UTC=2026-08-25T22:09:05+00:00
 LIVE_ALLOWED=false
 
 --- grossFillShares @ strategy/trader.go:1197 context 1189-1205 ---
@@ -391,166 +391,147 @@ LIVE_ALLOWED=false
 01504: 		fillPrice = math.Round(correctedFill*100) / 100
 01505: 	}
 01506: 	if grossFillShares > 0 {
-01507: 		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
-01508: 		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-01509: 	}
-01510: 	if actualShares <= 0 {
-01511: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-01512: 		// Require authoritative SizeMatched/fills evidence.
-01513: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-01514: 			zap.String("request", requestName),
+01507: 		// KALSHI: fills are authoritative contract quantities. Kalshi trading
+01508: 		// fees are cash charges and must never be deducted from contract inventory
+01509: 		// as Polymarket/CTF fee-shares. Preserve 0.01-contract granularity.
+01510: 		feeShares = 0
+01511: 		actualShares = math.Floor(grossFillShares*100) / 100
+01512: 	}
+01513: 	if actualShares <= 0 {
+01514: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
 
---- grossFillShares @ strategy/trader.go:1507 context 1499-1515 ---
-01499: 		// Any non-matched status on immediate orders is a deterministic no-fill.
-01500: 		logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: submit status %s order=%s", orderType, activityRequestLabel(requestName), strings.ToUpper(submitStatus), orderID))
-01501: 		return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
-01502: 	}
+--- grossFillShares @ strategy/trader.go:1511 context 1503-1519 ---
 01503: 	if correctedFill > 0 {
 01504: 		fillPrice = math.Round(correctedFill*100) / 100
 01505: 	}
 01506: 	if grossFillShares > 0 {
-01507: 		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
-01508: 		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-01509: 	}
-01510: 	if actualShares <= 0 {
-01511: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-01512: 		// Require authoritative SizeMatched/fills evidence.
-01513: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-01514: 			zap.String("request", requestName),
-01515: 			zap.String("order_id", orderID),
+01507: 		// KALSHI: fills are authoritative contract quantities. Kalshi trading
+01508: 		// fees are cash charges and must never be deducted from contract inventory
+01509: 		// as Polymarket/CTF fee-shares. Preserve 0.01-contract granularity.
+01510: 		feeShares = 0
+01511: 		actualShares = math.Floor(grossFillShares*100) / 100
+01512: 	}
+01513: 	if actualShares <= 0 {
+01514: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
+01515: 		// Require authoritative SizeMatched/fills evidence.
+01516: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
+01517: 			zap.String("request", requestName),
+01518: 			zap.String("order_id", orderID),
+01519: 			zap.Float64("gross_fill_shares", grossFillShares),
 
---- grossFillShares @ strategy/trader.go:1508 context 1500-1516 ---
-01500: 		logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: submit status %s order=%s", orderType, activityRequestLabel(requestName), strings.ToUpper(submitStatus), orderID))
-01501: 		return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
-01502: 	}
-01503: 	if correctedFill > 0 {
-01504: 		fillPrice = math.Round(correctedFill*100) / 100
-01505: 	}
-01506: 	if grossFillShares > 0 {
-01507: 		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
-01508: 		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-01509: 	}
-01510: 	if actualShares <= 0 {
-01511: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-01512: 		// Require authoritative SizeMatched/fills evidence.
-01513: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-01514: 			zap.String("request", requestName),
-01515: 			zap.String("order_id", orderID),
-01516: 			zap.Float64("gross_fill_shares", grossFillShares),
+--- grossFillShares @ strategy/trader.go:1519 context 1511-1527 ---
+01511: 		actualShares = math.Floor(grossFillShares*100) / 100
+01512: 	}
+01513: 	if actualShares <= 0 {
+01514: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
+01515: 		// Require authoritative SizeMatched/fills evidence.
+01516: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
+01517: 			zap.String("request", requestName),
+01518: 			zap.String("order_id", orderID),
+01519: 			zap.Float64("gross_fill_shares", grossFillShares),
+01520: 		)
+01521: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
+01522: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
+01523: 	}
+01524: 
+01525: 	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
+01526: 	// which may be lower than the limit ceiling used for the preflight estimate).
+01527: 	// This ensures the journal cost basis and PnL are accurate.
 
---- grossFillShares @ strategy/trader.go:1516 context 1508-1524 ---
-01508: 		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-01509: 	}
-01510: 	if actualShares <= 0 {
-01511: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-01512: 		// Require authoritative SizeMatched/fills evidence.
-01513: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-01514: 			zap.String("request", requestName),
-01515: 			zap.String("order_id", orderID),
-01516: 			zap.Float64("gross_fill_shares", grossFillShares),
-01517: 		)
-01518: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
-01519: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
-01520: 	}
-01521: 
-01522: 	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
-01523: 	// which may be lower than the limit ceiling used for the preflight estimate).
-01524: 	// This ensures the journal cost basis and PnL are accurate.
+--- grossFillShares @ strategy/trader.go:1528 context 1520-1536 ---
+01520: 		)
+01521: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
+01522: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
+01523: 	}
+01524: 
+01525: 	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
+01526: 	// which may be lower than the limit ceiling used for the preflight estimate).
+01527: 	// This ensures the journal cost basis and PnL are accurate.
+01528: 	effectiveShares := grossFillShares
+01529: 	if effectiveShares <= 0 {
+01530: 		effectiveShares = rawShares
+01531: 	}
+01532: 	usdSpent = marketBuyOrderNotional(effectiveShares, fillPrice)
+01533: 	if !t.cfg.PaperTrade {
+01534: 		// Doc-backed execution model: insert status/trade rows can appear before the
+01535: 		// settled token balance is visible, so ownership is only finalized after wallet credit.
+01536: 		minExpected := actualShares - 0.02
 
---- grossFillShares @ strategy/trader.go:1525 context 1517-1533 ---
-01517: 		)
-01518: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
-01519: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
-01520: 	}
-01521: 
-01522: 	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
-01523: 	// which may be lower than the limit ceiling used for the preflight estimate).
-01524: 	// This ensures the journal cost basis and PnL are accurate.
-01525: 	effectiveShares := grossFillShares
-01526: 	if effectiveShares <= 0 {
-01527: 		effectiveShares = rawShares
-01528: 	}
-01529: 	usdSpent = marketBuyOrderNotional(effectiveShares, fillPrice)
-01530: 	if !t.cfg.PaperTrade {
-01531: 		// Doc-backed execution model: insert status/trade rows can appear before the
-01532: 		// settled token balance is visible, so ownership is only finalized after wallet credit.
-01533: 		minExpected := actualShares - 0.02
+--- grossFillShares @ strategy/trader.go:1550 context 1542-1558 ---
+01542: 		// settled on-chain. Use a short check so we can place the hedge immediately.
+01543: 		// Tiers:
+01544: 		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
+01545: 		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
+01546: 		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
+01547: 		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
+01548: 		creditAttempts := 20
+01549: 		creditInterval := 500 * time.Millisecond
+01550: 		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
+01551: 			creditAttempts = 1
+01552: 		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+01553: 			creditAttempts = 3
+01554: 			creditInterval = 500 * time.Millisecond
+01555: 		}
+01556: 		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
+01557: 		if cErr != nil {
+01558: 			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
 
---- grossFillShares @ strategy/trader.go:1547 context 1539-1555 ---
-01539: 		// settled on-chain. Use a short check so we can place the hedge immediately.
-01540: 		// Tiers:
-01541: 		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
-01542: 		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
-01543: 		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
-01544: 		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
-01545: 		creditAttempts := 20
-01546: 		creditInterval := 500 * time.Millisecond
-01547: 		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
-01548: 			creditAttempts = 1
-01549: 		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
-01550: 			creditAttempts = 3
-01551: 			creditInterval = 500 * time.Millisecond
-01552: 		}
-01553: 		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
-01554: 		if cErr != nil {
-01555: 			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
+--- grossFillShares @ strategy/trader.go:1552 context 1544-1560 ---
+01544: 		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
+01545: 		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
+01546: 		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
+01547: 		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
+01548: 		creditAttempts := 20
+01549: 		creditInterval := 500 * time.Millisecond
+01550: 		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
+01551: 			creditAttempts = 1
+01552: 		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+01553: 			creditAttempts = 3
+01554: 			creditInterval = 500 * time.Millisecond
+01555: 		}
+01556: 		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
+01557: 		if cErr != nil {
+01558: 			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
+01559: 			// can verify whether the MATCHED buy eventually credited to the wallet.
+01560: 			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
 
---- grossFillShares @ strategy/trader.go:1549 context 1541-1557 ---
-01541: 		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
-01542: 		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
-01543: 		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
-01544: 		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
-01545: 		creditAttempts := 20
-01546: 		creditInterval := 500 * time.Millisecond
-01547: 		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
-01548: 			creditAttempts = 1
-01549: 		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
-01550: 			creditAttempts = 3
-01551: 			creditInterval = 500 * time.Millisecond
-01552: 		}
-01553: 		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
-01554: 		if cErr != nil {
-01555: 			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
-01556: 			// can verify whether the MATCHED buy eventually credited to the wallet.
-01557: 			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
-
---- grossFillShares @ strategy/trader.go:1576 context 1568-1584 ---
-01568: 			// (just below the expected threshold due to API lag or rounding), use the
-01569: 			// actual balance as shares rather than erroring and leaving pendingPairArb set.
-01570: 			if bal >= pairArbShareDust {
-01571: 				t.logger.Warn("trader: pair arb buy wallet credit short; using actual wallet balance as shares",
-01572: 					zap.String("order_id", orderID),
-01573: 					zap.Float64("expected", minExpected),
-01574: 					zap.Float64("actual_balance", bal),
-01575: 				)
-01576: 				effectiveGrossShares := grossFillShares
-01577: 				if effectiveGrossShares <= pairArbShareDust {
-01578: 					effectiveGrossShares = rawShares
-01579: 				}
-01580: 				if fillPrice <= 0 {
-01581: 					fillPrice = math.Round(limitPrice*100) / 100
+--- grossFillShares @ strategy/trader.go:1579 context 1571-1587 ---
+01571: 			// (just below the expected threshold due to API lag or rounding), use the
+01572: 			// actual balance as shares rather than erroring and leaving pendingPairArb set.
+01573: 			if bal >= pairArbShareDust {
+01574: 				t.logger.Warn("trader: pair arb buy wallet credit short; using actual wallet balance as shares",
+01575: 					zap.String("order_id", orderID),
+01576: 					zap.Float64("expected", minExpected),
+01577: 					zap.Float64("actual_balance", bal),
+01578: 				)
+01579: 				effectiveGrossShares := grossFillShares
+01580: 				if effectiveGrossShares <= pairArbShareDust {
+01581: 					effectiveGrossShares = rawShares
 01582: 				}
-01583: 				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
-01584: 				actualShares = bal
+01583: 				if fillPrice <= 0 {
+01584: 					fillPrice = math.Round(limitPrice*100) / 100
+01585: 				}
+01586: 				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+01587: 				actualShares = bal
 
---- grossFillShares @ strategy/trader.go:1606 context 1598-1614 ---
-01598: 				if requestName == "pair_arb_lead_buy" {
-01599: 					// Never open/hedge a lead until wallet credit is visible. Keep the
-01600: 					// pending order for reconcilePendingPairArbOrder() recovery instead.
-01601: 					logTimedActivityWarn(fmt.Sprintf("BUY %s %s delayed: MATCHED but wallet credit pending (balance=%.2f expected>=%.2f) order=%s", orderType, activityRequestLabel(requestName), bal, minExpected, orderID))
-01602: 					t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
-01603: 					keepPendingForReconcile = true
-01604: 					return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
-01605: 				}
-01606: 				effectiveGrossShares := grossFillShares
-01607: 				if effectiveGrossShares <= pairArbShareDust {
-01608: 					effectiveGrossShares = rawShares
-01609: 				}
-01610: 				if fillPrice <= 0 {
-01611: 					fillPrice = math.Round(limitPrice*100) / 100
+--- grossFillShares @ strategy/trader.go:1609 context 1601-1617 ---
+01601: 				if requestName == "pair_arb_lead_buy" {
+01602: 					// Never open/hedge a lead until wallet credit is visible. Keep the
+01603: 					// pending order for reconcilePendingPairArbOrder() recovery instead.
+01604: 					logTimedActivityWarn(fmt.Sprintf("BUY %s %s delayed: MATCHED but wallet credit pending (balance=%.2f expected>=%.2f) order=%s", orderType, activityRequestLabel(requestName), bal, minExpected, orderID))
+01605: 					t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+01606: 					keepPendingForReconcile = true
+01607: 					return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+01608: 				}
+01609: 				effectiveGrossShares := grossFillShares
+01610: 				if effectiveGrossShares <= pairArbShareDust {
+01611: 					effectiveGrossShares = rawShares
 01612: 				}
-01613: 				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
-01614: 				actualShares = math.Floor((effectiveGrossShares-feeShares)*100) / 100
+01613: 				if fillPrice <= 0 {
+01614: 					fillPrice = math.Round(limitPrice*100) / 100
+01615: 				}
+01616: 				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+01617: 				actualShares = math.Floor((effectiveGrossShares-feeShares)*100) / 100
 
 --- SizeMatched @ strategy/trader.go:856 context 848-864 ---
 00848: 		defer cancel()
@@ -685,78 +666,97 @@ LIVE_ALLOWED=false
 01469: 					grossFillShares = fillsGross
 01470: 					if fillsAvg > 0 {
 
---- SizeMatched @ strategy/trader.go:1512 context 1504-1520 ---
-01504: 		fillPrice = math.Round(correctedFill*100) / 100
-01505: 	}
-01506: 	if grossFillShares > 0 {
-01507: 		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
-01508: 		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-01509: 	}
-01510: 	if actualShares <= 0 {
-01511: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-01512: 		// Require authoritative SizeMatched/fills evidence.
-01513: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-01514: 			zap.String("request", requestName),
-01515: 			zap.String("order_id", orderID),
-01516: 			zap.Float64("gross_fill_shares", grossFillShares),
-01517: 		)
-01518: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
-01519: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
-01520: 	}
+--- SizeMatched @ strategy/trader.go:1515 context 1507-1523 ---
+01507: 		// KALSHI: fills are authoritative contract quantities. Kalshi trading
+01508: 		// fees are cash charges and must never be deducted from contract inventory
+01509: 		// as Polymarket/CTF fee-shares. Preserve 0.01-contract granularity.
+01510: 		feeShares = 0
+01511: 		actualShares = math.Floor(grossFillShares*100) / 100
+01512: 	}
+01513: 	if actualShares <= 0 {
+01514: 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
+01515: 		// Require authoritative SizeMatched/fills evidence.
+01516: 		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
+01517: 			zap.String("request", requestName),
+01518: 			zap.String("order_id", orderID),
+01519: 			zap.Float64("gross_fill_shares", grossFillShares),
+01520: 		)
+01521: 		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
+01522: 			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
+01523: 	}
 
---- SizeMatched @ strategy/trader.go:1671 context 1663-1679 ---
-01663: 		return false, hedgeOrderID
-01664: 	}
-01665: 	minExpected := pending.RequestedSize - pairArbWalletReconcileDelta
-01666: 	if minExpected < pairArbShareDust {
-01667: 		minExpected = pairArbShareDust
-01668: 	}
-01669: 	if gr, grErr := t.getOrderTimed(ctx, requestName+"_hedge_guard", hedgeOrderID); grErr == nil && gr != nil {
-01670: 		status := strings.ToLower(strings.TrimSpace(gr.Status))
-01671: 		matched := parseOrderSize(gr.SizeMatched)
-01672: 		remaining := parseOrderSize(gr.SizeRemaining)
-01673: 		if pending.RequestedSize > 0 {
-01674: 			if matched >= minExpected {
-01675: 				return true, hedgeOrderID
-01676: 			}
-01677: 			if matched > pairArbShareDust && remaining <= pairArbShareDust {
+--- SizeMatched @ strategy/trader.go:1674 context 1666-1682 ---
+01666: 		return false, hedgeOrderID
+01667: 	}
+01668: 	minExpected := pending.RequestedSize - pairArbWalletReconcileDelta
+01669: 	if minExpected < pairArbShareDust {
+01670: 		minExpected = pairArbShareDust
+01671: 	}
+01672: 	if gr, grErr := t.getOrderTimed(ctx, requestName+"_hedge_guard", hedgeOrderID); grErr == nil && gr != nil {
+01673: 		status := strings.ToLower(strings.TrimSpace(gr.Status))
+01674: 		matched := parseOrderSize(gr.SizeMatched)
+01675: 		remaining := parseOrderSize(gr.SizeRemaining)
+01676: 		if pending.RequestedSize > 0 {
+01677: 			if matched >= minExpected {
 01678: 				return true, hedgeOrderID
 01679: 			}
+01680: 			if matched > pairArbShareDust && remaining <= pairArbShareDust {
+01681: 				return true, hedgeOrderID
+01682: 			}
 
---- SizeMatched @ strategy/trader.go:2820 context 2812-2828 ---
-02812: 			}
-02813: 		}
-02814: 	}
-02815: 	if req.Size != "" {
-02816: 		expected, err := strconv.ParseFloat(req.Size, 64)
-02817: 		if err == nil && expected > 0 {
-02818: 			sizeRaw := strings.TrimSpace(gr.OriginalSize)
-02819: 			if sizeRaw == "" {
-02820: 				sizeRaw = strings.TrimSpace(gr.SizeMatched)
-02821: 			}
-02822: 			if sizeRaw != "" {
-02823: 				seen, sErr := strconv.ParseFloat(sizeRaw, 64)
-02824: 				if sErr == nil && seen > 0 {
-02825: 					allowedDelta := math.Max(1.0, expected*0.35)
-02826: 					if math.Abs(seen-expected) > allowedDelta {
-02827: 						return false
-02828: 					}
+--- SizeMatched @ strategy/trader.go:2823 context 2815-2831 ---
+02815: 			}
+02816: 		}
+02817: 	}
+02818: 	if req.Size != "" {
+02819: 		expected, err := strconv.ParseFloat(req.Size, 64)
+02820: 		if err == nil && expected > 0 {
+02821: 			sizeRaw := strings.TrimSpace(gr.OriginalSize)
+02822: 			if sizeRaw == "" {
+02823: 				sizeRaw = strings.TrimSpace(gr.SizeMatched)
+02824: 			}
+02825: 			if sizeRaw != "" {
+02826: 				seen, sErr := strconv.ParseFloat(sizeRaw, 64)
+02827: 				if sErr == nil && seen > 0 {
+02828: 					allowedDelta := math.Max(1.0, expected*0.35)
+02829: 					if math.Abs(seen-expected) > allowedDelta {
+02830: 						return false
+02831: 					}
 
---- SizeMatched @ strategy/trader.go:3030 context 3022-3038 ---
-03022: 	if resp == nil {
-03023: 		logTimedActivityWarn(fmt.Sprintf("order lookup %s returned nil response in %d ms", activityLabel, duration.Milliseconds()))
-03024: 		t.logger.Warn("trader: order lookup returned nil response", fields...)
-03025: 		return nil, nil
-03026: 	}
-03027: 	resultFields := append(fields,
-03028: 		zap.String("status", resp.Status),
-03029: 	)
-03030: 	if resp.SizeMatched != "" {
-03031: 		resultFields = append(resultFields, zap.String("size_matched", resp.SizeMatched))
-03032: 	}
-03033: 	if requestName == "conviction_sell_lookup" && strings.EqualFold(resp.Status, "LIVE") {
-03034: 		t.logger.Debug("trader: order lookup completed", resultFields...)
-03035: 		return resp, nil
-03036: 	}
-03037: 	t.logger.Debug("trader: order lookup completed", resultFields...)
-03038: 	return resp, nil
+--- SizeMatched @ strategy/trader.go:3033 context 3025-3041 ---
+03025: 	if resp == nil {
+03026: 		logTimedActivityWarn(fmt.Sprintf("order lookup %s returned nil response in %d ms", activityLabel, duration.Milliseconds()))
+03027: 		t.logger.Warn("trader: order lookup returned nil response", fields...)
+03028: 		return nil, nil
+03029: 	}
+03030: 	resultFields := append(fields,
+03031: 		zap.String("status", resp.Status),
+03032: 	)
+03033: 	if resp.SizeMatched != "" {
+03034: 		resultFields = append(resultFields, zap.String("size_matched", resp.SizeMatched))
+03035: 	}
+03036: 	if requestName == "conviction_sell_lookup" && strings.EqualFold(resp.Status, "LIVE") {
+03037: 		t.logger.Debug("trader: order lookup completed", resultFields...)
+03038: 		return resp, nil
+03039: 	}
+03040: 	t.logger.Debug("trader: order lookup completed", resultFields...)
+03041: 	return resp, nil
+
+--- SizeMatched @ strategy/trader.go:3034 context 3026-3042 ---
+03026: 		logTimedActivityWarn(fmt.Sprintf("order lookup %s returned nil response in %d ms", activityLabel, duration.Milliseconds()))
+03027: 		t.logger.Warn("trader: order lookup returned nil response", fields...)
+03028: 		return nil, nil
+03029: 	}
+03030: 	resultFields := append(fields,
+03031: 		zap.String("status", resp.Status),
+03032: 	)
+03033: 	if resp.SizeMatched != "" {
+03034: 		resultFields = append(resultFields, zap.String("size_matched", resp.SizeMatched))
+03035: 	}
+03036: 	if requestName == "conviction_sell_lookup" && strings.EqualFold(resp.Status, "LIVE") {
+03037: 		t.logger.Debug("trader: order lookup completed", resultFields...)
+03038: 		return resp, nil
+03039: 	}
+03040: 	t.logger.Debug("trader: order lookup completed", resultFields...)
+03041: 	return resp, nil
+03042: }
