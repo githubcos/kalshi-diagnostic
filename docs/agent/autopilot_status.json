@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T18:36:49+00:00",
-  "cycle": 1787683009,
-  "phase": "PAPER_EVIDENCE",
-  "percent": 95,
-  "result": "PASS",
-  "detail": "Finite gates captured; tests=PASS build=PASS paper=RUNNING. Awaiting fresh forensic economics snapshot.",
-  "next": "FINAL_PARITY_REVIEW"
+  "utc": "2026-08-25T18:41:51+00:00",
+  "cycle": 1787683311,
+  "phase": "FINAL_REGRESSION",
+  "percent": 85,
+  "result": "RUNNING",
+  "detail": "All finite source-context gates captured. Running one final test/build and paper-health verification.",
+  "next": "PAPER_EVIDENCE"
 }
