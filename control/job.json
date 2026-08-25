@@ -1,6 +1,6 @@
 {
-  "id": "bootstrap-idle",
-  "enabled": false,
+  "id": "bootstrap-status-20260825",
+  "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"}
