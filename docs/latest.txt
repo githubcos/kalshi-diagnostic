@@ -1,9 +1,9 @@
 KALSHIARBO 40-MIN PAPER AUDIT
 RUN=20260825_082928
-UTC=2026-08-25T09:00:18+00:00
+UTC=2026-08-25T09:02:21+00:00
 PORT=8085
 TARGET_DURATION_MIN=40
-ELAPSED_MIN=30
+ELAPSED_MIN=32
 BOT_PID=82805
 PROCESS=ALIVE
 
@@ -44,6 +44,8 @@ MINUTE_27=ALIVE
 MINUTE_28=ALIVE
 MINUTE_29=ALIVE
 MINUTE_30=ALIVE
+MINUTE_31=ALIVE
+MINUTE_32=ALIVE
 
 ===== CONSOLE =====
 
@@ -29026,6 +29028,35 @@ MINUTE_30=ALIVE
 09:00:01.492	DEBUG	trader: fee rate set	{"fee_rate_bps": "0"}
 09:00:01.506	ERROR	Kalshi market has no valid floor strike	{"ticker": "KXBTC15M-26AUG250515-15", "floor_strike": 0}
 09:00:01.599	INFO	kalshi feed: stop signal received
+09:00:53.268	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "read: websocket: close 1006 (abnormal closure): unexpected EOF"}
+09:00:56.476	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:00:59.619	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:02.770	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:05.910	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:09.052	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:12.196	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:15.338	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:18.473	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:21.606	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:24.756	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:27.902	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:31.047	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:34.192	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:37.332	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:40.464	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:43.608	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:46.750	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:49.883	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:53.021	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:56.157	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:01:59.310	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:02.444	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:05.611	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:08.685	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:11.818	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:14.965	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:18.111	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:02:21.244	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 --- /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260825_08.log ---
 08:19:05.663	INFO	runtime strategy config	{"cwd": "/home/ubuntu/KalshiArbo/kalshiarbo", "config_json": "/home/ubuntu/KalshiArbo/kalshiarbo/config.json", "env_file": "/home/ubuntu/KalshiArbo/kalshiarbo/all.env", "runtime_mode": "PAPER", "live_flag": false, "paper_trade": true, "market_type": "15m", "pair_arb_enabled": true, "pair_arb_sell_at_99": false, "pair_arb_schedule_mode": "CONTINUOUS", "pair_arb_schedule_windows_utc": ""}
 08:19:06.116	DEBUG	coinbase stream: connected	{"url": "wss://ws-feed.exchange.coinbase.com"}
