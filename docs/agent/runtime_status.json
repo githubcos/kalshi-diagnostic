@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-25T22:02:24+00:00",
+  "utc": "2026-08-25T22:02:31+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-25T22:02:24+00:00",
-    "epoch": 1787695344.1195726,
+    "utc": "2026-08-25T22:02:29+00:00",
+    "epoch": 1787695349.8739374,
     "pid": 2004638,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-deterministic-parity-v1-20260825-2205"
   },
   "state": {
     "last_job_id": "kalshi-parity-observe-v4-20260825-2154",
