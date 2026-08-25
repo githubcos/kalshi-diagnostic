@@ -23,7 +23,6 @@ diff --git a/strategy/trader.go b/strategy/trader.go
 -		pnl := p.markToMarket(currentYesPrice)
 +		pnl := p.markToMarket(currentYesPrice, currentNoPrice)
  		return fmt.Sprintf(
- 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
 @@ -8191,7 +8199,7 @@
  	p := t.position
  	tokenPrice := currentYesPrice
@@ -31,9 +30,7 @@ diff --git a/strategy/trader.go b/strategy/trader.go
 -		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
 +		tokenPrice = currentNoPrice
  	}
- 	side := "YES"
 @@ -8210,7 +8218,15 @@
- 
  // PositionSnapshot returns (side, shares, buyPrice, unrealizedPnL) for the display.
  // currentYesPrice is always the YES token price.
 -func (t *Trader) PositionSnapshot(currentYesPrice float64) (string, float64, float64, float64) {
@@ -62,7 +59,6 @@ diff --git a/strategy/trader.go b/strategy/trader.go
 -		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
 +		tokenPrice = currentNoPrice
  		side = "NO"
- 	}
 @@ -8234,7 +8250,15 @@
  	return side, p.Shares, p.BuyPrice, p.Unrealized(tokenPrice)
  }
@@ -77,8 +73,6 @@ diff --git a/strategy/trader.go b/strategy/trader.go
 +		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
 +	}
  	if t.IsFlat() {
- 		return DashboardPositionSnapshot{}
- 	}
 @@ -8266,7 +8290,7 @@
  			BuyPrice:               avgCost,
  			Shares:                 lockedShares,
@@ -102,13 +96,22 @@ diff --git a/strategy/trader.go b/strategy/trader.go
 diff --git a/main.go b/main.go
 --- a/main.go
 +++ b/main.go
-@@ -1,3 +1,3 @@
-@@
+@@ -1762,7 +1762,7 @@
+ 		var posSide string
+ 		var posShares, posBuy, posPnL float64
+ 		if !trader.IsFlat() {
 -			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes)
-+			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes, detector.PairArbSnapshot().NoPrice)
-@@
++			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes, rtdsClient.LatestPrice(noToken))
+ 		}
+ 		if showLog {
+@@ -1782,7 +1782,7 @@
+ 		btcSnap, clSnap, yesSnap, openSnap, winRemSnap, _ := detector.Snapshot()
+ 		ss := trader.SessionStats()
+ 		posFlat := trader.IsFlat()
 -		posSnap := trader.DashboardPositionSnapshot(yesSnap)
-+		posSnap := trader.DashboardPositionSnapshot(yesSnap, detector.PairArbSnapshot().NoPrice)
++		posSnap := trader.DashboardPositionSnapshot(yesSnap, rtdsClient.LatestPrice(noToken))
+ 		claimSnap := trader.DashboardClaimSnapshot()
+ 		webGates := snapshotStrategyGates(detector, !posFlat, trader.BuyInProgress())
 diff --git a/strategy/kalshi_pair_parity_test.go b/strategy/kalshi_pair_parity_test.go
 --- a/strategy/kalshi_pair_parity_test.go
 +++ b/strategy/kalshi_pair_parity_test.go
