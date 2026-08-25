@@ -1,0 +1,33 @@
+{
+  "overall_percent": 28,
+  "overall_basis": "7 of 25 parity/certification checks complete or provisionally verified",
+  "phase": "PAIR ARB venue-parity audit",
+  "phase_percent": 35,
+  "current_patch": "PAIR_ARB Kalshi sizing + minimum-order admission parity",
+  "patch_percent": 15,
+  "patch_state": "ANALYZING",
+  "doing": "Tracing the original PolyArbPro signal -> gate -> lead sizing -> hedge admission path and identifying which remaining Polymarket fee-share/minimum-order assumptions still affect Kalshi paper/live semantics.",
+  "why": "The bot has only one verified executed paper lead so far. Before changing thresholds, we must prove whether low execution frequency is correct strategy gating or a leftover Polymarket venue assumption.",
+  "done": [
+    "Kalshi market feed integrated",
+    "Kalshi paper executable-depth logic integrated",
+    "Kalshi cash-fee accounting corrected",
+    "Residual exit double-fee accounting bug fixed",
+    "Full go test ./... baseline passes",
+    "Go build baseline passes",
+    "Paper bot stable on port 8085"
+  ],
+  "remaining": [
+    "Separate signals from executed leads in forensic accounting",
+    "Verify lead sizing parity",
+    "Verify market minimum order rules",
+    "Verify hedge admission and timing parity",
+    "Verify partial-fill behavior",
+    "Verify timeout/unwind semantics",
+    "Verify settlement/claim behavior",
+    "Remove remaining Polymarket execution dependencies",
+    "Run repeated paper validation",
+    "Final parity certification"
+  ],
+  "next": "If a venue mismatch is verified, generate a narrow patch, then BACKUP -> APPLY_PATCH -> GOFMT -> GO_TEST -> GO_BUILD -> PAPER AUDIT."
+}
