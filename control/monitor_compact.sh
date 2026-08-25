@@ -5,6 +5,7 @@ STATUS="$REPO/control/project_status.json"
 F="$REPO/docs/latest.txt"
 PROGRESS="$REPO/docs/agent/progress.txt"
 RESULT="$REPO/docs/agent/latest.txt"
+TELEMETRY="$REPO/docs/agent/telemetry_status.txt"
 TMP="/tmp/kalshi_monitor_body.$$"
 PREV_HASH=""
 LAST_SYNC=0
@@ -35,24 +36,65 @@ except Exception: pass
 PY
 }
 
+tget() {
+  local key="$1"
+  [ -s "$TELEMETRY" ] || return 0
+  grep -a "^${key}=" "$TELEMETRY" 2>/dev/null | tail -1 | cut -d= -f2-
+}
+
+iso_age() {
+  python3 - "$1" <<'PY' 2>/dev/null
+from datetime import datetime, timezone
+import sys
+s=sys.argv[1].strip()
+try:
+ d=datetime.fromisoformat(s.replace('Z','+00:00'))
+ age=max(0,int((datetime.now(timezone.utc)-d).total_seconds()))
+ print(age)
+except Exception:
+ print(-1)
+PY
+}
+
+sync_one() {
+  local remote="$1" localfile="$2"
+  git -C "$REPO" show "origin/main:$remote" > "$localfile.tmp" 2>/dev/null && mv "$localfile.tmp" "$localfile"
+}
+
 sync_repo() {
   local now
   now=$(date +%s)
   (( now - LAST_SYNC < SYNC_EVERY )) && return 0
   LAST_SYNC=$now
-  # Fetch remote main, then update only monitor/status/result files from origin.
-  # Never reset the working tree and never touch the bot source directory.
   git -C "$REPO" fetch -q origin main 2>/dev/null || return 0
-  git -C "$REPO" show origin/main:control/project_status.json > "$STATUS.tmp" 2>/dev/null && mv "$STATUS.tmp" "$STATUS"
-  git -C "$REPO" show origin/main:docs/latest.txt > "$F.tmp" 2>/dev/null && mv "$F.tmp" "$F"
   mkdir -p "$REPO/docs/agent"
-  git -C "$REPO" show origin/main:docs/agent/progress.txt > "$PROGRESS.tmp" 2>/dev/null && mv "$PROGRESS.tmp" "$PROGRESS"
-  git -C "$REPO" show origin/main:docs/agent/latest.txt > "$RESULT.tmp" 2>/dev/null && mv "$RESULT.tmp" "$RESULT"
+  sync_one control/project_status.json "$STATUS"
+  sync_one docs/latest.txt "$F"
+  sync_one docs/agent/progress.txt "$PROGRESS"
+  sync_one docs/agent/latest.txt "$RESULT"
+  sync_one docs/agent/telemetry_status.txt "$TELEMETRY"
 }
 
 render_body() {
-  AGENT=$(systemctl is-active kalshi-agent.service 2>/dev/null || true)
+  AGENT_SERVICE=$(systemctl is-active kalshi-agent.service 2>/dev/null || true)
   if ss -ltnp 2>/dev/null | grep -q ':8085'; then BOT='PAPER RUNNING'; else BOT='NOT LISTENING'; fi
+
+  TEL_UPDATED=$(tget UPDATED_UTC)
+  TEL_HEARTBEAT=$(tget AGENT_HEARTBEAT_UTC)
+  TEL_STATUS=$(tget AGENT_STATUS)
+  TEL_JOB=$(tget AGENT_JOB)
+  LAST_JOB=$(tget LAST_JOB_ID)
+  LAST_RESULT=$(tget LAST_RESULT)
+  LAST_RUN=$(tget LAST_RUN_UTC)
+  HB_AGE=$(iso_age "${TEL_HEARTBEAT:-}")
+
+  if [ -n "${TEL_HEARTBEAT:-}" ] && [ "$HB_AGE" -ge 0 ] && [ "$HB_AGE" -le 20 ]; then
+    TELEMETRY_HEALTH='LIVE'
+  elif [ -n "${TEL_HEARTBEAT:-}" ]; then
+    TELEMETRY_HEALTH="STALE (${HB_AGE}s)"
+  else
+    TELEMETRY_HEALTH='MISSING'
+  fi
 
   OVERALL=$(jget overall_percent); OVERALL=${OVERALL:-0}
   PHASE=$(jget phase); PHASE=${PHASE:-'Kalshi parity engineering'}
@@ -65,21 +107,53 @@ render_body() {
   NEXT=$(jget next)
   BASIS=$(jget overall_basis)
 
+  # Runtime truth overrides stale descriptive wording.
+  if [ "${TEL_STATUS:-}" = "working" ] && [ -n "${TEL_JOB:-}" ]; then
+    RUNTIME_STATE="RUNNING"
+    RUNTIME_JOB="$TEL_JOB"
+  elif [ -n "${LAST_JOB:-}" ]; then
+    RUNTIME_STATE="${LAST_RESULT:-IDLE}"
+    RUNTIME_JOB="$LAST_JOB"
+  else
+    RUNTIME_STATE="${TEL_STATUS:-IDLE}"
+    RUNTIME_JOB="none"
+  fi
+
   {
-    printf 'AGENT       %s\n' "$AGENT"
+    echo 'RUNTIME TRUTH'
+    printf 'TELEMETRY   %s\n' "$TELEMETRY_HEALTH"
+    printf 'HEARTBEAT   %s' "${TEL_HEARTBEAT:-unknown}"
+    [ "$HB_AGE" -ge 0 ] 2>/dev/null && printf '  (%ss ago)' "$HB_AGE"
+    echo
+    printf 'AGENT       %s / %s\n' "$AGENT_SERVICE" "${TEL_STATUS:-unknown}"
+    printf 'JOB         %s\n' "$RUNTIME_JOB" | fold -s -w 58
+    printf 'JOB STATE   %s\n' "$RUNTIME_STATE"
+    [ -n "${LAST_RUN:-}" ] && printf 'LAST RUN    %s\n' "$LAST_RUN"
     printf 'BOT         %s\n' "$BOT"
     printf 'LIVE MONEY  HARD-BLOCKED\n\n'
+
     echo 'PROJECT COMPLETION'; bar "$OVERALL"; echo
     [ -n "$BASIS" ] && printf '%s\n' "$BASIS" | fold -s -w 58
     echo
     echo 'CURRENT PHASE'; printf '%s\n' "$PHASE" | fold -s -w 58; bar "$PHASEP"; echo; echo
-    echo 'CURRENT PATCH / INVESTIGATION'; printf 'PATCH: %s\n' "$PATCH" | fold -s -w 58; printf 'STATE: %s\n' "$PATCHSTATE"; bar "$PATCHP"; echo; echo
-    echo 'DOING NOW'; printf '%s\n' "$DOING" | fold -s -w 58; echo
+    echo 'ENGINEERING DESCRIPTION'
+    printf 'PATCH: %s\n' "$PATCH" | fold -s -w 58
+    printf 'DESCRIBED STATE: %s\n' "$PATCHSTATE" | fold -s -w 58
+    bar "$PATCHP"; echo; echo
+    echo 'DOING / FINDING'; printf '%s\n' "$DOING" | fold -s -w 58; echo
     echo 'WHY'; printf '%s\n' "$WHY" | fold -s -w 58; echo
-    echo 'AGENT — LIVE'
-    if [ -s "$PROGRESS" ]; then tail -n 8 "$PROGRESS" | sed 's/^/  /' | fold -s -w 58
-    elif [ -s "$RESULT" ]; then grep -aE 'JOB_ID=|RESULT=|GO_TEST|GO_BUILD|BACKUP|FAIL|PASS' "$RESULT" 2>/dev/null | tail -n 5 | sed 's/^/  /'
-    else echo '  Waiting for agent event...'; fi
+
+    echo 'AGENT EVENT'
+    if [ "${TEL_STATUS:-}" = "working" ] && [ -s "$PROGRESS" ]; then
+      tail -n 10 "$PROGRESS" | sed 's/^/  /' | fold -s -w 58
+    elif [ -n "${LAST_JOB:-}" ]; then
+      printf '  LAST JOB: %s\n' "$LAST_JOB" | fold -s -w 58
+      printf '  RESULT:   %s\n' "${LAST_RESULT:-unknown}"
+      [ -n "${LAST_RUN:-}" ] && printf '  FINISHED: %s\n' "$LAST_RUN"
+    else
+      echo '  No completed job yet.'
+    fi
+
     echo
     echo 'PAPER ECONOMICS'
     if [ -s "$F" ]; then
@@ -88,16 +162,21 @@ render_body() {
       SIG=$(grep -a 'Lead attempts' "$F" | tail -1 | awk '{print $NF}'); CYC=$(grep -a 'Completed cycles' "$F" | tail -1 | awk '{print $NF}')
       HED=$(grep -a 'Hedge events' "$F" | tail -1 | awk '{print $NF}'); TMO=$(grep -a 'Timeout exits' "$F" | tail -1 | awk '{print $NF}')
       FEES=$(grep -a 'Recorded fees' "$F" | tail -1 | awk '{print $NF}')
-      printf 'BANKROLL   %s -> %s\n' "${START:-?}" "${CURR:-?}"; printf 'P&L        %s   RETURN %s\n' "${PNL:-?}" "${RET:-?}"
-      printf 'SIGNALS    %s   COMPLETED %s\n' "${SIG:-?}" "${CYC:-?}"; printf 'HEDGES     %s   TIMEOUTS  %s\n' "${HED:-?}" "${TMO:-?}"; printf 'FEES       %s\n' "${FEES:-?}"
-    else echo 'No forensic snapshot yet.'; fi
+      printf 'BANKROLL   %s -> %s\n' "${START:-?}" "${CURR:-?}"
+      printf 'P&L        %s   RETURN %s\n' "${PNL:-?}" "${RET:-?}"
+      printf 'SIGNALS    %s   COMPLETED %s\n' "${SIG:-?}" "${CYC:-?}"
+      printf 'HEDGES     %s   TIMEOUTS  %s\n' "${HED:-?}" "${TMO:-?}"
+      printf 'FEES       %s\n' "${FEES:-?}"
+    else
+      echo 'No forensic snapshot yet.'
+    fi
     echo
-    echo 'NEXT'; printf '%s\n' "$NEXT" | fold -s -w 58
+    echo 'NEXT ENGINEERING TARGET'; printf '%s\n' "$NEXT" | fold -s -w 58
   } > "$TMP"
 }
 
 printf '\033[?25l'
-trap 'printf "\033[?25h"; rm -f "$TMP" "$STATUS.tmp" "$F.tmp" "$PROGRESS.tmp" "$RESULT.tmp"' EXIT INT TERM
+trap 'printf "\033[?25h"; rm -f "$TMP" "$STATUS.tmp" "$F.tmp" "$PROGRESS.tmp" "$RESULT.tmp" "$TELEMETRY.tmp"' EXIT INT TERM
 while true; do
   sync_repo
   render_body
@@ -108,11 +187,12 @@ while true; do
     echo '==========================================================='
     echo '            KALSHIARBO DEVELOPMENT — LIVE'
     echo '==========================================================='
-    printf 'UPDATED     %s\n' "$(date -u '+%H:%M:%S UTC')"
+    printf 'SCREEN UTC  %s\n' "$(date -u '+%H:%M:%S UTC')"
+    printf 'REMOTE UTC  %s\n' "${TEL_UPDATED:-unknown}"
     printf 'AUTO-SYNC   GitHub every %ss\n\n' "$SYNC_EVERY"
     cat "$TMP"
     echo
-    echo 'Auto-updates from GitHub | Ctrl+C monitor only'
+    echo 'Runtime truth comes from telemetry | Ctrl+C monitor only'
   fi
   sleep 1
 done
