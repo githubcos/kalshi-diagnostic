@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T17:20:34+00:00",
-  "cycle": 73,
-  "phase": "CYCLE_COMPLETE",
-  "percent": 100,
-  "result": "PASS",
-  "detail": "Cycle complete. tests=PASS build=PASS paper=RUNNING findings=3.",
-  "next": "NEXT_CYCLE"
+  "utc": "2026-08-25T17:21:27+00:00",
+  "cycle": 75,
+  "phase": "GO_BUILD",
+  "percent": 60,
+  "result": "RUNNING",
+  "detail": "All tests passed. Building current KalshiArbo binary.",
+  "next": "PAPER_HEALTH"
 }
