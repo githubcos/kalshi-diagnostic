@@ -1,0 +1,1 @@
+NEXT: isolate the remaining Polymarket fee-share/minimum-notional assumptions in PAIR ARB sizing and hedge admission; verify which still affect Kalshi paper/live semantics; generate a narrow Kalshi-native patch; run backup -> gofmt -> go test ./... -> go build -> paper audit.
