@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-25T16:39:39+00:00",
+  "utc": "2026-08-25T16:39:48+00:00",
   "publisher_pid": 1815915,
   "heartbeat": {
-    "utc": "2026-08-25T16:39:37+00:00",
-    "epoch": 1787675977.208322,
+    "utc": "2026-08-25T16:39:43+00:00",
+    "epoch": 1787675983.0401175,
     "pid": 1815873,
     "status": "working",
     "job_id": "kalshi-pair-collateral-resize-v1-20260825-1637"
   },
   "state": {
     "last_job_id": "kalshi-pair-tests-v4-20260825-1635",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163509.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163937.tar.gz",
     "last_result": "PASS",
     "last_run_utc": "2026-08-25T16:35:28+00:00"
   }
