@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T16:58:45+00:00",
+  "utc": "2026-08-25T16:58:51+00:00",
   "cycle": 24,
-  "phase": "GO_TEST",
-  "percent": 35,
-  "result": "RUNNING",
-  "detail": "Source scan complete: 3 flagged venue-pattern occurrences. Running full Go test suite.",
-  "next": "GO_BUILD"
+  "phase": "CYCLE_COMPLETE",
+  "percent": 100,
+  "result": "PASS",
+  "detail": "Cycle complete. tests=PASS build=PASS paper=RUNNING findings=3.",
+  "next": "NEXT_CYCLE"
 }
