@@ -1,11 +1,15 @@
 {
-  "id": "kalshi-controlled-live-data-paper-v1-20260825-2248",
+  "id": "kalshi-explicit-no-mark-to-market-v1-20260825-2355",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "STATUS"},
+    {"name": "BACKUP"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_explicit_no_mark_to_market_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["main.go", "strategy/trader.go", "strategy/kalshi_pair_parity_test.go"]},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
+    {"name": "START_PAPER"},
     {"name": "COLLECT_PARITY_EVIDENCE"},
-    {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "STATUS"}
   ]
 }
