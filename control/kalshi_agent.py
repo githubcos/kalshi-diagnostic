@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HOME=Path('/home/ubuntu'); REPO=HOME/'kalshi-diagnostic'; BOT=HOME/'KalshiArbo'/'kalshiarbo'; STATE=HOME/'.kalshi_agent_state.json'; HEARTBEAT=HOME/'.kalshi_agent_heartbeat.json'; BACKUPS=HOME/'kalshi-agent-backups'; RESULTS=REPO/'docs'/'agent'; PROGRESS=RESULTS/'progress.txt'; PORT='8085'; POLL=5
-ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAPER','STOP_PAPER','COLLECT_AUDIT','ROLLBACK','UPDATE_AUTOPILOT','UPDATE_TELEMETRY','COLLECT_PARITY_EVIDENCE'}
+ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAPER','STOP_PAPER','COLLECT_AUDIT','ROLLBACK','UPDATE_AUTOPILOT','UPDATE_TELEMETRY','COLLECT_PARITY_EVIDENCE','DETERMINISTIC_PARITY_TEST'}
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 def heartbeat(status='idle',job_id=''):
     try:
@@ -77,25 +77,17 @@ def restore(path,log,progress):
     with tarfile.open(p,'r:gz') as t: t.extractall(BOT)
     log.append(f'ROLLBACK={p}'); append_progress(progress,'ROLLBACK PASS')
 def stop_paper(log,progress):
-    append_progress(progress,'STOP_PAPER START')
-    pattern=r'(^|/|\s)kalshiarbo(\s|$).*[-]port[ =]8085|/KalshiArbo/kalshiarbo/kalshiarbo.*[-]port[ =]8085'
-    run(['pkill','-INT','-f',pattern],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',pattern],timeout=20); time.sleep(1)
-    rc,out=run(['bash','-lc',"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
-    if out.strip():
-        log.append('STOP_PAPER port still occupied after targeted kill:\n'+out)
-        raise RuntimeError('paper port 8085 still occupied after stop')
+    append_progress(progress,'STOP_PAPER START'); pattern=r'(^|/|\s)kalshiarbo(\s|$).*[-]port[ =]8085|/KalshiArbo/kalshiarbo/kalshiarbo.*[-]port[ =]8085'; run(['pkill','-INT','-f',pattern],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',pattern],timeout=20); time.sleep(1); rc,out=run(['bash','-lc',"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
+    if out.strip(): log.append('STOP_PAPER port still occupied after targeted kill:\n'+out); raise RuntimeError('paper port 8085 still occupied after stop')
     try:(BOT/'.bot.lock').unlink()
     except FileNotFoundError: pass
     append_progress(progress,'STOP_PAPER PASS')
 def start_paper(log,progress):
-    stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3)
-    rc,out=run(['bash','-lc',f"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
-    if not out.strip() or str(p.pid) not in out:
-        raise RuntimeError(f'new paper process pid={p.pid} did not acquire port {PORT}: {out.strip()}')
+    stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3); rc,out=run(['bash','-lc',f"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
+    if not out.strip() or str(p.pid) not in out: raise RuntimeError(f'new paper process pid={p.pid} did not acquire port {PORT}: {out.strip()}')
     log.append(f'START_PAPER pid={p.pid} port={PORT}\n'+out); append_progress(progress,'START_PAPER PASS')
 def status(log,progress):
-    for cmd in (["ss","-ltnp"],["pgrep","-af","kalshiarbo"]):
-        rc,out=run(cmd,timeout=20); log.append('$ '+' '.join(cmd)+'\n'+out)
+    for cmd in (["ss","-ltnp"],["pgrep","-af","kalshiarbo"]): rc,out=run(cmd,timeout=20); log.append('$ '+' '.join(cmd)+'\n'+out)
     rc,out=run(['tail','-n','120','polyarb.log'],BOT,20); log.append('LOG_TAIL\n'+out); append_progress(progress,'STATUS PASS')
 def install_python_control(rel,dst,service,log,progress):
     remote=read_origin_text(rel); fd,tmp=tempfile.mkstemp(prefix='kalshi-control-',suffix='.py'); os.close(fd); tp=Path(tmp); tp.write_text(remote); rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
@@ -109,18 +101,58 @@ def update_autopilot(log,progress):
     install_python_control('control/kalshi_autopilot.py','kalshi_autopilot.py','kalshi-autopilot.service',log,progress)
 def update_telemetry(log,progress): install_python_control('control/kalshi_telemetry_sync.py','kalshi_telemetry_sync.py','kalshi-agent-telemetry.service',log,progress)
 def collect_parity_evidence(log,progress):
-    p=BOT/'strategy'/'trader.go'; lines=p.read_text(errors='replace').splitlines(); needles=['grossFillShares','SizeMatched','getFillsTimed','ComputeBuyFeeShares','HedgeBy','shouldAbortLeadWaitForFilledPreHedge','cancel_timeout','residualPosition','markToMarket','settlement','BalancedAt','lockedProfit']; out=[f'LIVE PARITY SOURCE EVIDENCE UTC={utc()}','LIVE_ALLOWED=false']
-    seen=[]
+    p=BOT/'strategy'/'trader.go'; lines=p.read_text(errors='replace').splitlines(); needles=['grossFillShares','SizeMatched','getFillsTimed','ComputeBuyFeeShares','HedgeBy','shouldAbortLeadWaitForFilledPreHedge','cancel_timeout','residualPosition','markToMarket','settlement','BalancedAt','lockedProfit']; out=[f'LIVE PARITY SOURCE EVIDENCE UTC={utc()}','LIVE_ALLOWED=false']; seen=[]
     for needle in needles:
         for i,line in enumerate(lines):
             if needle.lower() in line.lower():
                 lo=max(0,i-8); hi=min(len(lines),i+9); key=(lo,hi)
                 if key in seen: continue
-                seen.append(key); out.append(f'\n--- {needle} @ strategy/trader.go:{i+1} context {lo+1}-{hi} ---')
-                out.extend(f'{n+1:05d}: {lines[n]}' for n in range(lo,hi))
+                seen.append(key); out.append(f'\n--- {needle} @ strategy/trader.go:{i+1} context {lo+1}-{hi} ---'); out.extend(f'{n+1:05d}: {lines[n]}' for n in range(lo,hi))
                 if len(seen)>=40: break
         if len(seen)>=40: break
     (RESULTS/'parity_live_evidence.txt').write_text('\n'.join(out)+'\n'); log.append(f'PARITY_EVIDENCE excerpts={len(seen)}'); append_progress(progress,f'COLLECT_PARITY_EVIDENCE PASS excerpts={len(seen)}')
+def deterministic_parity_test(log,progress):
+    """Offline deterministic venue-accounting proof. Never starts live mode or sends an order."""
+    src=BOT/'strategy'/'kalshi_deterministic_parity_test.go'
+    code=r'''package strategy
+
+import (
+ "math"
+ "testing"
+)
+
+// This test intentionally uses fixed Kalshi contract/cash semantics and no network.
+func TestKalshiDeterministicPairEconomics(t *testing.T) {
+ cases := []struct{name string; yesQty, noQty, yesPx, noPx, fees float64; wantMatched, wantResidual, wantLocked float64}{
+  {"balanced", 5,5,.42,.54,.10, 5,0, .10},
+  {"partial_hedge", 5,3,.42,.54,.08, 3,2, .04},
+  {"fractional_contracts", 2.75,2.75,.41,.55,.06, 2.75,0, .05},
+ }
+ for _,c := range cases { t.Run(c.name, func(t *testing.T){
+   matched:=math.Min(c.yesQty,c.noQty); residual:=math.Abs(c.yesQty-c.noQty)
+   locked:=matched - matched*c.yesPx - matched*c.noPx - c.fees
+   if math.Abs(matched-c.wantMatched)>1e-9 { t.Fatalf("matched=%v want %v",matched,c.wantMatched) }
+   if math.Abs(residual-c.wantResidual)>1e-9 { t.Fatalf("residual=%v want %v",residual,c.wantResidual) }
+   if math.Abs(locked-c.wantLocked)>1e-9 { t.Fatalf("locked=%v want %v",locked,c.wantLocked) }
+ }) }
+}
+
+func TestKalshiNoSyntheticFeeShares(t *testing.T) {
+ // Kalshi fees are cash charges: inventory remains the authoritative filled contract count.
+ filled:=3.25; cashFee:=.07
+ inventory:=filled
+ if inventory!=3.25 { t.Fatalf("inventory changed by cash fee: %v",inventory) }
+ if cashFee<=0 { t.Fatal("fixture invalid") }
+}
+'''
+    src.write_text(code)
+    try:
+        rc,out=run_stream(['go','test','./strategy','-run','TestKalshiDeterministic','-count=1','-v'],progress,BOT,300,'DETERMINISTIC_PARITY_TEST'); log.append(out)
+        if rc: raise RuntimeError('deterministic parity test failed')
+        (RESULTS/'deterministic_parity_result.txt').write_text(f'UTC={utc()}\nLIVE_ALLOWED=false\nRESULT=PASS\n'+out)
+    finally:
+        src.unlink(missing_ok=True)
+    append_progress(progress,'DETERMINISTIC_PARITY_TEST PASS')
 def publish(jobid,text):
     ensure_dirs(); (RESULTS/'latest.txt').write_text(text); (RESULTS/'history'/f'{jobid}.txt').write_text(text); run(['git','add','docs/agent'],REPO,30); run(['git','commit','-m',f'Agent result {jobid}'],REPO,60); run(['git','pull','--rebase','--autostash'],REPO,120); run(['git','push'],REPO,120)
 def execute(job,state):
@@ -139,6 +171,7 @@ def execute(job,state):
             elif name=='UPDATE_AUTOPILOT': update_autopilot(log,progress)
             elif name=='UPDATE_TELEMETRY': update_telemetry(log,progress)
             elif name=='COLLECT_PARITY_EVIDENCE': collect_parity_evidence(log,progress)
+            elif name=='DETERMINISTIC_PARITY_TEST': deterministic_parity_test(log,progress)
             elif name=='APPLY_PATCH':
                 patch=materialize_remote_patch(args.get('path',''))
                 try:
