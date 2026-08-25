@@ -1,0 +1,8 @@
+{
+  "id": "bootstrap-idle",
+  "enabled": false,
+  "live": false,
+  "actions": [
+    {"name": "STATUS"}
+  ]
+}
