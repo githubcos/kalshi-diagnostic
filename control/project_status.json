@@ -1,34 +1,28 @@
 {
-  "overall_percent": 50,
-  "overall_basis": "Two verified Kalshi venue-accounting defects are fixed and regression-verified; continuous autopilot audit/test/build/paper-health loop is active",
-  "phase": "PAIR ARB execution-path parity audit",
-  "phase_percent": 60,
-  "current_patch": "No new verified defect — classifying remaining venue-reference candidates",
+  "overall_percent": 70,
+  "overall_basis": "Finite parity gates have source evidence; verified Kalshi accounting/deployment defects are patched and regression-verified; fresh post-patch paper economics is still pending",
+  "phase": "HEDGE_TIMING / TIMEOUT_UNWIND verification",
+  "phase_percent": 75,
+  "current_patch": "No new verified trading defect — observation only",
   "patch_percent": 100,
-  "patch_state": "OBSERVATION / CONTEXT AUDIT",
-  "doing": "The adaptive collateral-resize Kalshi accounting patch passed patch/apply, gofmt, full go test ./..., and go build. Autonomous cycle 1 also passed tests/build and confirmed the paper bot running on port 8085. The remaining raw Polymarket symbol occurrences are being treated as audit candidates only until their execution context proves a Kalshi behavior mismatch.",
-  "why": "The parity loop must preserve PolyArbPro strategy intent. Raw shared Polymarket references are not sufficient evidence for a patch; only references that change Kalshi contract quantity, cash-fee accounting, venue minimums, partial-fill reconciliation, hedge timing/admission, timeout/unwind, or settlement should be changed.",
+  "patch_state": "PAPER RUNNING / EVIDENCE COLLECTION",
+  "doing": "Restricted job kalshi-parity-observe-v4-20260825-2154 completed PASS: 40 parity evidence excerpts collected and STATUS passed. The patched KalshiArbo process pid 3381136 remains the listener on port 8085. No trading-code change was made because no new venue mismatch is verified.",
+  "why": "PolyArbPro strategy semantics must stay unchanged. Kalshi-specific hedge and timeout behavior is patched only when authoritative execution/accounting evidence proves a venue mismatch; legacy Polymarket names or comments alone are not defects.",
   "done": [
-    "Source/telemetry bridge complete",
-    "Continuous EC2 autopilot active",
-    "Normal PAIR ARB fee-share leak fixed",
-    "Polymarket minimum-notional leak fixed",
-    "Adaptive collateral-resize fee-share leak fixed",
-    "Regression tests updated",
-    "Full tests/build PASS after both venue fixes",
-    "Paper bot confirmed running on port 8085",
-    "Autopilot cycle 1 PASS"
+    "PAIR ARB fee/minimum accounting fixes regression-verified",
+    "Adaptive collateral resize venue accounting fixed",
+    "Authoritative Kalshi NO mark-to-market fixed",
+    "Agent paper restart ownership defect fixed",
+    "Full tests/build passed on latest trading patch",
+    "Patched PAPER binary verified on port 8085",
+    "Finite PARTIAL_FILL, HEDGE_TIMING, TIMEOUT_UNWIND and SETTLEMENT source evidence captured",
+    "Observation v4 PASS with LIVE hard-blocked"
   ],
   "remaining": [
-    "Classify remaining Polymarket symbol references by live execution context",
-    "Audit authoritative partial-fill quantity handling",
-    "Verify hedge timing/admission parity",
-    "Separate signals from actual executed leads in forensic accounting",
-    "Verify timeout/unwind semantics",
-    "Verify settlement behavior",
-    "Collect a fresh post-patch paper forensic economics snapshot",
-    "Repeated paper validation",
-    "Final parity certification"
+    "Classify HEDGE_TIMING from fresh authoritative Kalshi execution behavior",
+    "Classify TIMEOUT_UNWIND from fresh authoritative Kalshi execution behavior",
+    "Publish a fresh completed-cycle paper forensic newer than 2026-08-25T14:25:49Z",
+    "Final parity review without strategy tuning unless a venue defect is proven"
   ],
-  "next": "Keep autopilot cycling continuously. Patch nothing from raw symbol counts alone. Prioritize partial-fill quantity and hedge timing context; if no verified mismatch is found, leave the paper bot running and continue observation until fresh forensic evidence arrives."
+  "next": "Leave PAPER running. Wait for fresh hedge/timeout/completed-cycle evidence. If no verified defect appears, continue observation rather than patching. LIVE remains hard-blocked and credentials remain untouched."
 }
