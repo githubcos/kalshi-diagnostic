@@ -8,14 +8,12 @@ def run(cmd,cwd=None,timeout=120,check=False):
     p=subprocess.run(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
     if check and p.returncode: raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(map(str,cmd))}\n{p.stdout}")
     return p
-def log(msg): print(f'[{utc()}] {msg}',flush=True)
 def ensure_clone():
     if (TEL/'.git').exists(): return
     if TEL.exists(): shutil.rmtree(TEL)
     r=run(['git','-C',str(SRC),'remote','get-url','origin'],check=True); url=r.stdout.strip()
     if not url: raise RuntimeError('origin URL is empty')
-    run(['git','clone','--depth','1',url,str(TEL)],timeout=180,check=True)
-    run(['git','config','user.name','Kalshi Agent Telemetry'],TEL,check=True); run(['git','config','user.email','kalshi-agent@localhost'],TEL,check=True)
+    run(['git','clone','--depth','1',url,str(TEL)],timeout=180,check=True); run(['git','config','user.name','Kalshi Agent Telemetry'],TEL,check=True); run(['git','config','user.email','kalshi-agent@localhost'],TEL,check=True)
 def copy_if_exists(src,dst):
     if src.exists(): dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst)
 def local_runtime_status():
@@ -27,7 +25,7 @@ def local_runtime_status():
 def sync_once():
     ensure_clone(); run(['git','fetch','-q','origin','main'],TEL,check=True); run(['git','reset','--hard','origin/main'],TEL,check=True)
     src_agent=SRC/'docs'/'agent'; dst_agent=TEL/'docs'/'agent'; dst_agent.mkdir(parents=True,exist_ok=True)
-    for name in ['progress.txt','latest.txt','local_error.txt','self_update_error.txt','autopilot_status.json','autopilot_report.txt','parity_gate_report.txt']:
+    for name in ['progress.txt','latest.txt','local_error.txt','self_update_error.txt','autopilot_status.json','autopilot_report.txt','parity_gate_report.txt','parity_live_evidence.txt']:
         copy_if_exists(src_agent/name,dst_agent/name)
     if (src_agent/'history').exists():
         (dst_agent/'history').mkdir(parents=True,exist_ok=True)
@@ -40,8 +38,7 @@ def sync_once():
     if run(['git','diff','--cached','--quiet'],TEL).returncode==0: return False
     run(['git','commit','-m','Sync Kalshi telemetry '+datetime.now(timezone.utc).strftime('%H:%M:%S')],TEL,check=True)
     p=run(['git','push','origin','HEAD:main'],TEL,180)
-    if p.returncode:
-        run(['git','pull','--rebase','origin','main'],TEL,180,check=True); run(['git','push','origin','HEAD:main'],TEL,180,check=True)
+    if p.returncode: run(['git','pull','--rebase','origin','main'],TEL,180,check=True); run(['git','push','origin','HEAD:main'],TEL,180,check=True)
     ERROR.unlink(missing_ok=True); return True
 def main():
     while True:
