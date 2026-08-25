@@ -1,9 +1,9 @@
 {
-  "id": "kalshi-pair-tests-v2-20260825-1632",
+  "id": "kalshi-pair-tests-v3-20260825-1634",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_tests_v2.patch", "strip": 1},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_tests_v3.patch", "strip": 1},
     {"name": "GOFMT", "files": ["strategy/pair_arb_test.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
