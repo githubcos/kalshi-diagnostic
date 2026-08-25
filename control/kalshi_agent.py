@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, os, re, shutil, subprocess, tarfile, time, tempfile
+import json, os, re, shutil, subprocess, tarfile, time, tempfile, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -7,6 +7,7 @@ HOME=Path('/home/ubuntu')
 REPO=HOME/'kalshi-diagnostic'
 BOT=HOME/'KalshiArbo'/'kalshiarbo'
 STATE=HOME/'.kalshi_agent_state.json'
+HEARTBEAT=HOME/'.kalshi_agent_heartbeat.json'
 BACKUPS=HOME/'kalshi-agent-backups'
 RESULTS=REPO/'docs'/'agent'
 PROGRESS=RESULTS/'progress.txt'
@@ -16,13 +17,21 @@ ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAP
 
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
+def heartbeat(status='idle', job_id=''):
+    try:
+        tmp=HEARTBEAT.with_suffix('.tmp')
+        tmp.write_text(json.dumps({'utc':utc(),'epoch':time.time(),'pid':os.getpid(),'status':status,'job_id':job_id},indent=2))
+        tmp.replace(HEARTBEAT)
+    except Exception:
+        pass
+
 def ensure_dirs():
     BACKUPS.mkdir(exist_ok=True)
     RESULTS.mkdir(parents=True,exist_ok=True)
     (RESULTS/'history').mkdir(exist_ok=True)
 
 def write_progress(lines):
-    ensure_dirs(); PROGRESS.write_text('\n'.join(lines)+'\n')
+    ensure_dirs(); PROGRESS.write_text('\n'.join(lines)+'\n'); heartbeat('working', next((x.split('=',1)[1] for x in lines if x.startswith('JOB_ID=')),''))
 
 def append_progress(lines,msg):
     lines.append(f'[{utc()}] {msg}'); write_progress(lines)
@@ -37,6 +46,7 @@ def run_stream(cmd,progress,cwd=None,timeout=900,label='COMMAND'):
     output=[]
     try:
         while True:
+            heartbeat('working', next((x.split('=',1)[1] for x in progress if x.startswith('JOB_ID=')),''))
             if time.time()-started > timeout:
                 p.kill(); raise TimeoutError(f'{label} timed out after {timeout}s')
             line=p.stdout.readline() if p.stdout else ''
@@ -66,9 +76,30 @@ def read_origin_text(rel):
     if rc: raise RuntimeError(f'unable to read origin/main:{rel}: {out.strip()}')
     return out
 
+def maybe_self_update():
+    """Replace the running agent with origin/main version and exec it in-place."""
+    try:
+        remote=read_origin_text('control/kalshi_agent.py')
+        current=Path(__file__).read_text()
+        if remote == current:
+            return False
+        fd,tmp=tempfile.mkstemp(prefix='kalshi-agent-selfupdate-',suffix='.py')
+        os.close(fd); tp=Path(tmp); tp.write_text(remote)
+        rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
+        if rc:
+            tp.unlink(missing_ok=True)
+            (RESULTS/'self_update_error.txt').write_text(f'{utc()} remote agent syntax check failed\n{out}\n')
+            return False
+        dst=Path(__file__).resolve()
+        os.chmod(tp,0o700)
+        os.replace(tp,dst)
+        heartbeat('self-updating')
+        os.execv(sys.executable,[sys.executable,str(dst)])
+    except Exception as e:
+        ensure_dirs(); (RESULTS/'self_update_error.txt').write_text(f'{utc()} {type(e).__name__}: {e}\n')
+        return False
+
 def load_remote_job():
-    rc,_=fetch_origin()
-    if rc: return None
     try: return json.loads(read_origin_text('control/job.json'))
     except Exception: return None
 
@@ -130,12 +161,12 @@ def status(log,progress):
 
 def publish(jobid,text):
     ensure_dirs(); (RESULTS/'latest.txt').write_text(text); (RESULTS/'history'/f'{jobid}.txt').write_text(text)
-    # Commit only generated agent result files. Rebase with autostash if remote advanced.
     run(['git','add','docs/agent'],REPO,30); run(['git','commit','-m',f'Agent result {jobid}'],REPO,60)
     run(['git','pull','--rebase','--autostash'],REPO,120); run(['git','push'],REPO,120)
 
 def execute(job,state):
-    jid=str(job.get('id','')).strip(); progress=['KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',f'JOB_ID={jid}',f'JOB_START_UTC={utc()}','LIVE_ALLOWED=false','------------------------------------------------------------']; write_progress(progress)
+    jid=str(job.get('id','')).strip(); heartbeat('working',jid)
+    progress=['KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',f'JOB_ID={jid}',f'JOB_START_UTC={utc()}','LIVE_ALLOWED=false','------------------------------------------------------------']; write_progress(progress)
     log=['KALSHI EC2 AGENT',f'JOB_ID={jid}',f'START_UTC={utc()}',f'LIVE_ALLOWED=false']; ok=True
     try:
         if not jid: raise ValueError('missing job id')
@@ -183,19 +214,24 @@ def execute(job,state):
         log.append('\nRESULT=PASS'); append_progress(progress,'JOB RESULT=PASS')
     except Exception as e:
         ok=False; log.append(f'\nRESULT=FAIL\nERROR={type(e).__name__}: {e}'); append_progress(progress,f'JOB RESULT=FAIL ERROR={type(e).__name__}: {e}')
-    log.append(f'END_UTC={utc()}'); append_progress(progress,f'JOB_END_UTC={utc()}'); return ok,'\n'.join(log)+'\n'
+    log.append(f'END_UTC={utc()}'); append_progress(progress,f'JOB_END_UTC={utc()}'); heartbeat('idle',''); return ok,'\n'.join(log)+'\n'
 
 def main():
-    ensure_dirs()
+    ensure_dirs(); heartbeat('starting')
     while True:
         try:
-            state=load_state(); job=load_remote_job()
-            if job:
-                jid=str(job.get('id','')).strip()
-                if job.get('enabled',False) and jid and jid!=state.get('last_job_id'):
-                    ok,text=execute(job,state); state['last_job_id']=jid; state['last_result']='PASS' if ok else 'FAIL'; state['last_run_utc']=utc(); save_state(state); publish(jid,text)
+            heartbeat('polling')
+            rc,_=fetch_origin()
+            if rc==0:
+                maybe_self_update()
+                state=load_state(); job=load_remote_job()
+                if job:
+                    jid=str(job.get('id','')).strip()
+                    if job.get('enabled',False) and jid and jid!=state.get('last_job_id'):
+                        ok,text=execute(job,state); state['last_job_id']=jid; state['last_result']='PASS' if ok else 'FAIL'; state['last_run_utc']=utc(); save_state(state); publish(jid,text)
+            heartbeat('idle')
         except Exception as e:
-            ensure_dirs(); (RESULTS/'local_error.txt').write_text(f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n')
+            ensure_dirs(); heartbeat('error'); (RESULTS/'local_error.txt').write_text(f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n')
         time.sleep(POLL)
 
 if __name__=='__main__': main()
