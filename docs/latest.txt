@@ -1,9 +1,9 @@
 KALSHIARBO 40-MIN PAPER AUDIT
 RUN=20260825_082928
-UTC=2026-08-25T09:08:31+00:00
+UTC=2026-08-25T09:10:35+00:00
 PORT=8085
 TARGET_DURATION_MIN=40
-ELAPSED_MIN=38
+ELAPSED_MIN=40
 BOT_PID=82805
 PROCESS=ALIVE
 
@@ -52,6 +52,8 @@ MINUTE_35=ALIVE
 MINUTE_36=ALIVE
 MINUTE_37=ALIVE
 MINUTE_38=ALIVE
+MINUTE_39=ALIVE
+MINUTE_40=ALIVE
 
 ===== CONSOLE =====
 
@@ -29181,6 +29183,45 @@ MINUTE_38=ALIVE
 09:08:24.793	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 09:08:27.958	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 09:08:31.114	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:34.261	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:37.398	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:40.537	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:43.679	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:46.811	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:49.944	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:53.077	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:56.221	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:08:59.355	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:02.522	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:05.660	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:08.795	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:11.941	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:15.074	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:18.216	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:21.351	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:24.487	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:27.558	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:30.697	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:33.831	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:36.967	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:40.108	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:43.249	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:46.385	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:49.519	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:52.668	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:55.823	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:09:58.964	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:02.147	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:05.287	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:08.414	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:11.545	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:14.678	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:17.830	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:20.969	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:24.113	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:27.254	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:30.386	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:33.526	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 --- /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260825_08.log ---
 08:19:05.663	INFO	runtime strategy config	{"cwd": "/home/ubuntu/KalshiArbo/kalshiarbo", "config_json": "/home/ubuntu/KalshiArbo/kalshiarbo/config.json", "env_file": "/home/ubuntu/KalshiArbo/kalshiarbo/all.env", "runtime_mode": "PAPER", "live_flag": false, "paper_trade": true, "market_type": "15m", "pair_arb_enabled": true, "pair_arb_sell_at_99": false, "pair_arb_schedule_mode": "CONTINUOUS", "pair_arb_schedule_windows_utc": ""}
 08:19:06.116	DEBUG	coinbase stream: connected	{"url": "wss://ws-feed.exchange.coinbase.com"}
