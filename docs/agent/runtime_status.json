@@ -1,0 +1,16 @@
+{
+  "utc": "2026-08-25T16:20:33+00:00",
+  "heartbeat": {
+    "utc": "2026-08-25T16:20:29+00:00",
+    "epoch": 1787674829.6539214,
+    "pid": 1755988,
+    "status": "idle",
+    "job_id": ""
+  },
+  "state": {
+    "last_job_id": "kalshi-pair-fee-min-v1-20260825-1451",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_160919.tar.gz",
+    "last_result": "FAIL",
+    "last_run_utc": "2026-08-25T16:09:25+00:00"
+  }
+}

@@ -1,0 +1,13 @@
+KALSHI EC2 AGENT
+JOB_ID=kalshi-pair-fee-min-v1-20260825-1451
+START_UTC=2026-08-25T16:09:19+00:00
+LIVE_ALLOWED=false
+
+=== APPLY_PATCH ===
+BACKUP=/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_160919.tar.gz
+patch: **** Only garbage was found in the patch input.
+
+
+RESULT=FAIL
+ERROR=RuntimeError: patch dry-run failed
+END_UTC=2026-08-25T16:09:25+00:00
