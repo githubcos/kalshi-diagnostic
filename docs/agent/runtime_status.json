@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-25T22:18:22+00:00",
+  "utc": "2026-08-25T22:18:30+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-25T22:18:21+00:00",
-    "epoch": 1787696301.5015726,
+    "utc": "2026-08-25T22:18:28+00:00",
+    "epoch": 1787696308.8146298,
     "pid": 2004638,
-    "status": "working",
-    "job_id": "kalshi-controlled-live-data-paper-v1-20260825-2248"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-final-production-regression-v1-20260825-2240",
+    "last_job_id": "kalshi-controlled-live-data-paper-v1-20260825-2248",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_221524.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-25T22:15:42+00:00"
+    "last_run_utc": "2026-08-25T22:18:22+00:00"
   },
   "autopilot": {
     "gate_index": 4,
