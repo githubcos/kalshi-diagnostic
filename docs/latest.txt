@@ -1,7 +1,8 @@
 ==================================================
 KALSHI 1-HOUR PAPER TEST
-START UTC: Tue Aug 25 08:05:39 UTC 2026
+START UTC: Tue Aug 25 08:07:48 UTC 2026
 BOT: /home/ubuntu/kalshi/polycryptobot_kalshi/kalshi-bot
+PORT: 8085
 ==================================================
 
 [1m[36m[0m
@@ -14,7 +15,7 @@ BOT: /home/ubuntu/kalshi/polycryptobot_kalshi/kalshi-bot
   [90m│[0m  Wallet       [96m[0m
   [90m│[0m  Trade Size   [97m$10.00[0m per entry
   [90m│[0m  Balance      [92m$100.00[0m starting
-  [90m│[0m  Started      [37m2026-08-25 08:05:39 UTC[0m
+  [90m│[0m  Started      [37m2026-08-25 08:07:48 UTC[0m
   [90m│[0m  Logs         [2m[90mlogs/polycryptopro_YYYYMMDD_HH.log[0m
   [90m────────────────────────────────────────────────────────────────────[0m
 
@@ -22,7 +23,7 @@ BOT: /home/ubuntu/kalshi/polycryptobot_kalshi/kalshi-bot
   [93m![0m  [33mPOLY_SIG_TYPE=1 (POLY_PROXY): /home/ubuntu/kalshi/polycryptobot_kalshi/node_modules is missing; claiming will not be possible until Node dependencies are installed.[0m
   [92m✓[0m  [2m[37mproxy wallet kalshi[0m
   [2m[36m·[0m  [2m[37mbalance: $47.45 pUSD[0m
-  [2m[36m·[0m  [2m[37mDashboard: http://localhost:8083[0m
+  [2m[36m·[0m  [2m[37mDashboard: http://localhost:8085[0m
   [2m[36m·[0m  [2m[37mLOGGING ENABLED[0m
   [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/kalshi/polycryptobot_kalshi config=/home/ubuntu/kalshi/polycryptobot_kalshi/config.json env=/home/ubuntu/kalshi/polycryptobot_kalshi/all.env[0m
   [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=15m snipe=false resolution=true collapse=false deep_discount=false penny_buy=false mid_flip=false late_flip=false follow_money=false scalp=true conviction=false[0m
@@ -30,10 +31,7 @@ BOT: /home/ubuntu/kalshi/polycryptobot_kalshi/kalshi-bot
   [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDC CVD)[0m
   [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
   [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
-  [2m[36m·[0m  [2m[37mWaiting for Start command from dashboard: http://localhost:8083[0m
-/home/ubuntu/kalshi_paper_1h.sh: line 60: rt: command not found
+  [2m[36m·[0m  [2m[37mWaiting for Start command from dashboard: http://localhost:8085[0m
 
 ==================================================
-END UTC: Tue Aug 25 08:07:42 UTC 2026
-BOT EXIT CODE: 127
-==================================================
+END UTC: Tue Aug 25 08:10:58 UTC 2026
