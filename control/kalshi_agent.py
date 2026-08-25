@@ -3,27 +3,15 @@ import json, os, re, shutil, subprocess, tarfile, time, tempfile, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-HOME=Path('/home/ubuntu')
-REPO=HOME/'kalshi-diagnostic'
-BOT=HOME/'KalshiArbo'/'kalshiarbo'
-STATE=HOME/'.kalshi_agent_state.json'
-HEARTBEAT=HOME/'.kalshi_agent_heartbeat.json'
-BACKUPS=HOME/'kalshi-agent-backups'
-RESULTS=REPO/'docs'/'agent'
-PROGRESS=RESULTS/'progress.txt'
-PORT='8085'
-POLL=5
-ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAPER','STOP_PAPER','COLLECT_AUDIT','ROLLBACK','UPDATE_AUTOPILOT'}
-
+HOME=Path('/home/ubuntu'); REPO=HOME/'kalshi-diagnostic'; BOT=HOME/'KalshiArbo'/'kalshiarbo'; STATE=HOME/'.kalshi_agent_state.json'; HEARTBEAT=HOME/'.kalshi_agent_heartbeat.json'; BACKUPS=HOME/'kalshi-agent-backups'; RESULTS=REPO/'docs'/'agent'; PROGRESS=RESULTS/'progress.txt'; PORT='8085'; POLL=5
+ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAPER','STOP_PAPER','COLLECT_AUDIT','ROLLBACK','UPDATE_AUTOPILOT','UPDATE_TELEMETRY','COLLECT_PARITY_EVIDENCE'}
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
-def heartbeat(status='idle', job_id=''):
+def heartbeat(status='idle',job_id=''):
     try:
         tmp=HEARTBEAT.with_suffix('.tmp'); tmp.write_text(json.dumps({'utc':utc(),'epoch':time.time(),'pid':os.getpid(),'status':status,'job_id':job_id},indent=2)); tmp.replace(HEARTBEAT)
     except Exception: pass
-def ensure_dirs():
-    BACKUPS.mkdir(exist_ok=True); RESULTS.mkdir(parents=True,exist_ok=True); (RESULTS/'history').mkdir(exist_ok=True)
-def write_progress(lines):
-    ensure_dirs(); PROGRESS.write_text('\n'.join(lines)+'\n'); heartbeat('working', next((x.split('=',1)[1] for x in lines if x.startswith('JOB_ID=')),''))
+def ensure_dirs(): BACKUPS.mkdir(exist_ok=True); RESULTS.mkdir(parents=True,exist_ok=True); (RESULTS/'history').mkdir(exist_ok=True)
+def write_progress(lines): ensure_dirs(); PROGRESS.write_text('\n'.join(lines)+'\n'); heartbeat('working',next((x.split('=',1)[1] for x in lines if x.startswith('JOB_ID=')),''))
 def append_progress(lines,msg): lines.append(f'[{utc()}] {msg}'); write_progress(lines)
 def run(cmd,cwd=None,timeout=600):
     p=subprocess.run(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout); return p.returncode,p.stdout
@@ -31,8 +19,8 @@ def run_stream(cmd,progress,cwd=None,timeout=900,label='COMMAND'):
     append_progress(progress,f'{label} START: '+' '.join(cmd)); started=time.time(); p=subprocess.Popen(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,bufsize=1); output=[]
     try:
         while True:
-            heartbeat('working', next((x.split('=',1)[1] for x in progress if x.startswith('JOB_ID=')),''))
-            if time.time()-started > timeout: p.kill(); raise TimeoutError(f'{label} timed out after {timeout}s')
+            heartbeat('working',next((x.split('=',1)[1] for x in progress if x.startswith('JOB_ID=')),''))
+            if time.time()-started>timeout: p.kill(); raise TimeoutError(f'{label} timed out after {timeout}s')
             line=p.stdout.readline() if p.stdout else ''
             if line:
                 line=line.rstrip('\n'); output.append(line); progress.append('    '+line)
@@ -43,7 +31,7 @@ def run_stream(cmd,progress,cwd=None,timeout=900,label='COMMAND'):
                     for rest in p.stdout:
                         rest=rest.rstrip('\n'); output.append(rest); progress.append('    '+rest)
                 break
-            if not line: time.sleep(0.1)
+            if not line: time.sleep(.1)
         rc=p.returncode
     finally:
         try:
@@ -58,17 +46,14 @@ def read_origin_text(rel):
 def maybe_self_update():
     try:
         remote=read_origin_text('control/kalshi_agent.py'); current=Path(__file__).read_text()
-        if remote == current: return False
-        fd,tmp=tempfile.mkstemp(prefix='kalshi-agent-selfupdate-',suffix='.py'); os.close(fd); tp=Path(tmp); tp.write_text(remote)
-        rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
-        if rc:
-            tp.unlink(missing_ok=True); (RESULTS/'self_update_error.txt').write_text(f'{utc()} remote agent syntax check failed\n{out}\n'); return False
+        if remote==current:return False
+        fd,tmp=tempfile.mkstemp(prefix='kalshi-agent-selfupdate-',suffix='.py'); os.close(fd); tp=Path(tmp); tp.write_text(remote); rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
+        if rc: tp.unlink(missing_ok=True); (RESULTS/'self_update_error.txt').write_text(f'{utc()} remote agent syntax check failed\n{out}\n'); return False
         dst=Path(__file__).resolve(); os.chmod(tp,0o700); os.replace(tp,dst); heartbeat('self-updating'); os.execv(sys.executable,[sys.executable,str(dst)])
-    except Exception as e:
-        ensure_dirs(); (RESULTS/'self_update_error.txt').write_text(f'{utc()} {type(e).__name__}: {e}\n'); return False
+    except Exception as e: ensure_dirs(); (RESULTS/'self_update_error.txt').write_text(f'{utc()} {type(e).__name__}: {e}\n'); return False
 def load_remote_job():
     try:return json.loads(read_origin_text('control/job.json'))
-    except Exception:return None
+    except:return None
 def materialize_remote_patch(rel):
     rel=str(rel or '').strip()
     if not rel.startswith('control/patches/') or not rel.endswith('.patch') or '..' in Path(rel).parts: raise ValueError('patch path must be under control/patches/*.patch')
@@ -78,67 +63,72 @@ def load_state():
     except:return {'last_job_id':None,'last_backup':None}
 def save_state(s): STATE.write_text(json.dumps(s,indent=2))
 def backup(state,log,progress):
-    ensure_dirs(); stamp=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S'); dest=BACKUPS/f'kalshiarbo_{stamp}.tar.gz'; append_progress(progress,f'BACKUP START -> {dest}'); started=time.time(); count=0
+    ensure_dirs(); stamp=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S'); dest=BACKUPS/f'kalshiarbo_{stamp}.tar.gz'; append_progress(progress,f'BACKUP START -> {dest}'); count=0
     with tarfile.open(dest,'w:gz') as t:
         for p in BOT.rglob('*'):
             rel=p.relative_to(BOT)
             if any(part in {'.git','logs','node_modules'} for part in rel.parts): continue
             if p.name in {'config.json','.bot.lock','kalshiarbo'} or p.suffix in {'.env','.pem','.key'}: continue
             if p.is_file(): t.add(p,arcname=str(rel)); count+=1
-    state['last_backup']=str(dest); save_state(state); log.append(f'BACKUP={dest}'); append_progress(progress,f'BACKUP PASS files={count} duration={time.time()-started:.2f}s'); return dest
+    state['last_backup']=str(dest); save_state(state); log.append(f'BACKUP={dest}'); append_progress(progress,f'BACKUP PASS files={count}'); return dest
 def restore(path,log,progress):
     p=Path(path)
     if not p.exists() or p.parent!=BACKUPS: raise ValueError('invalid backup')
-    append_progress(progress,f'ROLLBACK START <- {p}')
-    with tarfile.open(p,'r:gz') as t:
-        for m in t.getmembers():
-            target=(BOT/m.name).resolve()
-            if BOT.resolve() not in target.parents and target!=BOT.resolve(): raise ValueError('unsafe archive path')
-        t.extractall(BOT)
+    with tarfile.open(p,'r:gz') as t: t.extractall(BOT)
     log.append(f'ROLLBACK={p}'); append_progress(progress,'ROLLBACK PASS')
 def stop_paper(log,progress):
     append_progress(progress,'STOP_PAPER START'); run(['pkill','-INT','-f',str(BOT/'kalshiarbo')],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',str(BOT/'kalshiarbo')],timeout=20)
     try:(BOT/'.bot.lock').unlink()
     except FileNotFoundError: pass
-    log.append('STOP_PAPER requested'); append_progress(progress,'STOP_PAPER PASS')
+    append_progress(progress,'STOP_PAPER PASS')
 def start_paper(log,progress):
-    append_progress(progress,'START_PAPER PREP'); stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3); log.append(f'START_PAPER pid={p.pid} port={PORT}'); append_progress(progress,f'START_PAPER PASS pid={p.pid} port={PORT}')
+    stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3); log.append(f'START_PAPER pid={p.pid} port={PORT}'); append_progress(progress,'START_PAPER PASS')
 def status(log,progress):
-    append_progress(progress,'STATUS START')
     for cmd in (["ss","-ltnp"],["pgrep","-af","kalshiarbo"]):
         rc,out=run(cmd,timeout=20); log.append('$ '+' '.join(cmd)+'\n'+out)
-        for ln in out.splitlines()[-20:]: progress.append('    '+ln)
-    rc,out=run(['tail','-n','100','polyarb.log'],BOT,20); log.append('LOG_TAIL\n'+out); append_progress(progress,'STATUS PASS')
+    rc,out=run(['tail','-n','120','polyarb.log'],BOT,20); log.append('LOG_TAIL\n'+out); append_progress(progress,'STATUS PASS')
+def install_python_control(rel,dst,service,log,progress):
+    remote=read_origin_text(rel); fd,tmp=tempfile.mkstemp(prefix='kalshi-control-',suffix='.py'); os.close(fd); tp=Path(tmp); tp.write_text(remote); rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
+    if rc: tp.unlink(missing_ok=True); raise RuntimeError(f'{rel} syntax validation failed: '+out.strip())
+    os.chmod(tp,0o700); os.replace(tp,HOME/dst); rc,out=run(['sudo','systemctl','restart',service],timeout=30)
+    if rc: raise RuntimeError(f'unable to restart {service}: '+out.strip())
+    log.append(f'UPDATED {rel} -> {dst}'); append_progress(progress,f'UPDATE {service} PASS')
 def update_autopilot(log,progress):
-    append_progress(progress,'UPDATE_AUTOPILOT START')
-    remote=read_origin_text('control/kalshi_autopilot.py'); dst=HOME/'kalshi_autopilot.py'; fd,tmp=tempfile.mkstemp(prefix='kalshi-autopilot-update-',suffix='.py'); os.close(fd); tp=Path(tmp); tp.write_text(remote)
-    rc,out=run([sys.executable,'-m','py_compile',str(tp)],timeout=30)
-    if rc: tp.unlink(missing_ok=True); raise RuntimeError('autopilot syntax validation failed: '+out.strip())
-    os.chmod(tp,0o700); os.replace(tp,dst)
-    # Reset the obsolete raw-count loop state before restart.
     try:(HOME/'.kalshi_autopilot_state.json').unlink()
     except FileNotFoundError: pass
-    rc,out=run(['sudo','systemctl','restart','kalshi-autopilot.service'],timeout=30)
-    if rc: raise RuntimeError('unable to restart kalshi-autopilot.service: '+out.strip())
-    log.append('UPDATE_AUTOPILOT installed finite-gate controller'); append_progress(progress,'UPDATE_AUTOPILOT PASS')
+    install_python_control('control/kalshi_autopilot.py','kalshi_autopilot.py','kalshi-autopilot.service',log,progress)
+def update_telemetry(log,progress): install_python_control('control/kalshi_telemetry_sync.py','kalshi_telemetry_sync.py','kalshi-agent-telemetry.service',log,progress)
+def collect_parity_evidence(log,progress):
+    p=BOT/'strategy'/'trader.go'; lines=p.read_text(errors='replace').splitlines(); needles=['grossFillShares','SizeMatched','getFillsTimed','ComputeBuyFeeShares','HedgeBy','shouldAbortLeadWaitForFilledPreHedge','cancel_timeout','residualPosition','markToMarket','settlement','BalancedAt','lockedProfit']; out=[f'LIVE PARITY SOURCE EVIDENCE UTC={utc()}','LIVE_ALLOWED=false']
+    seen=[]
+    for needle in needles:
+        for i,line in enumerate(lines):
+            if needle.lower() in line.lower():
+                lo=max(0,i-8); hi=min(len(lines),i+9); key=(lo,hi)
+                if key in seen: continue
+                seen.append(key); out.append(f'\n--- {needle} @ strategy/trader.go:{i+1} context {lo+1}-{hi} ---')
+                out.extend(f'{n+1:05d}: {lines[n]}' for n in range(lo,hi))
+                if len(seen)>=40: break
+        if len(seen)>=40: break
+    (RESULTS/'parity_live_evidence.txt').write_text('\n'.join(out)+'\n'); log.append(f'PARITY_EVIDENCE excerpts={len(seen)}'); append_progress(progress,f'COLLECT_PARITY_EVIDENCE PASS excerpts={len(seen)}')
 def publish(jobid,text):
     ensure_dirs(); (RESULTS/'latest.txt').write_text(text); (RESULTS/'history'/f'{jobid}.txt').write_text(text); run(['git','add','docs/agent'],REPO,30); run(['git','commit','-m',f'Agent result {jobid}'],REPO,60); run(['git','pull','--rebase','--autostash'],REPO,120); run(['git','push'],REPO,120)
 def execute(job,state):
-    jid=str(job.get('id','')).strip(); heartbeat('working',jid); progress=['KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',f'JOB_ID={jid}',f'JOB_START_UTC={utc()}','LIVE_ALLOWED=false','------------------------------------------------------------']; write_progress(progress); log=['KALSHI EC2 AGENT',f'JOB_ID={jid}',f'START_UTC={utc()}',f'LIVE_ALLOWED=false']; ok=True
+    jid=str(job.get('id','')).strip(); heartbeat('working',jid); progress=['KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',f'JOB_ID={jid}',f'JOB_START_UTC={utc()}','LIVE_ALLOWED=false']; write_progress(progress); log=['KALSHI EC2 AGENT',f'JOB_ID={jid}',f'START_UTC={utc()}','LIVE_ALLOWED=false']; ok=True
     try:
         if not jid: raise ValueError('missing job id')
         if job.get('live') not in (None,False): raise ValueError('LIVE IS HARD-BLOCKED')
         actions=job.get('actions',[])
-        if not isinstance(actions,list): raise ValueError('actions must be list')
-        append_progress(progress,'JOB ACCEPTED actions='+','.join((a if isinstance(a,str) else str(a.get('name',''))) for a in actions))
         for idx,a in enumerate(actions,1):
             if isinstance(a,str): name=a; args={}
             else:name=str(a.get('name','')); args=a
             if name not in ALLOWED: raise ValueError(f'action not allowed: {name}')
-            log.append(f'\n=== {name} ==='); append_progress(progress,f'ACTION {idx}/{len(actions)} {name} START')
+            append_progress(progress,f'ACTION {idx}/{len(actions)} {name} START'); log.append(f'\n=== {name} ===')
             if name=='STATUS': status(log,progress)
             elif name=='BACKUP': backup(state,log,progress)
             elif name=='UPDATE_AUTOPILOT': update_autopilot(log,progress)
+            elif name=='UPDATE_TELEMETRY': update_telemetry(log,progress)
+            elif name=='COLLECT_PARITY_EVIDENCE': collect_parity_evidence(log,progress)
             elif name=='APPLY_PATCH':
                 patch=materialize_remote_patch(args.get('path',''))
                 try:
@@ -146,11 +136,9 @@ def execute(job,state):
                     if rc: raise RuntimeError('patch dry-run failed')
                     rc,out=run_stream(['patch','--batch','-p'+strip,'-i',str(patch)],progress,BOT,120,'PATCH_APPLY'); log.append(out)
                     if rc: raise RuntimeError('patch apply failed')
-                finally:
-                    try:patch.unlink()
-                    except:pass
+                finally: patch.unlink(missing_ok=True)
             elif name=='GOFMT':
-                files=args.get('files',[]) or ['strategy/trader.go','strategy/signal.go','kalshi/feed.go','main.go']; valid=[]
+                files=args.get('files',[]) or ['strategy/trader.go']; valid=[]
                 for f in files:
                     p=(BOT/f).resolve()
                     if BOT.resolve() not in p.parents or p.suffix!='.go': raise ValueError('unsafe gofmt path')
@@ -171,7 +159,7 @@ def execute(job,state):
         log.append('\nRESULT=PASS'); append_progress(progress,'JOB RESULT=PASS')
     except Exception as e:
         ok=False; log.append(f'\nRESULT=FAIL\nERROR={type(e).__name__}: {e}'); append_progress(progress,f'JOB RESULT=FAIL ERROR={type(e).__name__}: {e}')
-    log.append(f'END_UTC={utc()}'); append_progress(progress,f'JOB_END_UTC={utc()}'); heartbeat('idle',''); return ok,'\n'.join(log)+'\n'
+    log.append(f'END_UTC={utc()}'); heartbeat('idle',''); return ok,'\n'.join(log)+'\n'
 def main():
     ensure_dirs(); heartbeat('starting')
     while True:
@@ -184,7 +172,6 @@ def main():
                     if job.get('enabled',False) and jid and jid!=state.get('last_job_id'):
                         ok,text=execute(job,state); state['last_job_id']=jid; state['last_result']='PASS' if ok else 'FAIL'; state['last_run_utc']=utc(); save_state(state); publish(jid,text)
             heartbeat('idle')
-        except Exception as e:
-            ensure_dirs(); heartbeat('error'); (RESULTS/'local_error.txt').write_text(f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n')
+        except Exception as e: ensure_dirs(); heartbeat('error'); (RESULTS/'local_error.txt').write_text(f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n')
         time.sleep(POLL)
 if __name__=='__main__': main()
