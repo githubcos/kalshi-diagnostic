@@ -1,0 +1,47 @@
+--- a/strategy/pair_arb_test.go
++++ b/strategy/pair_arb_test.go
+@@ -183,34 +183,12 @@
+-func TestMaybeRebalancePairArbAllowsExactKalshiHedgeBelowOneDollarNotional(t *testing.T) {
+-	now := time.Now()
+-	trader := &Trader{
+-		cfg: TraderConfig{
+-			PaperTrade:                  true,
+-			TradeSizeUSD:                5,
+-			PairArbTradeSizeUSD:         5,
+-			PairArbMinLockedProfitCents: 8,
+-		},
+-		detector:     &Detector{},
+-		logger:       zap.NewNop(),
+-		paperBalance: 100,
+-		feeRateBps:   "0",
+-		pairedPosition: &PairArbPosition{
+-			YesTokenID:  "yes-token",
+-			NoTokenID:   "no-token",
+-			OpenedAt:    now.Add(-20 * time.Second),
+-			WindowEnd:   now.Add(2 * time.Minute),
+-			YesShares:   5,
+-			YesUSDSpent: 4.75,
+-		},
+-	}
+-
+-	if err := trader.maybeRebalancePairArb(context.Background(), 0.95, 0.05); err != nil {
+-		t.Fatalf("maybeRebalancePairArb returned error: %v", err)
+-	}
+-	if !almostEqual(trader.pairedPosition.NoShares, 5) {
+-		t.Fatalf("expected exact 5-contract Kalshi hedge fill, got %.2f NO shares", trader.pairedPosition.NoShares)
+-	}
+-	if !trader.pairedPosition.isBalanced() {
+-		t.Fatal("expected pair to be balanced after valid Kalshi hedge")
+-	}
++func TestPairArbExactHedgeSizingAllowsKalshiSubDollarNotional(t *testing.T) {
++	rawShares, notional, ok := pairArbExactHedgeSizing(5, 0.05, "0")
++	if !ok {
++		t.Fatal("expected 5-contract Kalshi hedge to pass venue sizing")
++	}
++	if !almostEqual(rawShares, 5) {
++		t.Fatalf("expected exact 5-contract hedge, got %.4f", rawShares)
++	}
++	if !almostEqual(notional, 0.25) {
++		t.Fatalf("expected $0.25 hedge notional, got %.4f", notional)
++	}
+ }
