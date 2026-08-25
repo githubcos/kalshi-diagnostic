@@ -1,7 +1,7 @@
 ==================================================
 KALSHIARBO STRICT COMPLETE-SET PAPER VALIDATION
 RUN=20260825_115215
-UTC=2026-08-25T12:14:01+00:00
+UTC=2026-08-25T12:15:03+00:00
 PORT=8085
 MODE=PAPER
 DURATION_SEC=2400
@@ -14,8 +14,8 @@ BOT_PROCESS=ALIVE
 
 ===== LIVE ECONOMIC SCOREBOARD =====
 KALSHIARBO STRICT ARBITRAGE — LIVE INDEPENDENT AUDIT
-UTC: 2026-08-25T12:14:00.427595+00:00
-Market: KXBTC15M-26AUG250815-15
+UTC: 2026-08-25T12:15:02.431694+00:00
+Market: KXBTC15M-26AUG250830-30
 Source: Kalshi public full orderbook, independent of bot
 
 MATHEMATICAL RULE
@@ -45,8 +45,8 @@ Profit capture efficiency*       0.00%
 * episode-level counterfactual; one fill per continuous opportunity episode
 
 CURRENT MARKET MATH
-Best YES executable ask       0.007000000000000006
-Best NO executable ask        0.994
+Best YES executable ask       0.54
+Best NO executable ask        0.47
 Classification                NO_NET_ARB
 Optimal executable arb         NONE
 
@@ -59,37 +59,6 @@ None
 ===== RELEVANT BOT EVIDENCE =====
 
 ===== RECENT INDEPENDENT AUDITOR EVENTS =====
-{"ts":"2026-08-25T12:08:03.101713+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:05.096368+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:07.105951+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:09.099482+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:11.107598+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:13.094662+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:15.106092+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:17.109399+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:19.108095+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:21.098276+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:23.094519+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:25.108652+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:27.100793+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:29.102791+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:31.094290+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:33.104063+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:35.153961+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:37.099093+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:39.103274+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:41.090472+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:43.088889+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:45.090652+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:47.089874+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:49.089999+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:51.090777+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:53.101543+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:55.085469+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:57.086199+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:08:59.086220+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:09:01.098367+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
-{"ts":"2026-08-25T12:09:03.106451+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
 {"ts":"2026-08-25T12:09:05.101517+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
 {"ts":"2026-08-25T12:09:07.095973+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
 {"ts":"2026-08-25T12:09:09.092244+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
@@ -239,3 +208,34 @@ None
 {"ts":"2026-08-25T12:13:57.118411+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
 {"ts":"2026-08-25T12:13:59.097971+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
 {"ts":"2026-08-25T12:14:01.117888+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:03.094365+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:05.087824+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:07.083847+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:09.079710+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:11.086811+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:13.083051+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:15.089110+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:17.098616+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:19.085286+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:21.087343+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:23.083260+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:25.092179+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:27.089441+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:29.084580+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:31.087557+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:33.106427+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:35.114151+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:37.112232+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:39.098098+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:41.130247+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:43.085637+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:45.091521+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:47.086165+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:49.067692+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:51.068691+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:53.064071+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:55.069925+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:57.068856+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:14:59.068223+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:15:01.073996+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250815-15","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
+{"ts":"2026-08-25T12:15:03.105806+00:00","kind":"SNAPSHOT","ticker":"KXBTC15M-26AUG250830-30","classify":"NO_NET_ARB","plan":null,"balance":20.0,"opportunity_id":null,"bot_entries":0,"false_entries":0}
