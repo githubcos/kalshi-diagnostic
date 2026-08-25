@@ -1,14 +1,11 @@
 {
-  "id": "kalshi-final-production-regression-v1-20260825-2240",
+  "id": "kalshi-controlled-live-data-paper-v1-20260825-2248",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
+    {"name": "STATUS"},
     {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "DETERMINISTIC_PARITY_TEST"},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
