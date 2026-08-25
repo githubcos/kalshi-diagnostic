@@ -1,25 +1,160 @@
-===== KALSHI NO-FAKE-FILL PATCH =====
-Tue Aug 25 01:40:54 UTC 2026
+===== PREFLIGHT FALLBACK AUDIT =====
+Tue Aug 25 01:42:03 UTC 2026
 
+===== BOT =====
 BOT_STOPPED
 
-===== PATCH =====
-1317-		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
-1318-	}
-1319-	if actualShares <= 0 {
-1320-		// KALSHI SAFETY: never manufacture filled inventory from requested size.
-1321-		// Require authoritative SizeMatched/fills evidence.
-1322:		t.logger.Warn("trader: Kalshi buy has no authoritative filled quantity",
-1323-			zap.String("request", requestName),
-1324-			zap.String("order_id", orderID),
-1325-			zap.Float64("gross_fill_shares", grossFillShares),
-1326-		)
-1327-		return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
-1328:			fmt.Errorf("pair arb: Kalshi order %s has no authoritative filled quantity yet", orderID)
-1329-	}
-1330-
-1331-	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
-1332-	// which may be lower than the limit ceiling used for the preflight estimate).
+===== FALLBACK CONTEXT =====
+				fill   float64
+				gross  float64
+				err    error
+			}
+			lookupResults := make(chan lookupResult, 2)
+
+			go func() {
+				gr, grErr := t.getOrderTimed(lookupCtx, requestName+"_lookup", resp.OrderID, zap.String("request_id", requestID))
+				res := lookupResult{source: "get_order", err: grErr}
+				if grErr == nil && gr != nil {
+					if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+						res.fill = prc
+					}
+					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
+						res.gross = sm
+					}
+				}
+				lookupResults <- res
+			}()
+
+			go func() {
+				avg, gross, trErr := t.getFillsTimed(lookupCtx, requestName+"_fills", resp.OrderID, tokenID, zap.String("request_id", requestID))
+				res := lookupResult{source: "get_fills", err: trErr}
+				if trErr == nil {
+					if avg > 0 {
+						res.fill = avg
+					}
+					if gross > 0 {
+						res.gross = gross
+					}
+				}
+				lookupResults <- res
+			}()
+
+			collected := 0
+			for collected < 2 {
+				select {
+				case res := <-lookupResults:
+					collected++
+					if res.err != nil {
+						continue
+					}
+					if correctedFill <= 0 && res.fill > 0 {
+						correctedFill = res.fill
+						fillSource = res.source
+					}
+					if grossFillShares <= 0 && res.gross > 0 {
+						grossFillShares = res.gross
+						fillSource = res.source
+					}
+					if correctedFill > 0 && grossFillShares > 0 {
+						collected = 2
+					}
+				case <-lookupCtx.Done():
+					collected = 2
+				}
+			}
+			cancelLookup()
+			postSubmitLookupMS = time.Since(lookupStart).Milliseconds()
+			if correctedFill <= 0 || grossFillShares <= 0 {
+				// Order is confirmed MATCHED but fill API hasn't propagated yet.
+				// We know shares were received Ã¢â‚¬â€ fall back to preflight estimates.
+				fillSource = "preflight_fallback"
+				t.logger.Warn("trader: pair arb buy fill data unavailable after lookup; using preflight estimate",
+					zap.String("request", requestName),
+					zap.String("order_id", orderID),
+					zap.Float64("preflight_price", fillPrice),
+					zap.Float64("preflight_shares", actualShares),
+					zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
+				)
+				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
+			}
+		}
+
+	case submitStatus == "live" || submitStatus == "delayed":
+		if submitStatus == "live" && orderType != polymarket.OrderTypeGTC {
+			// Immediate order types (FAK/FOK) should not return LIVE, but API races can
+			// produce transient LIVE responses. Poll/reconcile instead of treating this
+			// as deterministic no-fill so we never lose a late/partial fill.
+			t.logger.Warn("trader: pair arb immediate order returned LIVE; entering reconcile poll",
+				zap.String("request", requestName),
+				zap.String("order_id", orderID),
+				zap.String("order_type", string(orderType)),
+			)
+		}
+		// GTC LIVE (resting in book) or DELAYED (processing deferred): poll until matched or timeout.
+		t.setPendingPairArbOrder(orderID, tokenID, requestName)
+		pollTimeout := pairArbGTCPollDefaultTimeout
+		if s := t.cfg.PairArbLeadBuyTimeoutSec; s > 0 {
+			pollTimeout = time.Duration(s) * time.Second
+		}
+		if strings.Contains(requestName, "urgent_rescue") {
+			// Hedge leg already matched and we are trying to rescue the opposite lead.
+			// Keep this window very short to avoid carrying one-sided exposure.
+			pollTimeout = 1500 * time.Millisecond
+		}
+		pollStart := time.Now()
+		pollDeadline := pollStart.Add(pollTimeout)
+		hedgeAbortTriggered := false
+		hedgeAbortOrderID := ""
+		gapGuardCancelled := false
+		lastHedgeGuardProbe := time.Time{}
+		for time.Now().Before(pollDeadline) {
+			select {
+			case <-ctx.Done():
+				_ = t.cancelOrderTimed(ctx, requestName+"_cancel_ctx", orderID)
+
+===== ALL PREFLIGHT FALLBACK REFERENCES =====
+1082-					if correctedFill <= 0 && res.fill > 0 {
+1083-						correctedFill = res.fill
+1084-						fillSource = res.source
+1085-					}
+1086-					if grossFillShares <= 0 && res.gross > 0 {
+1087-						grossFillShares = res.gross
+1088-						fillSource = res.source
+1089-					}
+1090-					if correctedFill > 0 && grossFillShares > 0 {
+1091-						collected = 2
+1092-					}
+1093-				case <-lookupCtx.Done():
+1094-					collected = 2
+1095-				}
+1096-			}
+1097-			cancelLookup()
+1098-			postSubmitLookupMS = time.Since(lookupStart).Milliseconds()
+1099-			if correctedFill <= 0 || grossFillShares <= 0 {
+1100-				// Order is confirmed MATCHED but fill API hasn't propagated yet.
+1101-				// We know shares were received Ã¢â‚¬â€ fall back to preflight estimates.
+1102:				fillSource = "preflight_fallback"
+1103-				t.logger.Warn("trader: pair arb buy fill data unavailable after lookup; using preflight estimate",
+1104-					zap.String("request", requestName),
+1105-					zap.String("order_id", orderID),
+1106-					zap.Float64("preflight_price", fillPrice),
+1107-					zap.Float64("preflight_shares", actualShares),
+1108-					zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
+1109-				)
+1110-				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
+1111-			}
+1112-		}
+1113-
+1114-	case submitStatus == "live" || submitStatus == "delayed":
+1115-		if submitStatus == "live" && orderType != polymarket.OrderTypeGTC {
+1116-			// Immediate order types (FAK/FOK) should not return LIVE, but API races can
+1117-			// produce transient LIVE responses. Poll/reconcile instead of treating this
+1118-			// as deterministic no-fill so we never lose a late/partial fill.
+1119-			t.logger.Warn("trader: pair arb immediate order returned LIVE; entering reconcile poll",
+1120-				zap.String("request", requestName),
+1121-				zap.String("order_id", orderID),
+1122-				zap.String("order_type", string(orderType)),
+--
 1333-	// This ensures the journal cost basis and PnL are accurate.
 1334-	effectiveShares := grossFillShares
 1335-	if effectiveShares <= 0 {
@@ -34,11 +169,95 @@ BOT_STOPPED
 1344-			minExpected = pairArbShareDust
 1345-		}
 1346-		// Fast path: fills API already confirmed the trade (non-zero avg + gross).
-
-===== OLD FALLBACK CHECK =====
-1102:				fillSource = "preflight_fallback"
+1347-		// Polymarket's fills endpoint is authoritative — if it returned data, the order
+1348-		// settled on-chain. Use a short check so we can place the hedge immediately.
+1349-		// Tiers:
+1350-		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
+1351-		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
+1352-		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
 1353:		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
+1354-		creditAttempts := 20
+1355-		creditInterval := 500 * time.Millisecond
+1356-		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
+1357-			creditAttempts = 1
 1358:		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+1359-			creditAttempts = 3
+1360-			creditInterval = 500 * time.Millisecond
+1361-		}
+1362-		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
+1363-		if cErr != nil {
+1364-			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
+1365-			// can verify whether the MATCHED buy eventually credited to the wallet.
+1366-			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
+1367-				zap.String("order_id", orderID),
+1368-				zap.Error(cErr),
+1369-			)
+1370-			if requestName == "pair_arb_lead_buy" {
+1371-				t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+1372-			}
+1373-			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, cErr
+1374-		}
+1375-		if !credited {
+1376-			// Order is matched and money is spent. If we have any shares in the wallet
+1377-			// (just below the expected threshold due to API lag or rounding), use the
+1378-			// actual balance as shares rather than erroring and leaving pendingPairArb set.
+
+===== URGENT RESCUE PRICE =====
+1708-		}
+1709-		// Persist hedge order ID immediately for crash recovery.
+1710-		// If we crash before lead fills, RestorePosition will see no PairPosition and cancel it.
+1711-		if hedgeSubmittedLive {
+1712-			t.setPrePlacedHedgeOrder(hedgeOrderID, hedgeTokenID, "pair_arb_hedge_pre", hedgeRawShares)
+1713-		}
+1714-	} else {
+1715-		t.logger.Warn("trader: dual pre-place: hedge submit failed; will proceed sequentially after lead fills",
+1716-			zap.NamedError("hedge_err", hedgePlaceErr),
+1717-		)
+1718-	}
+1719-
+1720-	// ── Execute lead buy (blocks until fill or PairArbLeadBuyTimeoutSec) ───
+1721-	leadRequestName := "pair_arb_lead_buy"
+1722-	leadExecLimitPrice := leadLimitPrice
+1723-	if hedgeAlreadyFilled {
+1724-		// If hedge filled first, do not wait a full lead timeout on the opposite side.
+1725-		// Try an urgent rescue at a more aggressive limit while still honoring the
+1726-		// configured lead order type (GTC/FAK/FOK).
+1727-		leadRequestName = "pair_arb_lead_buy_urgent_rescue"
+1728:		leadExecLimitPrice = math.Round(math.Min(0.99, leadLimitPrice+0.03)*100) / 100
+1729-		t.logger.Warn("trader: dual pre-place hedge filled before lead; switching lead to urgent rescue",
+1730-			zap.String("hedge_order_id", hedgeOrderID),
+1731-			zap.Float64("original_lead_limit", leadLimitPrice),
+1732:			zap.Float64("urgent_lead_limit", leadExecLimitPrice),
+1733-			zap.String("lead_order_type", string(t.pairArbLeadOrderType())),
+1734-		)
+1735-	}
+1736-	leadOutcome, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD, leadErr := t.executePairLimitBuy(ctx, leadRequestName, leadTokenID, leadPrice, leadExecLimitPrice, rawLeadShares)
+1737-	if leadErr != nil {
+1738-		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, leadErr)
+1739-		// Lead didn't fill — cancel any hedge order still in the book.
+1740-		orphanExposureLikely := hedgeAlreadyFilled
+1741-		if hedgeOrderID != "" && (hedgeSubmittedLive || hedgeAlreadyFilled) {
+1742-			if cancelErr := t.cancelOrderTimed(ctx, "pair_arb_dual_cancel_orphan_hedge", hedgeOrderID); cancelErr != nil {
+1743-				if errors.Is(cancelErr, polymarket.ErrOrderNotCancellable) {
+1744-					orphanExposureLikely = true
+1745-				}
+1746-			}
+1747-		}
+1748-		t.clearPrePlacedHedgeOrder()
+1749-		t.recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID, sig.PolyYesPrice, orphanExposureLikely)
+1750-		return leadErr
+1751-	}
+1752-	if leadOutcome != pairArbBuyOutcomeFilled {
+1753-		pairConditionID := t.convConditionID
+1754-		if sig.OverrideConditionID != "" {
+1755-			pairConditionID = sig.OverrideConditionID
+1756-		}
+1757-		pairWindowEnd := t.detector.WindowEnd()
+1758-		if !sig.OverrideWindowEnd.IsZero() {
+1759-			pairWindowEnd = sig.OverrideWindowEnd
+1760-		}
+1761-		t.setPendingPairArbContext(leadOrderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+1762-		if leadOrderID != "" && t.pendingPairArb != nil && strings.EqualFold(strings.TrimSpace(t.pendingPairArb.OrderID), strings.TrimSpace(leadOrderID)) {
 
 ===== TEST =====
 ?   	github.com/polyarb	[no test files]
@@ -54,7 +273,7 @@ ok  	github.com/polyarb/discord	(cached)
 ?   	github.com/polyarb/kalshi	[no test files]
 ?   	github.com/polyarb/market	[no test files]
 ok  	github.com/polyarb/polymarket	(cached)
-ok  	github.com/polyarb/strategy	0.019s
+ok  	github.com/polyarb/strategy	(cached)
 ok  	github.com/polyarb/web	(cached)
 TEST_RC=0
 
