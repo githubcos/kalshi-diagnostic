@@ -1,9 +1,10 @@
 {
-  "id": "parity-baseline-20260825-1345",
+  "id": "kalshi-pair-fee-min-v1-20260825-1451",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_fee_minimum_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "STATUS"},
