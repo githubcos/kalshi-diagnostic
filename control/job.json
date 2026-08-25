@@ -1,9 +1,12 @@
 {
-  "id": "kalshi-autopilot-finite-gates-v2-20260825-1754",
+  "id": "kalshi-parity-evidence-refresh-v1-20260825-1852",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "UPDATE_TELEMETRY"},
+    {"name": "COLLECT_PARITY_EVIDENCE"},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
     {"name": "STATUS"}
   ]
 }
