@@ -17,12 +17,10 @@ def run(cmd,cwd=None,timeout=120,check=False):
         raise RuntimeError(f"command failed rc={p.returncode}: {' '.join(map(str,cmd))}\n{p.stdout}")
     return p
 
-def log(msg):
-    print(f'[{utc()}] {msg}',flush=True)
+def log(msg): print(f'[{utc()}] {msg}',flush=True)
 
 def ensure_clone():
-    if (TEL/'.git').exists():
-        return
+    if (TEL/'.git').exists(): return
     if TEL.exists(): shutil.rmtree(TEL)
     r=run(['git','-C',str(SRC),'remote','get-url','origin'],check=True)
     url=r.stdout.strip()
@@ -38,32 +36,28 @@ def copy_if_exists(src,dst):
         shutil.copy2(src,dst)
 
 def local_runtime_status():
-    status={'utc':utc(),'publisher_pid':os.getpid(),'heartbeat':None,'state':None}
-    for key,path in [('heartbeat',HOME/'.kalshi_agent_heartbeat.json'),('state',HOME/'.kalshi_agent_state.json')]:
+    status={'utc':utc(),'publisher_pid':os.getpid(),'heartbeat':None,'state':None,'autopilot':None}
+    for key,path in [('heartbeat',HOME/'.kalshi_agent_heartbeat.json'),('state',HOME/'.kalshi_agent_state.json'),('autopilot',HOME/'.kalshi_autopilot_state.json')]:
         try: status[key]=json.loads(path.read_text())
         except Exception: pass
     return status
 
 def sync_once():
     ensure_clone()
-    # Dedicated clone has no human edits; always start from latest origin/main.
     run(['git','fetch','-q','origin','main'],TEL,check=True)
     run(['git','reset','--hard','origin/main'],TEL,check=True)
 
-    src_agent=SRC/'docs'/'agent'
-    dst_agent=TEL/'docs'/'agent'
+    src_agent=SRC/'docs'/'agent'; dst_agent=TEL/'docs'/'agent'
     dst_agent.mkdir(parents=True,exist_ok=True)
-    for name in ['progress.txt','latest.txt','local_error.txt','self_update_error.txt']:
+    for name in ['progress.txt','latest.txt','local_error.txt','self_update_error.txt','autopilot_status.json','autopilot_report.txt']:
         copy_if_exists(src_agent/name,dst_agent/name)
     if (src_agent/'history').exists():
         (dst_agent/'history').mkdir(parents=True,exist_ok=True)
-        for p in (src_agent/'history').glob('*.txt'):
-            copy_if_exists(p,dst_agent/'history'/p.name)
+        for p in (src_agent/'history').glob('*.txt'): copy_if_exists(p,dst_agent/'history'/p.name)
 
     status=local_runtime_status()
     (dst_agent/'runtime_status.json').write_text(json.dumps(status,indent=2)+'\n')
-    state=status.get('state') or {}
-    hb=status.get('heartbeat') or {}
+    state=status.get('state') or {}; hb=status.get('heartbeat') or {}; ap=status.get('autopilot') or {}
     tel_text=(
         'KALSHI TELEMETRY ONLINE\n'
         f"UPDATED_UTC={status['utc']}\n"
@@ -74,13 +68,15 @@ def sync_once():
         f"LAST_JOB_ID={state.get('last_job_id','')}\n"
         f"LAST_RESULT={state.get('last_result','')}\n"
         f"LAST_RUN_UTC={state.get('last_run_utc','')}\n"
+        f"AUTOPILOT_CYCLE={ap.get('cycle','')}\n"
+        f"AUTOPILOT_LAST_RESULT={ap.get('last_result','')}\n"
+        f"AUTOPILOT_LAST_CYCLE_UTC={ap.get('last_cycle_utc','')}\n"
     )
     (dst_agent/'telemetry_status.txt').write_text(tel_text)
 
     run(['git','add','docs/agent'],TEL,check=True)
     diff=run(['git','diff','--cached','--quiet'],TEL)
-    if diff.returncode==0:
-        return False
+    if diff.returncode==0: return False
     run(['git','commit','-m','Sync Kalshi telemetry '+datetime.now(timezone.utc).strftime('%H:%M:%S')],TEL,check=True)
     p=run(['git','push','origin','HEAD:main'],TEL,180)
     if p.returncode:
@@ -88,18 +84,16 @@ def sync_once():
         run(['git','pull','--rebase','origin','main'],TEL,180,check=True)
         run(['git','push','origin','HEAD:main'],TEL,180,check=True)
     ERROR.unlink(missing_ok=True)
-    log(f"published agent={hb.get('status','unknown')} job={state.get('last_job_id','')} result={state.get('last_result','')}")
+    log(f"published agent={hb.get('status','unknown')} job={state.get('last_job_id','')} result={state.get('last_result','')} autopilot_cycle={ap.get('cycle','')}")
     return True
 
 def main():
     log('telemetry publisher started')
     while True:
-        try:
-            sync_once()
+        try: sync_once()
         except Exception as e:
             msg=f'{utc()} {type(e).__name__}: {e}'
-            ERROR.write_text(msg+'\n')
-            print(msg,file=sys.stderr,flush=True)
+            ERROR.write_text(msg+'\n'); print(msg,file=sys.stderr,flush=True)
         time.sleep(INTERVAL)
 
 if __name__=='__main__': main()
