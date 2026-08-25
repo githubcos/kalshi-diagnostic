@@ -1,0 +1,75 @@
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@
+ func pairArbExactHedgeSizing(targetActualShares, hedgePrice float64, feeRateBps string) (rawShares, notional float64, ok bool) {
+-	rawShares = solveRawSharesForTargetActual(targetActualShares, hedgePrice, feeRateBps)
+-	if rawShares <= 0 {
++	// Kalshi fees are charged in cash, not deducted from contract quantity.
++	// Fractional contracts are supported to 0.01-contract granularity, so an
++	// exact hedge simply mirrors the filled lead contracts rounded down to that
++	// granularity. Keep feeRateBps in the signature for compatibility with the
++	// original PolyArb call sites, but do not use Polymarket fee-share math here.
++	rawShares = math.Floor((targetActualShares+1e-9)*100) / 100
++	if rawShares < 0.01 || hedgePrice <= 0 || hedgePrice >= 1.0 {
+ 		return 0, 0, false
+ 	}
+ 	notional = marketBuyOrderNotional(rawShares, hedgePrice)
+-	return rawShares, notional, notional+0.0000001 >= polymarket.MinMarketOrderNotionalUSD && rawShares >= polymarket.MinOrderShares
++	return rawShares, notional, true
+ }
+@@
+-	usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
+-	if usdSpent+0.0000001 < polymarket.MinMarketOrderNotionalUSD {
+-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: limit buy notional $%.4f below $%.2f minimum", usdSpent, polymarket.MinMarketOrderNotionalUSD)
++	usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
++	if rawShares+1e-9 < 0.01 {
++		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: Kalshi order size %.4f below 0.01-contract granularity", rawShares)
+ 	}
+ 	fillPrice = math.Round(signalPrice*100) / 100
+-	feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+-	actualShares = math.Floor((rawShares-feeShares)*100) / 100
++	// Kalshi charges trading fees in cash. A fill of N contracts leaves N
++	// contracts in inventory; unlike Polymarket there is no fee-share deduction.
++	feeShares = 0
++	actualShares = math.Floor((rawShares+1e-9)*100) / 100
+ 	if actualShares <= 0 {
+-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
++		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: invalid Kalshi contract quantity")
+ 	}
+@@
+-	rawShares := math.Round((tradeSize/limitPrice)*100) / 100
+-	if t.cfg.PaperTrade {
+-		rawShares = pairKalshiSharesForBudget(tradeSize, limitPrice)
+-	}
++	// Kalshi sizing is the same in paper and live modes: contracts plus the
++	// exchange cash fee must fit inside the configured per-leg budget.
++	rawShares := pairKalshiSharesForBudget(tradeSize, limitPrice)
+ 	if rawShares <= 0 {
+ 		return fmt.Errorf("pair arb: invalid raw shares sizing")
+ 	}
+-	estimatedActualShares := math.Floor((rawShares-polymarket.ComputeBuyFeeShares(rawShares, leadPrice, t.feeRateBps))*100) / 100
+-	if t.cfg.PaperTrade {
+-		estimatedActualShares = rawShares
+-	}
++	// Kalshi fees are cash fees, so filled contract quantity is not reduced.
++	estimatedActualShares := rawShares
+ 	if estimatedActualShares <= 0 {
+-		return fmt.Errorf("pair arb: fee eats all lead shares")
++		return fmt.Errorf("pair arb: invalid estimated Kalshi lead contracts")
+ 	}
+@@
+ 	_, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(estimatedActualShares, hedgePrice, t.feeRateBps)
+ 	if !hedgeAllowed {
+-		return fmt.Errorf("pair arb: exact %s hedge would be $%.4f at %.4f, below $%.2f FAK minimum", hedgeSide, hedgeNotional, hedgePrice, polymarket.MinMarketOrderNotionalUSD)
++		return fmt.Errorf("pair arb: exact %s hedge %.4f contracts at %.4f is below Kalshi 0.01-contract granularity", hedgeSide, estimatedActualShares, hedgePrice)
+ 	}
+@@
+ 	leadCost := marketBuyOrderNotional(rawShares, limitPrice)
+-	if t.cfg.PaperTrade {
+-		leadCost += kalshiTakerFeeUSD(rawShares, limitPrice)
+-		hedgeNotional += kalshiTakerFeeUSD(estimatedActualShares, hedgePrice)
+-	}
++	// Kalshi fees are cash charges in both paper simulation and live execution.
++	leadCost += kalshiTakerFeeUSD(rawShares, limitPrice)
++	hedgeNotional += kalshiTakerFeeUSD(estimatedActualShares, hedgePrice)
+ 	totalRequired := leadCost + hedgeNotional
