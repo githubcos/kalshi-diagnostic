@@ -1,43 +1,20 @@
 ==================================================
-KALSHIARBO STRICT-ARB TEST UPDATE
-UTC: 2026-08-25T11:48:08+00:00
-STAMP: 20260825_114808
+KALSHIARBO STRICT COMPLETE-SET PAPER VALIDATION
+RUN=20260825_115215
+UTC=2026-08-25T11:52:26+00:00
+PORT=8085
+MODE=PAPER
+DURATION_SEC=2400
+PAIR_TRADE_SIZE_USD=5
+PAIR_MAX_SPEND_USD=10.0
+PAPER_START_BALANCE=20
+BOT_PID=97311
+BOT_PROCESS=ALIVE
 ==================================================
 
-=== STRICT MARKERS ===
-strategy/signal.go:2256:	// STRICT COMPLETE-SET ARBITRAGE ONLY.
-strategy/signal.go:2285:	// Trader.strictPairArbPreflight().
-strategy/trader.go:8364:func (t *Trader) strictPairArbPreflight(ctx context.Context, yesTokenID, noTokenID string, maxSpend float64) (*strictArbPlan, error) {
-strategy/trader.go:8597:	plan, preErr := t.strictPairArbPreflight(ctx, yesTokenID, noTokenID, 2.0*tradeSize)
-strategy/trader.go:8602:	t.logger.Info("pair arb: STRICT executable arbitrage proven",
-strategy/trader.go:8618:		return fmt.Errorf("strict arb safety: LIVE pair execution blocked because current adapter cannot atomically guarantee both legs")
+===== LIVE ECONOMIC SCOREBOARD =====
+Auditor starting...
 
-=== UPDATED STRICT TEST NAMES ===
-162:func TestOnPairArbSignalRejectsWhenStrictOrderbookUnavailable(t *testing.T) {
-509:func TestEvaluatePairArbRequiresPositiveGrossCompleteSetEdge(t *testing.T) {
+===== RELEVANT BOT EVIDENCE =====
 
-=== GO TEST ./... ===
-?   	github.com/polyarb	[no test files]
-?   	github.com/polyarb/binance	[no test files]
-?   	github.com/polyarb/bybit	[no test files]
-?   	github.com/polyarb/chainlink	[no test files]
-?   	github.com/polyarb/coinbase	[no test files]
-?   	github.com/polyarb/config	[no test files]
-?   	github.com/polyarb/deribit	[no test files]
-ok  	github.com/polyarb/discord	(cached)
-?   	github.com/polyarb/display	[no test files]
-?   	github.com/polyarb/exchangefeed	[no test files]
-?   	github.com/polyarb/kalshi	[no test files]
-?   	github.com/polyarb/market	[no test files]
-ok  	github.com/polyarb/polymarket	(cached)
-ok  	github.com/polyarb/strategy	0.017s
-ok  	github.com/polyarb/web	(cached)
-GO_TEST_RC=0
-
-=== GO BUILD ===
-GO_BUILD_RC=0
-
-=== RESULT ===
-BUILD_STATUS=PASS
-TEST_STATUS=PASS
-END_UTC=2026-08-25T11:48:15+00:00
+===== RECENT INDEPENDENT AUDITOR EVENTS =====
