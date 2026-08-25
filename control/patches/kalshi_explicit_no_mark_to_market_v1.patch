@@ -1,0 +1,130 @@
+diff --git a/strategy/trader.go b/strategy/trader.go
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -8159,7 +8159,15 @@
+ // FormatPosition returns a human-readable position summary, or "" if flat.
+ // currentYesPrice is always the YES token price.
+-func (t *Trader) FormatPosition(currentYesPrice float64) string {
++func (t *Trader) FormatPosition(currentYesPrice float64, noPrices ...float64) string {
++	currentNoPrice := 0.0
++	if len(noPrices) > 0 {
++		currentNoPrice = noPrices[0]
++	}
++	if currentNoPrice <= 0 {
++		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
++	}
+ 	if t.IsFlat() {
+ 		return ""
+ 	}
+@@ -8174,7 +8182,7 @@
+ 		if lockedShares > 0 {
+ 			avgCost = p.totalSpent() / lockedShares
+ 		}
+-		pnl := p.markToMarket(currentYesPrice)
++		pnl := p.markToMarket(currentYesPrice, currentNoPrice)
+ 		return fmt.Sprintf(
+ 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
+@@ -8191,7 +8199,7 @@
+ 	p := t.position
+ 	tokenPrice := currentYesPrice
+ 	if p.IsNoSide {
+-		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
++		tokenPrice = currentNoPrice
+ 	}
+ 	side := "YES"
+@@ -8210,7 +8218,15 @@
+ 
+ // PositionSnapshot returns (side, shares, buyPrice, unrealizedPnL) for the display.
+ // currentYesPrice is always the YES token price.
+-func (t *Trader) PositionSnapshot(currentYesPrice float64) (string, float64, float64, float64) {
++func (t *Trader) PositionSnapshot(currentYesPrice float64, noPrices ...float64) (string, float64, float64, float64) {
++	currentNoPrice := 0.0
++	if len(noPrices) > 0 {
++		currentNoPrice = noPrices[0]
++	}
++	if currentNoPrice <= 0 {
++		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
++	}
+ 	if t.IsFlat() {
+ 		return "", 0, 0, 0
+ 	}
+@@ -8220,13 +8236,13 @@
+ 		if lockedShares > 0 {
+ 			avgCost = p.totalSpent() / lockedShares
+ 		}
+-		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice)
++		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice, currentNoPrice)
+ 	}
+ 	p := t.position
+ 	tokenPrice := currentYesPrice
+ 	side := "YES"
+ 	if p.IsNoSide {
+-		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
++		tokenPrice = currentNoPrice
+ 		side = "NO"
+ 	}
+@@ -8234,7 +8250,15 @@
+ 	return side, p.Shares, p.BuyPrice, p.Unrealized(tokenPrice)
+ }
+ 
+-func (t *Trader) DashboardPositionSnapshot(currentYesPrice float64) DashboardPositionSnapshot {
++func (t *Trader) DashboardPositionSnapshot(currentYesPrice float64, noPrices ...float64) DashboardPositionSnapshot {
++	currentNoPrice := 0.0
++	if len(noPrices) > 0 {
++		currentNoPrice = noPrices[0]
++	}
++	if currentNoPrice <= 0 {
++		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
++	}
+ 	if t.IsFlat() {
+ 		return DashboardPositionSnapshot{}
+ 	}
+@@ -8266,7 +8290,7 @@
+ 			BuyPrice:               avgCost,
+ 			Shares:                 lockedShares,
+ 			USDSpent:               pair.totalSpent(),
+-			UnrealizedPnL:          pair.markToMarket(currentYesPrice),
++			UnrealizedPnL:          pair.markToMarket(currentYesPrice, currentNoPrice),
+@@ -8288,7 +8312,7 @@
+ 			PairResidualShares:     residualShares,
+ 			PairHedgeSide:          hedgeSide,
+ 			PairHedgeMaxPrice:      hedgeMaxPrice,
+-			PairMarkToMarket:       pair.markToMarket(currentYesPrice),
++			PairMarkToMarket:       pair.markToMarket(currentYesPrice, currentNoPrice),
+@@ -8303,7 +8327,7 @@
+ 	tokenPrice := currentYesPrice
+ 	side := "YES"
+ 	if position.IsNoSide {
+-		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
++		tokenPrice = currentNoPrice
+ 		side = "NO"
+ 	}
+diff --git a/main.go b/main.go
+--- a/main.go
++++ b/main.go
+@@ -1,3 +1,3 @@
+@@
+-			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes)
++			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes, detector.PairArbSnapshot().NoPrice)
+@@
+-		posSnap := trader.DashboardPositionSnapshot(yesSnap)
++		posSnap := trader.DashboardPositionSnapshot(yesSnap, detector.PairArbSnapshot().NoPrice)
+diff --git a/strategy/kalshi_pair_parity_test.go b/strategy/kalshi_pair_parity_test.go
+--- a/strategy/kalshi_pair_parity_test.go
++++ b/strategy/kalshi_pair_parity_test.go
+@@ -32,3 +32,14 @@
+ 		t.Fatalf("bad ask ordering: %#v", levels)
+ 	}
+ }
++
++func TestKalshiPairMarkToMarketUsesExplicitNoPrice(t *testing.T) {
++	p := &PairArbPosition{
++		YesShares: 5, NoShares: 3,
++		YesUSDSpent: 2.10, NoUSDSpent: 1.80,
++	}
++	got := p.markToMarket(0.40, 0.65)
++	want := 0.05
++	if math.Abs(got-want) > 1e-9 {
++		t.Fatalf("explicit Kalshi NO mark ignored: got %.4f want %.4f", got, want)
++	}
++}
