@@ -1,16 +1,14 @@
 {
-  "id": "kalshi-authoritative-fill-inventory-v1-20260825-2230",
+  "id": "kalshi-final-production-regression-v1-20260825-2240",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_authoritative_fill_inventory_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/trader.go"]},
+    {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "START_PAPER"},
-    {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
 }
