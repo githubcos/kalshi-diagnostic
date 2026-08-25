@@ -1,0 +1,16 @@
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -1504,8 +1504,11 @@
+ 		fillPrice = math.Round(correctedFill*100) / 100
+ 	}
+ 	if grossFillShares > 0 {
+-		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
+-		actualShares = math.Floor((grossFillShares-feeShares)*100) / 100
++		// KALSHI: fills are authoritative contract quantities. Kalshi trading
++		// fees are cash charges and must never be deducted from contract inventory
++		// as Polymarket/CTF fee-shares. Preserve 0.01-contract granularity.
++		feeShares = 0
++		actualShares = math.Floor(grossFillShares*100) / 100
+ 	}
+ 	if actualShares <= 0 {
+ 		// KALSHI SAFETY: never manufacture filled inventory from requested size.
