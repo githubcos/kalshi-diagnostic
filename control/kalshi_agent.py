@@ -77,12 +77,22 @@ def restore(path,log,progress):
     with tarfile.open(p,'r:gz') as t: t.extractall(BOT)
     log.append(f'ROLLBACK={p}'); append_progress(progress,'ROLLBACK PASS')
 def stop_paper(log,progress):
-    append_progress(progress,'STOP_PAPER START'); run(['pkill','-INT','-f',str(BOT/'kalshiarbo')],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',str(BOT/'kalshiarbo')],timeout=20)
+    append_progress(progress,'STOP_PAPER START')
+    pattern=r'(^|/|\s)kalshiarbo(\s|$).*[-]port[ =]8085|/KalshiArbo/kalshiarbo/kalshiarbo.*[-]port[ =]8085'
+    run(['pkill','-INT','-f',pattern],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',pattern],timeout=20); time.sleep(1)
+    rc,out=run(['bash','-lc',"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
+    if out.strip():
+        log.append('STOP_PAPER port still occupied after targeted kill:\n'+out)
+        raise RuntimeError('paper port 8085 still occupied after stop')
     try:(BOT/'.bot.lock').unlink()
     except FileNotFoundError: pass
     append_progress(progress,'STOP_PAPER PASS')
 def start_paper(log,progress):
-    stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3); log.append(f'START_PAPER pid={p.pid} port={PORT}'); append_progress(progress,'START_PAPER PASS')
+    stop_paper(log,progress); lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True); (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3)
+    rc,out=run(['bash','-lc',f"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20)
+    if not out.strip() or str(p.pid) not in out:
+        raise RuntimeError(f'new paper process pid={p.pid} did not acquire port {PORT}: {out.strip()}')
+    log.append(f'START_PAPER pid={p.pid} port={PORT}\n'+out); append_progress(progress,'START_PAPER PASS')
 def status(log,progress):
     for cmd in (["ss","-ltnp"],["pgrep","-af","kalshiarbo"]):
         rc,out=run(cmd,timeout=20); log.append('$ '+' '.join(cmd)+'\n'+out)
