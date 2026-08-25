@@ -1,11 +1,11 @@
 {
-  "utc": "2026-08-25T17:45:50+00:00",
+  "utc": "2026-08-25T17:45:59+00:00",
   "publisher_pid": 2004670,
   "heartbeat": {
-    "utc": "2026-08-25T17:45:47+00:00",
-    "epoch": 1787679947.9473975,
+    "utc": "2026-08-25T17:45:58+00:00",
+    "epoch": 1787679958.689988,
     "pid": 2004638,
-    "status": "idle",
+    "status": "polling",
     "job_id": ""
   },
   "state": {
@@ -15,9 +15,9 @@
     "last_run_utc": "2026-08-25T16:40:01+00:00"
   },
   "autopilot": {
-    "cycle": 129,
+    "cycle": 130,
     "phase": "STARTING",
     "last_result": "PASS",
-    "last_cycle_utc": "2026-08-25T17:45:30+00:00"
+    "last_cycle_utc": "2026-08-25T17:45:57+00:00"
   }
 }
