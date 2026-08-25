@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-25T22:02:31+00:00",
+  "utc": "2026-08-25T22:02:40+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-25T22:02:29+00:00",
-    "epoch": 1787695349.8739374,
+    "utc": "2026-08-25T22:02:38+00:00",
+    "epoch": 1787695358.007492,
     "pid": 2004638,
     "status": "working",
     "job_id": "kalshi-deterministic-parity-v1-20260825-2205"
   },
   "state": {
     "last_job_id": "kalshi-parity-observe-v4-20260825-2154",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_205216.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_220229.tar.gz",
     "last_result": "PASS",
     "last_run_utc": "2026-08-25T21:55:25+00:00"
   },
