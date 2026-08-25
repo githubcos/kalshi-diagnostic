@@ -1,10 +1,10 @@
 {
-  "id": "kalshi-pair-fee-min-v2-20260825-1629",
+  "id": "kalshi-pair-tests-v2-20260825-1632",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_fee_minimum_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/trader.go"]},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_arb_tests_v2.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/pair_arb_test.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "STATUS"},
