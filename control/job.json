@@ -1,8 +1,9 @@
 {
-  "id": "bootstrap-status-20260825",
+  "id": "parity-deep-status-20260825-1328",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "STATUS"}
+    {"name": "STATUS"},
+    {"name": "COLLECT_AUDIT"}
   ]
 }
