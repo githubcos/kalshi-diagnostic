@@ -1,0 +1,108 @@
+diff --git a/strategy/trader.go b/strategy/trader.go
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -8162,7 +8162,7 @@
+ 
+ // FormatPosition returns a human-readable position summary, or "" if flat.
+ // currentYesPrice is always the YES token price.
+-func (t *Trader) FormatPosition(currentYesPrice float64) string {
++func (t *Trader) FormatPosition(currentYesPrice float64, currentNoPrices ...float64) string {
+ 	if t.IsFlat() {
+ 		return ""
+ 	}
+@@ -8174,7 +8174,11 @@
+ 		if lockedShares > 0 {
+ 			avgCost = p.totalSpent() / lockedShares
+ 		}
+-		pnl := p.markToMarket(currentYesPrice)
++		currentNoPrice := 0.0
++		if len(currentNoPrices) > 0 {
++			currentNoPrice = currentNoPrices[0]
++		}
++		pnl := p.markToMarket(currentYesPrice, currentNoPrice)
+ 		return fmt.Sprintf(
+ 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
+ 			lockedShares,
+@@ -8208,7 +8212,7 @@
+ 
+ // PositionSnapshot returns (side, shares, buyPrice, unrealizedPnL) for the display.
+ // currentYesPrice is always the YES token price.
+-func (t *Trader) PositionSnapshot(currentYesPrice float64) (string, float64, float64, float64) {
++func (t *Trader) PositionSnapshot(currentYesPrice float64, currentNoPrices ...float64) (string, float64, float64, float64) {
+ 	if t.IsFlat() {
+ 		return "", 0, 0, 0
+ 	}
+@@ -8218,7 +8222,11 @@
+ 		if lockedShares > 0 {
+ 			avgCost = p.totalSpent() / lockedShares
+ 		}
+-		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice)
++		currentNoPrice := 0.0
++		if len(currentNoPrices) > 0 {
++			currentNoPrice = currentNoPrices[0]
++		}
++		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice, currentNoPrice)
+ 	}
+ 	p := t.position
+ 	tokenPrice := currentYesPrice
+@@ -8230,7 +8238,7 @@
+ 	return side, p.Shares, p.BuyPrice, p.Unrealized(tokenPrice)
+ }
+ 
+-func (t *Trader) DashboardPositionSnapshot(currentYesPrice float64) DashboardPositionSnapshot {
++func (t *Trader) DashboardPositionSnapshot(currentYesPrice float64, currentNoPrices ...float64) DashboardPositionSnapshot {
+ 	if t.IsFlat() {
+ 		return DashboardPositionSnapshot{}
+ 	}
+@@ -8257,6 +8265,10 @@
+ 		if lockedShares > 0 {
+ 			avgCost = matchedCost / lockedShares
+ 		}
++		currentNoPrice := 0.0
++		if len(currentNoPrices) > 0 {
++			currentNoPrice = currentNoPrices[0]
++		}
+ 		return DashboardPositionSnapshot{
+ 			HasPosition:            true,
+ 			Side:                   "PAIR",
+@@ -8266,7 +8278,7 @@
+ 			BuyPrice:               avgCost,
+ 			Shares:                 lockedShares,
+ 			USDSpent:               pair.totalSpent(),
+-			UnrealizedPnL:          pair.markToMarket(currentYesPrice),
++			UnrealizedPnL:          pair.markToMarket(currentYesPrice, currentNoPrice),
+ 			HeldSec:                time.Since(pair.OpenedAt).Seconds(),
+ 			PairActive:             true,
+ 			PairLeadSide:           pair.LeadSide,
+@@ -8288,7 +8300,7 @@
+ 			PairResidualShares:     residualShares,
+ 			PairHedgeSide:          hedgeSide,
+ 			PairHedgeMaxPrice:      hedgeMaxPrice,
+-			PairMarkToMarket:       pair.markToMarket(currentYesPrice),
++			PairMarkToMarket:       pair.markToMarket(currentYesPrice, currentNoPrice),
+ 			PairExitState:          pair.ExitState,
+ 			PairExitStateNote:      pair.ExitStateNote,
+ 			PairYesExitOrderID:     pair.YesExitOrderID,
+diff --git a/main.go b/main.go
+--- a/main.go
++++ b/main.go
+@@ -1945,7 +1945,8 @@
+ 		var posSide string
+ 		var posShares, posBuy, posPnL float64
+ 		if !trader.IsFlat() {
+-			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes)
++			currentNoPrice := detector.PairArbSnapshot().NoPrice
++			posSide, posShares, posBuy, posPnL = trader.PositionSnapshot(yes, currentNoPrice)
+ 		}
+ 		if showLog {
+ 			display.Status(win.Slug, btc, cl, open, yes, lag, btc-open, winRem, clAge,
+@@ -2405,7 +2406,8 @@
+ 		btcSnap, clSnap, yesSnap, openSnap, winRemSnap, _ := detector.Snapshot()
+ 		ss := trader.SessionStats()
+ 		posFlat := trader.IsFlat()
+-		posSnap := trader.DashboardPositionSnapshot(yesSnap)
++		noSnap := detector.PairArbSnapshot().NoPrice
++		posSnap := trader.DashboardPositionSnapshot(yesSnap, noSnap)
+ 		claimSnap := trader.DashboardClaimSnapshot()
+ 		webGates := snapshotStrategyGates(detector, !posFlat, trader.BuyInProgress())
+ 		pairIndicators, pairBlocker, pairSignalAt := snapshotPairArbIndicators(cfg, detector, !posFlat, trader.BuyInProgress())
