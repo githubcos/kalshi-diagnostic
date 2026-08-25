@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T17:23:10+00:00",
-  "cycle": 79,
-  "phase": "GO_TEST",
-  "percent": 35,
+  "utc": "2026-08-25T17:23:41+00:00",
+  "cycle": 80,
+  "phase": "GO_BUILD",
+  "percent": 60,
   "result": "RUNNING",
-  "detail": "Source scan complete: 3 flagged venue-pattern occurrences. Running full Go test suite.",
-  "next": "GO_BUILD"
+  "detail": "All tests passed. Building current KalshiArbo binary.",
+  "next": "PAPER_HEALTH"
 }
