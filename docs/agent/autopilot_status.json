@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T17:52:35+00:00",
-  "cycle": 145,
-  "phase": "GO_BUILD",
-  "percent": 60,
-  "result": "RUNNING",
-  "detail": "All tests passed. Building current KalshiArbo binary.",
-  "next": "PAPER_HEALTH"
+  "utc": "2026-08-25T17:54:33+00:00",
+  "cycle": 1787680473,
+  "phase": "HEDGE_TIMING",
+  "percent": 43,
+  "result": "EVIDENCE_CAPTURED",
+  "detail": "HEDGE_TIMING live execution context published (20 excerpts). Advancing to next finite gate; no blind patching.",
+  "next": "TIMEOUT_UNWIND"
 }
