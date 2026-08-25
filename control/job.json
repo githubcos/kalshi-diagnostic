@@ -1,8 +1,13 @@
 {
-  "id": "kalshi-parity-observe-v3-20260825-1949",
+  "id": "kalshi-pair-authoritative-no-mark-v1-20260825-2052",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_pair_authoritative_no_mark_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go", "main.go"]},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
+    {"name": "START_PAPER"},
     {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
