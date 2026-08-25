@@ -1,8 +1,11 @@
 {
-  "id": "parity-deep-status-20260825-1328",
+  "id": "parity-baseline-20260825-1345",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "BACKUP"},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
     {"name": "STATUS"},
     {"name": "COLLECT_AUDIT"}
   ]
