@@ -1,9 +1,10 @@
 {
-  "id": "kalshi-deterministic-parity-v1-20260825-2205",
+  "id": "kalshi-deterministic-parity-v2-20260825-2212",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
+    {"name": "DETERMINISTIC_PARITY_TEST"},
+    {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
