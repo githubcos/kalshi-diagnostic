@@ -1,13 +1,13 @@
 {
-  "overall_percent": 32,
-  "overall_basis": "Source visibility is complete; direct trading-path parity audit is now active",
+  "overall_percent": 36,
+  "overall_basis": "Direct source audit found the first verified Kalshi venue-parity defect",
   "phase": "PAIR ARB execution-path parity audit",
-  "phase_percent": 12,
-  "current_patch": "Lead sizing + hedge admission venue parity",
-  "patch_percent": 20,
-  "patch_state": "INSPECTING LIVE SOURCE",
-  "doing": "Reading the exported strategy/trader.go and Kalshi execution adapter now. I am tracing OnPairArbSignal from signal gates through exact lead sizing, strict preflight, lead execution, hedge admission, timeout/unwind, and accounting. The next code change will be generated only from a verified Polymarket-to-Kalshi mismatch.",
-  "why": "The sanitized source export succeeded at 14:27 UTC, so the previous source-visibility blocker is gone. The audit can now operate on the exact code that is running on EC2 rather than infer behavior from logs.",
+  "phase_percent": 28,
+  "current_patch": "Remove Polymarket fee/minimum-order economics from Kalshi PAIR ARB preflight",
+  "patch_percent": 35,
+  "patch_state": "VERIFIED DEFECT - PATCH DESIGN",
+  "doing": "I verified that OnPairArbSignal still computes estimated lead shares with polymarket.ComputeBuyFeeShares and rejects exact hedges using polymarket.MinMarketOrderNotionalUSD / polymarket.MinOrderShares. I am now replacing those venue checks with Kalshi contract-count and cash-fee semantics while preserving the original PolyArbPro lead->hedge strategy logic.",
+  "why": "This is a real venue mismatch, not a tuning opinion. It can suppress valid Kalshi entries and can make live Kalshi sizing diverge from paper mode because paper already uses Kalshi helpers while the non-paper path still uses Polymarket fee-share/minimum-order rules.",
   "done": [
     "Kalshi market feed integrated",
     "Kalshi paper executable-depth logic integrated",
@@ -17,14 +17,16 @@
     "Go build baseline passes",
     "Paper bot stable on port 8085",
     "Sanitized trading source exported successfully to GitHub",
-    "Direct inspection of strategy/trader.go started"
+    "OnPairArbSignal gate trace started",
+    "Verified Polymarket fee-share/minimum-order leak in Kalshi PAIR ARB preflight"
   ],
   "remaining": [
-    "Finish OnPairArbSignal gate trace",
-    "Verify strict preflight uses Kalshi minimum-contract semantics",
-    "Verify lead sizing parity",
-    "Verify hedge admission and timing parity",
+    "Patch lead sizing to use Kalshi contract/cash-fee semantics in all modes",
+    "Patch exact hedge admission to remove Polymarket FAK minimum-notional assumptions",
+    "Run gofmt + go test ./... + go build",
+    "Re-run paper audit and compare entry frequency",
     "Separate signals from executed leads in forensic accounting",
+    "Verify hedge timing parity",
     "Verify partial-fill behavior",
     "Verify timeout/unwind semantics",
     "Verify settlement behavior",
@@ -32,5 +34,5 @@
     "Run repeated paper validation",
     "Final parity certification"
   ],
-  "next": "Finish the lead/preflight trace; if a venue mismatch is verified, publish the narrow patch and queue backup -> apply -> gofmt -> go test ./... -> go build -> paper audit immediately."
+  "next": "Generate the narrow venue-parity patch, queue BACKUP -> APPLY_PATCH -> GOFMT -> GO_TEST -> GO_BUILD -> START_PAPER/COLLECT_AUDIT, then inspect the agent result immediately."
 }
