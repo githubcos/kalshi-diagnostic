@@ -1,13 +1,16 @@
 {
-  "id": "kalshi-deterministic-parity-v2-20260825-2212",
+  "id": "kalshi-authoritative-fill-inventory-v1-20260825-2230",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "DETERMINISTIC_PARITY_TEST"},
-    {"name": "DETERMINISTIC_PARITY_TEST"},
+    {"name": "BACKUP"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_authoritative_fill_inventory_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go"]},
     {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
+    {"name": "START_PAPER"},
+    {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
 }
