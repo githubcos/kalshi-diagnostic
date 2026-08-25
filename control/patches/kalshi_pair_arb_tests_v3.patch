@@ -1,6 +1,6 @@
 --- a/strategy/pair_arb_test.go
 +++ b/strategy/pair_arb_test.go
-@@ -183,34 +183,12 @@
+@@ -183,33 +183,12 @@
 -func TestMaybeRebalancePairArbAllowsExactKalshiHedgeBelowOneDollarNotional(t *testing.T) {
 -	now := time.Now()
 -	trader := &Trader{
