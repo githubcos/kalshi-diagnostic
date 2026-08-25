@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T17:54:54+00:00",
-  "cycle": 1787680494,
-  "phase": "TIMEOUT_UNWIND",
-  "percent": 61,
-  "result": "EVIDENCE_CAPTURED",
-  "detail": "TIMEOUT_UNWIND live execution context published (20 excerpts). Advancing to next finite gate; no blind patching.",
-  "next": "SETTLEMENT"
+  "utc": "2026-08-25T18:00:55+00:00",
+  "cycle": 1787680855,
+  "phase": "PAPER_EVIDENCE",
+  "percent": 95,
+  "result": "PASS",
+  "detail": "Finite gates captured; tests=PASS build=PASS paper=RUNNING. Awaiting fresh forensic economics snapshot.",
+  "next": "FINAL_PARITY_REVIEW"
 }
