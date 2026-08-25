@@ -1,8 +1,8 @@
-CURRENT PHASE: EXECUTION_STATE_VALIDATION at 97%, before FINAL_PARITY_REVIEW.
-LATEST VERIFIED TEST: kalshi-deterministic-parity-v2-20260825-2212 PASS. Deterministic Kalshi PAIR economics passed three consecutive runs: balanced pair, partial hedge/residual, fractional contracts, and cash-fee inventory semantics. Full go test ./... PASS and go build PASS.
-PAPER HEALTH: KalshiArbo remains the active listener on port 8085 (PID 3381136 in the latest agent result); LIVE_ALLOWED=false.
-WHAT IS PROVEN: Kalshi contract/cash accounting is repeatable and repository regression/build are clean.
-WHAT IS NOT YET PROVEN: the deterministic harness does not yet exercise the real PAIR execution state-machine functions through lead fill -> hedge admission -> hedge fill/reconciliation -> timeout/residual transitions. Do not mislabel arithmetic fixtures as end-to-end execution proof.
-ACTION NOW: inspect the actual strategy execution seams and construct the narrowest offline test that invokes production transition/reconciliation logic with controlled fill states. No network orders, no live mode, no credentials, and no strategy-threshold changes.
-PATCH POLICY: patch trading code only if this production-path test exposes a verified Kalshi-port defect. Testability-only scaffolding must not alter runtime semantics.
-SAFETY: PAPER remains running; LIVE=false; credentials untouched; PolyArbPro signal/threshold semantics unchanged.
+CURRENT PHASE: EXECUTION_STATE_VALIDATION at 98%, before FINAL_PARITY_REVIEW.
+VERIFIED DEFECT PATCHED: production PAIR buy execution still converted authoritative Kalshi filled contracts through polymarket.ComputeBuyFeeShares and subtracted fee-shares from inventory. Kalshi fees are cash charges, so authoritative filled contract quantity must remain inventory. Patch kalshi_authoritative_fill_inventory_v1 removed that Polymarket/CTF inventory deduction from the production fill path while preserving 0.01-contract granularity.
+EC2 RESULT: kalshi-authoritative-fill-inventory-v1-20260825-2230 PASS. Two backups were created, patch dry-run PASS, patch apply PASS, gofmt PASS, deterministic Kalshi economics PASS, full go test ./... PASS, go build PASS, PAPER restart PASS, parity evidence refresh PASS, status PASS.
+PAPER HEALTH: patched KalshiArbo is the active listener on port 8085 as PID 3592210 in the verified result; LIVE_ALLOWED=false.
+POST-PATCH SOURCE AUDIT: refreshed parity evidence at 2026-08-25T22:09:05Z contains no ComputeBuyFeeShares match in the captured production parity evidence.
+WHAT IS PROVEN: authoritative Kalshi fill inventory is no longer reduced by Polymarket fee-share accounting in the patched production path; deterministic accounting/regression/build all pass.
+REMAINING GATE: finish deterministic production-path execution-state validation for lead fill -> hedge admission -> hedge reconciliation -> timeout/residual transitions. Do not duplicate arithmetic fixtures and do not wait on random market cycles as primary proof.
+SAFETY: PAPER running; LIVE=false; credentials untouched; no PolyArbPro signal, threshold, hedge-target, or timeout semantics changed.
