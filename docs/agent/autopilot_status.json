@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-25T17:54:33+00:00",
-  "cycle": 1787680473,
-  "phase": "HEDGE_TIMING",
-  "percent": 43,
+  "utc": "2026-08-25T17:54:54+00:00",
+  "cycle": 1787680494,
+  "phase": "TIMEOUT_UNWIND",
+  "percent": 61,
   "result": "EVIDENCE_CAPTURED",
-  "detail": "HEDGE_TIMING live execution context published (20 excerpts). Advancing to next finite gate; no blind patching.",
-  "next": "TIMEOUT_UNWIND"
+  "detail": "TIMEOUT_UNWIND live execution context published (20 excerpts). Advancing to next finite gate; no blind patching.",
+  "next": "SETTLEMENT"
 }
