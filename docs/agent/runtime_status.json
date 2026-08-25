@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-25T16:35:03+00:00",
+  "utc": "2026-08-25T16:35:11+00:00",
   "publisher_pid": 1815915,
   "heartbeat": {
-    "utc": "2026-08-25T16:35:03+00:00",
-    "epoch": 1787675703.468829,
+    "utc": "2026-08-25T16:35:09+00:00",
+    "epoch": 1787675709.1920896,
     "pid": 1815873,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-pair-tests-v4-20260825-1635"
   },
   "state": {
     "last_job_id": "kalshi-pair-tests-v3-20260825-1634",
