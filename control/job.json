@@ -1,9 +1,8 @@
 {
-  "id": "kalshi-parity-evidence-publish-v2-20260825-1854",
+  "id": "kalshi-parity-observe-v3-20260825-1949",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_TELEMETRY"},
     {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
