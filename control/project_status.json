@@ -1,35 +1,33 @@
 {
-  "overall_percent": 38,
-  "overall_basis": "First verified venue-parity defect has been converted into an executable patch job",
+  "overall_percent": 44,
+  "overall_basis": "First verified Polymarket-to-Kalshi execution mismatch is fixed, tested, built, and paper bot remains running",
   "phase": "PAIR ARB execution-path parity audit",
-  "phase_percent": 34,
-  "current_patch": "Remove Polymarket fee/minimum-order economics from Kalshi PAIR ARB preflight",
-  "patch_percent": 60,
-  "patch_state": "PATCH QUEUED TO EC2 AGENT",
-  "doing": "Patch kalshi_pair_arb_fee_minimum_v1.patch is now queued. It changes exact hedge sizing to Kalshi 0.01-contract granularity, removes Polymarket fee-share deductions from Kalshi lead fills, uses Kalshi cash-fee budget sizing in both paper and live paths, and removes the Polymarket $ minimum-notional gate from the PAIR ARB buy preflight. The agent is expected to backup, dry-run/apply, gofmt, test, build, and collect a fresh audit.",
-  "why": "Kalshi's current API supports fractional contract quantities to 0.01 contracts and charges trading fees in cash. The existing PAIR ARB path was still using Polymarket fee-share and minimum-order economics, so the venue translation was not behaviorally consistent.",
+  "phase_percent": 48,
+  "current_patch": "Kalshi fee/minimum-order venue parity",
+  "patch_percent": 100,
+  "patch_state": "PASS — APPLIED / TESTED / BUILT",
+  "doing": "The first venue-parity patch is complete. Kalshi PAIR ARB no longer deducts Polymarket fee shares from contract quantity or enforces the Polymarket $1 minimum-notional rule in the patched lead/hedge path. Kalshi contract sizing and cash-fee semantics are now used consistently. Full go test ./... and go build both pass. I am moving directly to the next parity audit: hedge timing/admission, partial-fill handling, and signal-versus-executed-lead accounting.",
+  "why": "The previous code mixed Kalshi cash-fee/contract execution with Polymarket fee-share and minimum-notional assumptions. That mismatch is now removed and regression-tested without weakening the strategy's profitability gate.",
   "done": [
     "Sanitized source bridge complete",
+    "Dedicated telemetry online",
     "Verified Polymarket fee-share leak",
     "Verified Polymarket minimum-notional leak",
-    "Generated Kalshi-native PAIR ARB patch",
-    "Queued restricted EC2 patch/test/build job"
+    "Applied Kalshi-native PAIR ARB venue patch",
+    "Updated obsolete venue-specific tests",
+    "Full go test ./... PASS",
+    "Full go build PASS",
+    "Paper bot confirmed listening on port 8085"
   ],
   "remaining": [
-    "Agent patch dry-run/apply",
-    "gofmt",
-    "go test ./...",
-    "go build",
-    "Inspect failures and patch tests/code if required",
-    "Re-run paper audit and compare entry frequency",
     "Separate signals from executed leads in forensic accounting",
-    "Verify hedge timing parity",
+    "Verify hedge timing/admission parity",
     "Verify partial-fill behavior",
     "Verify timeout/unwind semantics",
     "Verify settlement behavior",
-    "Remove remaining Polymarket execution dependencies",
+    "Audit remaining Polymarket execution dependencies",
     "Repeated paper validation",
     "Final parity certification"
   ],
-  "next": "Wait for the EC2 agent result for job kalshi-pair-fee-min-v1-20260825-1451; inspect immediately and either fix the failure or advance to the next parity defect."
+  "next": "Trace hedge timing/admission and partial-fill paths against the reference behavior; patch only verified venue mismatches, then rerun backup -> gofmt -> go test ./... -> go build -> paper audit."
 }
