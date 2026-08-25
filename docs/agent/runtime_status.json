@@ -1,40 +1,25 @@
 {
-  "utc": "2026-08-25T17:54:10+00:00",
+  "utc": "2026-08-25T17:54:17+00:00",
   "publisher_pid": 2004670,
   "heartbeat": {
-    "utc": "2026-08-25T17:54:05+00:00",
-    "epoch": 1787680445.5706089,
+    "utc": "2026-08-25T17:54:16+00:00",
+    "epoch": 1787680456.9319725,
     "pid": 2004638,
-    "status": "idle",
+    "status": "polling",
     "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-autopilot-finite-gates-v1-20260825-1751",
+    "last_job_id": "kalshi-autopilot-finite-gates-v2-20260825-1754",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163937.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-25T17:52:52+00:00"
+    "last_run_utc": "2026-08-25T17:54:11+00:00"
   },
   "autopilot": {
-    "gate_index": 4,
+    "gate_index": 1,
     "completed": {
       "PARTIAL_FILL": {
-        "utc": "2026-08-25T17:52:52+00:00",
-        "evidence_hits": 18,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "HEDGE_TIMING": {
-        "utc": "2026-08-25T17:53:12+00:00",
-        "evidence_hits": 18,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "TIMEOUT_UNWIND": {
-        "utc": "2026-08-25T17:53:32+00:00",
-        "evidence_hits": 18,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "SETTLEMENT": {
-        "utc": "2026-08-25T17:53:52+00:00",
-        "evidence_hits": 18,
+        "utc": "2026-08-25T17:54:11+00:00",
+        "evidence_hits": 20,
         "state": "EVIDENCE_CAPTURED"
       }
     }
