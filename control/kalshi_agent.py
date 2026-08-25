@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-import json, os, re, shutil, subprocess, tarfile, time
+import json, os, re, shutil, subprocess, tarfile, time, tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 HOME=Path('/home/ubuntu')
 REPO=HOME/'kalshi-diagnostic'
 BOT=HOME/'KalshiArbo'/'kalshiarbo'
-JOB=REPO/'control'/'job.json'
 STATE=HOME/'.kalshi_agent_state.json'
 BACKUPS=HOME/'kalshi-agent-backups'
 RESULTS=REPO/'docs'/'agent'
 PROGRESS=RESULTS/'progress.txt'
 PORT='8085'
-POLL=15
+POLL=5
 ALLOWED={'STATUS','BACKUP','APPLY_PATCH','GOFMT','GO_TEST','GO_BUILD','START_PAPER','STOP_PAPER','COLLECT_AUDIT','ROLLBACK'}
 
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
@@ -23,57 +22,64 @@ def ensure_dirs():
     (RESULTS/'history').mkdir(exist_ok=True)
 
 def write_progress(lines):
-    ensure_dirs()
-    PROGRESS.write_text('\n'.join(lines)+'\n')
+    ensure_dirs(); PROGRESS.write_text('\n'.join(lines)+'\n')
 
 def append_progress(lines,msg):
-    lines.append(f'[{utc()}] {msg}')
-    write_progress(lines)
+    lines.append(f'[{utc()}] {msg}'); write_progress(lines)
 
 def run(cmd,cwd=None,timeout=600):
     p=subprocess.run(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
     return p.returncode,p.stdout
 
 def run_stream(cmd,progress,cwd=None,timeout=900,label='COMMAND'):
-    append_progress(progress,f'{label} START: '+' '.join(cmd))
-    started=time.time()
+    append_progress(progress,f'{label} START: '+' '.join(cmd)); started=time.time()
     p=subprocess.Popen(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,bufsize=1)
     output=[]
     try:
         while True:
             if time.time()-started > timeout:
-                p.kill()
-                raise TimeoutError(f'{label} timed out after {timeout}s')
+                p.kill(); raise TimeoutError(f'{label} timed out after {timeout}s')
             line=p.stdout.readline() if p.stdout else ''
             if line:
-                line=line.rstrip('\n')
-                output.append(line)
-                # Keep progress readable while preserving recent command output.
-                progress.append('    '+line)
-                if len(progress)>500:
-                    del progress[20:100]
+                line=line.rstrip('\n'); output.append(line); progress.append('    '+line)
+                if len(progress)>500: del progress[20:100]
                 write_progress(progress)
             if p.poll() is not None:
-                # Drain any remainder.
                 if p.stdout:
                     for rest in p.stdout:
                         rest=rest.rstrip('\n'); output.append(rest); progress.append('    '+rest)
                 break
-            if not line:
-                time.sleep(0.1)
+            if not line: time.sleep(0.1)
         rc=p.returncode
     finally:
         try:
             if p.stdout: p.stdout.close()
         except: pass
-    elapsed=time.time()-started
-    append_progress(progress,f'{label} END rc={rc} duration={elapsed:.2f}s')
+    append_progress(progress,f'{label} END rc={rc} duration={time.time()-started:.2f}s')
     return rc,'\n'.join(output)+'\n'
 
-def git_sync():
-    # Never fail the control loop merely because generated docs are dirty.
-    rc,out=run(['git','pull','--rebase','--autostash'],REPO,120)
-    return rc,out
+def fetch_origin():
+    return run(['git','fetch','-q','origin','main'],REPO,120)
+
+def read_origin_text(rel):
+    rc,out=run(['git','show',f'origin/main:{rel}'],REPO,60)
+    if rc: raise RuntimeError(f'unable to read origin/main:{rel}: {out.strip()}')
+    return out
+
+def load_remote_job():
+    rc,_=fetch_origin()
+    if rc: return None
+    try: return json.loads(read_origin_text('control/job.json'))
+    except Exception: return None
+
+def materialize_remote_patch(rel):
+    rel=str(rel or '').strip()
+    if not rel.startswith('control/patches/') or not rel.endswith('.patch') or '..' in Path(rel).parts:
+        raise ValueError('patch path must be under control/patches/*.patch')
+    text=read_origin_text(rel)
+    fd,tmp=tempfile.mkstemp(prefix='kalshi-agent-',suffix='.patch')
+    os.close(fd); Path(tmp).write_text(text)
+    return Path(tmp)
 
 def load_state():
     try:return json.loads(STATE.read_text())
@@ -81,29 +87,17 @@ def load_state():
 
 def save_state(s): STATE.write_text(json.dumps(s,indent=2))
 
-def safe_patch_path(rel):
-    p=(REPO/rel).resolve(); root=(REPO/'control'/'patches').resolve()
-    if root not in p.parents or p.suffix!='.patch': raise ValueError('patch path must be under control/patches/*.patch')
-    return p
-
 def backup(state,log,progress):
-    ensure_dirs()
-    stamp=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
-    dest=BACKUPS/f'kalshiarbo_{stamp}.tar.gz'
-    append_progress(progress,f'BACKUP START -> {dest}')
-    started=time.time(); count=0
+    ensure_dirs(); stamp=datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S'); dest=BACKUPS/f'kalshiarbo_{stamp}.tar.gz'
+    append_progress(progress,f'BACKUP START -> {dest}'); started=time.time(); count=0
     with tarfile.open(dest,'w:gz') as t:
         for p in BOT.rglob('*'):
             rel=p.relative_to(BOT)
             if any(part in {'.git','logs','node_modules'} for part in rel.parts): continue
             if p.name in {'config.json','.bot.lock','kalshiarbo'} or p.suffix in {'.env','.pem','.key'}: continue
-            if p.is_file():
-                t.add(p,arcname=str(rel)); count+=1
-    state['last_backup']=str(dest); save_state(state)
-    elapsed=time.time()-started
-    log.append(f'BACKUP={dest}')
-    append_progress(progress,f'BACKUP PASS files={count} duration={elapsed:.2f}s')
-    return dest
+            if p.is_file(): t.add(p,arcname=str(rel)); count+=1
+    state['last_backup']=str(dest); save_state(state); log.append(f'BACKUP={dest}')
+    append_progress(progress,f'BACKUP PASS files={count} duration={time.time()-started:.2f}s'); return dest
 
 def restore(path,log,progress):
     p=Path(path)
@@ -114,57 +108,35 @@ def restore(path,log,progress):
             target=(BOT/m.name).resolve()
             if BOT.resolve() not in target.parents and target!=BOT.resolve(): raise ValueError('unsafe archive path')
         t.extractall(BOT)
-    log.append(f'ROLLBACK={p}')
-    append_progress(progress,'ROLLBACK PASS')
+    log.append(f'ROLLBACK={p}'); append_progress(progress,'ROLLBACK PASS')
 
 def stop_paper(log,progress):
-    append_progress(progress,'STOP_PAPER START')
-    rc,out=run(['pkill','-INT','-f',str(BOT/'kalshiarbo')],timeout=20); time.sleep(2)
-    run(['pkill','-TERM','-f',str(BOT/'kalshiarbo')],timeout=20)
+    append_progress(progress,'STOP_PAPER START'); run(['pkill','-INT','-f',str(BOT/'kalshiarbo')],timeout=20); time.sleep(2); run(['pkill','-TERM','-f',str(BOT/'kalshiarbo')],timeout=20)
     try:(BOT/'.bot.lock').unlink()
     except FileNotFoundError: pass
-    log.append('STOP_PAPER requested')
-    append_progress(progress,'STOP_PAPER PASS')
+    log.append('STOP_PAPER requested'); append_progress(progress,'STOP_PAPER PASS')
 
 def start_paper(log,progress):
-    append_progress(progress,'START_PAPER PREP')
-    stop_paper(log,progress)
-    lf=(BOT/'polyarb.log').open('a')
-    p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True)
-    (BOT/'kalshiarbo.pid').write_text(str(p.pid))
-    time.sleep(3)
-    log.append(f'START_PAPER pid={p.pid} port={PORT}')
-    append_progress(progress,f'START_PAPER PASS pid={p.pid} port={PORT}')
+    append_progress(progress,'START_PAPER PREP'); stop_paper(log,progress)
+    lf=(BOT/'polyarb.log').open('a'); p=subprocess.Popen([str(BOT/'kalshiarbo'),'-port',PORT],cwd=BOT,stdout=lf,stderr=subprocess.STDOUT,start_new_session=True)
+    (BOT/'kalshiarbo.pid').write_text(str(p.pid)); time.sleep(3); log.append(f'START_PAPER pid={p.pid} port={PORT}'); append_progress(progress,f'START_PAPER PASS pid={p.pid} port={PORT}')
 
 def status(log,progress):
     append_progress(progress,'STATUS START')
     for cmd in (["ss","-ltnp"],["pgrep","-af","kalshiarbo"]):
         rc,out=run(cmd,timeout=20); log.append('$ '+' '.join(cmd)+'\n'+out)
         for ln in out.splitlines()[-20:]: progress.append('    '+ln)
-    rc,out=run(['tail','-n','100','polyarb.log'],BOT,20); log.append('LOG_TAIL\n'+out)
-    append_progress(progress,'STATUS PASS')
+    rc,out=run(['tail','-n','100','polyarb.log'],BOT,20); log.append('LOG_TAIL\n'+out); append_progress(progress,'STATUS PASS')
 
 def publish(jobid,text):
-    ensure_dirs()
-    (RESULTS/'latest.txt').write_text(text)
-    (RESULTS/'history'/f'{jobid}.txt').write_text(text)
-    run(['git','pull','--rebase','--autostash'],REPO,120)
-    run(['git','add','docs/agent'],REPO,30)
-    run(['git','commit','-m',f'Agent result {jobid}'],REPO,60)
-    run(['git','push'],REPO,120)
+    ensure_dirs(); (RESULTS/'latest.txt').write_text(text); (RESULTS/'history'/f'{jobid}.txt').write_text(text)
+    # Commit only generated agent result files. Rebase with autostash if remote advanced.
+    run(['git','add','docs/agent'],REPO,30); run(['git','commit','-m',f'Agent result {jobid}'],REPO,60)
+    run(['git','pull','--rebase','--autostash'],REPO,120); run(['git','push'],REPO,120)
 
 def execute(job,state):
-    jid=str(job.get('id','')).strip()
-    progress=[
-        'KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',
-        f'JOB_ID={jid}',
-        f'JOB_START_UTC={utc()}',
-        'LIVE_ALLOWED=false',
-        '------------------------------------------------------------'
-    ]
-    write_progress(progress)
-    log=[f'KALSHI EC2 AGENT',f'JOB_ID={jid}',f'START_UTC={utc()}',f'LIVE_ALLOWED=false']
-    ok=True
+    jid=str(job.get('id','')).strip(); progress=['KALSHI AUTONOMOUS AGENT — LIVE PROGRESS',f'JOB_ID={jid}',f'JOB_START_UTC={utc()}','LIVE_ALLOWED=false','------------------------------------------------------------']; write_progress(progress)
+    log=['KALSHI EC2 AGENT',f'JOB_ID={jid}',f'START_UTC={utc()}',f'LIVE_ALLOWED=false']; ok=True
     try:
         if not jid: raise ValueError('missing job id')
         if job.get('live') not in (None,False): raise ValueError('LIVE IS HARD-BLOCKED')
@@ -175,22 +147,22 @@ def execute(job,state):
             if isinstance(a,str): name=a; args={}
             else: name=str(a.get('name','')); args=a
             if name not in ALLOWED: raise ValueError(f'action not allowed: {name}')
-            log.append(f'\n=== {name} ===')
-            append_progress(progress,f'ACTION {idx}/{len(actions)} {name} START')
+            log.append(f'\n=== {name} ==='); append_progress(progress,f'ACTION {idx}/{len(actions)} {name} START')
             if name=='STATUS': status(log,progress)
             elif name=='BACKUP': backup(state,log,progress)
             elif name=='APPLY_PATCH':
-                patch=safe_patch_path(args.get('path',''))
-                backup(state,log,progress)
-                strip=str(int(args.get('strip',1)))
-                rc,out=run_stream(['patch','--dry-run','--batch','-p'+strip,'-i',str(patch)],progress,BOT,120,'PATCH_DRY_RUN'); log.append(out)
-                if rc: raise RuntimeError('patch dry-run failed')
-                rc,out=run_stream(['patch','--batch','-p'+strip,'-i',str(patch)],progress,BOT,120,'PATCH_APPLY'); log.append(out)
-                if rc: raise RuntimeError('patch apply failed')
+                patch=materialize_remote_patch(args.get('path',''))
+                try:
+                    backup(state,log,progress); strip=str(int(args.get('strip',1)))
+                    rc,out=run_stream(['patch','--dry-run','--batch','-p'+strip,'-i',str(patch)],progress,BOT,120,'PATCH_DRY_RUN'); log.append(out)
+                    if rc: raise RuntimeError('patch dry-run failed')
+                    rc,out=run_stream(['patch','--batch','-p'+strip,'-i',str(patch)],progress,BOT,120,'PATCH_APPLY'); log.append(out)
+                    if rc: raise RuntimeError('patch apply failed')
+                finally:
+                    try: patch.unlink()
+                    except: pass
             elif name=='GOFMT':
-                files=args.get('files',[])
-                if not files: files=['strategy/trader.go','strategy/signal.go','kalshi/feed.go','main.go']
-                valid=[]
+                files=args.get('files',[]) or ['strategy/trader.go','strategy/signal.go','kalshi/feed.go','main.go']; valid=[]
                 for f in files:
                     p=(BOT/f).resolve()
                     if BOT.resolve() not in p.parents or p.suffix!='.go': raise ValueError('unsafe gofmt path')
@@ -208,32 +180,22 @@ def execute(job,state):
             elif name=='COLLECT_AUDIT': status(log,progress)
             elif name=='ROLLBACK': restore(args.get('backup') or state.get('last_backup'),log,progress)
             append_progress(progress,f'ACTION {idx}/{len(actions)} {name} PASS')
-        log.append('\nRESULT=PASS')
-        append_progress(progress,'JOB RESULT=PASS')
+        log.append('\nRESULT=PASS'); append_progress(progress,'JOB RESULT=PASS')
     except Exception as e:
-        ok=False
-        log.append(f'\nRESULT=FAIL\nERROR={type(e).__name__}: {e}')
-        append_progress(progress,f'JOB RESULT=FAIL ERROR={type(e).__name__}: {e}')
-    log.append(f'END_UTC={utc()}')
-    append_progress(progress,f'JOB_END_UTC={utc()}')
-    return ok,'\n'.join(log)+'\n'
+        ok=False; log.append(f'\nRESULT=FAIL\nERROR={type(e).__name__}: {e}'); append_progress(progress,f'JOB RESULT=FAIL ERROR={type(e).__name__}: {e}')
+    log.append(f'END_UTC={utc()}'); append_progress(progress,f'JOB_END_UTC={utc()}'); return ok,'\n'.join(log)+'\n'
 
 def main():
     ensure_dirs()
     while True:
         try:
-            git_sync(); state=load_state()
-            if JOB.exists():
-                job=json.loads(JOB.read_text())
+            state=load_state(); job=load_remote_job()
+            if job:
                 jid=str(job.get('id','')).strip()
                 if job.get('enabled',False) and jid and jid!=state.get('last_job_id'):
-                    ok,text=execute(job,state)
-                    state['last_job_id']=jid; state['last_result']='PASS' if ok else 'FAIL'; state['last_run_utc']=utc(); save_state(state)
-                    publish(jid,text)
+                    ok,text=execute(job,state); state['last_job_id']=jid; state['last_result']='PASS' if ok else 'FAIL'; state['last_run_utc']=utc(); save_state(state); publish(jid,text)
         except Exception as e:
-            ensure_dirs()
-            err=f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n'
-            (RESULTS/'local_error.txt').write_text(err)
+            ensure_dirs(); (RESULTS/'local_error.txt').write_text(f'AGENT LOOP ERROR {utc()} {type(e).__name__}: {e}\n')
         time.sleep(POLL)
 
 if __name__=='__main__': main()
