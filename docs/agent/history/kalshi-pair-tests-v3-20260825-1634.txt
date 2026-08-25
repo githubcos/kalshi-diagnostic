@@ -1,0 +1,15 @@
+KALSHI EC2 AGENT
+JOB_ID=kalshi-pair-tests-v3-20260825-1634
+START_UTC=2026-08-25T16:33:59+00:00
+LIVE_ALLOWED=false
+
+=== APPLY_PATCH ===
+BACKUP=/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163359.tar.gz
+checking file strategy/pair_arb_test.go
+patch: **** malformed patch at line 47:  
+
+
+
+RESULT=FAIL
+ERROR=RuntimeError: patch dry-run failed
+END_UTC=2026-08-25T16:34:06+00:00
