@@ -1,11 +1,11 @@
 KALSHIARBO 40-MIN PAPER AUDIT
 RUN=20260825_082928
-UTC=2026-08-25T09:10:35+00:00
+UTC=2026-08-25T09:10:41+00:00
 PORT=8085
 TARGET_DURATION_MIN=40
 ELAPSED_MIN=40
 BOT_PID=82805
-PROCESS=ALIVE
+PROCESS=STOPPED
 
 ===== STATUS =====
 START_UTC=2026-08-25T08:29:31+00:00
@@ -54,6 +54,8 @@ MINUTE_37=ALIVE
 MINUTE_38=ALIVE
 MINUTE_39=ALIVE
 MINUTE_40=ALIVE
+END_UTC=2026-08-25T09:10:41+00:00
+AUDIT=COMPLETE
 
 ===== CONSOLE =====
 
@@ -29022,6 +29024,29 @@ MINUTE_40=ALIVE
 
   [93m![0m  [33mwaiting for window to end (14m58s remaining)[0m
 
+  [91m■ SHUTDOWN[0m  cleaning up…
+
+
+  [1m[96m╔════════════════════════════════════════════════════════════════════╗[0m
+  [1m[96m║[0m  [1m[97m>> SESSION SUMMARY <<[0m                                              [1m[96m║[0m
+  [1m[96m╠════════════════════════════════════════════════════════════════════╣[0m
+  [1m[96m║[0m  [90mUptime[0m        [97m40m44s                                              [0m[1m[96m║[0m
+  [1m[96m║[0m  [90mWindows[0m       [97m8                                                   [0m[1m[96m║[0m
+  [1m[96m║[0m  [90mTrades[0m        [97m1                                                   [0m[1m[96m║[0m
+  [1m[96m╠════════════════════════════════════════════════════════════════════╣[0m
+  [1m[96m║[0m  [90mWin Rate[0m      [92m0   [0m W  / [91m1   [0m L   [91m([91m0.0%[0m)[0m                            [1m[96m║[0m
+  [1m[96m║[0m  [90mBest Trade[0m    [91m-$0.1886[0m                                              [1m[96m║[0m
+  [1m[96m║[0m  [90mWorst Trade[0m   [91m-$0.1886[0m                                             [1m[96m║[0m
+  [1m[96m║[0m  [90mAvg Hold[0m      [37m5s                                                  [0m[1m[96m║[0m
+  [1m[96m╠════════════════════════════════════════════════════════════════════╣[0m
+  [1m[96m║[0m                                                                    [1m[96m║[0m
+  [1m[96m║[0m     [1m[91mNET P&L   -$0.1886   (-3.92%)[0m                                  [1m[96m║[0m
+  [1m[96m║[0m     [90mSpent: $4.81[0m                                                   [1m[96m║[0m
+  [1m[96m║[0m     [91mBalance: $19.81 / $20.00[0m                                       [1m[96m║[0m
+  [1m[96m║[0m                                                                    [1m[96m║[0m
+  [1m[96m╚════════════════════════════════════════════════════════════════════╝[0m
+
+
 ===== RECENT BOT LOG EVENTS =====
 --- /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260825_09.log ---
 09:00:00.256	DEBUG	market ready	{"slug": "KXBTC15M-26AUG250500-00", "condition_id": "KXBTC15M-26AUG250500-00", "yes_token": "KXBTC15M-26AUG250500-00:YES", "no_token": "KXBTC15M-26AUG250500-00:NO"}
@@ -29222,6 +29247,7 @@ MINUTE_40=ALIVE
 09:10:27.254	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 09:10:30.386	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 09:10:33.526	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
+09:10:36.662	WARN	deribit stream: disconnected, reconnecting in 3s	{"error": "dial: websocket: bad handshake"}
 --- /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260825_08.log ---
 08:19:05.663	INFO	runtime strategy config	{"cwd": "/home/ubuntu/KalshiArbo/kalshiarbo", "config_json": "/home/ubuntu/KalshiArbo/kalshiarbo/config.json", "env_file": "/home/ubuntu/KalshiArbo/kalshiarbo/all.env", "runtime_mode": "PAPER", "live_flag": false, "paper_trade": true, "market_type": "15m", "pair_arb_enabled": true, "pair_arb_sell_at_99": false, "pair_arb_schedule_mode": "CONTINUOUS", "pair_arb_schedule_windows_utc": ""}
 08:19:06.116	DEBUG	coinbase stream: connected	{"url": "wss://ws-feed.exchange.coinbase.com"}
