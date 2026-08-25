@@ -50,3 +50,13 @@ LIVE_ALLOWED=false
     ?   	github.com/polyarb/kalshi	[no test files]
     ?   	github.com/polyarb/market	[no test files]
     ok  	github.com/polyarb/polymarket	(cached)
+    ok  	github.com/polyarb/strategy	0.096s
+    ok  	github.com/polyarb/web	(cached)
+[2026-08-25T22:08:56+00:00] GO_TEST END rc=0 duration=12.18s
+[2026-08-25T22:08:56+00:00] ACTION 5/9 GO_TEST PASS
+[2026-08-25T22:08:56+00:00] ACTION 6/9 GO_BUILD START
+[2026-08-25T22:08:56+00:00] GO_BUILD START: go build -o kalshiarbo .
+[2026-08-25T22:08:59+00:00] GO_BUILD END rc=0 duration=3.43s
+[2026-08-25T22:08:59+00:00] ACTION 6/9 GO_BUILD PASS
+[2026-08-25T22:08:59+00:00] ACTION 7/9 START_PAPER START
+[2026-08-25T22:08:59+00:00] STOP_PAPER START
