@@ -1,71 +1,8 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-pair-tests-v4-20260825-1635
-JOB_START_UTC=2026-08-25T16:35:09+00:00
+JOB_ID=kalshi-pair-collateral-resize-v1-20260825-1637
+JOB_START_UTC=2026-08-25T16:39:37+00:00
 LIVE_ALLOWED=false
 ------------------------------------------------------------
-[2026-08-25T16:35:09+00:00] JOB ACCEPTED actions=APPLY_PATCH,GOFMT,GO_TEST,GO_BUILD,STATUS,COLLECT_AUDIT
-[2026-08-25T16:35:09+00:00] ACTION 1/6 APPLY_PATCH START
-[2026-08-25T16:35:09+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163509.tar.gz
-[2026-08-25T16:35:14+00:00] BACKUP PASS files=106 duration=5.72s
-[2026-08-25T16:35:14+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-b_s4f5xd.patch
-    checking file strategy/pair_arb_test.go
-[2026-08-25T16:35:14+00:00] PATCH_DRY_RUN END rc=0 duration=0.00s
-[2026-08-25T16:35:14+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-b_s4f5xd.patch
-    patching file strategy/pair_arb_test.go
-[2026-08-25T16:35:14+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-25T16:35:14+00:00] ACTION 1/6 APPLY_PATCH PASS
-[2026-08-25T16:35:14+00:00] ACTION 2/6 GOFMT START
-[2026-08-25T16:35:14+00:00] GOFMT START: gofmt -w /home/ubuntu/KalshiArbo/kalshiarbo/strategy/pair_arb_test.go
-[2026-08-25T16:35:14+00:00] GOFMT END rc=0 duration=0.04s
-[2026-08-25T16:35:14+00:00] ACTION 2/6 GOFMT PASS
-[2026-08-25T16:35:14+00:00] ACTION 3/6 GO_TEST START
-[2026-08-25T16:35:14+00:00] GO_TEST START: go test ./...
-    ?   	github.com/polyarb	[no test files]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    ok  	github.com/polyarb/discord	(cached)
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    ok  	github.com/polyarb/strategy	0.026s
-    ok  	github.com/polyarb/web	(cached)
-[2026-08-25T16:35:23+00:00] GO_TEST END rc=0 duration=8.71s
-[2026-08-25T16:35:23+00:00] ACTION 3/6 GO_TEST PASS
-[2026-08-25T16:35:23+00:00] ACTION 4/6 GO_BUILD START
-[2026-08-25T16:35:23+00:00] GO_BUILD START: go build -o kalshiarbo .
-[2026-08-25T16:35:28+00:00] GO_BUILD END rc=0 duration=4.59s
-[2026-08-25T16:35:28+00:00] ACTION 4/6 GO_BUILD PASS
-[2026-08-25T16:35:28+00:00] ACTION 5/6 STATUS START
-[2026-08-25T16:35:28+00:00] STATUS START
-    State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                 
-    LISTEN 0      4096       127.0.0.1:20241      0.0.0.0:*    users:(("cloudflared",pid=74387,fd=11))
-    LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*                                           
-    LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*                                           
-    LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*                                           
-    LISTEN 0      5          127.0.0.1:8765       0.0.0.0:*    users:(("python3",pid=74385,fd=3))     
-    LISTEN 0      4096            [::]:22            [::]:*                                           
-    LISTEN 0      4096               *:8085             *:*    users:(("kalshiarbo",pid=103223,fd=6)) 
-    103223 ./kalshiarbo -port 8085
-[2026-08-25T16:35:28+00:00] STATUS PASS
-[2026-08-25T16:35:28+00:00] ACTION 5/6 STATUS PASS
-[2026-08-25T16:35:28+00:00] ACTION 6/6 COLLECT_AUDIT START
-[2026-08-25T16:35:28+00:00] STATUS START
-    State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                 
-    LISTEN 0      4096       127.0.0.1:20241      0.0.0.0:*    users:(("cloudflared",pid=74387,fd=11))
-    LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*                                           
-    LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*                                           
-    LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*                                           
-    LISTEN 0      5          127.0.0.1:8765       0.0.0.0:*    users:(("python3",pid=74385,fd=3))     
-    LISTEN 0      4096            [::]:22            [::]:*                                           
-    LISTEN 0      4096               *:8085             *:*    users:(("kalshiarbo",pid=103223,fd=6)) 
-    103223 ./kalshiarbo -port 8085
-[2026-08-25T16:35:28+00:00] STATUS PASS
-[2026-08-25T16:35:28+00:00] ACTION 6/6 COLLECT_AUDIT PASS
-[2026-08-25T16:35:28+00:00] JOB RESULT=PASS
-[2026-08-25T16:35:28+00:00] JOB_END_UTC=2026-08-25T16:35:28+00:00
+[2026-08-25T16:39:37+00:00] JOB ACCEPTED actions=APPLY_PATCH,GOFMT,GO_TEST,GO_BUILD,STATUS,COLLECT_AUDIT
+[2026-08-25T16:39:37+00:00] ACTION 1/6 APPLY_PATCH START
+[2026-08-25T16:39:37+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163937.tar.gz
