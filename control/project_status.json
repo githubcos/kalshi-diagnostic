@@ -1,33 +1,32 @@
 {
-  "overall_percent": 44,
-  "overall_basis": "First verified Polymarket-to-Kalshi execution mismatch is fixed, tested, built, and paper bot remains running",
+  "overall_percent": 46,
+  "overall_basis": "First Kalshi venue-parity fix passed; second verified Polymarket fee-share leak found in adaptive collateral-resize execution",
   "phase": "PAIR ARB execution-path parity audit",
-  "phase_percent": 48,
-  "current_patch": "Kalshi fee/minimum-order venue parity",
-  "patch_percent": 100,
-  "patch_state": "PASS — APPLIED / TESTED / BUILT",
-  "doing": "The first venue-parity patch is complete. Kalshi PAIR ARB no longer deducts Polymarket fee shares from contract quantity or enforces the Polymarket $1 minimum-notional rule in the patched lead/hedge path. Kalshi contract sizing and cash-fee semantics are now used consistently. Full go test ./... and go build both pass. I am moving directly to the next parity audit: hedge timing/admission, partial-fill handling, and signal-versus-executed-lead accounting.",
-  "why": "The previous code mixed Kalshi cash-fee/contract execution with Polymarket fee-share and minimum-notional assumptions. That mismatch is now removed and regression-tested without weakening the strategy's profitability gate.",
+  "phase_percent": 54,
+  "current_patch": "Kalshi adaptive collateral-resize contract accounting",
+  "patch_percent": 55,
+  "patch_state": "QUEUED — EC2 APPLY/TEST/BUILD",
+  "doing": "I found another live-path venue leak in executePairLimitBuy: when a lead order is resized after a collateral-shortfall response, the code still recalculates actual Kalshi inventory with polymarket.ComputeBuyFeeShares. I generated a narrow patch that preserves the resized Kalshi contract count and treats fees as cash, then queued backup -> patch dry-run/apply -> gofmt -> go test ./... -> go build -> audit.",
+  "why": "Normal Kalshi lead/hedge sizing was fixed in the prior patch, but this adaptive retry branch could still understate filled Kalshi contracts and distort the subsequent hedge quantity. It must use the same cash-fee semantics as the rest of the Kalshi execution path.",
   "done": [
-    "Sanitized source bridge complete",
-    "Dedicated telemetry online",
-    "Verified Polymarket fee-share leak",
-    "Verified Polymarket minimum-notional leak",
-    "Applied Kalshi-native PAIR ARB venue patch",
-    "Updated obsolete venue-specific tests",
-    "Full go test ./... PASS",
-    "Full go build PASS",
-    "Paper bot confirmed listening on port 8085"
+    "Source/telemetry bridge complete",
+    "Normal PAIR ARB fee-share leak fixed",
+    "Polymarket minimum-notional leak fixed",
+    "Regression tests updated",
+    "Full tests/build passed after first venue fix",
+    "Second fee-share leak verified in collateral-resize branch",
+    "Second patch queued"
   ],
   "remaining": [
-    "Separate signals from executed leads in forensic accounting",
+    "Complete collateral-resize patch/test/build",
+    "Audit authoritative partial-fill quantity handling",
     "Verify hedge timing/admission parity",
-    "Verify partial-fill behavior",
+    "Separate signals from actual executed leads in forensic accounting",
     "Verify timeout/unwind semantics",
     "Verify settlement behavior",
     "Audit remaining Polymarket execution dependencies",
     "Repeated paper validation",
     "Final parity certification"
   ],
-  "next": "Trace hedge timing/admission and partial-fill paths against the reference behavior; patch only verified venue mismatches, then rerun backup -> gofmt -> go test ./... -> go build -> paper audit."
+  "next": "Read the EC2 result for kalshi-pair-collateral-resize-v1-20260825-1637 immediately; if it passes, continue directly into partial-fill quantity and hedge-timing audit without waiting for user input."
 }
