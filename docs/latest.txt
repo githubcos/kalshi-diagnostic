@@ -1,21 +1,20 @@
 ==================================================
-KALSHIARBO STRICT-ARB PATCH TEST
-UTC: 2026-08-25T11:46:36+00:00
-STAMP: 20260825_114636
+KALSHIARBO STRICT-ARB TEST UPDATE
+UTC: 2026-08-25T11:48:08+00:00
+STAMP: 20260825_114808
 ==================================================
 
-=== APPLY NIL-GUARD FIX ===
-Nil guard inserted.
-
-=== STRICT PATCH MARKERS ===
+=== STRICT MARKERS ===
 strategy/signal.go:2256:	// STRICT COMPLETE-SET ARBITRAGE ONLY.
 strategy/signal.go:2285:	// Trader.strictPairArbPreflight().
 strategy/trader.go:8364:func (t *Trader) strictPairArbPreflight(ctx context.Context, yesTokenID, noTokenID string, maxSpend float64) (*strictArbPlan, error) {
-strategy/trader.go:8366:		return nil, fmt.Errorf("strict arb: order executor unavailable")
 strategy/trader.go:8597:	plan, preErr := t.strictPairArbPreflight(ctx, yesTokenID, noTokenID, 2.0*tradeSize)
 strategy/trader.go:8602:	t.logger.Info("pair arb: STRICT executable arbitrage proven",
-strategy/trader.go:8611:		return fmt.Errorf("strict arb: continuous-imbalance mode is directional and is disabled for PAIR ARB")
 strategy/trader.go:8618:		return fmt.Errorf("strict arb safety: LIVE pair execution blocked because current adapter cannot atomically guarantee both legs")
+
+=== UPDATED STRICT TEST NAMES ===
+162:func TestOnPairArbSignalRejectsWhenStrictOrderbookUnavailable(t *testing.T) {
+509:func TestEvaluatePairArbRequiresPositiveGrossCompleteSetEdge(t *testing.T) {
 
 === GO TEST ./... ===
 ?   	github.com/polyarb	[no test files]
@@ -31,54 +30,14 @@ ok  	github.com/polyarb/discord	(cached)
 ?   	github.com/polyarb/kalshi	[no test files]
 ?   	github.com/polyarb/market	[no test files]
 ok  	github.com/polyarb/polymarket	(cached)
-
-  [1m[92m▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY [92mNO [PAIR HEDGE][1m[92m EXECUTED [0m
-  [32m▸[0m  [1m[33m│ PAPER [0m  [97m9.66[0m shares @ [97m$0.4800[0m    fee: [93m0.5299 sh[0m    cost: [97m$4.89[0m
-  [32m▸[0m  Target → [92m$0.0637[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
---- FAIL: TestOnPairArbSignalRejectsLeadWhenExactHedgeBelowMarketMinimum (0.00s)
-    pair_arb_test.go:186: expected entry range or market minimum error, got strict arb: order executor unavailable
-
-  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
-  [91m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$0.5200[0m → sell [97m$0.4400[0m  │  fee [93m$0.0000[0m
-  [91m◂[0m  ▼ [91mP&L  -$-0.8000  (--15.38%)[0m  │  Reason: pair_unprofitable_abort  │  Held: 10s
-  [91m◂[0m  [91m███████████████░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
-
-  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
-  [92m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$9.1000[0m → sell [97m$0.9900[0m  │  fee [93m$0.0000[0m
-  [92m◂[0m  ▲ [92mP&L  +$0.8000  (+0.88%)[0m  │  Reason: pair_sell_at_99  │  Held: 20s
-  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
-  [2m────────────────────────────────────────────────────────────────────[0m
-
---- FAIL: TestEvaluatePairArbUsesNoLeadWhenGapBelowOpenAndRising (0.00s)
-    pair_arb_test.go:532: expected SignalPairArbLeadNo, got NONE
-FAIL
-FAIL	github.com/polyarb/strategy	0.079s
+ok  	github.com/polyarb/strategy	0.017s
 ok  	github.com/polyarb/web	(cached)
-FAIL
-GO_TEST_RC=1
+GO_TEST_RC=0
 
 === GO BUILD ===
 GO_BUILD_RC=0
 
 === RESULT ===
 BUILD_STATUS=PASS
-TEST_STATUS=FAIL
-END_UTC=2026-08-25T11:46:54+00:00
+TEST_STATUS=PASS
+END_UTC=2026-08-25T11:48:15+00:00
