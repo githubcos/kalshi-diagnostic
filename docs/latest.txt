@@ -1,846 +1,1177 @@
 ===== GENERATED =====
-Tue Aug 25 01:26:56 UTC 2026
+Tue Aug 25 01:27:53 UTC 2026
 
 ===== BOT SAFETY =====
 BOT_STOPPED
 {"position":null,"fee_rate_bps":"0"}
-===== PAIR CREDIT CONFIRMATION FUNCTION =====
-4234-	if yesTokenID != "" {
-4235-		t.pendingPairArb.YesTokenID = yesTokenID
-4236-	}
-4237-	if noTokenID != "" {
-4238-		t.pendingPairArb.NoTokenID = noTokenID
-4239-	}
-4240-	if side := strings.ToUpper(strings.TrimSpace(leadSide)); side == "YES" || side == "NO" {
-4241-		t.pendingPairArb.LeadSide = side
-4242-	}
-4243-	t.savePositionState()
-4244-}
-4245-
-4246-func (t *Trader) cancelStaleOrderAtWindowReset(orderID, requestName string) bool {
-4247-	if t.cfg.PaperTrade || strings.TrimSpace(orderID) == "" {
-4248-		return true
-4249-	}
-4250-	ctx, cancel := context.WithTimeout(context.Background(), 1200*time.Millisecond)
-4251-	defer cancel()
-4252-	if err := t.orders.CancelOrder(ctx, orderID); err != nil {
-4253-		if errors.Is(err, polymarket.ErrOrderNotCancellable) {
-4254-			t.logger.Debug("trader: stale carried order already not cancellable",
-4255-				zap.String("order_id", orderID),
-4256-				zap.String("request", requestName),
-4257-			)
-4258-			return false
-4259-		}
-4260-		t.logger.Warn("trader: stale carried order cancel failed",
-4261-			zap.String("order_id", orderID),
-4262-			zap.String("request", requestName),
-4263-			zap.Error(err),
-4264-		)
-4265-		return false
-4266-	}
-4267-	t.logger.Info("trader: stale carried order canceled at window reset",
-4268-		zap.String("order_id", orderID),
-4269-		zap.String("request", requestName),
-4270-	)
-4271-	return true
-4272-}
-4273-
-4274:func (t *Trader) pairArbBuyCreditConfirmed(
-4275-	ctx context.Context,
-4276-	tokenID string,
-4277-	minShares float64,
-4278-) (bool, float64, error) {
-4279-	if minShares < pairArbShareDust {
-4280-		minShares = pairArbShareDust
-4281-	}
-4282-
-4283-	if t.cfg.PaperTrade {
-4284-		return true, minShares, nil
-4285-	}
-4286-
-4287-	// Kalshi execution is confirmed from authenticated order/fill data.
-4288-	// There is no Polymarket ERC1155 conditional-token wallet credit to
-4289-	// wait for after a Kalshi trade.
-4290-	return true, minShares, nil
-4291-}
-4292-
-4293:func (t *Trader) pairArbBuyCreditConfirmedWithRetry(
-4294-	ctx context.Context,
-4295-	tokenID string,
-4296-	minShares float64,
-4297-	attempts int,
-4298-	interval time.Duration,
-4299-) (bool, float64, error) {
-4300-	if minShares < pairArbShareDust {
-4301-		minShares = pairArbShareDust
-4302-	}
-4303-
-4304-	if t.cfg.PaperTrade {
-4305-		return true, minShares, nil
-4306-	}
-4307-
-4308-	// Kalshi has no ERC1155 token-credit propagation stage.
-4309-	// executePairLimitBuy reaches this function only after exchange
-4310-	// fill evidence has already been obtained.
-4311-	return true, minShares, nil
-4312-}
-4313-
-4314-func isPendingHedgeCreditProbe(requestName string) bool {
-4315-	return strings.HasPrefix(requestName, "pair_arb_hedge_credit_probe")
-4316-}
-4317-
-4318-func isPendingHedgeBuy(requestName string) bool {
-4319-	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
-4320-}
-4321-
-4322-func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
-4323-	if t.pendingHedgePrePlace != nil {
-4324-		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
-4325-			return true
-4326-		}
-4327-	}
-4328-	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
-4329-		if t.pendingPairArb.PlacedAt.IsZero() || now.Sub(t.pendingPairArb.PlacedAt) < pairArbHedgeSettleGrace {
-4330-			return true
-4331-		}
-4332-	}
-4333-	return false
-4334-}
-4335-
-4336-func (t *Trader) reconcilePendingPairArbHedgeCredit(ctx context.Context, po *pairArbPendingOrderState) error {
-4337-	if po == nil {
-4338-		return nil
-4339-	}
-4340-	pair := t.pairedPosition
-4341-	if pair == nil {
-4342-		t.clearPendingPairArbOrder()
-4343-		return nil
-4344-	}
-4345-
-4346-	requestName := po.RequestName
-4347-	if requestName == "" {
-4348-		requestName = "pair_arb_hedge_credit_probe"
-4349-	}
-4350-	gr, grErr := t.getOrderTimed(ctx, requestName+"_reconcile", po.OrderID)
-4351-	status := ""
-4352-	if gr != nil {
-4353-		status = strings.ToLower(strings.TrimSpace(gr.Status))
-4354-	}
-4355-	if status == "unmatched" || status == "canceled" || status == "cancelled" || status == "expired" {
-4356-		t.logger.Warn("trader: pending hedge credit probe order is not filled; clearing pending state",
-4357-			zap.String("order_id", po.OrderID),
-4358-			zap.String("status", gr.Status),
-4359-		)
-4360-		t.clearPendingPairArbOrder()
-4361-		return nil
-4362-	}
-4363-
-4364-	buySide, _, anchorAvgPrice := pair.rebalanceState()
-4365-	if po.TokenID != "" {
-4366-		if po.TokenID == pair.YesTokenID {
-4367-			buySide = "YES"
-4368-		} else if po.TokenID == pair.NoTokenID {
-4369-			buySide = "NO"
-4370-		}
-4371-	}
-4372-	if buySide == "" {
-4373-		t.clearPendingPairArbOrder()
-4374-		return nil
-4375-	}
-4376-	trackedBefore := pair.YesShares
-4377-	if buySide != "YES" {
-4378-		trackedBefore = pair.NoShares
-4379-	}
-4380-
-4381-	avg, gross, fillsErr := t.getFillsTimed(ctx, requestName+"_reconcile_fills", po.OrderID, po.TokenID)
-4382-	if (fillsErr != nil || gross <= pairArbShareDust || avg <= 0) && gr != nil {
-4383-		if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
-4384-			avg = prc
-4385-		}
-4386-		if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-4387-			gross = sm
-4388-		}
-4389-	}
-4390-	if status == "live" && gross <= pairArbShareDust {
-4391-		return fmt.Errorf("pair arb: pending hedge order %s still live; waiting for fill", po.OrderID)
-4392-	}
-4393-	if gross <= pairArbShareDust || avg <= 0 {
-4394-		if status == "matched" || status == "filled" {
-4395-			minExpected := trackedBefore + pairArbShareDust
-4396-			credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-4397-			if cErr != nil {
-4398-				return cErr
-4399-			}
-4400-			if credited {
-4401-				actualShares := math.Floor((bal-trackedBefore)*100) / 100
-4402-				if actualShares < pairArbShareDust {
-4403-					actualShares = pairArbShareDust
-4404-				}
-4405-				if avg <= 0 {
-4406-					if gr != nil {
-4407-						if p, pErr := strconv.ParseFloat(gr.Price, 64); pErr == nil && p > 0 {
-4408-							avg = p
-4409-						}
-4410-					}
-4411-					if avg <= 0 {
-4412-						avg = anchorAvgPrice
-4413-					}
-4414-					if avg <= 0 {
-4415-						avg = 0.50
-4416-					}
-4417-				}
-4418-				usdSpent := marketBuyOrderNotional(actualShares, avg)
-4419-				if buySide == "YES" {
-4420-					pair.YesShares += actualShares
-4421-					pair.YesUSDSpent += usdSpent
-4422-				} else {
-4423-					pair.NoShares += actualShares
-4424-					pair.NoUSDSpent += usdSpent
-4425-				}
-4426-				if pair.isBalanced() {
-4427-					pair.BalancedAt = time.Now()
-4428-					pair.HedgeBy = time.Time{}
-4429-				}
-4430-				t.clearPendingPairArbOrder()
-4431-				t.savePositionState()
-4432-				t.logger.Info("trader: pending hedge credit probe reconciled from wallet balance",
-4433-					zap.String("order_id", po.OrderID),
-4434-					zap.String("hedge_side", buySide),
-4435-					zap.Float64("fill_price", avg),
-4436-					zap.Float64("shares", actualShares),
-4437-					zap.Float64("wallet_balance", bal),
-4438-					zap.Float64("tracked_before", trackedBefore),
-4439-					zap.Float64("locked_shares", pair.lockedShares()),
-4440-				)
-4441-				return nil
-4442-			}
-4443-		}
-4444-		if grErr != nil {
-4445-			return fmt.Errorf("pair arb: pending hedge credit probe lookup failed: %w", grErr)
-4446-		}
-4447-		if fillsErr != nil {
-4448-			return fmt.Errorf("pair arb: pending hedge credit probe fill lookup failed: %w", fillsErr)
-4449-		}
-4450-		return fmt.Errorf("pair arb: pending hedge order %s matched state unresolved; waiting for fill details", po.OrderID)
-4451-	}
-4452-
-4453-	feeShares := polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
-4454-	actualShares := math.Floor((gross-feeShares)*100) / 100
-4455-	if actualShares < pairArbShareDust {
-4456-		actualShares = pairArbShareDust
-4457-	}
-4458-	minExpected := trackedBefore + actualShares - 0.02
-4459-	if minExpected < pairArbShareDust {
-4460-		minExpected = pairArbShareDust
-4461-	}
-4462-	credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-4463-	if cErr != nil {
-4464-		return cErr
-4465-	}
-4466-	if !credited {
-4467-		return fmt.Errorf("pair arb: pending hedge order %s filled but wallet credit not confirmed yet (have %.2f need %.2f)", po.OrderID, bal, minExpected)
-4468-	}
-4469-
-4470-	usdSpent := marketBuyOrderNotional(gross, avg)
-4471-	if buySide == "YES" {
-4472-		pair.YesShares += actualShares
-4473-		pair.YesUSDSpent += usdSpent
-4474-	} else {
-4475-		pair.NoShares += actualShares
-4476-		pair.NoUSDSpent += usdSpent
-4477-	}
-4478-	if pair.isBalanced() {
-4479-		pair.BalancedAt = time.Now()
-4480-		pair.HedgeBy = time.Time{}
-4481-	}
-4482-	t.clearPendingPairArbOrder()
-4483-	t.savePositionState()
-4484-	t.logger.Info("trader: pending hedge credit probe reconciled and absorbed",
-4485-		zap.String("order_id", po.OrderID),
-4486-		zap.String("hedge_side", buySide),
-4487-		zap.Float64("fill_price", avg),
-4488-		zap.Float64("shares", actualShares),
-4489-		zap.Float64("locked_shares", pair.lockedShares()),
-4490-	)
-4491-	return nil
-4492-}
-4493-
-4494-func (t *Trader) tokenBalanceShares(ctx context.Context, tokenID string) (float64, error) {
-4495-	// Kalshi does not expose Polymarket-style ERC1155 conditional-token
-4496-	// balances. This helper is legacy-only in the Kalshi fork.
-4497-	return 0, nil
-4498-}
-4499-
-4500-func (t *Trader) ensureNoPairArbInventory(ctx context.Context, yesTokenID, noTokenID string) error {
-4501-	if t.cfg.PaperTrade {
-4502-		return nil
-4503-	}
-4504-	zeroStreak := 0
-4505-	var lastErr error
-4506-	var lastYes, lastNo float64
-4507-	for attempt := 1; attempt <= pairArbExposureProbeAttempts; attempt++ {
-4508-		yesShares, yesErr := t.tokenBalanceShares(ctx, yesTokenID)
-4509-		noShares, noErr := t.tokenBalanceShares(ctx, noTokenID)
-4510-		if yesErr != nil || noErr != nil {
-4511-			if yesErr != nil {
-4512-				lastErr = yesErr
-4513-			} else {
-
-===== ALL SETTLEMENT / ALLOWANCE CALLERS IN TRADER =====
-868:		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
-1369:		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
-1854:		credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, hedgeTokenID, minHedgeShares)
+===== TRADER ORDER INTERFACE =====
+3558-		side := rec.Side
+3559-		if rec.Strategy == "pair_arb" {
+3560-			side = "pair_arb"
+3561-		}
+3562-		key := tradeKey{openedAt: rec.OpenedAt.UnixNano(), side: side}
+3563-		if idx, ok := indices[key]; ok {
+3564-			collapsed[idx] = mergeTradeRecords(collapsed[idx], rec)
+3565-			continue
+3566-		}
+3567-		indices[key] = len(collapsed)
+3568-		collapsed = append(collapsed, rec)
+3569-	}
+3570-	return collapsed
+3571-}
+3572-
+3573-// OrderExecutor is the exchange-execution surface used by Trader.
+3574-//
+3575-// The strategy continues using the original Polymarket-compatible request and
+3576-// response shapes. Exchange adapters translate those logical operations to the
+3577-// venue-specific API underneath.
+3578:type OrderExecutor interface {
+3579-	PlaceOrder(context.Context, *polymarket.NewOrderRequest) (*polymarket.OrderResponse, error)
+3580-	CancelOrder(context.Context, string) error
+3581-	GetOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+3582-	GetFillsByTakerOrderID(context.Context, string, string) (float64, float64, error)
+3583-	GetTickSize(context.Context, string) (string, error)
+3584-	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+3585-	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
 3586:	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
-3593:	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
-3596:	TriggerConditionalApproval(context.Context, string, time.Duration) error
-3597:	WaitForConditionalAllowance(context.Context, string, time.Duration) error
-3598:	WaitForSettledBalance(context.Context, string, float64, time.Duration) error
-3646:	// allowanceInFlight tracks token IDs that have an active WaitForConditionalAllowance
-4274:func (t *Trader) pairArbBuyCreditConfirmed(
-4293:func (t *Trader) pairArbBuyCreditConfirmedWithRetry(
-4396:			credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-4462:	credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-5165:	// pairArbBuyCreditConfirmedWithRetry call that ran moments ago already
+3587-	FetchUSDCBalance(context.Context) (float64, error)
+3588-	ResolveMarket(context.Context, string) (bool, bool, error)
+3589-
+3590-	// Legacy Polymarket settlement/allowance methods.
+3591-	// Kalshi adapter will explicitly reject these; Kalshi does not use CTF,
+3592-	// Polygon token allowances, or claim redemption.
+3593-	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
+3594-	HasCTFBalance(context.Context, string) (bool, error)
+3595-	RedeemCTFPosition(context.Context, string, bool) error
+3596-	TriggerConditionalApproval(context.Context, string, time.Duration) error
+3597-	WaitForConditionalAllowance(context.Context, string, time.Duration) error
+3598-	WaitForSettledBalance(context.Context, string, float64, time.Duration) error
+3599-}
+3600-
+3601-// Trader executes trades and monitors open positions.
+3602-type Trader struct {
+3603-	cfg       TraderConfig
+3604-	orders    OrderExecutor
+3605-	detector  *Detector
+3606-	logger    *zap.Logger
+3607-	stateFile string // path to JSON state file for crash recovery
+3608-
+3609-	position       *Position // nil when flat
+3610-	pairedPosition *PairArbPosition
+3611-	pendingBuy     *pendingBuyState // non-nil between PlaceOrder and position-open
+3612-	pendingPairArb *pairArbPendingOrderState
+3613-	// pendingHedgePrePlace tracks a hedge GTC order placed simultaneously with the
+3614-	// lead buy (dual pre-place mode). It may arrive before or after the lead fill.
+3615-	pendingHedgePrePlace *pairArbPendingOrderState
+3616-
+3617-	paperBalance float64 // simulated USD balance (paper mode only)
+3618-
+3619-	feeRateBps string // taker fee for current window's token (e.g. "175")
+3620-
+3621-	// buyInProgress is true while a buy attempt is in-flight (PlaceOrder Ã‚Â  fill poll).
+3622-	// Prevents concurrent or rapid-fire re-entry from multiple eval ticks.
+3623-	buyInProgress bool
+3624-
+3625-	// convYesTokenID / convNoTokenID / convConditionID are the market identifiers for the current window.
+3626-	// Set via SetMarketTokens at window start; used by flipConvictionPosition and CTF redemption.
+3627-	convYesTokenID  string
+3628-	convNoTokenID   string
+3629-	convConditionID string
+3630-
+3631-	journal        []TradeRecord // completed trades this window
+3632-	sessionJournal []TradeRecord // ALL completed trades across the session
+3633-	windowsPlayed  int           // number of windows completed
+3634-	startedAt      time.Time     // session start time
+3635-
+3636-	//  Session-level risk counters 	// Updated inside appendJournalLine on every completed trade.
+3637-	sessionPnL        float64 // cumulative P&L since the session started
+3638-	totalTrades       int     // total trades completed this session
+3639-	consecutiveLosses int     // how many trades in a row closed at a loss
+3640-
+3641-	// convictionStopLossAtomicCents holds the live-tuned conviction stop-loss
+3642-	// in cents as a uint64 (math.Float64bits encoding) for safe concurrent
+3643-	// writes from the auto-tuner goroutine and reads from the trading loop.
+3644-	convictionStopLossAtomicCents uint64
+3645-
+3646-	// allowanceInFlight tracks token IDs that have an active WaitForConditionalAllowance
+3647-	// goroutine running. Prevents multiple concurrent approval goroutines hammering
+3648-	// /balance-allowance and triggering HTTP 429 rate limits.
+3649-	allowanceInFlight           sync.Map // key: tokenID (string) Ã‚Â  struct{}{}
+3650-	claimInFlight               sync.Map // key: conditionID:side (string) -> struct{}{}
+3651-	pairClaimSafetyScheduled    sync.Map // key: conditionID:windowEndUnix -> struct{}{}
+3652-	claimMu                     sync.Mutex
+3653-	claimLastStatus             string
+3654-	claimLastMessage            string
+3655-	claimLastConditionID        string
+3656-	claimLastSide               string
+3657-	claimLastUpdatedAt          time.Time
+3658-	claimLastAttempt            int
+3659-	claimLastNextRetryAt        time.Time
+3660-	pairExitMu                  sync.Mutex
+3661-	pairExitManageInFlight      bool
+3662-	pairExitStatusMu            sync.Mutex
+3663-	pairExitStatusRefreshActive bool
+3664-	pairExitOrderStatus         map[string]pairExitOrderStatusSnapshot
+3665-	pairLeadEntryMu             sync.Mutex
+3666-	pairLeadEntryInFlight       bool
+3667-	pairRebalanceMu             sync.Mutex
+3668-	pairRebalanceInFlight       bool
+3669-	pendingClaims               []pendingClaim
+3670-	tickSizeMu                  sync.RWMutex
+3671-	tickSizeByToken             map[string]tickSizeSnapshot
+3672-	pairArbRetryAfter           time.Time
+3673-	pairArbForceCloseRetryAfter time.Time
+3674-	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
+3675-	// Used to suppress the orphan-liquidation trigger when the wallet API still shows
+3676-	// the just-sold shares (settlement / indexing lag).
+3677-	lastPairArbCloseAt time.Time
+3678-	// lastPairArbCloseConditionID is the condition ID tied to lastPairArbCloseAt.
+3679-	// Used to scope short post-close re-entry holds to the same market only.
+3680-	lastPairArbCloseConditionID string
+3681-	// pairArbHedgeOrphanFlag is set when forceClosePairArb fires while a pre-placed hedge
+3682-	// order was still tracked (pendingHedgePrePlace != nil). In that case the hedge may
+3683-	// have matched and its tokens are in the wallet without a tracked position. This flag
+3684-	// bypasses the orphan-cooldown suppression so liquidation runs immediately.
+3685-	pairArbHedgeOrphanFlag bool
+3686-	// lastPairArbStopLossAt is stamped when a stop-loss exit completes. Used to enforce
+3687-	// PairArbStopCooldownSec so the bot cannot immediately re-enter the same (or any)
+3688-	// market before conditional allowances are back on-chain.
+3689-	lastPairArbStopLossAt time.Time
+3690-	// pairArbLeadGapGuardFn, when non-nil, is evaluated on each GTC poll tick while the
+3691-	// lead order is resting LIVE. Returning (true, reason) cancels the order immediately
+3692-	// rather than waiting for the full timeout. Set by OnPairArbSignal before executing
+3693-	// the lead buy and cleared (via defer) when OnPairArbSignal returns.
+3694-	pairArbLeadGapGuardFn func() (shouldCancel bool, reason string)
+3695-
+3696-	// botConditionIDs tracks condition IDs this bot has actually traded/managed.
+3697-	// External reconciliation is restricted to this set.
+3698-	botConditionIDs map[string]struct{}
+3699-
+3700-	// cachedLiveBalance holds the most recently fetched on-chain USDC balance
+3701-	// (math.Float64bits encoding). Written by RefreshLiveBalance at window start
+3702-	// and refreshed in the background every 5 s. Zero means unknown/unset.
+3703-	cachedLiveBalance uint64
+3704-	pairCostReconcile sync.Mutex
+3705-	lastPairCostProbe time.Time
+3706-	pendingOrderWatch sync.Map // key: watch kind + orderID + tokenID -> struct{}{}
+3707-	isolatedPendingMu sync.Mutex
+3708-	isolatedPending   []pairArbPendingOrderState
+3709-
+3710-	// OnTradeClose, if non-nil, is called immediately after each completed trade
+3711-	// record is written to disk. Set from main to feed the web dashboard in real-time
+3712-	// without creating an import cycle.
+3713-	OnTradeClose func(TradeRecord)
+3714-
+3715-	// metrics, if non-nil, collects rolling latency stats exposed on the web metrics page.
+3716-	metrics *BotMetrics
+3717-}
+3718-
+3719-// SetMetrics attaches a rolling latency metrics collector.
+3720-func (t *Trader) SetMetrics(m *BotMetrics) { t.metrics = m }
+3721-
+3722-// NewTrader creates a Trader.
+3723-func NewTrader(
+3724-	cfg TraderConfig,
+3725-	orders OrderExecutor,
+3726-	detector *Detector,
+3727-	logger *zap.Logger,
+3728-) *Trader {
+3729-	pb := 0.0
+3730-	if cfg.PaperTrade {
+3731-		pb = cfg.PaperStartBalance
+3732-	}
+3733-	return &Trader{
+3734-		cfg:                           cfg,
+3735-		orders:                        orders,
+3736-		detector:                      detector,
+3737-		logger:                        logger,
+3738-		stateFile:                     "position_state.json",
+3739-		paperBalance:                  pb,
+3740-		journal:                       make([]TradeRecord, 0, 8),
+3741-		sessionJournal:                make([]TradeRecord, 0, 32),
+3742-		startedAt:                     time.Now(),
+3743-		tickSizeByToken:               make(map[string]tickSizeSnapshot),
+3744-		pairExitOrderStatus:           make(map[string]pairExitOrderStatusSnapshot),
+3745-		botConditionIDs:               make(map[string]struct{}),
+3746-		convictionStopLossAtomicCents: math.Float64bits(cfg.ConvictionStopLossCents),
+3747-	}
+3748-}
+3749-
+3750-func normalizeConditionID(conditionID string) string {
+3751-	return strings.ToLower(strings.TrimSpace(conditionID))
+3752-}
+3753-
+3754-func (t *Trader) isTokenTrackedByOpenPosition(tokenID string) bool {
+3755-	tokenID = strings.TrimSpace(tokenID)
+3756-	if tokenID == "" {
+3757-		return false
+3758-	}
+3759-	if t.position != nil && strings.EqualFold(strings.TrimSpace(t.position.TokenID), tokenID) {
+3760-		return true
+3761-	}
+3762-	if t.pairedPosition != nil {
+3763-		if strings.EqualFold(strings.TrimSpace(t.pairedPosition.YesTokenID), tokenID) ||
+3764-			strings.EqualFold(strings.TrimSpace(t.pairedPosition.NoTokenID), tokenID) {
+3765-			return true
+3766-		}
+--
+5282-
+5283-	pair = t.pairedPosition
+5284-	if pair == nil || !pair.isBalanced() {
+5285-		return
+5286-	}
+5287-	t.reconcileBalancedPairCostBasis(ctx, pair)
+5288-}
+5289-
+5290-func round2(v float64) float64 {
+5291-	return math.Round(v*100) / 100
+5292-}
+5293-
+5294-func round4(v float64) float64 {
+5295-	return math.Round(v*10000) / 10000
+5296-}
+5297-
+5298-func (t *Trader) stablePairCostSample(ctx context.Context, pair *PairArbPosition) (pairCostBasisSample, bool) {
+5299-	if pair == nil || pair.ConditionID == "" || t.orders == nil {
+5300-		return pairCostBasisSample{}, false
+5301-	}
 5302:	positions, err := t.orders.FetchCurrentPositions(ctx, 500, 0)
-10259:		if positions, pErr := t.orders.FetchCurrentPositions(ctx, 500, 0); pErr == nil {
+5303-	if err != nil {
+5304-		return pairCostBasisSample{}, false
+5305-	}
+5306-	var yesPos *polymarket.UserPosition
+5307-	var noPos *polymarket.UserPosition
+5308-	for i := range positions {
+5309-		pos := &positions[i]
+5310-		if !strings.EqualFold(strings.TrimSpace(pos.ConditionID), strings.TrimSpace(pair.ConditionID)) {
+5311-			continue
+5312-		}
+5313-		if pos.Size <= pairArbShareDust || pos.AvgPrice <= 0 || pos.AvgPrice >= 1.0 {
+5314-			continue
+5315-		}
+5316-		isNo, ok := inferNoSideFromOutcomes(pos.Outcome, pos.OppositeOutcome, pos.OutcomeIndex)
+5317-		if !ok {
+5318-			continue
+5319-		}
+5320-		if isNo {
+5321-			if noPos == nil || pos.Size > noPos.Size {
+5322-				noPos = pos
+5323-			}
+5324-		} else {
+5325-			if yesPos == nil || pos.Size > yesPos.Size {
+5326-				yesPos = pos
+5327-			}
+5328-		}
+5329-	}
+5330-	if yesPos == nil || noPos == nil {
+5331-		return pairCostBasisSample{}, false
 
-===== CONTEXT FOR EACH PAIR CREDIT CALL =====
-833-			if fillsAvg, fillsGross, err := t.getFillsTimed(ctx, requestName+"_async_fills", orderID, tokenID, zap.String("request_id", requestID)); err == nil {
-834-				if avgFill <= 0 && fillsAvg > 0 {
-835-					avgFill = fillsAvg
-836-				}
-837-				if grossShares <= 0 && fillsGross > 0 {
-838-					grossShares = fillsGross
-839-				}
-840-			}
-841-		}
-842-		if avgFill > 0 || grossShares > 0 {
-843-			t.logger.Debug("trader: pair arb buy async reconciliation",
-844-				zap.String("request", requestName),
-845-				zap.String("request_id", requestID),
-846-				zap.String("order_id", orderID),
-847-				zap.Float64("avg_fill", avgFill),
-848-				zap.Float64("gross_shares", grossShares),
-849-			)
-850-		}
-851-	}()
-852-}
-853-
-854-// asyncPairArbLeadCreditConfirm keeps lead-credit validation off the hot entry path.
-855-// If credit appears after the synchronous path returned not-filled, immediately
-856-// run pending-order reconciliation so the lead can be recovered and hedged.
-857-func (t *Trader) asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID string, minExpected float64) {
-858-	if t.cfg.PaperTrade || orderID == "" || tokenID == "" {
-859-		return
-860-	}
-861-	if minExpected < pairArbShareDust {
-862-		minExpected = pairArbShareDust
-863-	}
-864-	go func() {
-865-		ctx, cancel := context.WithTimeout(context.Background(), pairArbLeadCreditGrace)
-866-		defer cancel()
-867-
-868:		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
-869-		if err != nil {
-870-			t.logger.Warn("trader: async lead credit probe errored; keeping pending order for reconciliation",
-871-				zap.String("request", requestName),
-872-				zap.String("request_id", requestID),
-873-				zap.String("order_id", orderID),
-874-				zap.Error(err),
-875-			)
-876-			t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
-877-			return
-878-		}
-879-		if credited {
-880-			t.logger.Info("trader: async lead credit confirmed",
-881-				zap.String("request", requestName),
-882-				zap.String("request_id", requestID),
-883-				zap.String("order_id", orderID),
-884-				zap.Float64("wallet_balance", bal),
-885-				zap.Float64("min_expected", minExpected),
-886-			)
-887-			if t.pendingPairArb != nil && t.pendingPairArb.OrderID == orderID {
-888-				reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 3*time.Second)
-889-				defer reconcileCancel()
-890-				if recErr := t.reconcilePendingPairArbOrder(reconcileCtx); recErr != nil {
-891-					t.logger.Warn("trader: async lead credit reconcile failed",
-892-						zap.String("request", requestName),
-893-						zap.String("request_id", requestID),
-894-						zap.String("order_id", orderID),
-895-						zap.Error(recErr),
-896-					)
-897-				}
-898-			}
-899-			return
-900-		}
-901-		t.logger.Warn("trader: async lead credit not confirmed within grace; pending reconciliation remains active",
-902-			zap.String("request", requestName),
-903-			zap.String("request_id", requestID),
+===== ALL FetchCurrentPositions USAGE =====
+strategy/trader.go-3561-		}
+strategy/trader.go-3562-		key := tradeKey{openedAt: rec.OpenedAt.UnixNano(), side: side}
+strategy/trader.go-3563-		if idx, ok := indices[key]; ok {
+strategy/trader.go-3564-			collapsed[idx] = mergeTradeRecords(collapsed[idx], rec)
+strategy/trader.go-3565-			continue
+strategy/trader.go-3566-		}
+strategy/trader.go-3567-		indices[key] = len(collapsed)
+strategy/trader.go-3568-		collapsed = append(collapsed, rec)
+strategy/trader.go-3569-	}
+strategy/trader.go-3570-	return collapsed
+strategy/trader.go-3571-}
+strategy/trader.go-3572-
+strategy/trader.go-3573-// OrderExecutor is the exchange-execution surface used by Trader.
+strategy/trader.go-3574-//
+strategy/trader.go-3575-// The strategy continues using the original Polymarket-compatible request and
+strategy/trader.go-3576-// response shapes. Exchange adapters translate those logical operations to the
+strategy/trader.go-3577-// venue-specific API underneath.
+strategy/trader.go-3578-type OrderExecutor interface {
+strategy/trader.go-3579-	PlaceOrder(context.Context, *polymarket.NewOrderRequest) (*polymarket.OrderResponse, error)
+strategy/trader.go-3580-	CancelOrder(context.Context, string) error
+strategy/trader.go-3581-	GetOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+strategy/trader.go-3582-	GetFillsByTakerOrderID(context.Context, string, string) (float64, float64, error)
+strategy/trader.go-3583-	GetTickSize(context.Context, string) (string, error)
+strategy/trader.go-3584-	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+strategy/trader.go-3585-	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
+strategy/trader.go:3586:	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
+strategy/trader.go-3587-	FetchUSDCBalance(context.Context) (float64, error)
+strategy/trader.go-3588-	ResolveMarket(context.Context, string) (bool, bool, error)
+strategy/trader.go-3589-
+strategy/trader.go-3590-	// Legacy Polymarket settlement/allowance methods.
+strategy/trader.go-3591-	// Kalshi adapter will explicitly reject these; Kalshi does not use CTF,
+strategy/trader.go-3592-	// Polygon token allowances, or claim redemption.
+strategy/trader.go-3593-	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
+strategy/trader.go-3594-	HasCTFBalance(context.Context, string) (bool, error)
+strategy/trader.go-3595-	RedeemCTFPosition(context.Context, string, bool) error
+strategy/trader.go-3596-	TriggerConditionalApproval(context.Context, string, time.Duration) error
+strategy/trader.go-3597-	WaitForConditionalAllowance(context.Context, string, time.Duration) error
+strategy/trader.go-3598-	WaitForSettledBalance(context.Context, string, float64, time.Duration) error
+strategy/trader.go-3599-}
+strategy/trader.go-3600-
+strategy/trader.go-3601-// Trader executes trades and monitors open positions.
+strategy/trader.go-3602-type Trader struct {
+strategy/trader.go-3603-	cfg       TraderConfig
+strategy/trader.go-3604-	orders    OrderExecutor
+strategy/trader.go-3605-	detector  *Detector
+strategy/trader.go-3606-	logger    *zap.Logger
+strategy/trader.go-3607-	stateFile string // path to JSON state file for crash recovery
+strategy/trader.go-3608-
+strategy/trader.go-3609-	position       *Position // nil when flat
+strategy/trader.go-3610-	pairedPosition *PairArbPosition
+strategy/trader.go-3611-	pendingBuy     *pendingBuyState // non-nil between PlaceOrder and position-open
+strategy/trader.go-3612-	pendingPairArb *pairArbPendingOrderState
+strategy/trader.go-3613-	// pendingHedgePrePlace tracks a hedge GTC order placed simultaneously with the
+strategy/trader.go-3614-	// lead buy (dual pre-place mode). It may arrive before or after the lead fill.
+strategy/trader.go-3615-	pendingHedgePrePlace *pairArbPendingOrderState
+strategy/trader.go-3616-
+strategy/trader.go-3617-	paperBalance float64 // simulated USD balance (paper mode only)
+strategy/trader.go-3618-
+strategy/trader.go-3619-	feeRateBps string // taker fee for current window's token (e.g. "175")
+strategy/trader.go-3620-
+strategy/trader.go-3621-	// buyInProgress is true while a buy attempt is in-flight (PlaceOrder Ã‚Â  fill poll).
+strategy/trader.go-3622-	// Prevents concurrent or rapid-fire re-entry from multiple eval ticks.
+strategy/trader.go-3623-	buyInProgress bool
+strategy/trader.go-3624-
+strategy/trader.go-3625-	// convYesTokenID / convNoTokenID / convConditionID are the market identifiers for the current window.
+strategy/trader.go-3626-	// Set via SetMarketTokens at window start; used by flipConvictionPosition and CTF redemption.
+strategy/trader.go-3627-	convYesTokenID  string
+strategy/trader.go-3628-	convNoTokenID   string
+strategy/trader.go-3629-	convConditionID string
+strategy/trader.go-3630-
+strategy/trader.go-3631-	journal        []TradeRecord // completed trades this window
+strategy/trader.go-3632-	sessionJournal []TradeRecord // ALL completed trades across the session
+strategy/trader.go-3633-	windowsPlayed  int           // number of windows completed
+strategy/trader.go-3634-	startedAt      time.Time     // session start time
+strategy/trader.go-3635-
+strategy/trader.go-3636-	//  Session-level risk counters 	// Updated inside appendJournalLine on every completed trade.
+strategy/trader.go-3637-	sessionPnL        float64 // cumulative P&L since the session started
+strategy/trader.go-3638-	totalTrades       int     // total trades completed this session
+strategy/trader.go-3639-	consecutiveLosses int     // how many trades in a row closed at a loss
+strategy/trader.go-3640-
+strategy/trader.go-3641-	// convictionStopLossAtomicCents holds the live-tuned conviction stop-loss
+strategy/trader.go-3642-	// in cents as a uint64 (math.Float64bits encoding) for safe concurrent
+strategy/trader.go-3643-	// writes from the auto-tuner goroutine and reads from the trading loop.
+strategy/trader.go-3644-	convictionStopLossAtomicCents uint64
+strategy/trader.go-3645-
+strategy/trader.go-3646-	// allowanceInFlight tracks token IDs that have an active WaitForConditionalAllowance
 --
-1334-			t.clearPendingPairArbOrder()
-1335-			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
-1336-		}
-1337-	}
-1338-	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
-1339-	// which may be lower than the limit ceiling used for the preflight estimate).
-1340-	// This ensures the journal cost basis and PnL are accurate.
-1341-	effectiveShares := grossFillShares
-1342-	if effectiveShares <= 0 {
-1343-		effectiveShares = rawShares
-1344-	}
-1345-	usdSpent = marketBuyOrderNotional(effectiveShares, fillPrice)
-1346-	if !t.cfg.PaperTrade {
-1347-		// Doc-backed execution model: insert status/trade rows can appear before the
-1348-		// settled token balance is visible, so ownership is only finalized after wallet credit.
-1349-		minExpected := actualShares - 0.02
-1350-		if minExpected < pairArbShareDust {
-1351-			minExpected = pairArbShareDust
-1352-		}
-1353-		// Fast path: fills API already confirmed the trade (non-zero avg + gross).
-1354-		// Polymarket's fills endpoint is authoritative — if it returned data, the order
-1355-		// settled on-chain. Use a short check so we can place the hedge immediately.
-1356-		// Tiers:
-1357-		//   submit_response — FOK/FAK fill confirmed directly by the exchange response;
-1358-		//     1 immediate probe then proceed regardless (wallet_credit_pending handles lag).
-1359-		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
-1360-		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
-1361-		creditAttempts := 20
-1362-		creditInterval := 500 * time.Millisecond
-1363-		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
-1364-			creditAttempts = 1
-1365-		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
-1366-			creditAttempts = 3
-1367-			creditInterval = 500 * time.Millisecond
-1368-		}
-1369:		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
-1370-		if cErr != nil {
-1371-			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
-1372-			// can verify whether the MATCHED buy eventually credited to the wallet.
-1373-			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
-1374-				zap.String("order_id", orderID),
-1375-				zap.Error(cErr),
-1376-			)
-1377-			if requestName == "pair_arb_lead_buy" {
-1378-				t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
-1379-			}
-1380-			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, cErr
-1381-		}
-1382-		if !credited {
-1383-			// Order is matched and money is spent. If we have any shares in the wallet
-1384-			// (just below the expected threshold due to API lag or rounding), use the
-1385-			// actual balance as shares rather than erroring and leaving pendingPairArb set.
-1386-			if bal >= pairArbShareDust {
-1387-				t.logger.Warn("trader: pair arb buy wallet credit short; using actual wallet balance as shares",
-1388-					zap.String("order_id", orderID),
-1389-					zap.Float64("expected", minExpected),
-1390-					zap.Float64("actual_balance", bal),
-1391-				)
-1392-				effectiveGrossShares := grossFillShares
-1393-				if effectiveGrossShares <= pairArbShareDust {
-1394-					effectiveGrossShares = rawShares
-1395-				}
-1396-				if fillPrice <= 0 {
-1397-					fillPrice = math.Round(limitPrice*100) / 100
-1398-				}
-1399-				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
-1400-				actualShares = bal
-1401-				usdSpent = marketBuyOrderNotional(effectiveGrossShares, fillPrice)
-1402-				if usdSpent <= 0 {
-1403-					usdSpent = marketBuyOrderNotional(actualShares, fillPrice)
-1404-				}
+strategy/trader.go-5277-	if pair.isBalanced() {
+strategy/trader.go-5278-		pair.BalancedAt = time.Now()
+strategy/trader.go-5279-		pair.HedgeBy = time.Time{}
+strategy/trader.go-5280-	}
+strategy/trader.go-5281-	t.savePositionState()
+strategy/trader.go-5282-
+strategy/trader.go-5283-	pair = t.pairedPosition
+strategy/trader.go-5284-	if pair == nil || !pair.isBalanced() {
+strategy/trader.go-5285-		return
+strategy/trader.go-5286-	}
+strategy/trader.go-5287-	t.reconcileBalancedPairCostBasis(ctx, pair)
+strategy/trader.go-5288-}
+strategy/trader.go-5289-
+strategy/trader.go-5290-func round2(v float64) float64 {
+strategy/trader.go-5291-	return math.Round(v*100) / 100
+strategy/trader.go-5292-}
+strategy/trader.go-5293-
+strategy/trader.go-5294-func round4(v float64) float64 {
+strategy/trader.go-5295-	return math.Round(v*10000) / 10000
+strategy/trader.go-5296-}
+strategy/trader.go-5297-
+strategy/trader.go-5298-func (t *Trader) stablePairCostSample(ctx context.Context, pair *PairArbPosition) (pairCostBasisSample, bool) {
+strategy/trader.go-5299-	if pair == nil || pair.ConditionID == "" || t.orders == nil {
+strategy/trader.go-5300-		return pairCostBasisSample{}, false
+strategy/trader.go-5301-	}
+strategy/trader.go:5302:	positions, err := t.orders.FetchCurrentPositions(ctx, 500, 0)
+strategy/trader.go-5303-	if err != nil {
+strategy/trader.go-5304-		return pairCostBasisSample{}, false
+strategy/trader.go-5305-	}
+strategy/trader.go-5306-	var yesPos *polymarket.UserPosition
+strategy/trader.go-5307-	var noPos *polymarket.UserPosition
+strategy/trader.go-5308-	for i := range positions {
+strategy/trader.go-5309-		pos := &positions[i]
+strategy/trader.go-5310-		if !strings.EqualFold(strings.TrimSpace(pos.ConditionID), strings.TrimSpace(pair.ConditionID)) {
+strategy/trader.go-5311-			continue
+strategy/trader.go-5312-		}
+strategy/trader.go-5313-		if pos.Size <= pairArbShareDust || pos.AvgPrice <= 0 || pos.AvgPrice >= 1.0 {
+strategy/trader.go-5314-			continue
+strategy/trader.go-5315-		}
+strategy/trader.go-5316-		isNo, ok := inferNoSideFromOutcomes(pos.Outcome, pos.OppositeOutcome, pos.OutcomeIndex)
+strategy/trader.go-5317-		if !ok {
+strategy/trader.go-5318-			continue
+strategy/trader.go-5319-		}
+strategy/trader.go-5320-		if isNo {
+strategy/trader.go-5321-			if noPos == nil || pos.Size > noPos.Size {
+strategy/trader.go-5322-				noPos = pos
+strategy/trader.go-5323-			}
+strategy/trader.go-5324-		} else {
+strategy/trader.go-5325-			if yesPos == nil || pos.Size > yesPos.Size {
+strategy/trader.go-5326-				yesPos = pos
+strategy/trader.go-5327-			}
+strategy/trader.go-5328-		}
+strategy/trader.go-5329-	}
+strategy/trader.go-5330-	if yesPos == nil || noPos == nil {
+strategy/trader.go-5331-		return pairCostBasisSample{}, false
+strategy/trader.go-5332-	}
+strategy/trader.go-5333-	return pairCostBasisSample{
+strategy/trader.go-5334-		YesSize: round2(yesPos.Size),
+strategy/trader.go-5335-		NoSize:  round2(noPos.Size),
+strategy/trader.go-5336-		YesAvg:  round4(yesPos.AvgPrice),
+strategy/trader.go-5337-		NoAvg:   round4(noPos.AvgPrice),
+strategy/trader.go-5338-	}, true
+strategy/trader.go-5339-}
+strategy/trader.go-5340-
+strategy/trader.go-5341-func pairCostSamplesMatch(a, b pairCostBasisSample) bool {
+strategy/trader.go-5342-	return math.Abs(a.YesSize-b.YesSize) <= 0.01 &&
+strategy/trader.go-5343-		math.Abs(a.NoSize-b.NoSize) <= 0.01 &&
+strategy/trader.go-5344-		math.Abs(a.YesAvg-b.YesAvg) <= 0.0015 &&
+strategy/trader.go-5345-		math.Abs(a.NoAvg-b.NoAvg) <= 0.0015
+strategy/trader.go-5346-}
+strategy/trader.go-5347-
+strategy/trader.go-5348-func (t *Trader) reconcileBalancedPairCostBasis(ctx context.Context, pair *PairArbPosition) {
+strategy/trader.go-5349-	// Kalshi portfolio positions do not expose independent YES/NO
+strategy/trader.go-5350-	// average cost bases. Preserve confirmed order-fill accounting.
+strategy/trader.go-5351-	return
+strategy/trader.go-5352-}
+strategy/trader.go-5353-
+strategy/trader.go-5354-func claimRetryDelay(attempt int) time.Duration {
+strategy/trader.go-5355-	if attempt <= 5 {
+strategy/trader.go-5356-		return claimRetryInterval
+strategy/trader.go-5357-	}
+strategy/trader.go-5358-	if attempt <= 20 {
+strategy/trader.go-5359-		return claimRetryMediumInterval
+strategy/trader.go-5360-	}
+strategy/trader.go-5361-	return claimRetrySlowInterval
+strategy/trader.go-5362-}
 --
-1819-							}
-1820-						}
-1821-					}
-1822-					if gross > 0 {
-1823-						hedgeFilledPrice = avg
-1824-						hedgeFilledFeeShares = polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
-1825-						hedgeFilledActual = math.Floor((gross-hedgeFilledFeeShares)*100) / 100
-1826-						hedgeFilledUSD = marketBuyOrderNotional(gross, avg)
-1827-					}
-1828-				case "live":
-1829-					// Still resting — keep pendingHedgePrePlace (already saved above)
-1830-					t.logger.Info("trader: dual pre-place: lead filled, hedge still resting in book",
-1831-						zap.String("lead_order_id", leadOrderID),
-1832-						zap.String("hedge_order_id", hedgeOrderID),
-1833-						zap.Float64("lead_fill", leadFill),
-1834-						zap.Float64("hedge_limit", hedgeLimitPrice),
-1835-					)
-1836-				default:
-1837-					// Hedge was cancelled/expired — clear tracking, will retry normally
-1838-					t.logger.Warn("trader: dual pre-place: lead filled but pre-placed hedge cancelled",
-1839-						zap.String("hedge_status", gr.Status),
-1840-						zap.String("hedge_order_id", hedgeOrderID),
-1841-					)
-1842-					t.clearPrePlacedHedgeOrder()
-1843-				}
-1844-			}
-1845-		}
-1846-	}
-1847-
-1848-	// ── Both filled simultaneously ──────────────────────────────────────────
-1849-	if hedgeFilledActual > 0 {
-1850-		minHedgeShares := hedgeFilledActual - 0.02
-1851-		if minHedgeShares < pairArbShareDust {
-1852-			minHedgeShares = pairArbShareDust
-1853-		}
-1854:		credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, hedgeTokenID, minHedgeShares)
-1855-		if cErr != nil {
-1856-			return cErr
-1857-		}
-1858-		if !credited {
-1859-			t.logger.Warn("trader: dual pre-place hedge reported filled but wallet credit not confirmed; treating as pending",
-1860-				zap.String("hedge_order_id", hedgeOrderID),
-1861-				zap.String("hedge_token", hedgeTokenID),
-1862-				zap.Float64("expected_min_shares", minHedgeShares),
-1863-				zap.Float64("wallet_shares", bal),
-1864-			)
-1865-			t.setPrePlacedHedgeOrder(hedgeOrderID, hedgeTokenID, "pair_arb_hedge_pre", hedgeRawShares)
-1866-			t.clearPendingPairArbOrder()
-1867-			return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
-1868-		}
-1869-		// If the hedge order only partially filled (Polymarket reported "matched" for the
-1870-		// immediate taker portion while leaving a maker remainder resting in the book),
-1871-		// cancel the original order NOW before we forget its ID.  Without this cancel the
-1872-		// resting remainder silently fills later, lands in the wallet as untracked shares,
-1873-		// gets absorbed by reconcileLivePairArbState, and triggers a runaway rebalance
-1874-		// cycle (extra YES → buy NO → isBalanced still false → timeout force-close).
-1875-		hedgeLeadImbalance := math.Abs(hedgeFilledActual - leadActual)
-1876-		if hedgeOrderID != "" && hedgeLeadImbalance > pairArbWalletReconcileDelta {
-1877-			t.logger.Warn("trader: dual pre-place: partial taker fill detected; cancelling GTC remainder to prevent ghost fills",
-1878-				zap.String("hedge_order_id", hedgeOrderID),
-1879-				zap.Float64("filled_actual", hedgeFilledActual),
-1880-				zap.Float64("lead_actual", leadActual),
-1881-				zap.Float64("hedge_lead_imbalance", hedgeLeadImbalance),
-1882-				zap.Float64("remainder_raw", hedgeRawShares-(hedgeFilledActual+hedgeFilledFeeShares)),
-1883-			)
-1884-			_ = t.cancelOrderTimed(ctx, "pair_arb_dual_cancel_partial_hedge_remainder", hedgeOrderID)
-1885-		}
-1886-		t.clearPrePlacedHedgeOrder() // no longer pending
-1887-		now := time.Now()
-1888-		pairConditionID := t.convConditionID
-1889-		if sig.OverrideConditionID != "" {
---
-4239-	}
-4240-	if side := strings.ToUpper(strings.TrimSpace(leadSide)); side == "YES" || side == "NO" {
-4241-		t.pendingPairArb.LeadSide = side
-4242-	}
-4243-	t.savePositionState()
-4244-}
-4245-
-4246-func (t *Trader) cancelStaleOrderAtWindowReset(orderID, requestName string) bool {
-4247-	if t.cfg.PaperTrade || strings.TrimSpace(orderID) == "" {
-4248-		return true
-4249-	}
-4250-	ctx, cancel := context.WithTimeout(context.Background(), 1200*time.Millisecond)
-4251-	defer cancel()
-4252-	if err := t.orders.CancelOrder(ctx, orderID); err != nil {
-4253-		if errors.Is(err, polymarket.ErrOrderNotCancellable) {
-4254-			t.logger.Debug("trader: stale carried order already not cancellable",
-4255-				zap.String("order_id", orderID),
-4256-				zap.String("request", requestName),
-4257-			)
-4258-			return false
-4259-		}
-4260-		t.logger.Warn("trader: stale carried order cancel failed",
-4261-			zap.String("order_id", orderID),
-4262-			zap.String("request", requestName),
-4263-			zap.Error(err),
-4264-		)
-4265-		return false
-4266-	}
-4267-	t.logger.Info("trader: stale carried order canceled at window reset",
-4268-		zap.String("order_id", orderID),
-4269-		zap.String("request", requestName),
-4270-	)
-4271-	return true
-4272-}
-4273-
-4274:func (t *Trader) pairArbBuyCreditConfirmed(
-4275-	ctx context.Context,
-4276-	tokenID string,
-4277-	minShares float64,
-4278-) (bool, float64, error) {
-4279-	if minShares < pairArbShareDust {
-4280-		minShares = pairArbShareDust
-4281-	}
-4282-
-4283-	if t.cfg.PaperTrade {
-4284-		return true, minShares, nil
-4285-	}
-4286-
-4287-	// Kalshi execution is confirmed from authenticated order/fill data.
-4288-	// There is no Polymarket ERC1155 conditional-token wallet credit to
-4289-	// wait for after a Kalshi trade.
-4290-	return true, minShares, nil
-4291-}
-4292-
-4293:func (t *Trader) pairArbBuyCreditConfirmedWithRetry(
-4294-	ctx context.Context,
-4295-	tokenID string,
-4296-	minShares float64,
-4297-	attempts int,
-4298-	interval time.Duration,
-4299-) (bool, float64, error) {
-4300-	if minShares < pairArbShareDust {
-4301-		minShares = pairArbShareDust
-4302-	}
-4303-
-4304-	if t.cfg.PaperTrade {
-4305-		return true, minShares, nil
-4306-	}
-4307-
-4308-	// Kalshi has no ERC1155 token-credit propagation stage.
-4309-	// executePairLimitBuy reaches this function only after exchange
-4310-	// fill evidence has already been obtained.
-4311-	return true, minShares, nil
-4312-}
-4313-
-4314-func isPendingHedgeCreditProbe(requestName string) bool {
-4315-	return strings.HasPrefix(requestName, "pair_arb_hedge_credit_probe")
-4316-}
-4317-
-4318-func isPendingHedgeBuy(requestName string) bool {
-4319-	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
-4320-}
-4321-
-4322-func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
-4323-	if t.pendingHedgePrePlace != nil {
-4324-		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
-4325-			return true
-4326-		}
-4327-	}
-4328-	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
---
-4361-		return nil
-4362-	}
-4363-
-4364-	buySide, _, anchorAvgPrice := pair.rebalanceState()
-4365-	if po.TokenID != "" {
-4366-		if po.TokenID == pair.YesTokenID {
-4367-			buySide = "YES"
-4368-		} else if po.TokenID == pair.NoTokenID {
-4369-			buySide = "NO"
-4370-		}
-4371-	}
-4372-	if buySide == "" {
-4373-		t.clearPendingPairArbOrder()
-4374-		return nil
-4375-	}
-4376-	trackedBefore := pair.YesShares
-4377-	if buySide != "YES" {
-4378-		trackedBefore = pair.NoShares
-4379-	}
-4380-
-4381-	avg, gross, fillsErr := t.getFillsTimed(ctx, requestName+"_reconcile_fills", po.OrderID, po.TokenID)
-4382-	if (fillsErr != nil || gross <= pairArbShareDust || avg <= 0) && gr != nil {
-4383-		if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
-4384-			avg = prc
-4385-		}
-4386-		if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-4387-			gross = sm
-4388-		}
-4389-	}
-4390-	if status == "live" && gross <= pairArbShareDust {
-4391-		return fmt.Errorf("pair arb: pending hedge order %s still live; waiting for fill", po.OrderID)
-4392-	}
-4393-	if gross <= pairArbShareDust || avg <= 0 {
-4394-		if status == "matched" || status == "filled" {
-4395-			minExpected := trackedBefore + pairArbShareDust
-4396:			credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-4397-			if cErr != nil {
-4398-				return cErr
-4399-			}
-4400-			if credited {
-4401-				actualShares := math.Floor((bal-trackedBefore)*100) / 100
-4402-				if actualShares < pairArbShareDust {
-4403-					actualShares = pairArbShareDust
-4404-				}
-4405-				if avg <= 0 {
-4406-					if gr != nil {
-4407-						if p, pErr := strconv.ParseFloat(gr.Price, 64); pErr == nil && p > 0 {
-4408-							avg = p
-4409-						}
-4410-					}
-4411-					if avg <= 0 {
-4412-						avg = anchorAvgPrice
-4413-					}
-4414-					if avg <= 0 {
-4415-						avg = 0.50
-4416-					}
-4417-				}
-4418-				usdSpent := marketBuyOrderNotional(actualShares, avg)
-4419-				if buySide == "YES" {
-4420-					pair.YesShares += actualShares
-4421-					pair.YesUSDSpent += usdSpent
-4422-				} else {
-4423-					pair.NoShares += actualShares
-4424-					pair.NoUSDSpent += usdSpent
-4425-				}
-4426-				if pair.isBalanced() {
-4427-					pair.BalancedAt = time.Now()
-4428-					pair.HedgeBy = time.Time{}
-4429-				}
-4430-				t.clearPendingPairArbOrder()
-4431-				t.savePositionState()
-4432-				t.logger.Info("trader: pending hedge credit probe reconciled from wallet balance",
-4433-					zap.String("order_id", po.OrderID),
-4434-					zap.String("hedge_side", buySide),
-4435-					zap.Float64("fill_price", avg),
-4436-					zap.Float64("shares", actualShares),
-4437-					zap.Float64("wallet_balance", bal),
-4438-					zap.Float64("tracked_before", trackedBefore),
-4439-					zap.Float64("locked_shares", pair.lockedShares()),
-4440-				)
-4441-				return nil
-4442-			}
-4443-		}
-4444-		if grErr != nil {
-4445-			return fmt.Errorf("pair arb: pending hedge credit probe lookup failed: %w", grErr)
-4446-		}
-4447-		if fillsErr != nil {
-4448-			return fmt.Errorf("pair arb: pending hedge credit probe fill lookup failed: %w", fillsErr)
-4449-		}
-4450-		return fmt.Errorf("pair arb: pending hedge order %s matched state unresolved; waiting for fill details", po.OrderID)
-4451-	}
-4452-
-4453-	feeShares := polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
-4454-	actualShares := math.Floor((gross-feeShares)*100) / 100
-4455-	if actualShares < pairArbShareDust {
-4456-		actualShares = pairArbShareDust
-4457-	}
-4458-	minExpected := trackedBefore + actualShares - 0.02
-4459-	if minExpected < pairArbShareDust {
-4460-		minExpected = pairArbShareDust
-4461-	}
-4462:	credited, bal, cErr := t.pairArbBuyCreditConfirmed(ctx, po.TokenID, minExpected)
-4463-	if cErr != nil {
-4464-		return cErr
-4465-	}
-4466-	if !credited {
-4467-		return fmt.Errorf("pair arb: pending hedge order %s filled but wallet credit not confirmed yet (have %.2f need %.2f)", po.OrderID, bal, minExpected)
-4468-	}
-4469-
-4470-	usdSpent := marketBuyOrderNotional(gross, avg)
-4471-	if buySide == "YES" {
-4472-		pair.YesShares += actualShares
-4473-		pair.YesUSDSpent += usdSpent
-4474-	} else {
-4475-		pair.NoShares += actualShares
-4476-		pair.NoUSDSpent += usdSpent
-4477-	}
-4478-	if pair.isBalanced() {
-4479-		pair.BalancedAt = time.Now()
-4480-		pair.HedgeBy = time.Time{}
-4481-	}
-4482-	t.clearPendingPairArbOrder()
-4483-	t.savePositionState()
-4484-	t.logger.Info("trader: pending hedge credit probe reconciled and absorbed",
-4485-		zap.String("order_id", po.OrderID),
-4486-		zap.String("hedge_side", buySide),
-4487-		zap.Float64("fill_price", avg),
-4488-		zap.Float64("shares", actualShares),
-4489-		zap.Float64("locked_shares", pair.lockedShares()),
-4490-	)
-4491-	return nil
-4492-}
-4493-
-4494-func (t *Trader) tokenBalanceShares(ctx context.Context, tokenID string) (float64, error) {
-4495-	// Kalshi does not expose Polymarket-style ERC1155 conditional-token
-4496-	// balances. This helper is legacy-only in the Kalshi fork.
-4497-	return 0, nil
---
-5130-	if pendingPreHedgeTokenID != "" && strings.EqualFold(tokenID, strings.TrimSpace(pendingPreHedgeTokenID)) {
-5131-		return true
-5132-	}
-5133-	if pendingHedgeCreditTokenID != "" && strings.EqualFold(tokenID, strings.TrimSpace(pendingHedgeCreditTokenID)) {
-5134-		return true
-5135-	}
-5136-	return false
-5137-}
-5138-
-5139-func (t *Trader) reconcileLivePairArbState(ctx context.Context, pair *PairArbPosition, currentYesPrice float64, currentNoPrice float64) {
-5140-	if pair == nil || t.cfg.PaperTrade {
-5141-		return
-5142-	}
-5143-
-5144-	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
-5145-		pendingOrderID := t.pendingPairArb.OrderID
-5146-		pendingRequest := t.pendingPairArb.RequestName
-5147-		reconcileCtx, cancel := context.WithTimeout(ctx, pairArbReconcileLookupTimeout)
-5148-		err := t.reconcilePendingPairArbOrder(reconcileCtx)
-5149-		cancel()
-5150-		if err != nil {
-5151-			t.logger.Debug("trader: pending hedge reconciliation during live pair position still in progress",
-5152-				zap.String("order_id", pendingOrderID),
-5153-				zap.String("request", pendingRequest),
-5154-				zap.Error(err),
-5155-			)
-5156-		}
-5157-	}
-5158-
-5159-	pair = t.pairedPosition
-5160-	if pair == nil {
-5161-		return
-5162-	}
-5163-
-5164-	// Skip the wallet-delta probes entirely for brand-new positions: the
-5165:	// pairArbBuyCreditConfirmedWithRetry call that ran moments ago already
-5166-	// confirmed the balance. Nothing new could have appeared in < 500ms.
-5167-	if time.Since(pair.OpenedAt) < 500*time.Millisecond {
-5168-		return
-5169-	}
-5170-
-5171-	pendingPreHedgeTokenID := ""
-5172-	if php := t.pendingHedgePrePlace; php != nil {
-5173-		pendingPreHedgeTokenID = strings.TrimSpace(php.TokenID)
-5174-	}
-5175-	pendingHedgeCreditTokenID := ""
-5176-	if ppo := t.pendingPairArb; ppo != nil && (isPendingHedgeCreditProbe(ppo.RequestName) || isPendingHedgeBuy(ppo.RequestName)) {
-5177-		pendingHedgeCreditTokenID = strings.TrimSpace(ppo.TokenID)
-5178-	}
-5179-
-5180-	type deltaResult struct {
-5181-		nextShares   float64
-5182-		usdDelta     float64
-5183-		changed      bool
-5184-		probeOK      bool
-5185-		walletShares float64
-5186-	}
-5187-	applyWalletDelta := func(side string, tokenID string, trackedShares float64) deltaResult {
-5188-		if tokenID == "" {
-5189-			return deltaResult{nextShares: trackedShares}
-5190-		}
-5191-		if shouldSkipPairArbWalletDeltaAbsorb(tokenID, pendingPreHedgeTokenID, pendingHedgeCreditTokenID) {
-5192-			// This side is currently under pending order reconciliation; absorbing
-5193-			// wallet delta here can double-count fills and trigger spurious rebalances.
-5194-			return deltaResult{nextShares: trackedShares}
-5195-		}
-5196-		bal, err := t.tokenBalanceShares(ctx, tokenID)
-5197-		if err != nil {
-5198-			t.logger.Debug("trader: live pair wallet reconcile balance probe failed",
-5199-				zap.String("side", side),
-5200-				zap.String("token_id", tokenID),
+strategy/trader.go-10234-		t.logger.Warn("trader: restored position has Shares=0 (buy never filled); discarding",
+strategy/trader.go-10235-			zap.String("order_id", pos.OrderID),
+strategy/trader.go-10236-			zap.String("token_id", pos.TokenID),
+strategy/trader.go-10237-		)
+strategy/trader.go-10238-		t.savePositionState()
+strategy/trader.go-10239-		return false
+strategy/trader.go-10240-	}
+strategy/trader.go-10241-
+strategy/trader.go-10242-	//  Stale window guard
+strategy/trader.go-10243-	// If the position's window ended more than 10 minutes ago, the market has
+strategy/trader.go-10244-	// irrevocably resolved (CTF settlement). The CLOB won't accept a sell;
+strategy/trader.go-10245-	// discard immediately rather than looping forever.
+strategy/trader.go-10246-	if !pos.WindowEnd.IsZero() && time.Now().After(pos.WindowEnd.Add(10*time.Minute)) {
+strategy/trader.go-10247-		t.logger.Warn("trader: restored position window ended >10m ago (market resolved); discarding",
+strategy/trader.go-10248-			zap.String("token_id", pos.TokenID),
+strategy/trader.go-10249-			zap.Time("window_end", pos.WindowEnd),
+strategy/trader.go-10250-		)
+strategy/trader.go-10251-		t.savePositionState()
+strategy/trader.go-10252-		return false
+strategy/trader.go-10253-	}
+strategy/trader.go-10254-
+strategy/trader.go-10255-	// Kalshi restart ghost check.
+strategy/trader.go-10256-	// Verify that the authoritative Kalshi portfolio still reports exposure
+strategy/trader.go-10257-	// on the expected outcome. This replaces the Polymarket ERC1155 balance check.
+strategy/trader.go-10258-	if t.orders != nil && pos.ConditionID != "" {
+strategy/trader.go:10259:		if positions, pErr := t.orders.FetchCurrentPositions(ctx, 500, 0); pErr == nil {
+strategy/trader.go-10260-			foundShares := 0.0
+strategy/trader.go-10261-
+strategy/trader.go-10262-			for i := range positions {
+strategy/trader.go-10263-				p := &positions[i]
+strategy/trader.go-10264-
+strategy/trader.go-10265-				if !strings.EqualFold(
+strategy/trader.go-10266-					strings.TrimSpace(p.ConditionID),
+strategy/trader.go-10267-					strings.TrimSpace(pos.ConditionID),
+strategy/trader.go-10268-				) {
+strategy/trader.go-10269-					continue
+strategy/trader.go-10270-				}
+strategy/trader.go-10271-
+strategy/trader.go-10272-				isNo, ok := inferNoSideFromOutcomes(
+strategy/trader.go-10273-					p.Outcome,
+strategy/trader.go-10274-					p.OppositeOutcome,
+strategy/trader.go-10275-					p.OutcomeIndex,
+strategy/trader.go-10276-				)
+strategy/trader.go-10277-				if !ok || isNo != pos.IsNoSide {
+strategy/trader.go-10278-					continue
+strategy/trader.go-10279-				}
+strategy/trader.go-10280-
+strategy/trader.go-10281-				if p.Size > foundShares {
+strategy/trader.go-10282-					foundShares = p.Size
+strategy/trader.go-10283-				}
+strategy/trader.go-10284-			}
+strategy/trader.go-10285-
+strategy/trader.go-10286-			if foundShares < pos.Shares*0.5 {
+strategy/trader.go-10287-				t.logger.Warn(
+strategy/trader.go-10288-					"trader: restored Kalshi position not found in portfolio; discarding stale state",
+strategy/trader.go-10289-					zap.String("condition_id", pos.ConditionID),
+strategy/trader.go-10290-					zap.Float64("expected_shares", pos.Shares),
+strategy/trader.go-10291-					zap.Float64("portfolio_shares", foundShares),
+strategy/trader.go-10292-				)
+strategy/trader.go-10293-				t.position = nil
+strategy/trader.go-10294-				t.savePositionState()
+strategy/trader.go-10295-				return false
+strategy/trader.go-10296-			}
+strategy/trader.go-10297-		} else {
+strategy/trader.go-10298-			t.logger.Warn(
+strategy/trader.go-10299-				"trader: Kalshi portfolio verification unavailable during restore; preserving position conservatively",
+strategy/trader.go-10300-				zap.Error(pErr),
+strategy/trader.go-10301-			)
+strategy/trader.go-10302-		}
+strategy/trader.go-10303-	}
+strategy/trader.go-10304-
+strategy/trader.go-10305-	t.position = pos
+strategy/trader.go-10306-	t.detector.SetInPosition(true)
+strategy/trader.go-10307-	t.savePositionState() // commit cleaned-up state (no pending sell order ID)
+strategy/trader.go-10308-	t.logger.Warn("trader: RESTORED open lag position from previous run",
+strategy/trader.go-10309-		zap.String("token_id", pos.TokenID),
+strategy/trader.go-10310-		zap.Float64("shares", pos.Shares),
+strategy/trader.go-10311-		zap.Float64("buy_price", pos.BuyPrice),
+strategy/trader.go-10312-		zap.Time("expires_at", pos.ExpiresAt),
+strategy/trader.go-10313-	)
+strategy/trader.go-10314-	return true
+strategy/trader.go-10315-}
 
-===== KALSHI POSITION NORMALIZATION =====
-kalshi/orders.go:53:func (o Order) FilledContracts() float64 {
+===== USER POSITION TYPE =====
+polymarket/positions.go-7-	"io"
+polymarket/positions.go-8-	"net/http"
+polymarket/positions.go-9-	"net/url"
+polymarket/positions.go-10-	"strconv"
+polymarket/positions.go-11-	"strings"
+polymarket/positions.go-12-)
+polymarket/positions.go-13-
+polymarket/positions.go-14-const dataAPIBaseURL = "https://data-api.polymarket.com"
+polymarket/positions.go-15-
+polymarket/positions.go-16-// UserPosition models GET /positions from the Polymarket Data API.
+polymarket/positions.go:17:type UserPosition struct {
+polymarket/positions.go-18-	ProxyWallet        string  `json:"proxyWallet"`
+polymarket/positions.go-19-	Asset              string  `json:"asset"`
+polymarket/positions.go-20-	ConditionID        string  `json:"conditionId"`
+polymarket/positions.go-21-	Size               float64 `json:"size"`
+polymarket/positions.go-22-	AvgPrice           float64 `json:"avgPrice"`
+polymarket/positions.go-23-	InitialValue       float64 `json:"initialValue"`
+polymarket/positions.go-24-	CurrentValue       float64 `json:"currentValue"`
+polymarket/positions.go-25-	CashPnL            float64 `json:"cashPnl"`
+polymarket/positions.go-26-	PercentPnL         float64 `json:"percentPnl"`
+polymarket/positions.go-27-	TotalBought        float64 `json:"totalBought"`
+polymarket/positions.go-28-	RealizedPnL        float64 `json:"realizedPnl"`
+polymarket/positions.go-29-	PercentRealizedPnL float64 `json:"percentRealizedPnl"`
+polymarket/positions.go-30-	CurPrice           float64 `json:"curPrice"`
+polymarket/positions.go-31-	Redeemable         bool    `json:"redeemable"`
+polymarket/positions.go-32-	Mergeable          bool    `json:"mergeable"`
+polymarket/positions.go-33-	Title              string  `json:"title"`
+polymarket/positions.go-34-	Slug               string  `json:"slug"`
+polymarket/positions.go-35-	EventSlug          string  `json:"eventSlug"`
+polymarket/positions.go-36-	Outcome            string  `json:"outcome"`
+polymarket/positions.go-37-	OutcomeIndex       int     `json:"outcomeIndex"`
+polymarket/positions.go-38-	OppositeOutcome    string  `json:"oppositeOutcome"`
+polymarket/positions.go-39-	OppositeAsset      string  `json:"oppositeAsset"`
+polymarket/positions.go-40-	EndDate            string  `json:"endDate"`
+polymarket/positions.go-41-}
+polymarket/positions.go-42-
+polymarket/positions.go-43-// ClosedUserPosition models GET /closed-positions from the Polymarket Data API.
+polymarket/positions.go-44-type ClosedUserPosition struct {
+polymarket/positions.go-45-	ProxyWallet     string  `json:"proxyWallet"`
+polymarket/positions.go-46-	Asset           string  `json:"asset"`
+polymarket/positions.go-47-	ConditionID     string  `json:"conditionId"`
+polymarket/positions.go-48-	AvgPrice        float64 `json:"avgPrice"`
+polymarket/positions.go-49-	TotalBought     float64 `json:"totalBought"`
+polymarket/positions.go-50-	RealizedPnL     float64 `json:"realizedPnl"`
+polymarket/positions.go-51-	CurPrice        float64 `json:"curPrice"`
+polymarket/positions.go-52-	Timestamp       int64   `json:"timestamp"`
+polymarket/positions.go-53-	Title           string  `json:"title"`
+polymarket/positions.go-54-	Slug            string  `json:"slug"`
+polymarket/positions.go-55-	EventSlug       string  `json:"eventSlug"`
+polymarket/positions.go-56-	Outcome         string  `json:"outcome"`
+polymarket/positions.go-57-	OutcomeIndex    int     `json:"outcomeIndex"`
+polymarket/positions.go-58-	OppositeOutcome string  `json:"oppositeOutcome"`
+polymarket/positions.go-59-	OppositeAsset   string  `json:"oppositeAsset"`
+polymarket/positions.go-60-	EndDate         string  `json:"endDate"`
+polymarket/positions.go-61-}
+polymarket/positions.go-62-
+polymarket/positions.go-63-func (c *RESTClient) doDataAPIGet(ctx context.Context, path string, q url.Values) ([]byte, error) {
+polymarket/positions.go-64-	hc := c.httpClient
+polymarket/positions.go-65-	if hc == nil {
+polymarket/positions.go-66-		hc = http.DefaultClient
+polymarket/positions.go-67-	}
+polymarket/positions.go-68-	u := dataAPIBaseURL + path
+polymarket/positions.go-69-	if len(q) > 0 {
+polymarket/positions.go-70-		u += "?" + q.Encode()
+polymarket/positions.go-71-	}
+polymarket/positions.go-72-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+polymarket/positions.go-73-	if err != nil {
+polymarket/positions.go-74-		return nil, err
+polymarket/positions.go-75-	}
+polymarket/positions.go-76-	resp, err := hc.Do(req)
+polymarket/positions.go-77-	if err != nil {
+
+===== KALSHI POSITION STRUCT =====
+kalshi/orders.go-49-	CreatedTime    string `json:"created_time"`
+kalshi/orders.go-50-	LastUpdateTime string `json:"last_update_time"`
+kalshi/orders.go-51-}
+kalshi/orders.go-52-
+kalshi/orders.go-53-func (o Order) FilledContracts() float64 {
+kalshi/orders.go-54-	v, _ := strconv.ParseFloat(o.FillCountFP, 64)
+kalshi/orders.go-55-	return v
+kalshi/orders.go-56-}
+kalshi/orders.go-57-
+kalshi/orders.go-58-func (o Order) RemainingContracts() float64 {
+kalshi/orders.go-59-	v, _ := strconv.ParseFloat(o.RemainingCountFP, 64)
+kalshi/orders.go-60-	return v
+kalshi/orders.go-61-}
+kalshi/orders.go-62-
+kalshi/orders.go-63-func (o Order) FeesUSD() float64 {
+kalshi/orders.go-64-	t, _ := strconv.ParseFloat(o.TakerFeesDollars, 64)
+kalshi/orders.go-65-	m, _ := strconv.ParseFloat(o.MakerFeesDollars, 64)
+kalshi/orders.go-66-	return t + m
+kalshi/orders.go-67-}
+kalshi/orders.go-68-
+kalshi/orders.go:69:type MarketPosition struct {
+kalshi/orders.go-70-	Ticker                string `json:"ticker"`
+kalshi/orders.go-71-	TotalTradedDollars    string `json:"total_traded_dollars"`
 kalshi/orders.go:72:	PositionFP            string `json:"position_fp"`
 kalshi/orders.go:73:	MarketExposureDollars string `json:"market_exposure_dollars"`
-kalshi/orders.go:125:func (c *Client) GetPositions(ctx context.Context, ticker string) ([]MarketPosition, error) {
-kalshi/orders.go:160:	AverageFillPrice string `json:"average_fill_price,omitempty"`
-kalshi/orders.go:406:	FilledContracts  float64
-kalshi/orders.go:408:	AverageFillPrice float64
-kalshi/orders.go:412:func (o Order) NormalizeForLogicalToken(tokenID string) (NormalizedOrder, error) {
-kalshi/orders.go:435:		FilledContracts:  filled,
-kalshi/orders.go:437:		AverageFillPrice: price,
-kalshi/execution_adapter.go:224:	n, err := o.NormalizeForLogicalToken(tokenID)
-kalshi/execution_adapter.go:229:	if n.FilledContracts <= 0 {
-kalshi/execution_adapter.go:233:	return n.AverageFillPrice, n.FilledContracts, nil
-kalshi/execution_adapter.go:422:	items, err := a.Client.GetPositions(ctx, "")
+kalshi/orders.go-74-	RealizedPnLDollars    string `json:"realized_pnl_dollars"`
+kalshi/orders.go-75-	RestingOrdersCount    int    `json:"resting_orders_count"`
+kalshi/orders.go-76-	FeesPaidDollars       string `json:"fees_paid_dollars"`
+kalshi/orders.go-77-	LastUpdatedTS         string `json:"last_updated_ts"`
+kalshi/orders.go-78-}
+kalshi/orders.go-79-
+kalshi/orders.go-80-type balanceResponse struct {
+kalshi/orders.go-81-	Balance        int64 `json:"balance"`
+kalshi/orders.go-82-	PortfolioValue int64 `json:"portfolio_value"`
+kalshi/orders.go-83-	UpdatedTS      int64 `json:"updated_ts"`
+kalshi/orders.go-84-}
+kalshi/orders.go-85-
+kalshi/orders.go-86-type orderResponse struct {
+kalshi/orders.go-87-	Order Order `json:"order"`
+kalshi/orders.go-88-}
+kalshi/orders.go-89-
+kalshi/orders.go-90-type positionsResponse struct {
+kalshi/orders.go-91-	MarketPositions []MarketPosition `json:"market_positions"`
+kalshi/orders.go-92-	Cursor          string           `json:"cursor"`
+kalshi/orders.go-93-}
+kalshi/orders.go-94-
+kalshi/orders.go-95-func (c *Client) GetBalance(ctx context.Context) (*Balance, error) {
+kalshi/orders.go-96-	var r balanceResponse
+kalshi/orders.go-97-
+kalshi/orders.go-98-	if err := c.Do(ctx, http.MethodGet, "/portfolio/balance", nil, &r); err != nil {
+kalshi/orders.go-99-		return nil, err
+kalshi/orders.go-100-	}
+kalshi/orders.go-101-
+kalshi/orders.go-102-	return &Balance{
+kalshi/orders.go-103-		Balance:        r.Balance,
+kalshi/orders.go-104-		PortfolioValue: r.PortfolioValue,
+kalshi/orders.go-105-		UpdatedTS:      r.UpdatedTS,
+kalshi/orders.go-106-	}, nil
+kalshi/orders.go-107-}
+kalshi/orders.go-108-
+kalshi/orders.go-109-func (c *Client) GetOrder(ctx context.Context, orderID string) (*Order, error) {
+kalshi/orders.go-110-	orderID = strings.TrimSpace(orderID)
+kalshi/orders.go-111-	if orderID == "" {
+kalshi/orders.go-112-		return nil, fmt.Errorf("kalshi: empty order id")
+kalshi/orders.go-113-	}
+kalshi/orders.go-114-
+kalshi/orders.go-115-	var r orderResponse
+kalshi/orders.go-116-	path := "/portfolio/orders/" + url.PathEscape(orderID)
+kalshi/orders.go-117-
+kalshi/orders.go-118-	if err := c.Do(ctx, http.MethodGet, path, nil, &r); err != nil {
+kalshi/orders.go-119-		return nil, err
+kalshi/orders.go-120-	}
+kalshi/orders.go-121-
+kalshi/orders.go-122-	return &r.Order, nil
+kalshi/orders.go-123-}
+kalshi/orders.go-124-
+kalshi/orders.go-125-func (c *Client) GetPositions(ctx context.Context, ticker string) ([]MarketPosition, error) {
+kalshi/orders.go-126-	path := "/portfolio/positions"
+kalshi/orders.go-127-
+kalshi/orders.go-128-	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go-129-		path += "?ticker=" + url.QueryEscape(strings.TrimSpace(ticker))
+kalshi/orders.go-130-	}
+kalshi/orders.go-131-
+kalshi/orders.go-132-	var r positionsResponse
+kalshi/orders.go-133-	if err := c.Do(ctx, http.MethodGet, path, nil, &r); err != nil {
+kalshi/orders.go-134-		return nil, err
+kalshi/orders.go-135-	}
+kalshi/orders.go-136-
+kalshi/orders.go-137-	return r.MarketPositions, nil
+kalshi/orders.go-138-}
+kalshi/orders.go-139-
+kalshi/orders.go-140-type CreateOrderRequest struct {
+kalshi/orders.go-141-	Ticker                  string `json:"ticker"`
+kalshi/orders.go-142-	ClientOrderID           string `json:"client_order_id"`
+kalshi/orders.go-143-	Side                    string `json:"side"`
+kalshi/orders.go-144-	Count                   string `json:"count"`
+kalshi/orders.go-145-	Price                   string `json:"price"`
+kalshi/orders.go-146-	TimeInForce             string `json:"time_in_force"`
+kalshi/orders.go-147-	SelfTradePreventionType string `json:"self_trade_prevention_type"`
+kalshi/orders.go-148-
+kalshi/orders.go-149-	ExpirationTime     int64 `json:"expiration_time,omitempty"`
+kalshi/orders.go-150-	PostOnly           bool  `json:"post_only"`
+kalshi/orders.go-151-	CancelOrderOnPause bool  `json:"cancel_order_on_pause"`
+kalshi/orders.go-152-	ReduceOnly         bool  `json:"reduce_only"`
+kalshi/orders.go-153-}
+kalshi/orders.go-154-
+kalshi/orders.go-155-type CreateOrderResponse struct {
+kalshi/orders.go-156-	OrderID          string `json:"order_id"`
+kalshi/orders.go-157-	ClientOrderID    string `json:"client_order_id"`
+kalshi/orders.go-158-	FillCount        string `json:"fill_count"`
+kalshi/orders.go-159-	RemainingCount   string `json:"remaining_count"`
+kalshi/orders.go-160-	AverageFillPrice string `json:"average_fill_price,omitempty"`
+kalshi/orders.go-161-	AverageFeePaid   string `json:"average_fee_paid,omitempty"`
+kalshi/orders.go-162-	TSMS             int64  `json:"ts_ms"`
+kalshi/orders.go-163-}
+kalshi/orders.go-164-
+kalshi/orders.go-165-type CancelOrderResponse struct {
+kalshi/orders.go-166-	OrderID       string `json:"order_id"`
+kalshi/orders.go-167-	ClientOrderID string `json:"client_order_id"`
+kalshi/orders.go-168-	ReducedBy     string `json:"reduced_by"`
+kalshi/orders.go-169-	TSMS          int64  `json:"ts_ms"`
+kalshi/orders.go-170-}
+kalshi/orders.go-171-
+kalshi/orders.go-172-func (c *Client) CreateOrder(
+kalshi/orders.go-173-	ctx context.Context,
+--
+kalshi/execution_adapter.go-410-
+kalshi/execution_adapter.go-411-// Position cost-basis reconciliation requires additional Kalshi position fields.
+kalshi/execution_adapter.go-412-// Do not synthesize cost basis.
+kalshi/execution_adapter.go-413-func (a *ExecutionAdapter) FetchCurrentPositions(
+kalshi/execution_adapter.go-414-	ctx context.Context,
+kalshi/execution_adapter.go-415-	limit int,
+kalshi/execution_adapter.go-416-	offset int,
+kalshi/execution_adapter.go-417-) ([]polymarket.UserPosition, error) {
+kalshi/execution_adapter.go-418-	if err := a.requireClient(); err != nil {
+kalshi/execution_adapter.go-419-		return nil, err
+kalshi/execution_adapter.go-420-	}
+kalshi/execution_adapter.go-421-
+kalshi/execution_adapter.go-422-	items, err := a.Client.GetPositions(ctx, "")
+kalshi/execution_adapter.go-423-	if err != nil {
+kalshi/execution_adapter.go-424-		return nil, err
+kalshi/execution_adapter.go-425-	}
+kalshi/execution_adapter.go-426-
+kalshi/execution_adapter.go-427-	out := make([]polymarket.UserPosition, 0, len(items))
+kalshi/execution_adapter.go-428-
+kalshi/execution_adapter.go-429-	for _, kp := range items {
 kalshi/execution_adapter.go:430:		raw, err := strconv.ParseFloat(strings.TrimSpace(kp.PositionFP), 64)
+kalshi/execution_adapter.go-431-		if err != nil || math.Abs(raw) <= 0.000001 {
+kalshi/execution_adapter.go-432-			continue
+kalshi/execution_adapter.go-433-		}
+kalshi/execution_adapter.go-434-
+kalshi/execution_adapter.go-435-		isNo := raw < 0
+kalshi/execution_adapter.go-436-		size := math.Abs(raw)
+kalshi/execution_adapter.go-437-
+kalshi/execution_adapter.go-438-		outcome := "Yes"
+kalshi/execution_adapter.go-439-		opposite := "No"
+kalshi/execution_adapter.go-440-		index := 0
+kalshi/execution_adapter.go-441-
+kalshi/execution_adapter.go-442-		if isNo {
+kalshi/execution_adapter.go-443-			outcome = "No"
+kalshi/execution_adapter.go-444-			opposite = "Yes"
+kalshi/execution_adapter.go-445-			index = 1
+kalshi/execution_adapter.go-446-		}
+kalshi/execution_adapter.go-447-
+kalshi/execution_adapter.go-448-		currentValue, _ := strconv.ParseFloat(
 kalshi/execution_adapter.go:449:			strings.TrimSpace(kp.MarketExposureDollars),
+kalshi/execution_adapter.go-450-			64,
+kalshi/execution_adapter.go-451-		)
+kalshi/execution_adapter.go-452-
+kalshi/execution_adapter.go-453-		out = append(out, polymarket.UserPosition{
+kalshi/execution_adapter.go-454-			ConditionID:     kp.Ticker,
+kalshi/execution_adapter.go-455-			Size:            size,
+kalshi/execution_adapter.go-456-			AvgPrice:        0,
+kalshi/execution_adapter.go-457-			CurrentValue:    currentValue,
+kalshi/execution_adapter.go-458-			Outcome:         outcome,
+kalshi/execution_adapter.go-459-			OutcomeIndex:    index,
+kalshi/execution_adapter.go-460-			OppositeOutcome: opposite,
+kalshi/execution_adapter.go-461-		})
+kalshi/execution_adapter.go-462-	}
+kalshi/execution_adapter.go-463-
+kalshi/execution_adapter.go-464-	return out, nil
+kalshi/execution_adapter.go-465-}
+kalshi/execution_adapter.go-466-
+kalshi/execution_adapter.go-467-// -----------------------------------------------------------------------------
+kalshi/execution_adapter.go-468-// Polymarket-only operations.
+kalshi/execution_adapter.go-469-// Kalshi has no CTF, Polygon ERC-1155 allowance, or manual redemption.
+kalshi/execution_adapter.go-470-// -----------------------------------------------------------------------------
+kalshi/execution_adapter.go-471-
+kalshi/execution_adapter.go-472-func (a *ExecutionAdapter) FetchConditionalBalanceAllowance(
+kalshi/execution_adapter.go-473-	ctx context.Context,
+kalshi/execution_adapter.go-474-	tokenID string,
+kalshi/execution_adapter.go-475-) (*polymarket.BalanceAllowanceResponse, error) {
+kalshi/execution_adapter.go-476-	return nil, errors.New("kalshi execution: conditional token allowance is not applicable")
+kalshi/execution_adapter.go-477-}
+kalshi/execution_adapter.go-478-
+kalshi/execution_adapter.go-479-func (a *ExecutionAdapter) HasCTFBalance(
+kalshi/execution_adapter.go-480-	ctx context.Context,
+kalshi/execution_adapter.go-481-	conditionID string,
+kalshi/execution_adapter.go-482-) (bool, error) {
+kalshi/execution_adapter.go-483-	return false, errors.New("kalshi execution: CTF balance is not applicable")
+kalshi/execution_adapter.go-484-}
+kalshi/execution_adapter.go-485-
+kalshi/execution_adapter.go-486-func (a *ExecutionAdapter) RedeemCTFPosition(
+kalshi/execution_adapter.go-487-	ctx context.Context,
+kalshi/execution_adapter.go-488-	conditionID string,
+kalshi/execution_adapter.go-489-	isNoSide bool,
+kalshi/execution_adapter.go-490-) error {
+kalshi/execution_adapter.go-491-	return errors.New("kalshi execution: CTF redemption is not applicable")
+kalshi/execution_adapter.go-492-}
+kalshi/execution_adapter.go-493-
+kalshi/execution_adapter.go-494-func (a *ExecutionAdapter) TriggerConditionalApproval(
+kalshi/execution_adapter.go-495-	ctx context.Context,
+kalshi/execution_adapter.go-496-	tokenID string,
+kalshi/execution_adapter.go-497-	retryDelay time.Duration,
+kalshi/execution_adapter.go-498-) error {
+kalshi/execution_adapter.go-499-	return errors.New("kalshi execution: conditional approval is not applicable")
+kalshi/execution_adapter.go-500-}
+kalshi/execution_adapter.go-501-
+kalshi/execution_adapter.go-502-func (a *ExecutionAdapter) WaitForConditionalAllowance(
+kalshi/execution_adapter.go-503-	ctx context.Context,
+kalshi/execution_adapter.go-504-	tokenID string,
+kalshi/execution_adapter.go-505-	timeout time.Duration,
+kalshi/execution_adapter.go-506-) error {
+kalshi/execution_adapter.go-507-	return errors.New("kalshi execution: conditional allowance is not applicable")
+kalshi/execution_adapter.go-508-}
+kalshi/execution_adapter.go-509-
+kalshi/execution_adapter.go-510-func (a *ExecutionAdapter) WaitForSettledBalance(
+kalshi/execution_adapter.go-511-	ctx context.Context,
+kalshi/execution_adapter.go-512-	tokenID string,
+kalshi/execution_adapter.go-513-	minShares float64,
+kalshi/execution_adapter.go-514-	timeout time.Duration,
+kalshi/execution_adapter.go-515-) error {
+kalshi/execution_adapter.go-516-	return errors.New("kalshi execution: Polygon settlement balance is not applicable")
+kalshi/execution_adapter.go-517-}
+kalshi/execution_adapter.go-518-
+kalshi/execution_adapter.go-519-// Compile-time protection: this must continue satisfying the Trader interface
+kalshi/execution_adapter.go-520-// shape as the migration progresses.
+kalshi/execution_adapter.go-521-
+kalshi/execution_adapter.go-522-// ResolveMarket returns the authoritative finalized Kalshi result.
+kalshi/execution_adapter.go-523-// known=false means the market has not finalized yet.
+kalshi/execution_adapter.go-524-func (a *ExecutionAdapter) ResolveMarket(
+kalshi/execution_adapter.go-525-	ctx context.Context,
+kalshi/execution_adapter.go-526-	conditionID string,
+kalshi/execution_adapter.go-527-) (resolvedYes bool, known bool, err error) {
+kalshi/execution_adapter.go-528-	if err := a.requireClient(); err != nil {
+kalshi/execution_adapter.go-529-		return false, false, err
+kalshi/execution_adapter.go-530-	}
+kalshi/execution_adapter.go-531-
+kalshi/execution_adapter.go-532-	return a.Client.FetchResolution(ctx, conditionID)
+kalshi/execution_adapter.go-533-}
+kalshi/execution_adapter.go-534-
+kalshi/execution_adapter.go-535-var _ interface {
+kalshi/execution_adapter.go-536-	PlaceOrder(context.Context, *polymarket.NewOrderRequest) (*polymarket.OrderResponse, error)
+kalshi/execution_adapter.go-537-	CancelOrder(context.Context, string) error
+kalshi/execution_adapter.go-538-	GetOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+kalshi/execution_adapter.go-539-	GetFillsByTakerOrderID(context.Context, string, string) (float64, float64, error)
+kalshi/execution_adapter.go-540-	GetTickSize(context.Context, string) (string, error)
+kalshi/execution_adapter.go-541-	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+kalshi/execution_adapter.go-542-	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
+kalshi/execution_adapter.go-543-	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
+kalshi/execution_adapter.go-544-	FetchUSDCBalance(context.Context) (float64, error)
+kalshi/execution_adapter.go-545-	ResolveMarket(context.Context, string) (bool, bool, error)
+kalshi/execution_adapter.go-546-	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
+kalshi/execution_adapter.go-547-	HasCTFBalance(context.Context, string) (bool, error)
+kalshi/execution_adapter.go-548-	RedeemCTFPosition(context.Context, string, bool) error
+kalshi/execution_adapter.go-549-	TriggerConditionalApproval(context.Context, string, time.Duration) error
 
-===== TESTS =====
+===== KALSHI GET POSITIONS =====
+kalshi/orders.go-95-func (c *Client) GetBalance(ctx context.Context) (*Balance, error) {
+kalshi/orders.go-96-	var r balanceResponse
+kalshi/orders.go-97-
+kalshi/orders.go-98-	if err := c.Do(ctx, http.MethodGet, "/portfolio/balance", nil, &r); err != nil {
+kalshi/orders.go-99-		return nil, err
+kalshi/orders.go-100-	}
+kalshi/orders.go-101-
+kalshi/orders.go-102-	return &Balance{
+kalshi/orders.go-103-		Balance:        r.Balance,
+kalshi/orders.go-104-		PortfolioValue: r.PortfolioValue,
+kalshi/orders.go-105-		UpdatedTS:      r.UpdatedTS,
+kalshi/orders.go-106-	}, nil
+kalshi/orders.go-107-}
+kalshi/orders.go-108-
+kalshi/orders.go-109-func (c *Client) GetOrder(ctx context.Context, orderID string) (*Order, error) {
+kalshi/orders.go-110-	orderID = strings.TrimSpace(orderID)
+kalshi/orders.go-111-	if orderID == "" {
+kalshi/orders.go-112-		return nil, fmt.Errorf("kalshi: empty order id")
+kalshi/orders.go-113-	}
+kalshi/orders.go-114-
+kalshi/orders.go-115-	var r orderResponse
+kalshi/orders.go-116-	path := "/portfolio/orders/" + url.PathEscape(orderID)
+kalshi/orders.go-117-
+kalshi/orders.go-118-	if err := c.Do(ctx, http.MethodGet, path, nil, &r); err != nil {
+kalshi/orders.go-119-		return nil, err
+kalshi/orders.go-120-	}
+kalshi/orders.go-121-
+kalshi/orders.go-122-	return &r.Order, nil
+kalshi/orders.go-123-}
+kalshi/orders.go-124-
+kalshi/orders.go:125:func (c *Client) GetPositions(ctx context.Context, ticker string) ([]MarketPosition, error) {
+kalshi/orders.go-126-	path := "/portfolio/positions"
+kalshi/orders.go-127-
+kalshi/orders.go-128-	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go-129-		path += "?ticker=" + url.QueryEscape(strings.TrimSpace(ticker))
+kalshi/orders.go-130-	}
+kalshi/orders.go-131-
+kalshi/orders.go-132-	var r positionsResponse
+kalshi/orders.go-133-	if err := c.Do(ctx, http.MethodGet, path, nil, &r); err != nil {
+kalshi/orders.go-134-		return nil, err
+kalshi/orders.go-135-	}
+kalshi/orders.go-136-
+kalshi/orders.go-137-	return r.MarketPositions, nil
+kalshi/orders.go-138-}
+kalshi/orders.go-139-
+kalshi/orders.go-140-type CreateOrderRequest struct {
+kalshi/orders.go-141-	Ticker                  string `json:"ticker"`
+kalshi/orders.go-142-	ClientOrderID           string `json:"client_order_id"`
+kalshi/orders.go-143-	Side                    string `json:"side"`
+kalshi/orders.go-144-	Count                   string `json:"count"`
+kalshi/orders.go-145-	Price                   string `json:"price"`
+kalshi/orders.go-146-	TimeInForce             string `json:"time_in_force"`
+kalshi/orders.go-147-	SelfTradePreventionType string `json:"self_trade_prevention_type"`
+kalshi/orders.go-148-
+kalshi/orders.go-149-	ExpirationTime     int64 `json:"expiration_time,omitempty"`
+kalshi/orders.go-150-	PostOnly           bool  `json:"post_only"`
+kalshi/orders.go-151-	CancelOrderOnPause bool  `json:"cancel_order_on_pause"`
+kalshi/orders.go-152-	ReduceOnly         bool  `json:"reduce_only"`
+kalshi/orders.go-153-}
+kalshi/orders.go-154-
+kalshi/orders.go-155-type CreateOrderResponse struct {
+kalshi/orders.go-156-	OrderID          string `json:"order_id"`
+kalshi/orders.go-157-	ClientOrderID    string `json:"client_order_id"`
+kalshi/orders.go-158-	FillCount        string `json:"fill_count"`
+kalshi/orders.go-159-	RemainingCount   string `json:"remaining_count"`
+kalshi/orders.go-160-	AverageFillPrice string `json:"average_fill_price,omitempty"`
+kalshi/orders.go-161-	AverageFeePaid   string `json:"average_fee_paid,omitempty"`
+kalshi/orders.go-162-	TSMS             int64  `json:"ts_ms"`
+kalshi/orders.go-163-}
+kalshi/orders.go-164-
+kalshi/orders.go-165-type CancelOrderResponse struct {
+kalshi/orders.go-166-	OrderID       string `json:"order_id"`
+kalshi/orders.go-167-	ClientOrderID string `json:"client_order_id"`
+kalshi/orders.go-168-	ReducedBy     string `json:"reduced_by"`
+kalshi/orders.go-169-	TSMS          int64  `json:"ts_ms"`
+kalshi/orders.go-170-}
+kalshi/orders.go-171-
+kalshi/orders.go-172-func (c *Client) CreateOrder(
+kalshi/orders.go-173-	ctx context.Context,
+kalshi/orders.go-174-	req CreateOrderRequest,
+kalshi/orders.go-175-) (*CreateOrderResponse, error) {
+kalshi/orders.go-176-	if strings.TrimSpace(req.Ticker) == "" {
+kalshi/orders.go-177-		return nil, fmt.Errorf("kalshi: empty ticker")
+kalshi/orders.go-178-	}
+kalshi/orders.go-179-	if strings.TrimSpace(req.ClientOrderID) == "" {
+kalshi/orders.go-180-		return nil, fmt.Errorf("kalshi: empty client order id")
+kalshi/orders.go-181-	}
+kalshi/orders.go-182-	if req.Side != "bid" && req.Side != "ask" {
+kalshi/orders.go-183-		return nil, fmt.Errorf("kalshi: invalid V2 side %q", req.Side)
+kalshi/orders.go-184-	}
+kalshi/orders.go-185-	if strings.TrimSpace(req.Count) == "" {
+kalshi/orders.go-186-		return nil, fmt.Errorf("kalshi: empty order count")
+kalshi/orders.go-187-	}
+kalshi/orders.go-188-	if strings.TrimSpace(req.Price) == "" {
+kalshi/orders.go-189-		return nil, fmt.Errorf("kalshi: empty order price")
+kalshi/orders.go-190-	}
+kalshi/orders.go-191-
+kalshi/orders.go-192-	switch req.TimeInForce {
+kalshi/orders.go-193-	case "good_till_canceled", "fill_or_kill", "immediate_or_cancel":
+kalshi/orders.go-194-	default:
+kalshi/orders.go-195-		return nil, fmt.Errorf(
+kalshi/orders.go-196-			"kalshi: invalid time_in_force %q",
+kalshi/orders.go-197-			req.TimeInForce,
+kalshi/orders.go-198-		)
+kalshi/orders.go-199-	}
+kalshi/orders.go-200-
+kalshi/orders.go-201-	if req.SelfTradePreventionType == "" {
+kalshi/orders.go-202-		req.SelfTradePreventionType = "taker_at_cross"
+kalshi/orders.go-203-	}
+kalshi/orders.go-204-
+kalshi/orders.go-205-	var out CreateOrderResponse
+kalshi/orders.go-206-	if err := c.Do(
+kalshi/orders.go-207-		ctx,
+kalshi/orders.go-208-		http.MethodPost,
+kalshi/orders.go-209-		"/portfolio/events/orders",
+kalshi/orders.go-210-		req,
+kalshi/orders.go-211-		&out,
+kalshi/orders.go-212-	); err != nil {
+kalshi/orders.go-213-		return nil, err
+kalshi/orders.go-214-	}
+kalshi/orders.go-215-
+kalshi/orders.go-216-	if strings.TrimSpace(out.OrderID) == "" {
+kalshi/orders.go-217-		return nil, fmt.Errorf("kalshi: create order returned empty order_id")
+kalshi/orders.go-218-	}
+kalshi/orders.go-219-
+kalshi/orders.go-220-	return &out, nil
+kalshi/orders.go-221-}
+kalshi/orders.go-222-
+kalshi/orders.go-223-func (c *Client) CancelOrderV2(
+kalshi/orders.go-224-	ctx context.Context,
+kalshi/orders.go-225-	orderID string,
+kalshi/orders.go-226-) (*CancelOrderResponse, error) {
+kalshi/orders.go-227-	orderID = strings.TrimSpace(orderID)
+kalshi/orders.go-228-	if orderID == "" {
+kalshi/orders.go-229-		return nil, fmt.Errorf("kalshi: empty order id")
+kalshi/orders.go-230-	}
+kalshi/orders.go-231-
+kalshi/orders.go-232-	var out CancelOrderResponse
+kalshi/orders.go-233-	path := "/portfolio/events/orders/" + url.PathEscape(orderID)
+kalshi/orders.go-234-
+kalshi/orders.go-235-	if err := c.Do(
+kalshi/orders.go-236-		ctx,
+kalshi/orders.go-237-		http.MethodDelete,
+kalshi/orders.go-238-		path,
+kalshi/orders.go-239-		nil,
+kalshi/orders.go-240-		&out,
+kalshi/orders.go-241-	); err != nil {
+kalshi/orders.go-242-		return nil, err
+kalshi/orders.go-243-	}
+kalshi/orders.go-244-
+kalshi/orders.go-245-	return &out, nil
+kalshi/orders.go-246-}
+kalshi/orders.go-247-
+kalshi/orders.go-248-func LogicalOrderToV2(
+kalshi/orders.go-249-	tokenID string,
+kalshi/orders.go-250-	action string,
+kalshi/orders.go-251-	price float64,
+kalshi/orders.go-252-) (ticker, bookSide string, kalshiPrice float64, err error) {
+kalshi/orders.go-253-	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/orders.go-254-	if err != nil {
+kalshi/orders.go-255-		return "", "", 0, err
+kalshi/orders.go-256-	}
+kalshi/orders.go-257-
+kalshi/orders.go-258-	action = strings.ToUpper(strings.TrimSpace(action))
+kalshi/orders.go-259-
+kalshi/orders.go-260-	if action != "BUY" && action != "SELL" {
+kalshi/orders.go-261-		return "", "", 0, fmt.Errorf("kalshi: invalid logical action %q", action)
+kalshi/orders.go-262-	}
+kalshi/orders.go-263-
+kalshi/orders.go-264-	if price <= 0 || price >= 1 {
+kalshi/orders.go-265-		return "", "", 0, fmt.Errorf("kalshi: invalid logical price %.4f", price)
+kalshi/orders.go-266-	}
+kalshi/orders.go-267-
+kalshi/orders.go-268-	// Kalshi adapter uses a YES bid/ask book:
+kalshi/orders.go-269-	//
+kalshi/orders.go-270-	// BUY YES  P  -> BID YES P
+kalshi/orders.go-271-	// SELL YES P  -> ASK YES P
+kalshi/orders.go-272-	//
+kalshi/orders.go-273-	// A NO contract at P is economically the opposite YES contract at 1-P:
+kalshi/orders.go-274-	//
+kalshi/orders.go-275-	// BUY NO   P  -> ASK YES (1-P)
+kalshi/orders.go-276-	// SELL NO  P  -> BID YES (1-P)
+kalshi/orders.go-277-	//
+kalshi/orders.go-278-	// This complement is essential. A logical BUY NO @ 0.67 must become
+kalshi/orders.go-279-	// ASK YES @ 0.33, not ASK YES @ 0.67.
+kalshi/orders.go-280-	yesPrice := price
+kalshi/orders.go-281-	side := ""
+kalshi/orders.go-282-
+kalshi/orders.go-283-	switch outcome {
+kalshi/orders.go-284-	case "YES":
+kalshi/orders.go-285-		if action == "BUY" {
+kalshi/orders.go-286-			side = "bid"
+kalshi/orders.go-287-		} else {
+kalshi/orders.go-288-			side = "ask"
+kalshi/orders.go-289-		}
+kalshi/orders.go-290-
+kalshi/orders.go-291-	case "NO":
+kalshi/orders.go-292-		yesPrice = 1.0 - price
+kalshi/orders.go-293-
+kalshi/orders.go-294-		if action == "BUY" {
+kalshi/orders.go-295-			side = "ask"
+kalshi/orders.go-296-		} else {
+kalshi/orders.go-297-			side = "bid"
+kalshi/orders.go-298-		}
+kalshi/orders.go-299-
+kalshi/orders.go-300-	default:
+kalshi/orders.go-301-		return "", "", 0, fmt.Errorf("kalshi: unsupported outcome %q", outcome)
+kalshi/orders.go-302-	}
+kalshi/orders.go-303-
+kalshi/orders.go-304-	yesPrice = math.Round(yesPrice*10000) / 10000
+kalshi/orders.go-305-
+
+===== TOKEN BALANCE + INVENTORY CHECK =====
+		zap.String("order_id", po.OrderID),
+		zap.String("hedge_side", buySide),
+		zap.Float64("fill_price", avg),
+		zap.Float64("shares", actualShares),
+		zap.Float64("locked_shares", pair.lockedShares()),
+	)
+	return nil
+}
+
+func (t *Trader) tokenBalanceShares(ctx context.Context, tokenID string) (float64, error) {
+	// Kalshi does not expose Polymarket-style ERC1155 conditional-token
+	// balances. This helper is legacy-only in the Kalshi fork.
+	return 0, nil
+}
+
+func (t *Trader) ensureNoPairArbInventory(ctx context.Context, yesTokenID, noTokenID string) error {
+	if t.cfg.PaperTrade {
+		return nil
+	}
+	zeroStreak := 0
+	var lastErr error
+	var lastYes, lastNo float64
+	for attempt := 1; attempt <= pairArbExposureProbeAttempts; attempt++ {
+		yesShares, yesErr := t.tokenBalanceShares(ctx, yesTokenID)
+		noShares, noErr := t.tokenBalanceShares(ctx, noTokenID)
+		if yesErr != nil || noErr != nil {
+			if yesErr != nil {
+				lastErr = yesErr
+			} else {
+				lastErr = noErr
+			}
+			zeroStreak = 0
+		} else {
+			lastYes, lastNo = yesShares, noShares
+			if yesShares <= pairArbShareDust && noShares <= pairArbShareDust {
+				zeroStreak++
+				if zeroStreak >= pairArbExposureZeroConfirmMin {
+					return nil
+				}
+			} else {
+				zeroStreak = 0
+			}
+		}
+		if attempt < pairArbExposureProbeAttempts {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(pairArbExposureProbeInterval):
+			}
+		}
+	}
+	if lastYes > pairArbInventoryEntryBlock || lastNo > pairArbInventoryEntryBlock {
+		return fmt.Errorf("pair arb: existing wallet inventory detected (YES=%.2f NO=%.2f); refusing new lead", lastYes, lastNo)
+	}
+	if lastErr != nil {
+		return fmt.Errorf("pair arb: unable to verify token inventory: %w", lastErr)
+	}
+	return fmt.Errorf("pair arb: unable to confidently verify zero inventory")
+}
+
+func (t *Trader) recoverPairArbAmbiguousSubmit(ctx context.Context, yesTokenID, noTokenID string, approxYesPrice float64, cause error) {
+	if !(isAmbiguousPlaceOrderParseError(cause) || isNetworkError(cause)) || t.cfg.PaperTrade {
+		return
+	}
+	t.logger.Error("pair arb: ambiguous/timeout submit response; probing wallet inventory immediately",
+		zap.Error(cause),
+		zap.String("yes_token", yesTokenID),
+		zap.String("no_token", noTokenID),
+	)
+	invErr := t.ensureNoPairArbInventory(ctx, yesTokenID, noTokenID)
+	if invErr == nil {
+		return
+	}
+	if !strings.Contains(invErr.Error(), "existing wallet inventory detected") {
+		t.logger.Warn("pair arb: ambiguous submit inventory probe failed", zap.Error(invErr))
+		return
+	}
+	liqCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	t.liquidateOrphanedPairArbInventory(liqCtx, yesTokenID, noTokenID, approxYesPrice)
+	if retryErr := t.ensureNoPairArbInventory(liqCtx, yesTokenID, noTokenID); retryErr != nil {
+		t.logger.Error("pair arb: wallet inventory still present after ambiguous-submit liquidation",
+			zap.Error(retryErr),
+		)
+	}
+}
+
+func (t *Trader) triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID string, approxYesPrice float64, cause error) {
+	if cause == nil || t.cfg.PaperTrade {
+		return
+	}
+
+===== TEST =====
 ?   	github.com/polyarb	[no test files]
 ?   	github.com/polyarb/binance	[no test files]
 ?   	github.com/polyarb/bybit	[no test files]
@@ -860,4 +1191,4 @@ TEST_RC=0
 
 ===== BUILD =====
 BUILD_RC=0
-SHA256=550b2108bdae07ff91a24916967f57be95cb0f62ca38c4c5904720d0a83c307b
+SHA256=4b4265d3b7260bbf896624da6cca15659e7891be0fcee287ebc985a57cbf510f
