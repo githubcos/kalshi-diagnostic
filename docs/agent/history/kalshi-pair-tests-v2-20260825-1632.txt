@@ -1,0 +1,86 @@
+KALSHI EC2 AGENT
+JOB_ID=kalshi-pair-tests-v2-20260825-1632
+START_UTC=2026-08-25T16:32:27+00:00
+LIVE_ALLOWED=false
+
+=== APPLY_PATCH ===
+BACKUP=/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163227.tar.gz
+checking file strategy/pair_arb_test.go
+Hunk #1 succeeded at 163 (offset 1 line).
+Hunk #2 succeeded at 206 with fuzz 1 (offset 2 lines).
+
+patching file strategy/pair_arb_test.go
+Hunk #1 succeeded at 163 (offset 1 line).
+Hunk #2 succeeded at 206 with fuzz 1 (offset 2 lines).
+
+
+=== GOFMT ===
+
+
+
+=== GO_TEST ===
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	(cached)
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+
+  [1m[92m▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY [92mNO [PAIR HEDGE][1m[92m EXECUTED [0m
+  [32m▸[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares @ [97m$0.4600[0m    fee: [93m0.0000 sh[0m    cost: [97m$4.78[0m
+  [32m▸[0m  Target → [92m$0.0920[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+
+  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
+  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
+  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
+  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+
+  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
+  [92m◂[0m  [1m[33m│ PAPER [0m  [97m8.00[0m shares  │  buy [37m$7.2800[0m → sell [97m$1.0000[0m  │  fee [93m$0.0000[0m
+  [92m◂[0m  ▲ [92mP&L  +$0.7200  (+1.24%)[0m  │  Reason: pair_window_resolved  │  Held: 30s
+  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+--- FAIL: TestMaybeRebalancePairArbAllowsExactKalshiHedgeBelowOneDollarNotional (0.00s)
+    pair_arb_test.go:210: expected exact 5-contract Kalshi hedge fill, got 0.00 NO shares
+
+  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
+  [91m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$0.4300[0m → sell [97m$0.2000[0m  │  fee [93m$0.1200[0m
+  [91m◂[0m  ▼ [91mP&L  -$-2.4200  (--56.28%)[0m  │  Reason: pair_fill_leg_timeout  │  Held: 6s
+  [91m◂[0m  [91m████████████████████████████████████████[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+
+  [1m[91m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED [0m
+  [91m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$0.5200[0m → sell [97m$0.4400[0m  │  fee [93m$0.1800[0m
+  [91m◂[0m  ▼ [91mP&L  -$-0.9800  (--18.85%)[0m  │  Reason: pair_unprofitable_abort  │  Held: 10s
+  [91m◂[0m  [91m███████████████████░░░░░░░░░░░░░░░░░░░░░[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+
+  [1m[92m◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL PAIR EXECUTED [0m
+  [92m◂[0m  [1m[33m│ PAPER [0m  [97m10.00[0m shares  │  buy [37m$9.1000[0m → sell [97m$0.9900[0m  │  fee [93m$0.0000[0m
+  [92m◂[0m  ▲ [92mP&L  +$0.8000  (+0.88%)[0m  │  Reason: pair_sell_at_99  │  Held: 20s
+  [92m◂[0m  [92m█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░[0m
+  [2m────────────────────────────────────────────────────────────────────[0m
+
+FAIL
+FAIL	github.com/polyarb/strategy	0.028s
+ok  	github.com/polyarb/web	(cached)
+FAIL
+
+
+RESULT=FAIL
+ERROR=RuntimeError: tests failed
+END_UTC=2026-08-25T16:32:46+00:00
