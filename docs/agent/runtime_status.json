@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-25T16:30:47+00:00",
+  "utc": "2026-08-25T16:31:00+00:00",
   "publisher_pid": 1815915,
   "heartbeat": {
-    "utc": "2026-08-25T16:30:42+00:00",
-    "epoch": 1787675442.548243,
+    "utc": "2026-08-25T16:31:00+00:00",
+    "epoch": 1787675460.836212,
     "pid": 1815873,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-pair-fee-min-v2-20260825-1629"
   },
   "state": {
     "last_job_id": "kalshi-pair-fee-min-v1-20260825-1451",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_160919.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_163053.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-25T16:09:25+00:00"
   }
