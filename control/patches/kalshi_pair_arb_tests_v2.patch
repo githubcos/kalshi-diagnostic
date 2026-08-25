@@ -1,0 +1,46 @@
+--- a/strategy/pair_arb_test.go
++++ b/strategy/pair_arb_test.go
+@@ -162,18 +162,21 @@
+-func TestExecutePairLimitBuyRejectsOrderBelowMarketMinimum(t *testing.T) {
++func TestExecutePairLimitBuyAllowsKalshiSubDollarNotional(t *testing.T) {
+ 	trader := &Trader{
+ 		cfg:          TraderConfig{PaperTrade: true},
+ 		logger:       zap.NewNop(),
+ 		paperBalance: 100,
+ 		feeRateBps:   "0",
+ 	}
+ 
+-	_, _, _, _, _, _, err := trader.executePairLimitBuy(context.Background(), "pair_arb_hedge_buy", "no-token", 0.05, 0.05, 5)
+-	if err == nil {
+-		t.Fatal("expected limit buy below $1 minimum to be rejected")
++	outcome, _, _, actualShares, _, usdSpent, err := trader.executePairLimitBuy(context.Background(), "pair_arb_hedge_buy", "no-token", 0.05, 0.05, 5)
++	if err != nil {
++		t.Fatalf("expected valid Kalshi 5-contract order to be accepted, got %v", err)
+ 	}
+-	if !strings.Contains(err.Error(), "below $1.00 minimum") {
+-		t.Fatalf("expected minimum-notional error, got %v", err)
++	if outcome != pairArbBuyOutcomeFilled || !almostEqual(actualShares, 5) {
++		t.Fatalf("expected 5 Kalshi contracts filled, outcome=%v shares=%.4f", outcome, actualShares)
++	}
++	if usdSpent <= 0 || usdSpent >= 1.0 {
++		t.Fatalf("expected valid sub-$1 Kalshi notional, got %.4f", usdSpent)
+ 	}
+ }
+ 
+-func TestMaybeRebalancePairArbSkipsExactHedgeBelowMarketMinimum(t *testing.T) {
++func TestMaybeRebalancePairArbAllowsExactKalshiHedgeBelowOneDollarNotional(t *testing.T) {
+@@ -201,10 +204,10 @@
+ 	if err := trader.maybeRebalancePairArb(context.Background(), 0.95, 0.05); err != nil {
+ 		t.Fatalf("maybeRebalancePairArb returned error: %v", err)
+ 	}
+-	if trader.pairedPosition.NoShares != 0 {
+-		t.Fatalf("expected no hedge fill when exact hedge is below market minimum, got %.2f NO shares", trader.pairedPosition.NoShares)
++	if !almostEqual(trader.pairedPosition.NoShares, 5) {
++		t.Fatalf("expected exact 5-contract Kalshi hedge fill, got %.2f NO shares", trader.pairedPosition.NoShares)
+ 	}
+-	if trader.pairedPosition.isBalanced() {
+-		t.Fatal("expected pair to remain unbalanced")
++	if !trader.pairedPosition.isBalanced() {
++		t.Fatal("expected pair to be balanced after valid Kalshi hedge")
+ 	}
+ }
