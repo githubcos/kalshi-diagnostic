@@ -1,0 +1,196 @@
+KALSHI EC2 AGENT
+JOB_ID=kalshi-pair-authoritative-no-mark-v1-20260825-2052
+START_UTC=2026-08-25T20:52:16+00:00
+LIVE_ALLOWED=false
+
+=== APPLY_PATCH ===
+BACKUP=/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_205216.tar.gz
+checking file strategy/trader.go
+Hunk #1 succeeded at 8163 (offset 1 line).
+Hunk #3 succeeded at 8211 (offset -1 lines).
+Hunk #6 succeeded at 8267 (offset 2 lines).
+checking file main.go
+Hunk #1 succeeded at 1810 (offset -135 lines).
+Hunk #2 succeeded at 1833 (offset -573 lines).
+
+patching file strategy/trader.go
+Hunk #1 succeeded at 8163 (offset 1 line).
+Hunk #3 succeeded at 8211 (offset -1 lines).
+Hunk #6 succeeded at 8267 (offset 2 lines).
+patching file main.go
+Hunk #1 succeeded at 1810 (offset -135 lines).
+Hunk #2 succeeded at 1833 (offset -573 lines).
+
+
+=== GOFMT ===
+
+
+
+=== GO_TEST ===
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	0.057s
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+ok  	github.com/polyarb/strategy	0.029s
+ok  	github.com/polyarb/web	0.019s
+
+
+=== GO_BUILD ===
+
+
+
+=== START_PAPER ===
+START_PAPER pid=3375972 port=8085
+
+=== COLLECT_PARITY_EVIDENCE ===
+PARITY_EVIDENCE excerpts=40
+
+=== STATUS ===
+$ ss -ltnp
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                 
+LISTEN 0      4096       127.0.0.1:20241      0.0.0.0:*    users:(("cloudflared",pid=74387,fd=11))
+LISTEN 0      4096      127.0.0.54:53         0.0.0.0:*                                           
+LISTEN 0      4096         0.0.0.0:22         0.0.0.0:*                                           
+LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*                                           
+LISTEN 0      5          127.0.0.1:8765       0.0.0.0:*    users:(("python3",pid=74385,fd=3))     
+LISTEN 0      4096            [::]:22            [::]:*                                           
+LISTEN 0      4096               *:8085             *:*    users:(("kalshiarbo",pid=103223,fd=6)) 
+
+$ pgrep -af kalshiarbo
+103223 ./kalshiarbo -port 8085
+3375972 /home/ubuntu/KalshiArbo/kalshiarbo/kalshiarbo -port 8085
+
+LOG_TAIL
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78443[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/6.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m9s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78432[0m │ open [90m$78786[0m │ edge [91m-354[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.6/6.6[0m [91m$159[0m │ [90m-- flat --[0m │ [91m8s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78432[0m │ open [90m$78786[0m │ edge [91m-354[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/6.6[0m [91m$159[0m │ [90m-- flat --[0m │ [91m8s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78434[0m │ open [90m$78786[0m │ edge [91m-352[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m7s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78432[0m │ open [90m$78786[0m │ edge [91m-354[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.6/6.6[0m [91m$159[0m │ [90m-- flat --[0m │ [91m8s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78432[0m │ open [90m$78786[0m │ edge [91m-354[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/6.6[0m [91m$159[0m │ [90m-- flat --[0m │ [91m8s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78434[0m │ open [90m$78786[0m │ edge [91m-352[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m7s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78432[0m │ open [90m$78786[0m │ edge [91m-354[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/6.6[0m [91m$159[0m │ [90m-- flat --[0m │ [91m8s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78434[0m │ open [90m$78786[0m │ edge [91m-352[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m7s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78434[0m │ open [90m$78786[0m │ edge [91m-352[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m7s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.7/5.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.6/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.7/5.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78458[0m │ open [90m$78786[0m │ edge [91m-328[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.8/5.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78440[0m │ open [90m$78786[0m │ edge [91m-346[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m11.7/7.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m6s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.7/5.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78458[0m │ open [90m$78786[0m │ edge [91m-328[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.8/5.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78457[0m │ open [90m$78786[0m │ edge [91m-329[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.0/5.0[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/6.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.7/5.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78458[0m │ open [90m$78786[0m │ edge [91m-328[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.8/5.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78457[0m │ open [90m$78786[0m │ edge [91m-329[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.0/5.0[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78457[0m │ open [90m$78786[0m │ edge [91m-329[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.5/5.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m0s[0m │ [92m$19.83[0m
+[10A[2K  BTC [97m$78441[0m │ open [90m$78786[0m │ edge [91m-344[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.2/4.4[0m [91m$159[0m │ [90m-- flat --[0m │ [91m5s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78444[0m │ open [90m$78786[0m │ edge [91m-342[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.3/4.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m4s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m8.9/5.2[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78448[0m │ open [90m$78786[0m │ edge [91m-338[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.0/4.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m3s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.9/4.1[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78454[0m │ open [90m$78786[0m │ edge [91m-332[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.7/5.3[0m [91m$159[0m │ [90m-- flat --[0m │ [91m2s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78458[0m │ open [90m$78786[0m │ edge [91m-328[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m10.8/5.8[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78457[0m │ open [90m$78786[0m │ edge [91m-329[0m │ CL [37m$78406[0m [90m2s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.0/5.0[0m [91m$159[0m │ [90m-- flat --[0m │ [91m1s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78457[0m │ open [90m$78786[0m │ edge [91m-329[0m │ CL [37m$78406[0m [90m0s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.5/5.7[0m [91m$159[0m │ [90m-- flat --[0m │ [91m0s[0m │ [92m$19.83[0m
+[2K  BTC [97m$78455[0m │ open [90m$78786[0m │ edge [91m-331[0m │ CL [37m$78406[0m [90m1s ago[0m [91mCLedge -380[0m │ YES [96m0.00[0m │ [92m9.8/5.5[0m [91m$159[0m │ [90m-- flat --[0m │ [91m0s[0m │ [92m$19.83[0m
+
+  [1m[36m╔════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97m▓▓ WINDOW SUMMARY ▓▓[0m                                              [1m[36m║[0m
+  [1m[36m╠════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  Window: [96mKXBTC15M-26AUG251645-45[0m   Open: [97m$78785.92[0m                   [1m[36m║[0m
+  [1m[36m╠════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [90mNo trades this window[0m                                             [1m[36m║[0m
+  [1m[36m╚════════════════════════════════════════════════════════════════════╝[0m
+
+  [93m![0m  [33mwaiting for window to end (14m59s remaining)[0m
+
+[1m[36m[0m
+     [2m[37mKalshiArb Pro[0m
+     [2m[37mBTC 15m Matched Pair Engine[0m
+     [90mKalshi  |  15-Min BTC/USD[0m
+
+  [90m────────────────────────────────────────────────────────────────────[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [90m│[0m  Wallet       [96m[0m
+  [90m│[0m  Trade Size   [97m$5.00[0m per entry
+  [90m│[0m  Balance      [92m$20.00[0m starting
+  [90m│[0m  Started      [37m2026-08-25 20:52:44 UTC[0m
+  [90m│[0m  Logs         [2m[90mpolyarb.log[0m
+  [90m────────────────────────────────────────────────────────────────────[0m
+
+  [2m[36m·[0m  [2m[37mpaper balance: $20.00[0m
+  [2m[36m·[0m  [2m[37mDashboard: http://localhost:8085[0m
+  [2m[36m·[0m  [2m[37mLOGGING ENABLED[0m
+  [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/KalshiArbo/kalshiarbo config=/home/ubuntu/KalshiArbo/kalshiarbo/config.json env=/home/ubuntu/KalshiArbo/kalshiarbo/all.env[0m
+  [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false[0m
+  [92m✓[0m  [2m[37mDeribit WS (BTC spot index + order book + DVOL)[0m
+  [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDT CVD)[0m
+  [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
+  [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
+  [2m[36m·[0m  [2m[37mWaiting for Start command from dashboard: http://localhost:8085[0m
+
+
+RESULT=PASS
+END_UTC=2026-08-25T20:52:47+00:00

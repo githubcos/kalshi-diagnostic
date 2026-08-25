@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-25T20:52:41+00:00",
+  "utc": "2026-08-25T20:52:49+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-25T20:52:38+00:00",
-    "epoch": 1787691158.0734735,
+    "utc": "2026-08-25T20:52:47+00:00",
+    "epoch": 1787691167.8865237,
     "pid": 2004638,
-    "status": "working",
-    "job_id": "kalshi-pair-authoritative-no-mark-v1-20260825-2052"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-parity-observe-v3-20260825-1949",
+    "last_job_id": "kalshi-pair-authoritative-no-mark-v1-20260825-2052",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260825_205216.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-25T19:50:59+00:00"
+    "last_run_utc": "2026-08-25T20:52:47+00:00"
   },
   "autopilot": {
     "gate_index": 4,
