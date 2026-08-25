@@ -1,0 +1,26 @@
+KALSHI AUTOPILOT REPORT cycle=1
+UTC=2026-08-25T16:48:38+00:00
+PAPER_ALIVE=True
+FINDINGS=3
+FINDING strategy/trader.go polymarket.ComputeBuyFeeShares count=22 :: Polymarket fee-share math still present
+FINDING strategy/trader.go polymarket.MinMarketOrderNotionalUSD count=4 :: Polymarket minimum-notional constant still present
+FINDING strategy/trader.go polymarket.MinOrderShares count=20 :: Polymarket minimum-share constant still present
+
+=== GO TEST TAIL ===
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	(cached)
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+ok  	github.com/polyarb/strategy	(cached)
+ok  	github.com/polyarb/web	(cached)
+
+=== GO BUILD TAIL ===
