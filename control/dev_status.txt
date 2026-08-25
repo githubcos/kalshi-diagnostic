@@ -1,0 +1,5 @@
+FOUND: baseline is healthy — full Go test suite passes and kalshiarbo builds successfully.
+FOUND: paper bot is alive on port 8085 with bankroll about $19.83 after one known timeout loss.
+FOUND: first verified venue-parity issue under review is remaining Polymarket sizing/minimum-order logic inside PAIR ARB preflight/live-path helpers; paper execution itself already uses Kalshi executable depth and cash-fee accounting.
+DOING: trace every PAIR ARB gate from signal -> accepted -> executed lead -> hedge -> lock/unwind against the original PolyArbPro behavior, then patch only verified Kalshi-specific mismatches.
+SAFETY: live trading remains hard-blocked; credentials are untouched.
