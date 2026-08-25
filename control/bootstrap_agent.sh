@@ -15,8 +15,6 @@ TEL_SERVICE="/etc/systemd/system/kalshi-agent-telemetry.service"
 
 echo "=== KALSHI AGENT BOOTSTRAP ==="
 
-# Deliberately do NOT git pull here. Caller installs known-good control files
-# from origin/main before invoking this script.
 cp "$AGENT_SRC" "$AGENT_DST"
 cp "$WATCH_SRC" "$WATCH_DST"
 cp "$TEL_SRC" "$TEL_DST"
@@ -96,14 +94,36 @@ sudo systemctl enable kalshi-agent.service kalshi-agent-watchdog.timer kalshi-ag
 sudo systemctl restart kalshi-agent.service
 sudo systemctl restart kalshi-agent-watchdog.timer
 sudo systemctl restart kalshi-agent-telemetry.service
-sleep 4
+
+echo "Waiting for agent + telemetry health..."
+for i in $(seq 1 12); do
+  AG=$(systemctl is-active kalshi-agent.service 2>/dev/null || true)
+  TEL=$(systemctl is-active kalshi-agent-telemetry.service 2>/dev/null || true)
+  if [ "$AG" = "active" ] && [ "$TEL" = "active" ] && [ -d "$HOME/kalshi-agent-telemetry/.git" ] && [ ! -s "$HOME/.kalshi_telemetry_error.txt" ]; then
+    break
+  fi
+  sleep 2
+done
+
+AG=$(systemctl is-active kalshi-agent.service 2>/dev/null || true)
+TEL=$(systemctl is-active kalshi-agent-telemetry.service 2>/dev/null || true)
 
 echo
-sudo systemctl --no-pager --full status kalshi-agent.service || true
-echo
-sudo systemctl --no-pager --full status kalshi-agent-telemetry.service || true
-echo
-sudo systemctl --no-pager --full status kalshi-agent-watchdog.timer || true
+echo "AGENT_SERVICE=$AG"
+echo "TELEMETRY_SERVICE=$TEL"
+[ -f "$HOME/.kalshi_agent_heartbeat.json" ] && { echo "--- AGENT HEARTBEAT ---"; cat "$HOME/.kalshi_agent_heartbeat.json"; }
+[ -f "$HOME/.kalshi_agent_state.json" ] && { echo "--- AGENT STATE ---"; cat "$HOME/.kalshi_agent_state.json"; }
+if [ -s "$HOME/.kalshi_telemetry_error.txt" ]; then
+  echo "--- TELEMETRY ERROR ---"
+  cat "$HOME/.kalshi_telemetry_error.txt"
+fi
+
+if [ "$AG" != "active" ] || [ "$TEL" != "active" ] || [ ! -d "$HOME/kalshi-agent-telemetry/.git" ] || [ -s "$HOME/.kalshi_telemetry_error.txt" ]; then
+  echo "BOOTSTRAP_FAILED"
+  sudo journalctl -u kalshi-agent.service -n 30 --no-pager || true
+  sudo journalctl -u kalshi-agent-telemetry.service -n 50 --no-pager || true
+  exit 1
+fi
 
 echo
 echo "=== SELF-HEALING SAFETY ==="
