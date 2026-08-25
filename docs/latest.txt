@@ -1,51 +1,47 @@
-===== VERIFY RETRY =====
-Tue Aug 25 01:32:42 UTC 2026
+===== COMPILE FIX =====
+Tue Aug 25 01:33:28 UTC 2026
 
-===== PATCH EXISTS =====
-4455:func (t *Trader) tokenBalanceShares(ctx context.Context, tokenID string) (float64, error) {
-4456-	tokenID = strings.TrimSpace(tokenID)
-4457-	if tokenID == "" {
-4458-		return 0, fmt.Errorf("kalshi position lookup: empty token id")
-4459-	}
-4460-
-4461-	// Kalshi logical token IDs are encoded as:
-4462-	//     <ticker>:YES
-4463-	//     <ticker>:NO
-4393-	if gross <= pairArbShareDust || avg <= 0 {
-4394-		if status == "matched" || status == "filled" {
-4395-			// KALSHI SAFETY:
-4396:			// MATCHED/FILLED status alone is not sufficient accounting evidence.
-4397-			// Do not synthesize shares from the old Polymarket wallet-credit path.
-4398-			// Wait until GetFills or SizeMatched provides an authoritative quantity.
-4399-			return fmt.Errorf(
-4400-				"pair arb: Kalshi order %s reports %s but fill quantity/price is not available yet; waiting for authoritative fill evidence",
-4401-				po.OrderID,
-4402-				status,
-4403-			)
-4404-		}
+4359-		)
+4360-		t.clearPendingPairArbOrder()
+4361-		return nil
+4362-	}
+4363-
+4364:	buySide, _, _ := pair.rebalanceState()
+4365-	if po.TokenID != "" {
+4366-		if po.TokenID == pair.YesTokenID {
+4367-			buySide = "YES"
+4368-		} else if po.TokenID == pair.NoTokenID {
+4369-			buySide = "NO"
+--
+9606-				}
+9607-				if gross > 0 {
+9608-					fee := polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
+9609-					actual := math.Floor((gross-fee)*100) / 100
+9610-					usd := marketBuyOrderNotional(gross, avg)
+9611:					buySide, _, _ := pair.rebalanceState()
+9612-					if buySide == "YES" {
+9613-						pair.YesShares += actual
+9614-						pair.YesUSDSpent += usd
+9615-					} else if buySide == "NO" {
+9616-						pair.NoShares += actual
 
 ===== TEST =====
-# github.com/polyarb/strategy
-strategy/trader.go:4364:14: declared and not used: anchorAvgPrice
-FAIL	github.com/polyarb [build failed]
+?   	github.com/polyarb	[no test files]
 ?   	github.com/polyarb/binance	[no test files]
 ?   	github.com/polyarb/bybit	[no test files]
 ?   	github.com/polyarb/chainlink	[no test files]
 ?   	github.com/polyarb/coinbase	[no test files]
 ?   	github.com/polyarb/config	[no test files]
 ?   	github.com/polyarb/deribit	[no test files]
-FAIL	github.com/polyarb/discord [build failed]
+ok  	github.com/polyarb/discord	0.032s
 ?   	github.com/polyarb/display	[no test files]
 ?   	github.com/polyarb/exchangefeed	[no test files]
 ?   	github.com/polyarb/kalshi	[no test files]
 ?   	github.com/polyarb/market	[no test files]
 ok  	github.com/polyarb/polymarket	(cached)
-FAIL	github.com/polyarb/strategy [build failed]
-FAIL	github.com/polyarb/web [build failed]
-FAIL
-TEST_RC=1
+ok  	github.com/polyarb/strategy	0.028s
+ok  	github.com/polyarb/web	0.030s
+TEST_RC=0
 
 ===== BUILD =====
-# github.com/polyarb/strategy
-strategy/trader.go:4364:14: declared and not used: anchorAvgPrice
-BUILD_RC=1
+BUILD_RC=0
