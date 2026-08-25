@@ -1,0 +1,307 @@
+KALSHI FINITE PARITY GATE: SETTLEMENT
+UTC=2026-08-25T17:55:16+00:00
+TITLE=settlement and final mark-to-market semantics
+PAPER_ALIVE=True
+LIVE_ALLOWED=false
+HITS=20
+
+--- markToMarket at strategy/trader.go:360 (context 354-366) ---
+00354: 	if p.NoShares < p.YesShares {
+00355: 		return "NO", p.YesShares - p.NoShares, p.sideAveragePrice("YES")
+00356: 	}
+00357: 	return "", 0, 0
+00358: }
+00359: 
+00360: func (p *PairArbPosition) markToMarket(yesPrice float64, noPrices ...float64) float64 {
+00361: 	if p == nil || yesPrice <= 0 {
+00362: 		return 0
+00363: 	}
+00364: 
+00365: 	noPrice := 0.0
+00366: 	if len(noPrices) > 0 {
+
+--- markToMarket at strategy/trader.go:545 (context 539-551) ---
+00539: 	PairExpectedProfit     float64
+00540: 	PairExpectedROIPct     float64
+00541: 	PairResidualSide       string
+00542: 	PairResidualShares     float64
+00543: 	PairHedgeSide          string
+00544: 	PairHedgeMaxPrice      float64
+00545: 	PairMarkToMarket       float64
+00546: 	PairExitState          string
+00547: 	PairExitStateNote      string
+00548: 	PairYesExitOrderID     string
+00549: 	PairNoExitOrderID      string
+00550: 	PairExitPlacedAt       time.Time
+00551: }
+
+--- markToMarket at strategy/trader.go:8177 (context 8171-8183) ---
+08171: 		p := t.pairedPosition
+08172: 		lockedShares := p.lockedShares()
+08173: 		avgCost := 0.0
+08174: 		if lockedShares > 0 {
+08175: 			avgCost = p.totalSpent() / lockedShares
+08176: 		}
+08177: 		pnl := p.markToMarket(currentYesPrice)
+08178: 		return fmt.Sprintf(
+08179: 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
+08180: 			lockedShares,
+08181: 			avgCost,
+08182: 			p.YesShares,
+08183: 			p.NoShares,
+
+--- markToMarket at strategy/trader.go:8221 (context 8215-8227) ---
+08215: 		p := t.pairedPosition
+08216: 		lockedShares := p.lockedShares()
+08217: 		avgCost := 0.0
+08218: 		if lockedShares > 0 {
+08219: 			avgCost = p.totalSpent() / lockedShares
+08220: 		}
+08221: 		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice)
+08222: 	}
+08223: 	p := t.position
+08224: 	tokenPrice := currentYesPrice
+08225: 	side := "YES"
+08226: 	if p.IsNoSide {
+08227: 		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+
+--- markToMarket at strategy/trader.go:8269 (context 8263-8275) ---
+08263: 			HasPosition:            true,
+08264: 			Side:                   "PAIR",
+08265: 			Type:                   "pair_arb",
+08266: 			BuyPrice:               avgCost,
+08267: 			Shares:                 lockedShares,
+08268: 			USDSpent:               pair.totalSpent(),
+08269: 			UnrealizedPnL:          pair.markToMarket(currentYesPrice),
+08270: 			HeldSec:                time.Since(pair.OpenedAt).Seconds(),
+08271: 			PairActive:             true,
+08272: 			PairLeadSide:           pair.LeadSide,
+08273: 			PairYesFilled:          pair.YesShares > 0,
+08274: 			PairNoFilled:           pair.NoShares > 0,
+08275: 			PairYesAvgPrice:        pair.sideAveragePrice("YES"),
+
+--- markToMarket at strategy/trader.go:8291 (context 8285-8297) ---
+08285: 			PairExpectedProfit:     expectedProfit,
+08286: 			PairExpectedROIPct:     expectedROIPct,
+08287: 			PairResidualSide:       residualSide,
+08288: 			PairResidualShares:     residualShares,
+08289: 			PairHedgeSide:          hedgeSide,
+08290: 			PairHedgeMaxPrice:      hedgeMaxPrice,
+08291: 			PairMarkToMarket:       pair.markToMarket(currentYesPrice),
+08292: 			PairExitState:          pair.ExitState,
+08293: 			PairExitStateNote:      pair.ExitStateNote,
+08294: 			PairYesExitOrderID:     pair.YesExitOrderID,
+08295: 			PairNoExitOrderID:      pair.NoExitOrderID,
+08296: 			PairExitPlacedAt:       pair.ExitOrdersPlacedAt,
+08297: 		}
+
+--- settlement at strategy/trader.go:3368 (context 3362-3374) ---
+03362: 	display.Info(fmt.Sprintf("resolution pre-close entry filled for %s at %.3f", label, fillPrice))
+03363: 	if time.Now().After(windowEnd) {
+03364: 		resolveCtx, resolveCancel := context.WithTimeout(context.Background(), 65*time.Second)
+03365: 		resolvedYes, resolveErr := resolveWinningSide(resolveCtx)
+03366: 		resolveCancel()
+03367: 		if resolveErr != nil {
+03368: 			display.Warn(fmt.Sprintf("resolution pre-close settlement fallback used for %s: %v", label, resolveErr))
+03369: 		}
+03370: 		t.SettleExpiredPosition(ctx, resolvedYes)
+03371: 	}
+03372: 	return true
+03373: }
+03374: 
+
+--- settlement at strategy/trader.go:3897 (context 3891-3903) ---
+03891: 	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+03892: 	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
+03893: 	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
+03894: 	FetchUSDCBalance(context.Context) (float64, error)
+03895: 	ResolveMarket(context.Context, string) (bool, bool, error)
+03896: 
+03897: 	// Legacy Polymarket settlement/allowance methods.
+03898: 	// Kalshi adapter will explicitly reject these; Kalshi does not use CTF,
+03899: 	// Polygon token allowances, or claim redemption.
+03900: 	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
+03901: 	HasCTFBalance(context.Context, string) (bool, error)
+03902: 	RedeemCTFPosition(context.Context, string, bool) error
+03903: 	TriggerConditionalApproval(context.Context, string, time.Duration) error
+
+--- settlement at strategy/trader.go:3983 (context 3977-3989) ---
+03977: 	tickSizeMu                  sync.RWMutex
+03978: 	tickSizeByToken             map[string]tickSizeSnapshot
+03979: 	pairArbRetryAfter           time.Time
+03980: 	pairArbForceCloseRetryAfter time.Time
+03981: 	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
+03982: 	// Used to suppress the orphan-liquidation trigger when the wallet API still shows
+03983: 	// the just-sold shares (settlement / indexing lag).
+03984: 	lastPairArbCloseAt time.Time
+03985: 	// lastPairArbCloseConditionID is the condition ID tied to lastPairArbCloseAt.
+03986: 	// Used to scope short post-close re-entry holds to the same market only.
+03987: 	lastPairArbCloseConditionID string
+03988: 	// pairArbHedgeOrphanFlag is set when forceClosePairArb fires while a pre-placed hedge
+03989: 	// order was still tracked (pendingHedgePrePlace != nil). In that case the hedge may
+
+--- settlement at strategy/trader.go:4629 (context 4623-4635) ---
+04623: }
+04624: 
+04625: func isPendingHedgeBuy(requestName string) bool {
+04626: 	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
+04627: }
+04628: 
+04629: func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
+04630: 	if t.pendingHedgePrePlace != nil {
+04631: 		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
+04632: 			return true
+04633: 		}
+04634: 	}
+04635: 	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
+
+--- settlement at strategy/trader.go:5103 (context 5097-5109) ---
+05097: 		zap.String("yes_token", yesTokenID),
+05098: 		zap.String("no_token", noTokenID),
+05099: 	)
+05100: 	t.liquidateOrphanedPairArbInventory(ctx, yesTokenID, noTokenID, approxYesPrice)
+05101: 	// Always clear the pending order after liquidation: the sell has been submitted so the
+05102: 	// order-ID no longer represents live exposure. ensureNoPairArbInventory may fail due to
+05103: 	// settlement lag even after a successful sell, which previously left pendingPairArb set
+05104: 	// forever and blocked every future entry with "pending order is MATCHED".
+05105: 	t.clearPendingPairArbOrder()
+05106: 	go t.monitorAndLiquidateOrphanedPairArbInventory(yesTokenID, noTokenID, approxYesPrice)
+05107: }
+05108: 
+05109: func (t *Trader) reconcilePendingPairArbOrder(ctx context.Context) error {
+
+--- settlement at strategy/trader.go:5810 (context 5804-5816) ---
+05804: 		side = "no"
+05805: 	}
+05806: 	return conditionID + ":" + side
+05807: }
+05808: 
+05809: func (t *Trader) enqueueClaimRetry(claim pendingClaim) {
+05810: 	// Kalshi settlement is automatic after market finalization.
+05811: 	return
+05812: }
+05813: 
+05814: func (t *Trader) DashboardClaimSnapshot() DashboardClaimSnapshot {
+05815: 	t.claimMu.Lock()
+05816: 	defer t.claimMu.Unlock()
+
+--- settlement at strategy/trader.go:6300 (context 6294-6306) ---
+06294: 				zap.Float64("tracked_shares", pos.Shares),
+06295: 			)
+06296: 			sellShares = pos.Shares
+06297: 		}
+06298: 		if sellShares <= 0 {
+06299: 			pos.SellPending = false
+06300: 			// Shares not yet visible in balance API (common if settlement is delayed).
+06301: 			// Back off for 2s to avoid hammering the API on every 500ms tick.
+06302: 			pos.SellDelayUntil = time.Now().Add(2 * time.Second)
+06303: 			t.savePositionState()
+06304: 			return fmt.Errorf("place sell order: no sellable conditional token balance available (will retry in 2s)")
+06305: 		}
+06306: 		if sellShares < pos.Shares {
+
+--- settlement at strategy/trader.go:7129 (context 7123-7135) ---
+07123: 				return false, lastBal, ctx.Err()
+07124: 			case <-time.After(settleProbeInterval):
+07125: 			}
+07126: 		}
+07127: 	}
+07128: 	if lastErr != nil {
+07129: 		t.logger.Warn("trader: pair arb sell-at-99 settlement probe error",
+07130: 			zap.String("side", side),
+07131: 			zap.String("token_id", tokenID),
+07132: 			zap.Float64("last_balance", lastBal),
+07133: 			zap.Error(lastErr),
+07134: 		)
+07135: 	}
+
+--- settlement at strategy/trader.go:7463 (context 7457-7469) ---
+07457: 			settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+07458: 			if settleErr != nil {
+07459: 				return settleErr
+07460: 			}
+07461: 			if !settled {
+07462: 				t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+07463: 				t.setPairExitState(pair, pairExitStateOrdersLive, "window complete; fill seen, awaiting settlement confirmation")
+07464: 				t.savePositionState()
+07465: 				return nil
+07466: 			}
+07467: 			walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+07468: 			if balErr != nil {
+07469: 				return balErr
+
+--- settlement at strategy/trader.go:7525 (context 7519-7531) ---
+07519: 	settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+07520: 	if settleErr != nil {
+07521: 		return settleErr
+07522: 	}
+07523: 	if !settled {
+07524: 		t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+07525: 		t.setPairExitState(pair, pairExitStateOrdersLive, "fill reported; awaiting balance settlement confirmation")
+07526: 		t.savePositionState()
+07527: 		return nil
+07528: 	}
+07529: 	walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+07530: 	if balErr != nil {
+07531: 		return balErr
+
+--- settlement at strategy/trader.go:7613 (context 7607-7619) ---
+07607: 		if pos.IsResolutionSnipe {
+07608: 			if !winning {
+07609: 				return t.closePosition(ctx, tokenPrice,
+07610: 					fmt.Sprintf("resolution_snipe_losing_end (rem=%.0fs)", time.Until(pos.WindowEnd).Seconds()))
+07611: 			}
+07612: 			// Winning resolution snipe: sell at 0.99 now rather than waiting for CTF
+07613: 			// settlement (which takes 1-2 minutes after window close).
+07614: 			return t.closePosition(ctx, 0.99,
+07615: 				fmt.Sprintf("resolution_snipe_winning_sell99 (btc=%.2f, open=%.2f, rem=%.0fs)",
+07616: 					btcLatest, openPrice, time.Until(pos.WindowEnd).Seconds()))
+07617: 		}
+07618: 		// Conviction positions manage their own expiry via the 5s gate below;
+07619: 		// do NOT apply the normal safeExitBuffer close here (would fire too early).
+
+--- settlement at strategy/trader.go:7681 (context 7675-7687) ---
+07675: 	if now.After(pos.ExpiresAt) {
+07676: 		if pos.IsScalp {
+07677: 			return t.closePosition(ctx, tokenPrice, "max_hold_timeout")
+07678: 		}
+07679: 		if winning {
+07680: 			if pos.IsResolutionSnipe {
+07681: 				// Winning resolution positions hold through settlement and claim.
+07682: 				return nil
+07683: 			}
+07684: 			if pos.IsConviction {
+07685: 				// Hold-to-resolution entries exit at 0.99 near expiry once they are winning.
+07686: 				reason := "conviction_expiry_sell99"
+07687: 				if pos.IsReversalSnipe {
+
+--- settlement at strategy/trader.go:7812 (context 7806-7818) ---
+07806: // PostCloseGraceSell attempts to sell any remaining winning position on the CLOB
+07807: // during the ~30-60 second grace window that remains open after the market closes.
+07808: // The CLOB typically matches orders at 0.99 for the winning side during this period.
+07809: //
+07810: // It is a no-op for:
+07811: //   - flat positions (nothing to sell)
+07812: //   - paper mode (settlement is handled by SettleExpiredPosition)
+07813: //   - the losing side (tokens will be worth $0.00; selling at 0.99 would be a loss)
+07814: //
+07815: // resolvedYes should reflect the final BTC vs open-price comparison.
+07816: // Any shares not sold within graceDuration are left for SettleExpiredPosition.
+07817: func (t *Trader) PostCloseGraceSell(ctx context.Context, resolvedYes bool, graceDuration time.Duration) error {
+07818: 	if t.pairedPosition != nil {
+
+--- settlement at strategy/trader.go:7829 (context 7823-7835) ---
+07823: 	}
+07824: 	if t.cfg.PaperTrade {
+07825: 		return nil
+07826: 	}
+07827: 	pos := t.position
+07828: 	if pos.IsResolutionSnipe {
+07829: 		t.logger.Info("trader: post-close grace sell skipped for resolution position; waiting for settlement claim",
+07830: 			zap.String("condition_id", pos.ConditionID),
+07831: 			zap.Bool("is_no_side", pos.IsNoSide),
+07832: 		)
+07833: 		return nil
+07834: 	}
+07835: 	onWinningSide := (!pos.IsNoSide && resolvedYes) || (pos.IsNoSide && !resolvedYes)
+

@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-25T18:52:02+00:00",
-  "publisher_pid": 2004670,
+  "utc": "2026-08-25T18:52:10+00:00",
+  "publisher_pid": 2907617,
   "heartbeat": {
-    "utc": "2026-08-25T18:52:01+00:00",
-    "epoch": 1787683921.8000839,
+    "utc": "2026-08-25T18:52:09+00:00",
+    "epoch": 1787683929.2692432,
     "pid": 2004638,
-    "status": "polling",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-parity-evidence-refresh-v1-20260825-1852"
   },
   "state": {
     "last_job_id": "kalshi-autopilot-finite-gates-v2-20260825-1754",
