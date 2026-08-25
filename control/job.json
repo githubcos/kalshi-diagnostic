@@ -1,9 +1,12 @@
 {
-  "id": "kalshi-parity-observe-v4-20260825-2154",
+  "id": "kalshi-deterministic-parity-v1-20260825-2205",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "COLLECT_PARITY_EVIDENCE"},
+    {"name": "BACKUP"},
+    {"name": "DETERMINISTIC_PARITY_TEST"},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
     {"name": "STATUS"}
   ]
 }
