@@ -1,8 +1,8 @@
 ╔══════════════════════════════════════════════════════════════════════╗
 ║              KALSHIARBO INDEPENDENT FORENSIC AUDITOR              ║
 ╚══════════════════════════════════════════════════════════════════════╝
- UTC                  2026-08-25T14:16:46+00:00
- Runtime              01:10:50
+ UTC                  2026-08-25T14:17:18+00:00
+ Runtime              01:11:23
  Bot                  ALIVE  kalshiarbo pid=103223
  Port                 8085
 
@@ -15,7 +15,7 @@
  Maximum drawdown      $    0.1672
 
 ──────────────────── PAIR-ARB PERFORMANCE ──────────────────────────
- Lead attempts                 31
+ Lead attempts                 32
  Hedge events                   0
  Hedge-event rate            0.00%
  Locked events                  0
@@ -30,20 +30,21 @@
  Net realized P&L         -$0.1672
 
 ──────────────────── CURRENT OPEN ATTEMPT ──────────────────────────
- Attempt               #31
+ Attempt               #32
  Lead side             YES
- BTC                    $79035.56
+ BTC                    $79031.90
  Window open            $79004.10
- BTC gap                $+31.50
- YES at signal          0.5700
+ BTC gap                $+27.80
+ YES at signal          0.5800
  Quantity               N/A
  Entry                  N/A
  Capital                N/A
- Age                    21.13s
+ Age                    18.18s
  Hedge seen             NO
  Locked                 NO
 
 ──────────────────────── RECENT EVENTS ─────────────────────────────
+ LEAD #32 YES gap=+27.80 YES=0.5800
  LEAD #31 YES gap=+31.50 YES=0.5700
  LEAD #30 YES gap=+28.00 YES=0.5500
  LEAD #29 YES gap=+31.10 YES=0.5600
@@ -53,7 +54,6 @@
  LEAD #25 YES gap=+116.60 YES=0.6500
  LEAD #24 YES gap=+108.40 YES=0.6500
  LEAD #23 YES gap=+103.20 YES=0.6300
- LEAD #22 YES gap=+130.90 YES=0.6500
 
 ──────────────────────── DIAGNOSIS ─────────────────────────────────
  WARNING: HEDGE/TIMEOUT LOSSES DOMINATE
