@@ -1,13 +1,13 @@
 {
-  "overall_percent": 28,
-  "overall_basis": "7 of 25 parity/certification checks complete or provisionally verified",
-  "phase": "Source visibility + PAIR ARB venue-parity audit",
-  "phase_percent": 40,
-  "current_patch": "Sanitized source export bridge",
-  "patch_percent": 75,
-  "patch_state": "READY TO RUN ON EC2",
-  "doing": "Publishing a sanitized snapshot of the current KalshiArbo source into GitHub so I can inspect the exact live code, identify verified PolyArbPro/Kalshi mismatches, generate patches, and send them back through the restricted agent.",
-  "why": "The agent can already test and build the bot, but without source visibility I cannot safely inspect the current trader.go/feed/sizing/hedge implementation from GitHub. This is the blocker that made the previous 15% checkpoint appear frozen.",
+  "overall_percent": 32,
+  "overall_basis": "Source visibility is complete; direct trading-path parity audit is now active",
+  "phase": "PAIR ARB execution-path parity audit",
+  "phase_percent": 12,
+  "current_patch": "Lead sizing + hedge admission venue parity",
+  "patch_percent": 20,
+  "patch_state": "INSPECTING LIVE SOURCE",
+  "doing": "Reading the exported strategy/trader.go and Kalshi execution adapter now. I am tracing OnPairArbSignal from signal gates through exact lead sizing, strict preflight, lead execution, hedge admission, timeout/unwind, and accounting. The next code change will be generated only from a verified Polymarket-to-Kalshi mismatch.",
+  "why": "The sanitized source export succeeded at 14:27 UTC, so the previous source-visibility blocker is gone. The audit can now operate on the exact code that is running on EC2 rather than infer behavior from logs.",
   "done": [
     "Kalshi market feed integrated",
     "Kalshi paper executable-depth logic integrated",
@@ -16,21 +16,21 @@
     "Full go test ./... baseline passes",
     "Go build baseline passes",
     "Paper bot stable on port 8085",
-    "Sanitized source exporter published to control/source_export.sh"
+    "Sanitized trading source exported successfully to GitHub",
+    "Direct inspection of strategy/trader.go started"
   ],
   "remaining": [
-    "Run sanitized source export on EC2",
-    "Inspect exact current source against original PolyArbPro behavior",
-    "Separate signals from executed leads in forensic accounting",
+    "Finish OnPairArbSignal gate trace",
+    "Verify strict preflight uses Kalshi minimum-contract semantics",
     "Verify lead sizing parity",
-    "Verify market minimum order rules",
     "Verify hedge admission and timing parity",
+    "Separate signals from executed leads in forensic accounting",
     "Verify partial-fill behavior",
     "Verify timeout/unwind semantics",
-    "Verify settlement/claim behavior",
+    "Verify settlement behavior",
     "Remove remaining Polymarket execution dependencies",
     "Run repeated paper validation",
     "Final parity certification"
   ],
-  "next": "Run the one-time sanitized source exporter; then I inspect source immediately and start patching verified venue mismatches through the agent."
+  "next": "Finish the lead/preflight trace; if a venue mismatch is verified, publish the narrow patch and queue backup -> apply -> gofmt -> go test ./... -> go build -> paper audit immediately."
 }
