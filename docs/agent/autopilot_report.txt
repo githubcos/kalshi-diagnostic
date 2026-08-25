@@ -1,5 +1,5 @@
-KALSHI AUTOPILOT REPORT cycle=120
-UTC=2026-08-25T17:41:30+00:00
+KALSHI AUTOPILOT REPORT cycle=121
+UTC=2026-08-25T17:41:57+00:00
 PAPER_ALIVE=True
 FINDINGS=3
 FINDING strategy/trader.go polymarket.ComputeBuyFeeShares count=22 :: Polymarket fee-share math still present
