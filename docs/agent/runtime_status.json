@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T02:27:46+00:00",
+  "utc": "2026-08-26T02:27:55+00:00",
   "publisher_pid": 20576,
   "heartbeat": {
-    "utc": "2026-08-26T02:27:39+00:00",
-    "epoch": 1787711259.7517412,
+    "utc": "2026-08-26T02:27:49+00:00",
+    "epoch": 1787711269.1680858,
     "pid": 4075083,
     "status": "working",
     "job_id": "kalshi-window-rollover-expected-expiration-v2-20260826-0227"
   },
   "state": {
     "last_job_id": "kalshi-window-rollover-expiration-v1-retry2-20260826-0224",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_022333.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_022739.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T02:23:43+00:00"
   },
