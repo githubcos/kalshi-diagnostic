@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T08:43:20+00:00",
-  "publisher_pid": 542,
+  "utc": "2026-08-26T08:45:08+00:00",
+  "publisher_pid": 540,
   "heartbeat": {
-    "utc": "2026-08-26T08:43:20+00:00",
-    "epoch": 1787733800.1372657,
+    "utc": "2026-08-26T08:45:07+00:00",
+    "epoch": 1787733907.7070396,
     "pid": 537,
     "status": "working",
     "job_id": "kalshi-feed-one-shot-recovery-v3-20260826-0830"
