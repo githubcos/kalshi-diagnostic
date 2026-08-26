@@ -1,9 +1,9 @@
 {
-  "id": "kalshi-feed-rest-diagnostics-v1b-20260826-0917",
+  "id": "kalshi-paper-positive-edge-profile-v1-20260826-1004",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "GO_BUILD"},
+    {"name": "APPLY_PATCH", "path": "control/patches/paper_positive_edge_profile_v1.patch", "strip": 1},
     {"name": "START_PAPER"},
     {"name": "STATUS"},
     {"name": "UPDATE_TELEMETRY"},
