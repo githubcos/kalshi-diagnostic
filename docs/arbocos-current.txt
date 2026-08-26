@@ -1,0 +1,142 @@
+=== CONFIG FILES ===
+-rw------- 1 ubuntu ubuntu 5.5K Aug 26 22:24 config.json
+
+=== SAFE SETTINGS ===
+config.json:22:  "MARKET_TYPE": "neg_risk",
+config.json:29:  "PAIR_ARB_BRAIN_ENABLED": "false",
+config.json:30:  "PAIR_ARB_BRAIN_LABEL_THRESHOLD_USD": "20",
+config.json:31:  "PAIR_ARB_BRAIN_MIN_SAMPLES": "30",
+config.json:32:  "PAIR_ARB_BRAIN_STATE_FILE": "brain_state.json",
+config.json:33:  "PAIR_ARB_BRAIN_THRESHOLD": "0.45",
+config.json:34:  "PAIR_ARB_CARRY_EARLY_SEC": "45",
+config.json:35:  "PAIR_ARB_CARRY_ENABLED": "false",
+config.json:36:  "PAIR_ARB_CARRY_MIN_BTC_GAP_USD": "0.75",
+config.json:37:  "PAIR_ARB_CARRY_MIN_PREV_GAP_USD": "8",
+config.json:38:  "PAIR_ARB_CARRY_OPP_DISCOUNT_CENTS": "0",
+config.json:39:  "PAIR_ARB_CONTINUOUS_IMBALANCE_ALLOW_MOMENTUM": "false",
+config.json:40:  "PAIR_ARB_CONTINUOUS_IMBALANCE_COOLDOWN_SEC": "8",
+config.json:41:  "PAIR_ARB_CONTINUOUS_IMBALANCE_ENABLED": "false",
+config.json:42:  "PAIR_ARB_CONTINUOUS_IMBALANCE_MAX_ADDS": "6",
+config.json:43:  "PAIR_ARB_CONTINUOUS_IMBALANCE_MIN_PRICE_IMPROVEMENT_CENTS": "1",
+config.json:44:  "PAIR_ARB_CONTINUOUS_IMBALANCE_MIN_SIGNAL_GAP_USD": "25",
+config.json:45:  "PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD": "0",
+config.json:46:  "PAIR_ARB_CVD_MOMENTUM_ENABLED": "false",
+config.json:47:  "PAIR_ARB_CVD_MOMENTUM_LOCKED_PROFIT_CENTS": "3",
+config.json:48:  "PAIR_ARB_CVD_MOMENTUM_MAX_ELAPSED_SEC": "60",
+config.json:49:  "PAIR_ARB_CVD_MOMENTUM_MAX_GAP_USD": "15",
+config.json:50:  "PAIR_ARB_CVD_MOMENTUM_MIN_CVD_BTC": "10",
+config.json:51:  "PAIR_ARB_DIRECTION_MODE": "BOTH",
+config.json:52:  "PAIR_ARB_DUAL_PRE_PLACE": "true",
+config.json:53:  "PAIR_ARB_ENABLED": "true",
+config.json:54:  "PAIR_ARB_FLOW_MOVEMENT_MODE": "false",
+config.json:55:  "PAIR_ARB_HEDGE_PRE_OFFSET_CENTS": "0",
+config.json:56:  "PAIR_ARB_HEDGE_TIMEOUT_SEC": "5",
+config.json:57:  "PAIR_ARB_LEAD_BUY_SLIP_TICKS": "2",
+config.json:58:  "PAIR_ARB_LEAD_BUY_TIMEOUT_SEC": "0",
+config.json:59:  "PAIR_ARB_LEAD_ORDER_TYPE": "FAK",
+config.json:60:  "PAIR_ARB_MAX_ADVERSE_YES_DRIFT_CENTS": "3",
+config.json:61:  "PAIR_ARB_MAX_BTC_GAP_USD": "180",
+config.json:62:  "PAIR_ARB_MAX_CL_AGE_SEC": "120",
+config.json:63:  "PAIR_ARB_MAX_COINBASE_SPREAD_USD": "0",
+config.json:64:  "PAIR_ARB_MAX_CONTRA_OI_DELTA_USD": "0",
+config.json:65:  "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS": "0",
+config.json:66:  "PAIR_ARB_MAX_SIGNAL_AGE_SEC": "10",
+config.json:67:  "PAIR_ARB_MAX_TOKEN_PRICE": "0.65",
+config.json:68:  "PAIR_ARB_MAX_WINDOW_SEC": "210",
+config.json:69:  "PAIR_ARB_MIN_BOOK_IMBALANCE": "0",
+config.json:70:  "PAIR_ARB_MIN_BTC_GAP_USD": "20",
+config.json:71:  "PAIR_ARB_MIN_BTC_TICK_RUN": "0",
+config.json:72:  "PAIR_ARB_MIN_COINBASE_SPREAD_USD": "0",
+config.json:73:  "PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE": "0",
+config.json:74:  "PAIR_ARB_MIN_CVD_BTC": "0",
+config.json:75:  "PAIR_ARB_MIN_GAP_HOLD_SEC": "0",
+config.json:76:  "PAIR_ARB_MIN_GAP_VELOCITY_USD": "0.5",
+config.json:77:  "PAIR_ARB_MIN_LOCKED_PROFIT_CENTS": "8",
+config.json:78:  "PAIR_ARB_MIN_OI_DELTA_USD": "0",
+config.json:79:  "PAIR_ARB_MIN_TOKEN_PRICE": "0.35",
+config.json:80:  "PAIR_ARB_MIN_WINDOW_SEC": "45",
+config.json:81:  "PAIR_ARB_ML_FILTER_AUTO_TRAIN": "false",
+config.json:82:  "PAIR_ARB_ML_FILTER_AUTO_TRAIN_INTERVAL_MIN": "60",
+config.json:83:  "PAIR_ARB_ML_FILTER_ENABLED": "false",
+config.json:84:  "PAIR_ARB_ML_FILTER_LABEL_THRESHOLD_USD": "20",
+config.json:85:  "PAIR_ARB_ML_FILTER_MIN_SAMPLES": "30",
+config.json:86:  "PAIR_ARB_ML_FILTER_STATE_FILE": "brain_state.json",
+config.json:87:  "PAIR_ARB_ML_FILTER_THRESHOLD": "0.45",
+config.json:88:  "PAIR_ARB_PRE_OPEN_ENABLED": "false",
+config.json:89:  "PAIR_ARB_PRE_OPEN_ENTRY_WINDOW_SEC": "5",
+config.json:90:  "PAIR_ARB_PRE_OPEN_MAX_TOKEN_PRICE": "0.54",
+config.json:91:  "PAIR_ARB_PRE_OPEN_MIN_GAP_USD": "3",
+config.json:92:  "PAIR_ARB_PRE_OPEN_MIN_TOKEN_PRICE": "0.46",
+config.json:93:  "PAIR_ARB_PRE_OPEN_SRC_WINDOW_SEC": "15",
+config.json:94:  "PAIR_ARB_REVERSE_SIGNAL_ENABLED": "false",
+config.json:95:  "PAIR_ARB_REVERSE_SIGNAL_LOOKBACK_SEC": "8",
+config.json:96:  "PAIR_ARB_REVERSE_SIGNAL_MAX_GAP_USD": "0",
+config.json:97:  "PAIR_ARB_REVERSE_SIGNAL_MIN_GAP_USD": "20",
+config.json:98:  "PAIR_ARB_REVERSE_SIGNAL_MIN_SHRINK_USD": "2",
+config.json:99:  "PAIR_ARB_REVERSE_SIGNAL_MIN_VELOCITY_USD": "0.25",
+config.json:100:  "PAIR_ARB_SCHEDULE_MODE": "CONTINUOUS",
+config.json:101:  "PAIR_ARB_SCHEDULE_WINDOWS_UTC": "",
+config.json:102:  "PAIR_ARB_SELL_AT_99": "false",
+config.json:103:  "PAIR_ARB_SIGNALS_RETENTION_HOURS": "0",
+config.json:104:  "PAIR_ARB_SIGNAL_MIN_GAP_USD": "1",
+config.json:105:  "PAIR_ARB_STOP_COOLDOWN_SEC": "30",
+config.json:106:  "PAIR_ARB_STOP_LOSS_CENTS": "0",
+config.json:107:  "PAIR_ARB_STOP_LOSS_MIN_GAP_AGAINST_USD": "0",
+config.json:108:  "PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC": "0",
+config.json:109:  "PAIR_ARB_TRADE_SIZE_USD": "5",
+config.json:110:  "PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC": "12",
+config.json:111:  "PAIR_ARB_UNPROFITABLE_ABORT_MIN_GAP_AGAINST_USD": "2",
+config.json:112:  "PAIR_ARB_YES_DRIFT_WINDOW_SEC": "10",
+config.json:114:  "PAPER_TRADE": "true",
+config.json:129:  "TRADE_SIZE_USD": "5"
+
+=== PROCESS ===
+NOT RUNNING
+
+=== PORT ===
+8086 NOT LISTENING
+
+=== LOG ===
+nohup: ignoring input
+warning: env POLY_API_KEY not set
+warning: env POLY_API_SECRET not set
+warning: env POLY_API_PASSPHRASE not set
+warning: env PRIVATE_KEY_HEX not set
+warning: env PROXY_WALLET_ADDRESS not set
+
+
+  PolyArbPro  First-run setup                       
+                                                     
+  Required credentials are missing from all.env.     
+  Open the setup wizard to configure the bot:        
+                                                     
+       http://localhost:8086/wizard                  
+                                                     
+  Default password: changeme  (change on first login)
+  Press Ctrl-C to exit.                              
+
+
+
+╔══════════════════════════════════════════════════════╗
+║  Dashboard password: changeme                        ║
+║  Change it at: http://localhost:8080/settings        ║
+╚══════════════════════════════════════════════════════╝
+
+
+  Credentials saved  starting the bot...
+
+[1m[36m[0m
+     [2m[37mPoly Arb Pro[0m
+     [2m[37mBTC 5m Matched Pair Engine[0m
+     [90mPolymarket CLOB  |  5-Min BTC/USD[0m
+
+  [90m────────────────────────────────────────────────────────────────────[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [90m│[0m  Wallet       [96m0xd68f..adE5[0m
+  [90m│[0m  Trade Size   [97m$5.00[0m per entry
+  [90m│[0m  Balance      [92m$20.00[0m starting
+  [90m│[0m  Started      [37m2026-08-26 22:24:21 UTC[0m
+  [90m│[0m  Logs         [2m[90mpolyarb.log[0m
+  [90m────────────────────────────────────────────────────────────────────[0m
+
+22:24:21.094	FATAL	invalid PRIVATE_KEY_HEX	{"error": "invalid hex character 'x' in private key"}
