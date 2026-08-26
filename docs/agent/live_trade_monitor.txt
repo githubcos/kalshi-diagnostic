@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T02:18:42+00:00
+UPDATED_UTC=2026-08-26T02:18:50+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=3 hedge=3 closed=3
-CLOSE_REASONS={"pair_paper_locked_recycle": 3}
+EVENTS lead=0 hedge=0 closed=0
+CLOSE_REASONS={}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -117,28 +117,4 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-◂  ▲ P&L  +$0.1706  (+0.49%)  │  Reason: pair_paper_locked_recycle  │  Held: 6s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78779.67 open=78804.30 gap=$-24.6 no=0.8700 prob=0.67 rem=87s]
-✗  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78779.92 open=78804.30 gap=$-24.4 no=0.9000 prob=0.67 rem=81s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.0812  (+0.28%)  │  Reason: pair_paper_locked_recycle  │  Held: 9s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78806.77 open=78804.30 gap=$2.5 yes=0.6400 prob=0.52 rem=52s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.4351  (+0.85%)  │  Reason: pair_paper_locked_recycle  │  Held: 1s
-║  #1  pair_arb  buy 0.7353 → sell 0.6900  6sh  -$0.3564  pair_stop_loss  ║
-║  #2  pair_arb  buy 0.8032 → sell 0.7100  6sh  -$0.6564  pair_stop_loss  ║
-║  #3  pair_arb  buy 0.7351 → sell 0.7000  7sh  -$0.3326  pair_stop_loss  ║
-║  #4  pair_arb  buy 0.9161 → sell 1.0000  7sh  +$0.5790  pair_paper_locked_recycle  ║
-║  #5  pair_arb  buy 0.7539 → sell 0.7001  6sh  -$0.4478  pair_stop_loss  ║
-║  #6  pair_arb  buy 0.9891 → sell 1.0000  7sh  +$0.0716  pair_paper_locked_recycle  ║
-║  #7  pair_arb  buy 0.9866 → sell 1.0000  6sh  +$0.0852  pair_paper_locked_recycle  ║
-║  #8  pair_arb  buy 0.8606 → sell 0.8400  6sh  -$0.1768  pair_stop_loss  ║
-║  #9  pair_arb  buy 0.9860 → sell 1.0000  6sh  +$0.0786  pair_paper_locked_recycle  ║
-║  #10  pair_arb  buy 0.9810 → sell 1.0000  5sh  +$0.1028  pair_paper_locked_recycle  ║
-║  #11  pair_arb  buy 0.9716 → sell 1.0000  6sh  +$0.1706  pair_paper_locked_recycle  ║
-║  #12  pair_arb  buy 0.9850 → sell 1.0000  5sh  +$0.0812  pair_paper_locked_recycle  ║
-║  #13  pair_arb  buy 0.9411 → sell 1.0000  7sh  +$0.4351  pair_paper_locked_recycle  ║
-║  TOTAL P&L   -$0.3659   (-0.51%)                              ║
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
