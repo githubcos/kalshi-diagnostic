@@ -1,0 +1,312 @@
+=== TRADER STRUCT ===
+3526:type Trader struct {
+3527-	cfg       TraderConfig
+3528-	orders    *polymarket.OrdersClient
+3529-	detector  *Detector
+3530-	logger    *zap.Logger
+3531-	stateFile string // path to JSON state file for crash recovery
+3532-
+3533-	position       *Position // nil when flat
+3534-	pairedPosition *PairArbPosition
+3535-	pendingBuy     *pendingBuyState // non-nil between PlaceOrder and position-open
+3536-	pendingPairArb *pairArbPendingOrderState
+3537-	// pendingHedgePrePlace tracks a hedge GTC order placed simultaneously with the
+3538-	// lead buy (dual pre-place mode). It may arrive before or after the lead fill.
+3539-	pendingHedgePrePlace *pairArbPendingOrderState
+3540-
+3541-	paperBalance float64 // simulated USD balance (paper mode only)
+3542-
+3543-	feeRateBps string // taker fee for current window's token (e.g. "175")
+3544-
+3545-	// buyInProgress is true while a buy attempt is in-flight (PlaceOrder Ã‚Â  fill poll).
+3546-	// Prevents concurrent or rapid-fire re-entry from multiple eval ticks.
+3547-	buyInProgress bool
+3548-
+3549-	// convYesTokenID / convNoTokenID / convConditionID are the market identifiers for the current window.
+3550-	// Set via SetMarketTokens at window start; used by flipConvictionPosition and CTF redemption.
+3551-	convYesTokenID  string
+3552-	convNoTokenID   string
+3553-	convConditionID string
+3554-
+3555-	journal        []TradeRecord // completed trades this window
+3556-	sessionJournal []TradeRecord // ALL completed trades across the session
+3557-	windowsPlayed  int           // number of windows completed
+3558-	startedAt      time.Time     // session start time
+3559-
+3560-	//  Session-level risk counters 	// Updated inside appendJournalLine on every completed trade.
+3561-	sessionPnL        float64 // cumulative P&L since the session started
+3562-	totalTrades       int     // total trades completed this session
+3563-	consecutiveLosses int     // how many trades in a row closed at a loss
+3564-
+3565-	// convictionStopLossAtomicCents holds the live-tuned conviction stop-loss
+3566-	// in cents as a uint64 (math.Float64bits encoding) for safe concurrent
+3567-	// writes from the auto-tuner goroutine and reads from the trading loop.
+3568-	convictionStopLossAtomicCents uint64
+3569-
+3570-	// allowanceInFlight tracks token IDs that have an active WaitForConditionalAllowance
+3571-	// goroutine running. Prevents multiple concurrent approval goroutines hammering
+3572-	// /balance-allowance and triggering HTTP 429 rate limits.
+3573-	allowanceInFlight           sync.Map // key: tokenID (string) Ã‚Â  struct{}{}
+3574-	claimInFlight               sync.Map // key: conditionID:side (string) -> struct{}{}
+3575-	pairClaimSafetyScheduled    sync.Map // key: conditionID:windowEndUnix -> struct{}{}
+3576-	claimMu                     sync.Mutex
+3577-	claimLastStatus             string
+3578-	claimLastMessage            string
+3579-	claimLastConditionID        string
+3580-	claimLastSide               string
+3581-	claimLastUpdatedAt          time.Time
+3582-	claimLastAttempt            int
+3583-	claimLastNextRetryAt        time.Time
+3584-	pairExitMu                  sync.Mutex
+3585-	pairExitManageInFlight      bool
+3586-	pairExitStatusMu            sync.Mutex
+3587-	pairExitStatusRefreshActive bool
+3588-	pairExitOrderStatus         map[string]pairExitOrderStatusSnapshot
+3589-	pairLeadEntryMu             sync.Mutex
+3590-	pairLeadEntryInFlight       bool
+3591-	pairRebalanceMu             sync.Mutex
+3592-	pairRebalanceInFlight       bool
+3593-	pendingClaims               []pendingClaim
+3594-	tickSizeMu                  sync.RWMutex
+3595-	tickSizeByToken             map[string]tickSizeSnapshot
+3596-	pairArbRetryAfter           time.Time
+3597-	pairArbForceCloseRetryAfter time.Time
+3598-	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
+3599-	// Used to suppress the orphan-liquidation trigger when the wallet API still shows
+3600-	// the just-sold shares (settlement / indexing lag).
+3601-	lastPairArbCloseAt time.Time
+3602-	// lastPairArbCloseConditionID is the condition ID tied to lastPairArbCloseAt.
+3603-	// Used to scope short post-close re-entry holds to the same market only.
+3604-	lastPairArbCloseConditionID string
+3605-	// pairArbHedgeOrphanFlag is set when forceClosePairArb fires while a pre-placed hedge
+3606-	// order was still tracked (pendingHedgePrePlace != nil). In that case the hedge may
+3607-	// have matched and its tokens are in the wallet without a tracked position. This flag
+3608-	// bypasses the orphan-cooldown suppression so liquidation runs immediately.
+3609-	pairArbHedgeOrphanFlag bool
+3610-	// lastPairArbStopLossAt is stamped when a stop-loss exit completes. Used to enforce
+3611-	// PairArbStopCooldownSec so the bot cannot immediately re-enter the same (or any)
+3612-	// market before conditional allowances are back on-chain.
+3613-	lastPairArbStopLossAt time.Time
+3614-	// pairArbLeadGapGuardFn, when non-nil, is evaluated on each GTC poll tick while the
+3615-	// lead order is resting LIVE. Returning (true, reason) cancels the order immediately
+3616-	// rather than waiting for the full timeout. Set by OnPairArbSignal before executing
+3617-	// the lead buy and cleared (via defer) when OnPairArbSignal returns.
+3618-	pairArbLeadGapGuardFn func() (shouldCancel bool, reason string)
+3619-
+3620-	// botConditionIDs tracks condition IDs this bot has actually traded/managed.
+3621-	// External reconciliation is restricted to this set.
+3622-	botConditionIDs map[string]struct{}
+3623-
+3624-	// cachedLiveBalance holds the most recently fetched on-chain USDC balance
+3625-	// (math.Float64bits encoding). Written by RefreshLiveBalance at window start
+3626-	// and refreshed in the background every 5 s. Zero means unknown/unset.
+3627-	cachedLiveBalance uint64
+3628-	pairCostReconcile sync.Mutex
+3629-	lastPairCostProbe time.Time
+3630-	pendingOrderWatch sync.Map // key: watch kind + orderID + tokenID -> struct{}{}
+3631-	isolatedPendingMu sync.Mutex
+3632-	isolatedPending   []pairArbPendingOrderState
+3633-
+3634-	// OnTradeClose, if non-nil, is called immediately after each completed trade
+3635-	// record is written to disk. Set from main to feed the web dashboard in real-time
+3636-	// without creating an import cycle.
+3637-	OnTradeClose func(TradeRecord)
+3638-
+3639-	// metrics, if non-nil, collects rolling latency stats exposed on the web metrics page.
+3640-	metrics *BotMetrics
+3641-}
+3642-
+3643-// SetMetrics attaches a rolling latency metrics collector.
+3644-func (t *Trader) SetMetrics(m *BotMetrics) { t.metrics = m }
+3645-
+3646-// NewTrader creates a Trader.
+
+=== NEW TRADER ===
+3647:func NewTrader(
+3648-	cfg TraderConfig,
+3649-	orders *polymarket.OrdersClient,
+3650-	detector *Detector,
+3651-	logger *zap.Logger,
+3652-) *Trader {
+3653-	pb := 0.0
+3654-	if cfg.PaperTrade {
+3655-		pb = cfg.PaperStartBalance
+3656-	}
+3657-	return &Trader{
+3658-		cfg:                           cfg,
+3659-		orders:                        orders,
+3660-		detector:                      detector,
+3661-		logger:                        logger,
+3662-		stateFile:                     "position_state.json",
+3663-		paperBalance:                  pb,
+3664-		journal:                       make([]TradeRecord, 0, 8),
+3665-		sessionJournal:                make([]TradeRecord, 0, 32),
+3666-		startedAt:                     time.Now(),
+3667-		tickSizeByToken:               make(map[string]tickSizeSnapshot),
+3668-		pairExitOrderStatus:           make(map[string]pairExitOrderStatusSnapshot),
+3669-		botConditionIDs:               make(map[string]struct{}),
+3670-		convictionStopLossAtomicCents: math.Float64bits(cfg.ConvictionStopLossCents),
+3671-	}
+3672-}
+3673-
+3674-func normalizeConditionID(conditionID string) string {
+3675-	return strings.ToLower(strings.TrimSpace(conditionID))
+3676-}
+3677-
+3678-func (t *Trader) isTokenTrackedByOpenPosition(tokenID string) bool {
+3679-	tokenID = strings.TrimSpace(tokenID)
+3680-	if tokenID == "" {
+3681-		return false
+3682-	}
+3683-	if t.position != nil && strings.EqualFold(strings.TrimSpace(t.position.TokenID), tokenID) {
+3684-		return true
+3685-	}
+3686-	if t.pairedPosition != nil {
+3687-		if strings.EqualFold(strings.TrimSpace(t.pairedPosition.YesTokenID), tokenID) ||
+3688-			strings.EqualFold(strings.TrimSpace(t.pairedPosition.NoTokenID), tokenID) {
+3689-			return true
+3690-		}
+3691-	}
+3692-	return false
+3693-}
+3694-
+3695-func (t *Trader) registerIsolatedPending(po pairArbPendingOrderState) {
+3696-	orderID := strings.TrimSpace(po.OrderID)
+3697-	tokenID := strings.TrimSpace(po.TokenID)
+3698-	if orderID == "" || tokenID == "" {
+3699-		return
+3700-	}
+3701-	po.OrderID = orderID
+3702-	po.TokenID = tokenID
+3703-
+3704-	t.isolatedPendingMu.Lock()
+3705-	for _, existing := range t.isolatedPending {
+3706-		if strings.EqualFold(strings.TrimSpace(existing.OrderID), orderID) &&
+3707-			strings.EqualFold(strings.TrimSpace(existing.TokenID), tokenID) {
+3708-			t.isolatedPendingMu.Unlock()
+3709-			return
+3710-		}
+3711-	}
+3712-	t.isolatedPending = append(t.isolatedPending, po)
+3713-	t.isolatedPendingMu.Unlock()
+3714-	t.savePositionState()
+3715-}
+3716-
+3717-func (t *Trader) unregisterIsolatedPending(orderID, tokenID string) {
+3718-	orderID = strings.TrimSpace(orderID)
+3719-	tokenID = strings.TrimSpace(tokenID)
+3720-	if orderID == "" || tokenID == "" {
+3721-		return
+3722-	}
+3723-	t.isolatedPendingMu.Lock()
+3724-	idx := -1
+3725-	for i := range t.isolatedPending {
+3726-		entry := t.isolatedPending[i]
+3727-		if strings.EqualFold(strings.TrimSpace(entry.OrderID), orderID) &&
+3728-			strings.EqualFold(strings.TrimSpace(entry.TokenID), tokenID) {
+3729-			idx = i
+3730-			break
+3731-		}
+3732-	}
+3733-	if idx < 0 {
+3734-		t.isolatedPendingMu.Unlock()
+3735-		return
+3736-	}
+3737-	t.isolatedPending = append(t.isolatedPending[:idx], t.isolatedPending[idx+1:]...)
+3738-	t.isolatedPendingMu.Unlock()
+3739-	t.savePositionState()
+3740-}
+3741-
+3742-func (t *Trader) watchIsolatedPendingOrder(po *pairArbPendingOrderState, reason string) {
+3743-	if t.cfg.PaperTrade || po == nil || strings.TrimSpace(po.OrderID) == "" || strings.TrimSpace(po.TokenID) == "" {
+3744-		return
+3745-	}
+3746-	orderID := strings.TrimSpace(po.OrderID)
+3747-	tokenID := strings.TrimSpace(po.TokenID)
+3748-	requestName := strings.TrimSpace(po.RequestName)
+3749-	placedAt := po.PlacedAt
+3750-	watchKey := fmt.Sprintf("isolated|%s|%s", strings.ToLower(orderID), strings.ToLower(tokenID))
+3751-	if _, loaded := t.pendingOrderWatch.LoadOrStore(watchKey, struct{}{}); loaded {
+3752-		return
+3753-	}
+3754-	t.registerIsolatedPending(pairArbPendingOrderState{
+3755-		OrderID:     orderID,
+3756-		TokenID:     tokenID,
+3757-		RequestName: requestName,
+3758-		Origin:      reason,
+3759-		PlacedAt:    placedAt,
+3760-	})
+3761-	go func() {
+3762-		defer t.pendingOrderWatch.Delete(watchKey)
+3763-		defer t.unregisterIsolatedPending(orderID, tokenID)
+3764-
+3765-		watchBudget := pairArbIsolatedWatchTimeout
+3766-		if !placedAt.IsZero() {
+3767-			age := time.Since(placedAt)
+3768-			if age < 0 {
+3769-				age = 0
+3770-			}
+3771-			if age < watchBudget {
+3772-				watchBudget -= age
+3773-			} else {
+3774-				watchBudget = 2 * time.Minute
+3775-			}
+3776-		}
+3777-		if watchBudget < 2*time.Minute {
+3778-			watchBudget = 2 * time.Minute
+3779-		}
+3780-
+3781-		ctx, cancel := context.WithTimeout(context.Background(), watchBudget)
+3782-		defer cancel()
+3783-
+3784-		fallbackPrice := 0.50
+3785-		if avg, gross, err := t.getFillsTimed(ctx, requestName+"_isolated_watch_fills", orderID, tokenID); err == nil && gross > pairArbShareDust && avg > 0 {
+3786-			fallbackPrice = avg
+3787-		}
+3788-
+3789-		t.logger.Warn("trader: started isolated pending-order ownership watch",
+3790-			zap.String("order_id", orderID),
+3791-			zap.String("token_id", tokenID),
+3792-			zap.String("request", requestName),
+3793-			zap.String("reason", reason),
+3794-			zap.Duration("watch_budget", watchBudget),
+3795-		)
+3796-
+3797-		ticker := time.NewTicker(pairArbIsolatedWatchPoll)
+3798-		defer ticker.Stop()
+3799-		for {
+3800-			if ctx.Err() != nil {
+3801-				break
+3802-			}
+3803-			if t.isTokenTrackedByOpenPosition(tokenID) {
+3804-				t.logger.Info("trader: isolated pending-order watch stopping; token is now tracked by open position",
+3805-					zap.String("order_id", orderID),
+3806-					zap.String("token_id", tokenID),
+3807-				)
+3808-				return
+3809-			}
+3810-			bal, balErr := t.tokenBalanceShares(ctx, tokenID)
+3811-			if balErr == nil && bal > pairArbShareDust {
+3812-				sellable, sellableErr := t.resolveSellableShares(ctx, tokenID, bal)
+3813-				if sellableErr != nil {
+3814-					t.logger.Warn("trader: isolated pending-order watch saw credited shares but sellable lookup failed",
+3815-						zap.String("order_id", orderID),
+3816-						zap.String("token_id", tokenID),
+3817-						zap.Float64("wallet_balance", bal),
+3818-						zap.Error(sellableErr),
+3819-					)
+3820-				} else if sellable >= polymarket.MinOrderShares {
+3821-					fillPrice, filledShares, filled, sellErr := t.attemptSellWithFallback(ctx, tokenID, fallbackPrice, fmt.Sprintf("%.2f", sellable))
+3822-					if sellErr != nil {
+3823-						t.logger.Error("trader: isolated pending-order emergency liquidation failed",
+3824-							zap.String("order_id", orderID),
+3825-							zap.String("token_id", tokenID),
+3826-							zap.Float64("sellable", sellable),
+3827-							zap.Error(sellErr),
+
+=== CLIENT FIELD ASSIGNMENTS ===
+645:var clobCollateralShortfallPattern = regexp.MustCompile(`(?i)balance:\s*(\d+)\s*,\s*sum of matched orders:\s*(\d+)\s*,\s*order amount:\s*(\d+)`)
+756:	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
+3528:	orders    *polymarket.OrdersClient
+3649:	orders *polymarket.OrdersClient,
+3659:		orders:                        orders,
