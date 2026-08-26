@@ -1,0 +1,26 @@
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -730,6 +730,20 @@
+ func (t *Trader) setPairExitState(pair *PairArbPosition, state string, note string) {
+ 	if pair == nil {
+ 		return
+ 	}
++	// High-volume PAPER research mode: once both Kalshi legs are fully locked,
++	// realize the mathematically guaranteed $1/contract settlement immediately
++	// and recycle the simulated position. This is deliberately restricted to
++	// the active stress-test profile and never applies to LIVE execution.
++	if state == pairExitStateClaimQueued &&
++		t.cfg.PaperTrade &&
++		t.cfg.MaxTradesPerSession >= 10000 &&
++		t.cfg.PairArbMinBTCGapUSD <= 5 &&
++		t.pairArbTradeSizeUSD() <= 5 &&
++		pair.isBalanced() {
++		t.logger.Info("trader: PAPER high-volume locked pair recycled",
++			zap.Float64("locked_shares", pair.lockedShares()),
++			zap.Float64("locked_profit", pair.lockedProfit()))
++		t.closePairArbPosition(pair, 1.0, 0, "pair_paper_locked_recycle", "pair_paper_locked_recycle")
++		return
++	}
+ 	if pair.ExitState == state && pair.ExitStateNote == note {
+ 		return
+ 	}
