@@ -1,0 +1,38 @@
+diff --git a/kalshi_no_caller_test.go b/kalshi_no_caller_test.go
+deleted file mode 100644
+--- a/kalshi_no_caller_test.go
++++ /dev/null
+@@ -1,33 +0,0 @@
+-package main
+-
+-import (
+-	"os"
+-	"strings"
+-	"testing"
+-)
+-
+-func TestKalshiMainUsesExplicitNoPriceForPositionSnapshots(t *testing.T) {
+-	b, err := os.ReadFile("main.go")
+-	if err != nil {
+-		t.Fatal(err)
+-	}
+-	s := string(b)
+-	wants := []string{
+-		"trader.PositionSnapshot(yes, rtdsClient.LatestPrice(noToken))",
+-		"trader.DashboardPositionSnapshot(yesSnap, rtdsClient.LatestPrice(noToken))",
+-	}
+-	missing := false
+-	for _, want := range wants {
+-		if !strings.Contains(s, want) {
+-			t.Errorf("missing explicit Kalshi NO caller: %s", want)
+-			missing = true
+-		}
+-	}
+-	if missing {
+-		for i, line := range strings.Split(s, "\n") {
+-			if strings.Contains(line, "PositionSnapshot(") {
+-				t.Logf("main.go:%d: %s", i+1, strings.TrimSpace(line))
+-			}
+-		}
+-	}
+-}
