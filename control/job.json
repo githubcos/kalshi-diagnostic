@@ -1,16 +1,13 @@
 {
-  "id": "kalshi-professional-paper-phase1-20260826",
+  "id": "kalshi-professional-paper-phase2-20260826",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
     {"name": "BACKUP"},
-    {"name": "COLLECT_PARITY_EVIDENCE"},
-    {"name": "DETERMINISTIC_PARITY_TEST"},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
+    {"name": "UPDATE_AUTOPILOT"},
     {"name": "UPDATE_TELEMETRY"},
+    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
