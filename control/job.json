@@ -1,8 +1,9 @@
 {
-  "id": "kalshi-feed-postfix-status-v1-20260826-0039",
+  "id": "kalshi-live-trade-math-monitor-v1-20260826-0045",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
 }
