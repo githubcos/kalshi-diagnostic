@@ -1,0 +1,39 @@
+--- a/strategy/trader.go
++++ b/strategy/trader.go
+@@ -8765,6 +8765,29 @@
+ 	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
++
++	// Kalshi compatibility: an IOC/FAK lead can partially fill with fewer
++	// contracts than the pre-flight estimate. If that actual fill is too small
++	// to place the opposite hedge at the locked-profit limit, waiting until
++	// HedgeBy can never produce a valid pair. Fail closed immediately instead
++	// of carrying a knowingly unhedgeable directional residual.
++	if t.pairArbLeadOrderType() != polymarket.OrderTypeFOK {
++		_, deficitShares, anchorAvgPrice := pair.rebalanceState()
++		if deficitShares > pairArbShareDust && anchorAvgPrice > 0 {
++			hegdeLimitPrice := pairKalshiMaxHedgePrice(anchorAvgPrice, deficitShares, t.pairArbMinLockedProfit())
++			rawHedgeShares, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(deficitShares, hegdeLimitPrice, t.feeRateBps)
++			if hegdeLimitPrice <= 0 || hegdeLimitPrice >= 1.0 || !hedgeAllowed || rawHedgeShares <= 0 {
++				t.logger.Warn("trader: actual lead fill cannot form venue-valid hedge; force-closing immediately",
++					zap.String("lead_side", leadSide),
++					zap.Float64("actual_lead_shares", actualShares),
++					zap.Float64("hedge_limit", hegdeLimitPrice),
++					zap.Float64("hedge_notional", hedgeNotional),
++				)
++				return t.forceClosePairArb(ctx, sig.PolyYesPrice, "pair_hedge_below_venue_minimum")
++			}
++		}
++	}
+ 	// FOK mode: place an immediate FOK hedge; unwind lead if all attempts miss. No
+ 	// resting orders, no timeout loop — either both legs fill atomically or lead is sold.
+ 	if t.pairArbLeadOrderType() == polymarket.OrderTypeFOK {
+@@ -9694,9 +9717,6 @@
+ 	if residualSide == "" || residualShares <= 0 {
+ 		return nil
+ 	}
+-	if residualShares < polymarket.MinOrderShares {
+-		return nil
+-	}
+ 	residualTokenID := pair.YesTokenID
+ 	residualExitPrice := math.Round(currentYesPrice*100) / 100
+ 	if residualSide == "NO" {
