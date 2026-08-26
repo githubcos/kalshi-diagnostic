@@ -1,307 +1,307 @@
-KALSHI FINITE PARITY GATE: HEDGE_TIMING
-UTC=2026-08-26T00:28:57+00:00
-TITLE=hedge admission and timing
+KALSHI FINITE PARITY GATE: TIMEOUT_UNWIND
+UTC=2026-08-26T00:29:18+00:00
+TITLE=timeout and unwind semantics
 PAPER_ALIVE=True
 LIVE_ALLOWED=false
 HITS=20
 
---- HedgeBy at strategy/trader.go:232 (context 226-238) ---
-00226: 	YesTokenID  string    `json:"yes_token_id"`
-00227: 	NoTokenID   string    `json:"no_token_id"`
-00228: 	LeadSide    string    `json:"lead_side"`
-00229: 	OpenPrice   float64   `json:"open_price"`
-00230: 	WindowEnd   time.Time `json:"window_end"`
-00231: 	OpenedAt    time.Time `json:"opened_at"`
-00232: 	HedgeBy     time.Time `json:"hedge_by,omitempty"`
-00233: 	BalancedAt  time.Time `json:"balanced_at,omitempty"`
-00234: 	// LockedProfitCents overrides the default hedge locked-profit target for this position.
-00235: 	// Non-zero for CVD momentum entries (typically 3¢ vs the standard 8¢).
-00236: 	LockedProfitCents  float64 `json:"locked_profit_cents,omitempty"`
-00237: 	YesShares          float64 `json:"yes_shares"`
-00238: 	NoShares           float64 `json:"no_shares"`
+--- cancel_timeout at strategy/trader.go:1425 (context 1419-1431) ---
+01419: 					}
+01420: 				}
+01421: 			}
+01422: 		}
+01423: 		postSubmitLookupMS = time.Since(pollStart).Milliseconds()
+01424: 		if correctedFill <= 0 && grossFillShares <= 0 {
+01425: 			_ = t.cancelOrderTimed(ctx, requestName+"_cancel_timeout", orderID)
+01426: 			// Cancel-vs-match race hardening: the order can be MATCHED while the cancel
+01427: 			// request is in-flight or while status propagation lags. Reconcile once more
+01428: 			// before declaring timeout so we can continue hedge flow immediately.
+01429: 			if gr, grErr := t.getOrderTimed(ctx, requestName+"_post_cancel_lookup", orderID); grErr == nil && gr != nil {
+01430: 				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+01431: 				if pcStatus == "matched" || pcStatus == "filled" {
 
---- HedgeBy at strategy/trader.go:1739 (context 1733-1745) ---
-01733: 	t.savePositionState()
-01734: }
-01735: 
-01736: // executeDualPrePlacePairArb places the lead buy AND the hedge buy simultaneously as
-01737: // resting GTC maker orders. The hedge rests at a passive price so when the market moves
-01738: // both legs can fill in the same second. Execution cases:
-01739: //   - Both fill:        open balanced position immediately, HedgeBy cleared.
-01740: //   - Lead fills only:  hedge order stays resting as pendingHedgePrePlace; normal hedge
-01741: //     management (maybeRebalancePairArb) will absorb it when polled.
-01742: //   - Neither fills:    cancel pre-placed hedge, return error (no position).
-01743: //   - Hedge only:       unexpected (NO collapsed without YES rising); cancel hedge, return error.
-01744: func (t *Trader) executeDualPrePlacePairArb(
-01745: 	ctx context.Context,
+--- timeout at strategy/trader.go:27 (context 21-33) ---
+00021: 
+00022: 	"github.com/polyarb/display"
+00023: 	"github.com/polyarb/polymarket"
+00024: )
+00025: 
+00026: // isNetworkError returns true for errors that indicate the HTTP request was sent
+00027: // but the response was never received (timeout, EOF, connection reset). In these
+00028: // cases a PlaceOrder POST may have reached the server and created an order on the
+00029: // CLOB even though our client got an error  requiring orphan recovery.
+00030: func isNetworkError(err error) bool {
+00031: 	if err == nil {
+00032: 		return false
+00033: 	}
 
---- HedgeBy at strategy/trader.go:2211 (context 2205-2217) ---
-02205: 
-02206: 		if pair.isBalanced() {
-02207: 			// The complete position is economically protected. Do NOT create
-02208: 			// additional market risk merely because execution finished below
-02209: 			// the preferred locked-profit target.
-02210: 			pair.BalancedAt = now
-02211: 			pair.HedgeBy = time.Time{}
-02212: 
-02213: 			if !targetMet {
-02214: 				t.logger.Warn(
-02215: 					"trader: pair protected but post-fill locked-profit target was NOT achieved",
-02216: 					zap.Float64("locked_shares", pair.lockedShares()),
-02217: 					zap.Float64("total_spent", pair.totalSpent()),
+--- timeout at strategy/trader.go:36 (context 30-42) ---
+00030: func isNetworkError(err error) bool {
+00031: 	if err == nil {
+00032: 		return false
+00033: 	}
+00034: 	s := err.Error()
+00035: 	if strings.Contains(s, "context deadline exceeded") ||
+00036: 		strings.Contains(s, "Client.Timeout") ||
+00037: 		strings.Contains(s, "EOF") ||
+00038: 		strings.Contains(s, "connection reset") ||
+00039: 		strings.Contains(s, "i/o timeout") {
+00040: 		return true
+00041: 	}
+00042: 	var netErr net.Error
 
---- HedgeBy at strategy/trader.go:2227 (context 2221-2233) ---
-02221: 						actualLockedProfit/pair.lockedShares()),
-02222: 					zap.Float64("required_profit_per_share",
-02223: 						t.pairArbMinLockedProfit()),
-02224: 				)
-02225: 			}
-02226: 		} else {
-02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
-02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02229: 				pair.HedgeBy = pair.WindowEnd
-02230: 			}
-02231: 		}
-02232: 		t.pairedPosition = pair
-02233: 		t.rememberBotConditionID(pair.ConditionID)
+--- timeout at strategy/trader.go:39 (context 33-45) ---
+00033: 	}
+00034: 	s := err.Error()
+00035: 	if strings.Contains(s, "context deadline exceeded") ||
+00036: 		strings.Contains(s, "Client.Timeout") ||
+00037: 		strings.Contains(s, "EOF") ||
+00038: 		strings.Contains(s, "connection reset") ||
+00039: 		strings.Contains(s, "i/o timeout") {
+00040: 		return true
+00041: 	}
+00042: 	var netErr net.Error
+00043: 	if errors.As(err, &netErr) && netErr.Timeout() {
+00044: 		return true
+00045: 	}
 
---- HedgeBy at strategy/trader.go:2228 (context 2222-2234) ---
-02222: 					zap.Float64("required_profit_per_share",
-02223: 						t.pairArbMinLockedProfit()),
-02224: 				)
-02225: 			}
-02226: 		} else {
-02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
-02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02229: 				pair.HedgeBy = pair.WindowEnd
-02230: 			}
-02231: 		}
-02232: 		t.pairedPosition = pair
-02233: 		t.rememberBotConditionID(pair.ConditionID)
-02234: 		t.detector.SetInPosition(true)
+--- timeout at strategy/trader.go:43 (context 37-49) ---
+00037: 		strings.Contains(s, "EOF") ||
+00038: 		strings.Contains(s, "connection reset") ||
+00039: 		strings.Contains(s, "i/o timeout") {
+00040: 		return true
+00041: 	}
+00042: 	var netErr net.Error
+00043: 	if errors.As(err, &netErr) && netErr.Timeout() {
+00044: 		return true
+00045: 	}
+00046: 	return false
+00047: }
+00048: 
+00049: func isAmbiguousPlaceOrderParseError(err error) bool {
 
---- HedgeBy at strategy/trader.go:2229 (context 2223-2235) ---
-02223: 						t.pairArbMinLockedProfit()),
-02224: 				)
-02225: 			}
-02226: 		} else {
-02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
-02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02229: 				pair.HedgeBy = pair.WindowEnd
-02230: 			}
-02231: 		}
-02232: 		t.pairedPosition = pair
-02233: 		t.rememberBotConditionID(pair.ConditionID)
-02234: 		t.detector.SetInPosition(true)
-02235: 		t.savePositionState()
+--- timeout at strategy/trader.go:407 (context 401-413) ---
+00401: 	PairArbCarryEarlySec         int
+00402: 	PairArbCarryOppDiscountCents float64
+00403: 	PairArbMinLockedProfitCents  float64
+00404: 	// PairArbCVDMomentumLockedProfitCents is the looser hedge target (in cents) used for
+00405: 	// CVD momentum entries where the opposite token starts near 0.50. 0 = use default.
+00406: 	PairArbCVDMomentumLockedProfitCents                float64
+00407: 	PairArbHedgeTimeoutSec                             int
+00408: 	PairArbStopLossCents                               float64
+00409: 	PairArbStopLossMinHoldSec                          int
+00410: 	PairArbStopLossMinGapAgainstUSD                    float64
+00411: 	PairArbUnprofitableAbortGraceSec                   int
+00412: 	PairArbUnprofitableAbortMinGapAgainstUSD           float64
+00413: 	PairArbLeadBuySlipTicks                            int
 
---- HedgeBy at strategy/trader.go:2389 (context 2383-2395) ---
-02383: 		YesTokenID:  yesTokenID,
-02384: 		NoTokenID:   noTokenID,
-02385: 		LeadSide:    "YES",
-02386: 		OpenPrice:   sig.OpenPrice,
-02387: 		WindowEnd:   pairWindowEnd,
-02388: 		OpenedAt:    now,
-02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
-02390: 		YesShares:   actualSharesYes,
-02391: 		YesUSDSpent: usdSpentYes,
-02392: 	}
-02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02394: 		pair.HedgeBy = pair.WindowEnd
-02395: 	}
+--- timeout at strategy/trader.go:414 (context 408-420) ---
+00408: 	PairArbStopLossCents                               float64
+00409: 	PairArbStopLossMinHoldSec                          int
+00410: 	PairArbStopLossMinGapAgainstUSD                    float64
+00411: 	PairArbUnprofitableAbortGraceSec                   int
+00412: 	PairArbUnprofitableAbortMinGapAgainstUSD           float64
+00413: 	PairArbLeadBuySlipTicks                            int
+00414: 	PairArbLeadBuyTimeoutSec                           int
+00415: 	PairArbLeadOrderType                               polymarket.OrderType
+00416: 	PairArbDualPrePlace                                bool
+00417: 	PairArbHedgePreOffsetCents                         float64
+00418: 	PairArbMaxSignalAgeSec                             int
+00419: 	PairArbMaxCLAgeSec                                 int
+00420: 	PairArbSellAt99                                    bool
 
---- HedgeBy at strategy/trader.go:2393 (context 2387-2399) ---
-02387: 		WindowEnd:   pairWindowEnd,
-02388: 		OpenedAt:    now,
-02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
-02390: 		YesShares:   actualSharesYes,
-02391: 		YesUSDSpent: usdSpentYes,
-02392: 	}
-02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02394: 		pair.HedgeBy = pair.WindowEnd
-02395: 	}
-02396: 	t.pairedPosition = pair
-02397: 	t.rememberBotConditionID(pairConditionID)
-02398: 	t.detector.SetInPosition(true)
-02399: 	t.savePositionState()
+--- timeout at strategy/trader.go:792 (context 786-798) ---
+00786: 	}
+00787: 	return strings.Contains(message, "pair arb: fak not filled") ||
+00788: 		strings.Contains(message, "pair arb: lead buy not filled")
+00789: }
+00790: 
+00791: const (
+00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
+00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
+00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
+00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
+00796: 	// double-placing if the first request reached the server but the response was lost.
+00797: 	pairArbLeadMaxAttempts  = 1
+00798: 	pairArbHedgeMaxAttempts = 1
 
---- HedgeBy at strategy/trader.go:2394 (context 2388-2400) ---
-02388: 		OpenedAt:    now,
-02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
-02390: 		YesShares:   actualSharesYes,
-02391: 		YesUSDSpent: usdSpentYes,
-02392: 	}
-02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02394: 		pair.HedgeBy = pair.WindowEnd
-02395: 	}
-02396: 	t.pairedPosition = pair
-02397: 	t.rememberBotConditionID(pairConditionID)
-02398: 	t.detector.SetInPosition(true)
-02399: 	t.savePositionState()
-02400: 	t.logger.Info("trader: pair arb dual: YES leg opened",
+--- timeout at strategy/trader.go:793 (context 787-799) ---
+00787: 	return strings.Contains(message, "pair arb: fak not filled") ||
+00788: 		strings.Contains(message, "pair arb: lead buy not filled")
+00789: }
+00790: 
+00791: const (
+00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
+00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
+00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
+00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
+00796: 	// double-placing if the first request reached the server but the response was lost.
+00797: 	pairArbLeadMaxAttempts  = 1
+00798: 	pairArbHedgeMaxAttempts = 1
+00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
 
---- HedgeBy at strategy/trader.go:2426 (context 2420-2432) ---
-02420: 		return t.managePairArbPosition(ctx, liveYes, liveNo, 0)
-02421: 	}
-02422: 
-02423: 	pair.NoShares = actualSharesNo
-02424: 	pair.NoUSDSpent = usdSpentNo
-02425: 	pair.BalancedAt = now
-02426: 	pair.HedgeBy = time.Time{} // both legs present; no hedge deadline needed
-02427: 	t.savePositionState()
-02428: 	t.logger.Info("trader: pair arb dual: NO leg opened; fully hedged from entry",
-02429: 		zap.String("order_id", orderIDNo),
-02430: 		zap.Float64("fill_price", fillPriceNo),
-02431: 		zap.Float64("shares", actualSharesNo),
-02432: 		zap.Float64("usd_spent", usdSpentNo),
+--- timeout at strategy/trader.go:794 (context 788-800) ---
+00788: 		strings.Contains(message, "pair arb: lead buy not filled")
+00789: }
+00790: 
+00791: const (
+00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
+00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
+00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
+00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
+00796: 	// double-placing if the first request reached the server but the response was lost.
+00797: 	pairArbLeadMaxAttempts  = 1
+00798: 	pairArbHedgeMaxAttempts = 1
+00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
 
---- HedgeBy at strategy/trader.go:2465 (context 2459-2471) ---
-02459: 		YesTokenID:  yesTokenID,
-02460: 		NoTokenID:   noTokenID,
-02461: 		LeadSide:    leadSide,
-02462: 		OpenPrice:   sig.OpenPrice,
-02463: 		WindowEnd:   pairWindowEnd,
-02464: 		OpenedAt:    now,
-02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
-02466: 	}
-02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02468: 		pair.HedgeBy = pair.WindowEnd
-02469: 	}
-02470: 	if isNoLead {
-02471: 		pair.NoShares = actualShares
+--- timeout at strategy/trader.go:803 (context 797-809) ---
+00797: 	pairArbLeadMaxAttempts  = 1
+00798: 	pairArbHedgeMaxAttempts = 1
+00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
+00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
+00802: 	pairArbLimitBuySlip = 0.02
+00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
+00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
+00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
+00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
+00807: )
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
 
---- HedgeBy at strategy/trader.go:2467 (context 2461-2473) ---
-02461: 		LeadSide:    leadSide,
-02462: 		OpenPrice:   sig.OpenPrice,
-02463: 		WindowEnd:   pairWindowEnd,
-02464: 		OpenedAt:    now,
-02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
-02466: 	}
-02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02468: 		pair.HedgeBy = pair.WindowEnd
-02469: 	}
-02470: 	if isNoLead {
-02471: 		pair.NoShares = actualShares
-02472: 		pair.NoUSDSpent = usdSpent
-02473: 	} else {
+--- timeout at strategy/trader.go:804 (context 798-810) ---
+00798: 	pairArbHedgeMaxAttempts = 1
+00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
+00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
+00802: 	pairArbLimitBuySlip = 0.02
+00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
+00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
+00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
+00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
+00807: )
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+00810: 	if strings.Contains(requestName, "lead") {
 
---- HedgeBy at strategy/trader.go:2468 (context 2462-2474) ---
-02462: 		OpenPrice:   sig.OpenPrice,
-02463: 		WindowEnd:   pairWindowEnd,
-02464: 		OpenedAt:    now,
-02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
-02466: 	}
-02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-02468: 		pair.HedgeBy = pair.WindowEnd
-02469: 	}
-02470: 	if isNoLead {
-02471: 		pair.NoShares = actualShares
-02472: 		pair.NoUSDSpent = usdSpent
-02473: 	} else {
-02474: 		pair.YesShares = actualShares
+--- timeout at strategy/trader.go:805 (context 799-811) ---
+00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
+00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
+00802: 	pairArbLimitBuySlip = 0.02
+00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
+00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
+00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
+00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
+00807: )
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+00810: 	if strings.Contains(requestName, "lead") {
+00811: 		return pairArbLeadSubmitTimeout
 
---- HedgeBy at strategy/trader.go:2596 (context 2590-2602) ---
-02590: 			} else {
-02591: 				pair.NoShares += hActual
-02592: 				pair.NoUSDSpent += hUSD
-02593: 			}
-02594: 			if pair.isBalanced() {
-02595: 				pair.BalancedAt = time.Now()
-02596: 				pair.HedgeBy = time.Time{}
-02597: 			}
-02598: 			t.clearPendingPairArbOrder()
-02599: 			t.savePositionState()
-02600: 			lockedPerShare := 1.0 - pair.sideAveragePrice("YES") - pair.sideAveragePrice("NO")
-02601: 			display.TradeOpen(buySide+" [PAIR HEDGE]", hFill, hActual, hFeeShares, hUSD, lockedPerShare, t.cfg.PaperTrade)
-02602: 			t.logger.Info("trader: FOK hedge filled; pair balanced",
+--- timeout at strategy/trader.go:809 (context 803-815) ---
+00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
+00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
+00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
+00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
+00807: )
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+00810: 	if strings.Contains(requestName, "lead") {
+00811: 		return pairArbLeadSubmitTimeout
+00812: 	}
+00813: 	if strings.Contains(requestName, "hedge") {
+00814: 		return pairArbHedgeSubmitTimeout
+00815: 	}
 
---- HedgeBy at strategy/trader.go:2687 (context 2681-2693) ---
-02681: 		}
-02682: 		return false, ""
-02683: 	}
-02684: }
-02685: 
-02686: // shouldAbortUnprofitableUnhedgedPairArb returns true when an unhedged pair position
-02687: // should be force-closed before HedgeBy because the lead is already losing and the
-02688: // original signal has weakened, reversed momentum, or flipped direction.
-02689: //
-02690: // It applies PairArbUnprofitableAbortGraceSec and PairArbUnprofitableAbortMinGapAgainstUSD.
-02691: func (t *Trader) shouldAbortUnprofitableUnhedgedPairArb(pair *PairArbPosition, currentYesPrice float64, currentNoPrice float64, now time.Time) (bool, float64, string) {
-02692: 	if pair == nil || pair.isBalanced() || t.detector == nil {
-02693: 		return false, 0, ""
+--- timeout at strategy/trader.go:811 (context 805-817) ---
+00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
+00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
+00807: )
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+00810: 	if strings.Contains(requestName, "lead") {
+00811: 		return pairArbLeadSubmitTimeout
+00812: 	}
+00813: 	if strings.Contains(requestName, "hedge") {
+00814: 		return pairArbHedgeSubmitTimeout
+00815: 	}
+00816: 	return pairArbHedgeSubmitTimeout
+00817: }
 
---- HedgeBy at strategy/trader.go:4751 (context 4745-4757) ---
-04745: 	} else {
-04746: 		pair.NoShares += actualShares
-04747: 		pair.NoUSDSpent += usdSpent
-04748: 	}
-04749: 	if pair.isBalanced() {
-04750: 		pair.BalancedAt = time.Now()
-04751: 		pair.HedgeBy = time.Time{}
-04752: 	}
-04753: 	t.clearPendingPairArbOrder()
-04754: 	t.savePositionState()
-04755: 	t.logger.Info("trader: pending hedge credit probe reconciled and absorbed",
-04756: 		zap.String("order_id", po.OrderID),
-04757: 		zap.String("hedge_side", buySide),
+--- timeout at strategy/trader.go:814 (context 808-820) ---
+00808: 
+00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+00810: 	if strings.Contains(requestName, "lead") {
+00811: 		return pairArbLeadSubmitTimeout
+00812: 	}
+00813: 	if strings.Contains(requestName, "hedge") {
+00814: 		return pairArbHedgeSubmitTimeout
+00815: 	}
+00816: 	return pairArbHedgeSubmitTimeout
+00817: }
+00818: 
+00819: func pairArbSubmitMaxAttemptsForRequest(requestName string) int {
+00820: 	if strings.Contains(requestName, "lead") {
 
---- HedgeBy at strategy/trader.go:5240 (context 5234-5246) ---
-05234: 						ConditionID: pairConditionID,
-05235: 						YesTokenID:  yesID,
-05236: 						NoTokenID:   noID,
-05237: 						LeadSide:    leadSide,
-05238: 						WindowEnd:   pairWindowEnd,
-05239: 						OpenedAt:    po.PlacedAt,
-05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
-05241: 					}
-05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-05243: 						pair.HedgeBy = pair.WindowEnd
-05244: 					}
-05245: 					if isNoLead {
-05246: 						pair.NoShares = walletBal
+--- timeout at strategy/trader.go:816 (context 810-822) ---
+00810: 	if strings.Contains(requestName, "lead") {
+00811: 		return pairArbLeadSubmitTimeout
+00812: 	}
+00813: 	if strings.Contains(requestName, "hedge") {
+00814: 		return pairArbHedgeSubmitTimeout
+00815: 	}
+00816: 	return pairArbHedgeSubmitTimeout
+00817: }
+00818: 
+00819: func pairArbSubmitMaxAttemptsForRequest(requestName string) int {
+00820: 	if strings.Contains(requestName, "lead") {
+00821: 		return pairArbLeadMaxAttempts
+00822: 	}
 
---- HedgeBy at strategy/trader.go:5242 (context 5236-5248) ---
-05236: 						NoTokenID:   noID,
-05237: 						LeadSide:    leadSide,
-05238: 						WindowEnd:   pairWindowEnd,
-05239: 						OpenedAt:    po.PlacedAt,
-05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
-05241: 					}
-05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-05243: 						pair.HedgeBy = pair.WindowEnd
-05244: 					}
-05245: 					if isNoLead {
-05246: 						pair.NoShares = walletBal
-05247: 						pair.NoUSDSpent = usdSpent
-05248: 						pair.NoWalletConfirmed = true
+--- timeout at strategy/trader.go:847 (context 841-853) ---
+00841: 
+00842: func (t *Trader) asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID string) {
+00843: 	if orderID == "" || tokenID == "" {
+00844: 		return
+00845: 	}
+00846: 	go func() {
+00847: 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+00848: 		defer cancel()
+00849: 
+00850: 		var avgFill float64
+00851: 		var grossShares float64
+00852: 		if gr, err := t.getOrderTimed(ctx, requestName+"_async_lookup", orderID, zap.String("request_id", requestID)); err == nil && gr != nil {
+00853: 			if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
 
---- HedgeBy at strategy/trader.go:5243 (context 5237-5249) ---
-05237: 						LeadSide:    leadSide,
-05238: 						WindowEnd:   pairWindowEnd,
-05239: 						OpenedAt:    po.PlacedAt,
-05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
-05241: 					}
-05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
-05243: 						pair.HedgeBy = pair.WindowEnd
-05244: 					}
-05245: 					if isNoLead {
-05246: 						pair.NoShares = walletBal
-05247: 						pair.NoUSDSpent = usdSpent
-05248: 						pair.NoWalletConfirmed = true
-05249: 					} else {
+--- timeout at strategy/trader.go:893 (context 887-899) ---
+00887: 		return
+00888: 	}
+00889: 	if minExpected < pairArbShareDust {
+00890: 		minExpected = pairArbShareDust
+00891: 	}
+00892: 	go func() {
+00893: 		ctx, cancel := context.WithTimeout(context.Background(), pairArbLeadCreditGrace)
+00894: 		defer cancel()
+00895: 
+00896: 		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
+00897: 		if err != nil {
+00898: 			t.logger.Warn("trader: async lead credit probe errored; keeping pending order for reconciliation",
+00899: 				zap.String("request", requestName),
 
---- HedgeBy at strategy/trader.go:5613 (context 5607-5619) ---
-05607: 			t.reconcileBalancedPairCostBasis(ctx, pair)
-05608: 		}
-05609: 		return
-05610: 	}
-05611: 	if pair.isBalanced() {
-05612: 		pair.BalancedAt = time.Now()
-05613: 		pair.HedgeBy = time.Time{}
-05614: 	}
-05615: 	t.savePositionState()
-05616: 
-05617: 	pair = t.pairedPosition
-05618: 	if pair == nil || !pair.isBalanced() {
-05619: 		return
+--- timeout at strategy/trader.go:916 (context 910-922) ---
+00910: 				zap.String("request_id", requestID),
+00911: 				zap.String("order_id", orderID),
+00912: 				zap.Float64("wallet_balance", bal),
+00913: 				zap.Float64("min_expected", minExpected),
+00914: 			)
+00915: 			if t.pendingPairArb != nil && t.pendingPairArb.OrderID == orderID {
+00916: 				reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 3*time.Second)
+00917: 				defer reconcileCancel()
+00918: 				if recErr := t.reconcilePendingPairArbOrder(reconcileCtx); recErr != nil {
+00919: 					t.logger.Warn("trader: async lead credit reconcile failed",
+00920: 						zap.String("request", requestName),
+00921: 						zap.String("request_id", requestID),
+00922: 						zap.String("order_id", orderID),
 
