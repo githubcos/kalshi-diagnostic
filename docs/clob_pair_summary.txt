@@ -1,0 +1,36 @@
+samples 193
+min_edge_c -6.000000000000005
+max_edge_c 2.0000000000000018
+avg_edge_c -1.0831491319997533
+median_edge_c -1.0000000000000009
+edge_ge_0c 7
+edge_ge_1c 2
+edge_ge_2c 1
+edge_ge_3c 0
+edge_ge_4c 0
+edge_ge_5c 0
+edge_ge_6c 0
+edge_ge_7c 0
+edge_ge_8c 0
+
+TOP 20
+2026-08-26T23:48:23.730732+00:00 btc-updown-5m-1787787900 edge=2.00c combined=0.9800 shares=7.35 up_worst=0.68 down_worst=0.3
+2026-08-26T23:48:52.834190+00:00 btc-updown-5m-1787787900 edge=1.67c combined=0.9833 shares=7.43 up_worst=0.68 down_worst=0.31
+2026-08-26T23:45:44.196323+00:00 btc-updown-5m-1787787900 edge=0.00c combined=1.0000 shares=7.04 up_worst=0.71 down_worst=0.29
+2026-08-26T23:48:38.175393+00:00 btc-updown-5m-1787787900 edge=0.00c combined=1.0000 shares=7.14 up_worst=0.7 down_worst=0.3
+2026-08-26T23:45:04.571894+00:00 btc-updown-5m-1787787900 edge=0.00c combined=1.0000 shares=9.09 up_worst=0.55 down_worst=0.45
+2026-08-26T23:46:54.064034+00:00 btc-updown-5m-1787787900 edge=0.00c combined=1.0000 shares=5.75 up_worst=0.87 down_worst=0.13
+2026-08-26T23:47:51.789280+00:00 btc-updown-5m-1787787900 edge=0.00c combined=1.0000 shares=5.43 up_worst=0.92 down_worst=0.08
+2026-08-26T23:45:02.159957+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.77 up_worst=0.57 down_worst=0.44
+2026-08-26T23:45:05.771883+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.77 up_worst=0.57 down_worst=0.44
+2026-08-26T23:45:34.586197+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.20 up_worst=0.61 down_worst=0.4
+2026-08-26T23:46:05.878886+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.77 up_worst=0.57 down_worst=0.44
+2026-08-26T23:46:07.078377+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.77 up_worst=0.57 down_worst=0.44
+2026-08-26T23:46:09.471842+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.20 up_worst=0.61 down_worst=0.4
+2026-08-26T23:46:16.761989+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.33 up_worst=0.6 down_worst=0.41
+2026-08-26T23:46:17.962859+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.33 up_worst=0.6 down_worst=0.41
+2026-08-26T23:46:19.160177+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=8.33 up_worst=0.6 down_worst=0.41
+2026-08-26T23:45:00.869246+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=9.09 up_worst=0.55 down_worst=0.46
+2026-08-26T23:45:08.171657+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=9.26 up_worst=0.54 down_worst=0.47
+2026-08-26T23:45:09.370771+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=9.26 up_worst=0.54 down_worst=0.47
+2026-08-26T23:45:10.582776+00:00 btc-updown-5m-1787787900 edge=-1.00c combined=1.0100 shares=9.26 up_worst=0.54 down_worst=0.47
