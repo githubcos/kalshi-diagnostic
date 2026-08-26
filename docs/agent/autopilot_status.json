@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T01:01:13+00:00",
-  "cycle": 1787706073,
-  "phase": "PAPER_PROFIT_STRESS",
-  "percent": 50,
-  "result": "RUNNING",
-  "detail": "PAPER stress running from $100 toward terminal $200/$0; current=$100.00. Logs preserved.",
-  "next": "CONTINUE_UNTIL_200_OR_0"
+  "utc": "2026-08-26T01:01:32+00:00",
+  "cycle": 1787706092,
+  "phase": "PAPER_STRESS_CONFIG",
+  "percent": 100,
+  "result": "PASS",
+  "detail": "High-volume PAPER data profile applied: broad gates, zero cooldown, $0.50 trades, 8s hedge timeout. Start=$100, terminal=$200/$0, logs preserved.",
+  "next": "START_PAPER"
 }
