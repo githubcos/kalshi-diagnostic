@@ -8,3 +8,16 @@ LIVE_ALLOWED=false
 [2026-08-26T08:21:02+00:00] ACTION 1/9 BACKUP PASS
 [2026-08-26T08:21:02+00:00] ACTION 2/9 APPLY_PATCH START
 [2026-08-26T08:21:02+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082102.tar.gz
+[2026-08-26T08:21:12+00:00] BACKUP PASS files=112
+[2026-08-26T08:21:12+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-xzyc66vw.patch
+    checking file kalshi/client.go
+    Hunk #1 succeeded at 199 (offset 50 lines).
+    checking file kalshi/market.go
+    Hunk #1 succeeded at 215 with fuzz 1 (offset 45 lines).
+    Hunk #2 succeeded at 231 with fuzz 1 (offset 46 lines).
+    Hunk #3 succeeded at 257 with fuzz 1 (offset 39 lines).
+    checking file kalshi/feed.go
+    Hunk #1 succeeded at 24 with fuzz 2 (offset 1 line).
+    patch: **** unexpected end of file in patch
+[2026-08-26T08:21:12+00:00] PATCH_DRY_RUN END rc=2 duration=0.00s
+[2026-08-26T08:21:12+00:00] JOB RESULT=FAIL ERROR=RuntimeError: patch dry-run failed
