@@ -1,0 +1,48 @@
+diff --git a/kalshi/market.go b/kalshi/market.go
+--- a/kalshi/market.go
++++ b/kalshi/market.go
+@@ -218,6 +218,11 @@ func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, e
+ 	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+ 
+ 	var response orderbookResponse
+ 	if err := c.DoPublic(ctx, http.MethodGet, path, &response); err != nil {
+-		return nil, err
++		if c.PrivateKey == nil || strings.TrimSpace(c.APIKeyID) == "" {
++			return nil, err
++		}
++		if authErr := c.Do(ctx, http.MethodGet, path, nil, &response); authErr != nil {
++			return nil, fmt.Errorf("kalshi orderbook public request failed: %v; authenticated retry failed: %w", err, authErr)
++		}
+ 	}
+diff --git a/kalshi/feed.go b/kalshi/feed.go
+--- a/kalshi/feed.go
++++ b/kalshi/feed.go
+@@ -23,4 +23,6 @@ type FeedClient struct {
+ 	mu          sync.RWMutex
+ 	latestPrice map[string]float64
+ 	PriceC      chan exchangefeed.PriceEvent
++	restWarnOnce  sync.Once
++	restPrimeOnce sync.Once
+ }
+@@ -54,11 +56,21 @@ func (f *FeedClient) pollOnce(ctx context.Context) {
+ 	for _, id := range f.tokenIDs {
+ 		b, e := f.client.GetOrderBook(ctx, id)
+ 		if e != nil {
++			if f.logger != nil {
++				f.restWarnOnce.Do(func() {
++					f.logger.Warn("kalshi feed: REST quote fallback failed", zap.String("token_id", id), zap.Error(e))
++				})
++			}
+ 			continue
+ 		}
+ 		p, q := bestAsk(b)
+ 		if p > 0 {
+ 			f.update(id, p, q, "SELL")
++			if f.logger != nil {
++				f.restPrimeOnce.Do(func() {
++					f.logger.Info("kalshi feed: REST quote fallback primed", zap.String("token_id", id), zap.Float64("ask", p))
++				})
++			}
+ 		}
+ 	}
+ }
