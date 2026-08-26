@@ -1,0 +1,17 @@
+=== CURRENT DIRECTORY ===
+/home/ubuntu/ArboCos
+
+=== CONTENTS ===
+total 12K
+drwxrwxr-x  3 ubuntu ubuntu 4.0K Aug 26 22:16 .
+drwxr-x--- 22 ubuntu ubuntu 4.0K Aug 26 22:17 ..
+drwxrwxrwx 13 ubuntu ubuntu 4.0K Apr 28 23:02 polyarbpro_2.4
+
+=== GO PROJECTS ===
+./polyarbpro_2.4/main.go
+./polyarbpro_2.4/go.mod
+
+=== EXECUTABLES ===
+
+=== CONFIG / ENV ===
+./polyarbpro_2.4/config/config.go
