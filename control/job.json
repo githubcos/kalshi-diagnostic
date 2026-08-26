@@ -1,10 +1,9 @@
 {
-  "id": "kalshi-paper-stress-v2-20260826-0048",
+  "id": "kalshi-live-trade-monitor-session-scope-v1-20260826-0052",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_AUTOPILOT"},
-    {"name": "START_PAPER"},
+    {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
 }
