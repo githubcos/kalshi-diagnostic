@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T02:35:23+00:00",
+  "utc": "2026-08-26T02:35:31+00:00",
   "publisher_pid": 40050,
   "heartbeat": {
-    "utc": "2026-08-26T02:35:19+00:00",
-    "epoch": 1787711719.9901557,
+    "utc": "2026-08-26T02:35:29+00:00",
+    "epoch": 1787711729.930144,
     "pid": 4075083,
-    "status": "working",
-    "job_id": "kalshi-kxbtc15m-window-end-v3-retry1-20260826-0235"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-kxbtc15m-window-end-v3-20260826-0231",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023510.tar.gz",
+    "last_job_id": "kalshi-kxbtc15m-window-end-v3-retry1-20260826-0235",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023519.tar.gz",
     "last_result": "FAIL",
-    "last_run_utc": "2026-08-26T02:31:36+00:00"
+    "last_run_utc": "2026-08-26T02:35:29+00:00"
   },
   "autopilot": null
 }
