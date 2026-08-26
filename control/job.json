@@ -1,17 +1,11 @@
 {
-  "id": "kalshi-feed-one-shot-recovery-v3-20260826-0830",
+  "id": "kalshi-feed-source-probe-v1-20260826-0912",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "ROLLBACK", "backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082156.tar.gz"},
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_orderbook_auth_fallback_v2.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["kalshi/market.go", "kalshi/feed.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
-    {"name": "STATUS"},
-    {"name": "UPDATE_TELEMETRY"},
-    {"name": "STATUS"}
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_feed_source_probe_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["kalshi/feed_source_probe_test.go"]},
+    {"name": "GO_TEST"}
   ]
 }
