@@ -1,0 +1,52 @@
+POLYMARKET ORIGINAL — HISTORICAL TRADE ECONOMICS
+========================================================================
+RECORDS 45
+TOTAL_PNL=-20.0214
+WINS=12
+LOSSES=33
+WIN_RATE=26.67%
+GROSS_WIN=3.5676
+GROSS_LOSS=-23.5890
+
+BY SIDE
+PAIR_MATCHED           n=  4 wins=  4 losses=  0 net=   2.5351
+PAIR_RESIDUAL_NO       n= 12 wins=  4 losses=  8 net=  -2.5827
+PAIR_RESIDUAL_YES      n= 29 wins=  4 losses= 25 net= -19.9738
+
+BY REASON
+pair_fill_leg_timeout            n= 37 wins=  5 losses= 32 net= -22.8529
+pair_window_resolved             n=  4 wins=  4 losses=  0 net=   2.5351
+pair_unhedged_resolved           n=  4 wins=  3 losses=  1 net=   0.2964
+
+CORE ARBITRAGE BREAKDOWN
+MATCHED_RECORDS=4
+MATCHED_NET=2.5351
+RESIDUAL_RECORDS=41
+RESIDUAL_NET=-22.5565
+
+WORST_RECORD
+{
+  "opened_at": "2026-08-24T00:41:17.000086257Z",
+  "closed_at": "2026-08-24T00:41:22.011086335Z",
+  "held_sec": 5.011000061,
+  "strategy": "pair_arb",
+  "side": "PAIR_RESIDUAL_YES",
+  "entry_btc_price": 0,
+  "entry_edge_usd": 0,
+  "entry_cl_lag_usd": 0,
+  "entry_atr": 0,
+  "entry_window_rem_sec": 222.999913743,
+  "entry_open_price": 77389.94353209,
+  "buy_price": 0.596037037037037,
+  "sell_price": 0.37,
+  "shares": 8.1,
+  "usd_spent": 4.8279,
+  "pnl": -2.20852,
+  "reason": "pair_fill_leg_timeout",
+  "cfg_min_edge_usd": 0,
+  "cfg_scalp_target_cents": 0,
+  "cfg_stop_loss_cents": 0,
+  "cfg_trade_size_usd": 5
+}
+
+NOTE: records may represent legs/components rather than independent basket attempts.
