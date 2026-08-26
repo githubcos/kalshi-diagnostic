@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T09:58:48+00:00
+UPDATED_UTC=2026-08-26T09:58:56+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=0 hedge=0 closed=0
-CLOSE_REASONS={}
+EVENTS lead=1 hedge=0 closed=1
+CLOSE_REASONS={"pair_hedge_below_venue_minimum": 1}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -118,3 +118,7 @@ OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78425.27 open=78372.69 gap=$52.6 yes=0.9900 prob=0.62 rem=366s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.0250  (--0.50%)  │  Reason: pair_hedge_below_venue_minimum  │  Held: 0s
