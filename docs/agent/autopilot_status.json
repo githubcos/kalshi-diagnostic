@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T00:49:44+00:00",
-  "cycle": 1787705384,
-  "phase": "FINAL_REGRESSION",
-  "percent": 85,
+  "utc": "2026-08-26T00:53:24+00:00",
+  "cycle": 1787705604,
+  "phase": "PAPER_PROFIT_STRESS",
+  "percent": 50,
   "result": "RUNNING",
-  "detail": "All finite source-context gates captured. Running one final test/build and paper-health verification.",
-  "next": "PAPER_EVIDENCE"
+  "detail": "PAPER stress running from $100 toward terminal $200/$0; current=$100.00. Logs preserved.",
+  "next": "CONTINUE_UNTIL_200_OR_0"
 }
