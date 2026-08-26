@@ -1,0 +1,108 @@
+=== POSSIBLE POLYARB INSTALLS ===
+/home/ubuntu/KalshiArbo/polyarbpro_2.4
+/home/ubuntu/PolyArb
+/home/ubuntu/PolyArb/polyarbpro_2.4
+
+=== POSSIBLE BINARIES / FILES ===
+   365572    412 -rwxrwx---   1 ubuntu   ubuntu     419250 Aug 23 23:02 /home/ubuntu/polyarbpro-24_ljLFx.zip
+   804045    104 -rw-r--r--   1 ubuntu   ubuntu      99798 Aug 26 22:08 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_22.log
+   803004    752 -rw-r--r--   1 ubuntu   ubuntu     764028 Aug 26 13:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_13.log
+   804104    680 -rw-r--r--   1 ubuntu   ubuntu     689533 Aug 26 12:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_12.log
+   798764    860 -rw-r--r--   1 ubuntu   ubuntu     872603 Aug 26 02:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_02.log
+   800367    504 -rw-r--r--   1 ubuntu   ubuntu     511427 Aug 26 19:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_19.log
+   797303    452 -rw-r--r--   1 ubuntu   ubuntu     458643 Aug 26 03:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_03.log
+   804715    268 -rw-r--r--   1 ubuntu   ubuntu     267393 Aug 26 08:23 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_08.log
+   802881    592 -rw-r--r--   1 ubuntu   ubuntu     599275 Aug 26 11:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_11.log
+   796777    276 -rw-r--r--   1 ubuntu   ubuntu     277161 Aug 26 09:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_09.log
+   801288    504 -rw-r--r--   1 ubuntu   ubuntu     511786 Aug 26 20:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_20.log
+   804820    580 -rw-r--r--   1 ubuntu   ubuntu     589409 Aug 26 06:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_06.log
+   803764    588 -rw-r--r--   1 ubuntu   ubuntu     597032 Aug 26 16:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_16.log
+   802914    580 -rw-r--r--   1 ubuntu   ubuntu     588799 Aug 26 05:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_05.log
+   808925    584 -rw-r--r--   1 ubuntu   ubuntu     591980 Aug 25 23:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260825_23.log
+   802624    588 -rw-r--r--   1 ubuntu   ubuntu     596071 Aug 26 21:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_21.log
+   805653    520 -rw-r--r--   1 ubuntu   ubuntu     525744 Aug 26 04:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_04.log
+   799375    648 -rw-r--r--   1 ubuntu   ubuntu     657497 Aug 26 00:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_00.log
+   804117    752 -rw-r--r--   1 ubuntu   ubuntu     763246 Aug 26 14:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_14.log
+   802222    656 -rw-r--r--   1 ubuntu   ubuntu     664036 Aug 26 17:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_17.log
+   803523    612 -rw-r--r--   1 ubuntu   ubuntu     620639 Aug 26 10:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_10.log
+   802798    688 -rw-r--r--   1 ubuntu   ubuntu     698107 Aug 26 15:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_15.log
+   804260    596 -rw-r--r--   1 ubuntu   ubuntu     605582 Aug 26 07:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_07.log
+   801645    508 -rw-r--r--   1 ubuntu   ubuntu     514054 Aug 26 18:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_18.log
+   807774   1704 -rw-r--r--   1 ubuntu   ubuntu    1737926 Aug 26 01:59 /home/ubuntu/KalshiArbo/kalshiarbo/logs/polyarb_20260826_01.log
+   798163   1560 -rw-rw-r--   1 ubuntu   ubuntu    1589599 Aug 26 22:08 /home/ubuntu/KalshiArbo/kalshiarbo/polyarb.log
+   797881   3768 -rw-r--r--   1 ubuntu   ubuntu    3856148 Aug 24 13:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_13.log
+   797885   2440 -rw-r--r--   1 ubuntu   ubuntu    2494597 Aug 24 16:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_16.log
+   797877     32 -rw-r--r--   1 ubuntu   ubuntu      30066 Aug 25 09:10 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260825_09.log
+   797886     52 -rw-r--r--   1 ubuntu   ubuntu      49575 Aug 24 18:02 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_18.log
+   797884   1472 -rw-r--r--   1 ubuntu   ubuntu    1504332 Aug 24 17:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_17.log
+   797883   2924 -rw-r--r--   1 ubuntu   ubuntu    2991136 Aug 24 15:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_15.log
+   797882   4408 -rw-r--r--   1 ubuntu   ubuntu    4511268 Aug 24 14:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_14.log
+   797879   3132 -rw-r--r--   1 ubuntu   ubuntu    3205491 Aug 24 11:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_11.log
+   797880   3692 -rw-r--r--   1 ubuntu   ubuntu    3779376 Aug 24 12:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_12.log
+   797878   3116 -rw-r--r--   1 ubuntu   ubuntu    3188562 Aug 24 10:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_10.log
+   797888    424 -rw-r--r--   1 ubuntu   ubuntu     430904 Aug 25 08:59 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260825_08.log
+   797887    236 -rw-r--r--   1 ubuntu   ubuntu     240039 Aug 24 19:33 /home/ubuntu/KalshiArbo/kalshiarbo_before_strict_arb_20260825_114004/logs/polyarb_20260824_19.log
+   807986    608 -rw-r--r--   1 ubuntu   ubuntu     614743 Aug 25 20:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_20.log
+   798854    500 -rw-r--r--   1 ubuntu   ubuntu     504599 Aug 26 02:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_02.log
+   797712    596 -rw-r--r--   1 ubuntu   ubuntu     602497 Aug 25 10:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_10.log
+   799268    660 -rw-r--r--   1 ubuntu   ubuntu     671455 Aug 25 15:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_15.log
+   797448    452 -rw-r--r--   1 ubuntu   ubuntu     458643 Aug 26 03:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_03.log
+   804700    240 -rw-r--r--   1 ubuntu   ubuntu     239687 Aug 26 08:23 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_08.log
+   797562    504 -rw-r--r--   1 ubuntu   ubuntu     511920 Aug 25 09:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_09.log
+   803544    596 -rw-r--r--   1 ubuntu   ubuntu     606118 Aug 25 17:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_17.log
+   804755    560 -rw-r--r--   1 ubuntu   ubuntu     568522 Aug 26 06:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_06.log
+   797100    552 -rw-r--r--   1 ubuntu   ubuntu     558663 Aug 25 19:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_19.log
+   802578    532 -rw-r--r--   1 ubuntu   ubuntu     537857 Aug 25 22:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_22.log
+   797060    592 -rw-r--r--   1 ubuntu   ubuntu     598246 Aug 25 11:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_11.log
+   802929    580 -rw-r--r--   1 ubuntu   ubuntu     589056 Aug 26 05:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_05.log
+   797070    748 -rw-r--r--   1 ubuntu   ubuntu     759770 Aug 25 13:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_13.log
+   808926    540 -rw-r--r--   1 ubuntu   ubuntu     547780 Aug 25 23:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_23.log
+   798790    756 -rw-r--r--   1 ubuntu   ubuntu     768772 Aug 25 14:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_14.log
+   805632    520 -rw-r--r--   1 ubuntu   ubuntu     525981 Aug 26 04:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_04.log
+   799376    628 -rw-r--r--   1 ubuntu   ubuntu     638468 Aug 26 00:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_00.log
+   797086    528 -rw-r--r--   1 ubuntu   ubuntu     533886 Aug 25 18:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_18.log
+   813945    624 -rw-r--r--   1 ubuntu   ubuntu     634869 Aug 25 21:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_21.log
+   797077    600 -rw-r--r--   1 ubuntu   ubuntu     609482 Aug 25 16:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_16.log
+   804275    596 -rw-r--r--   1 ubuntu   ubuntu     605582 Aug 26 07:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_07.log
+   807813    564 -rw-r--r--   1 ubuntu   ubuntu     572595 Aug 26 01:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260826_01.log
+   797068    640 -rw-r--r--   1 ubuntu   ubuntu     648634 Aug 25 12:59 /home/ubuntu/PolyArb/polyarbpro_2.4/logs/polyarb_20260825_12.log
+   796985  14760 -rwxrwxr-x   1 ubuntu   ubuntu   15112800 Aug 23 23:04 /home/ubuntu/PolyArb/polyarbpro_2.4/polyarb-original
+   796793  10596 -rwxrwxr-x   1 ubuntu   ubuntu   10849512 Aug 23 21:28 /home/ubuntu/.cache/go-build/f0/f0038b5f6d1cd3897c06110a0552eac44701bf1814a8a2d73ce73de4232017aa-d/polyarb
+   796785  10616 -rwxrwxr-x   1 ubuntu   ubuntu   10870056 Aug 23 21:13 /home/ubuntu/.cache/go-build/ed/ed1d98543035a1cf7bc1fdc2fe31b226323f279e6bb8cc6939ab5dc1ea180bee-d/polyarb
+   796788  10616 -rwxrwxr-x   1 ubuntu   ubuntu   10870056 Aug 23 21:17 /home/ubuntu/.cache/go-build/e2/e21e1f47978fc23ddf66469cf3aeabb67f94ae9e6c5bfd966bc001b9f247993c-d/polyarb
+   796997  10620 -rwxrwxr-x   1 ubuntu   ubuntu   10874152 Aug 23 21:05 /home/ubuntu/.cache/go-build/6a/6a5ee1b31026553613b4c49106373369660ec526a8e02f13fd0c0ef1a21b2a19-d/polyarb
+   796903  10640 -rwxrwxr-x   1 ubuntu   ubuntu   10894568 Aug 24 00:11 /home/ubuntu/.cache/go-build/5e/5ef1a7bbb4b4aa52335d93fa95230d005b78ccf0f647763d49e508a10be6e9c7-d/polyarb
+   796802  10596 -rwxrwxr-x   1 ubuntu   ubuntu   10849512 Aug 23 22:24 /home/ubuntu/.cache/go-build/3d/3d3c7b35dcea81894d9f01e836b746c6d7ec4a8812f80a558d4a18024d37ae34-d/polyarb
+   796804  10596 -rwxrwxr-x   1 ubuntu   ubuntu   10849512 Aug 23 22:36 /home/ubuntu/.cache/go-build/3d/3d47237fd7ecd5ba43606b1de0e22cafc2dc1b6248dbb173b6b9e63d425129e0-d/polyarb
+   796800  10592 -rwxrwxr-x   1 ubuntu   ubuntu   10845416 Aug 23 22:20 /home/ubuntu/.cache/go-build/a0/a016484c3b210786c254d6d870f69e63160eefb0c769749c3fc32b1463c18d87-d/polyarb
+   796786  10616 -rwxrwxr-x   1 ubuntu   ubuntu   10870056 Aug 23 21:15 /home/ubuntu/.cache/go-build/35/3571d0e4ee519a3c2d80786058edbe0124339a55a393e375c5a8aed6ea29fcac-d/polyarb
+   796987  10620 -rwxrwxr-x   1 ubuntu   ubuntu   10874152 Aug 23 20:45 /home/ubuntu/.cache/go-build/35/35291e601693822a1b6d4093ab51e6b45d182007a60ba84fd39f3c5c1547d586-d/polyarb
+   796996  10620 -rwxrwxr-x   1 ubuntu   ubuntu   10874152 Aug 23 20:55 /home/ubuntu/.cache/go-build/33/333cbb1e8988cc3dc9355452ff541cb25a6386d30619e70e5cb2865203d42cf6-d/polyarb
+   796992  10620 -rwxrwxr-x   1 ubuntu   ubuntu   10874152 Aug 23 21:00 /home/ubuntu/.cache/go-build/94/94532b31c4b818987ad33a6a1e832f6b83581a13290f61e175281a722bf88ce9-d/polyarb
+   796797  10596 -rwxrwxr-x   1 ubuntu   ubuntu   10849512 Aug 23 21:37 /home/ubuntu/.cache/go-build/4e/4ed76fa8296b4b483f5549685c43397bc1704a7326404ab777ce72250f173684-d/polyarb
+   808068 111960 -rw-rw-r--   1 ubuntu   ubuntu   114644015 Aug 26 01:01 /home/ubuntu/kalshi-stress-runs/paper_profit_v1_20260826_005302/before_high_volume/polyarb.log
+   806628 110468 -rw-rw-r--   1 ubuntu   ubuntu   113111098 Aug 26 00:48 /home/ubuntu/kalshi-stress-runs/paper_profit_v1_20260826_005302/before/polyarb.log
+   806640 120600 -rw-rw-r--   1 ubuntu   ubuntu   123487730 Aug 26 02:07 /home/ubuntu/kalshi-stress-runs/paper_profit_v1_20260826_005302/live/polyarb.log
+   799801 114792 -rw-rw-r--   1 ubuntu   ubuntu   117541192 Aug 26 01:13 /home/ubuntu/kalshi-stress-runs/paper_profit_v1_20260826_005302/before_high_volume_v3/polyarb.log
+   797403 118336 -rw-rw-r--   1 ubuntu   ubuntu   121171348 Aug 26 01:51 /home/ubuntu/kalshi-stress-runs/paper_profit_v1_20260826_005302/before_hedgeability_v4/polyarb.log
+   801690 127488 -rw-rw-r--   1 ubuntu   ubuntu   130542318 Aug 26 09:16 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_3_to_2_1787737514/polyarb.log
+   804672 125032 -rw-rw-r--   1 ubuntu   ubuntu   128027255 Aug 26 02:50 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_3_to_2_1787712608/polyarb.log
+   800330 123392 -rw-rw-r--   1 ubuntu   ubuntu   126349229 Aug 26 02:39 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/epoch_0004_before_change/polyarb.log
+   801565 123728 -rw-rw-r--   1 ubuntu   ubuntu   126691184 Aug 26 02:41 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/epoch_0005_before_change/polyarb.log
+   803183 127712 -rw-rw-r--   1 ubuntu   ubuntu   130772847 Aug 26 09:57 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_3_to_2_1787738235/polyarb.log
+   799869 120608 -rw-rw-r--   1 ubuntu   ubuntu   123496394 Aug 26 02:07 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_adaptive_v5/polyarb.log
+   799911 124356 -rw-rw-r--   1 ubuntu   ubuntu   127336927 Aug 26 02:43 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/live/polyarb.log
+   801549 121412 -rw-rw-r--   1 ubuntu   ubuntu   124323214 Aug 26 02:15 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/epoch_0003_before_change/polyarb.log
+   801956 127492 -rw-rw-r--   1 ubuntu   ubuntu   130544091 Aug 26 09:45 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_2_to_3_1787737648/polyarb.log
+   800204 120612 -rw-rw-r--   1 ubuntu   ubuntu   123499936 Aug 26 02:07 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/epoch_0001_before_change/polyarb.log
+   798137 125840 -rw-rw-r--   1 ubuntu   ubuntu   128859689 Aug 26 06:12 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_3_to_2_1787724727/polyarb.log
+   804949 125040 -rw-rw-r--   1 ubuntu   ubuntu   128035160 Aug 26 02:50 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_2_to_3_1787712743/polyarb.log
+   798478 125856 -rw-rw-r--   1 ubuntu   ubuntu   128869991 Aug 26 06:12 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_2_to_3_1787724861/polyarb.log
+   800657 120832 -rw-rw-r--   1 ubuntu   ubuntu   123731290 Aug 26 02:12 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/epoch_0002_before_change/polyarb.log
+   803461 127852 -rw-rw-r--   1 ubuntu   ubuntu   130913994 Aug 26 09:59 /home/ubuntu/kalshi-stress-runs/adaptive_paper_v5_20260826_020723/before_change_2_to_3_1787738367/polyarb.log
+
+=== RUNNING PROCESSES ===
+No matching process running
+
+=== LISTENING PORTS ===
+LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=580985,fd=6))                
