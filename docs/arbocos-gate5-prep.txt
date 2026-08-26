@@ -1,0 +1,1013 @@
+=== ORDERBOOK TYPES ===
+polymarket/market.go-32-	TokenID string `json:"token_id"`
+polymarket/market.go-33-	Outcome string `json:"outcome"` // "Yes" or "No"
+polymarket/market.go-34-}
+polymarket/market.go-35-
+polymarket/market.go-36-// OrderBook holds the current orderbook for a token.
+polymarket/market.go:37:type OrderBook struct {
+polymarket/market.go-38-	Market    string      `json:"market"`
+polymarket/market.go-39-	AssetID   string      `json:"asset_id"`
+polymarket/market.go-40-	Bids      []PriceSize `json:"bids"`
+polymarket/market.go-41-	Asks      []PriceSize `json:"asks"`
+polymarket/market.go-42-	Timestamp string      `json:"timestamp"`
+polymarket/market.go-43-	Hash      string      `json:"hash"`
+polymarket/market.go-44-}
+polymarket/market.go-45-
+polymarket/market.go-46-type PriceSize struct {
+polymarket/market.go-47-	Price string `json:"price"`
+polymarket/market.go-48-	Size  string `json:"size"`
+polymarket/market.go-49-}
+polymarket/market.go-50-
+polymarket/market.go-51-// RESTClient is a thin client wrapping the Polymarket CLOB REST API.
+polymarket/market.go-52-type RESTClient struct {
+polymarket/market.go-53-	baseURL          string
+polymarket/market.go-54-	creds            *L2Credentials
+polymarket/market.go-55-	httpClient       *http.Client
+polymarket/market.go-56-	submitHTTPClient *http.Client
+polymarket/market.go-57-	logger           *zap.Logger
+polymarket/market.go-58-}
+polymarket/market.go-59-
+polymarket/market.go-60-// timedRoundTripper wraps an inner RoundTripper and logs the method, URL path,
+polymarket/market.go-61-// and wall-clock duration in milliseconds for every HTTP request.
+polymarket/market.go-62-type timedRoundTripper struct {
+polymarket/market.go-63-	inner  http.RoundTripper
+polymarket/market.go-64-	logger *zap.Logger
+polymarket/market.go-65-	name   string
+polymarket/market.go-66-}
+polymarket/market.go-67-
+polymarket/market.go-68-func (t *timedRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+polymarket/market.go-69-	start := time.Now()
+polymarket/market.go-70-	resp, err := t.inner.RoundTrip(req)
+polymarket/market.go-71-	ms := time.Since(start).Milliseconds()
+polymarket/market.go-72-	if err != nil {
+--
+polymarket/rtds.go-22-
+polymarket/rtds.go-23-const rtdsReconnectDelay = 3 * time.Second
+polymarket/rtds.go-24-
+polymarket/rtds.go-25-// rtdsMessage is the raw wire format from the RTDS socket.
+polymarket/rtds.go-26-type rtdsMessage struct {
+polymarket/rtds.go:27:	EventType string `json:"event_type"` // "price_change", "book", "last_trade_price"
+polymarket/rtds.go-28-	AssetID   string `json:"asset_id"`
+polymarket/rtds.go-29-	// Price change / trade fields
+polymarket/rtds.go-30-	Price     string `json:"price"`
+polymarket/rtds.go-31-	Size      string `json:"size"`
+polymarket/rtds.go-32-	Side      string `json:"side"`
+polymarket/rtds.go-33-	Timestamp string `json:"timestamp"` // milliseconds
+polymarket/rtds.go-34-	// Sometimes it's an array wrapper
+polymarket/rtds.go-35-	MarketID string `json:"market"`
+polymarket/rtds.go-36-}
+polymarket/rtds.go-37-
+polymarket/rtds.go-38-type rtdsSubscribeMsg struct {
+polymarket/rtds.go-39-	AssetIDs []string `json:"assets_ids"`
+polymarket/rtds.go-40-	Type     string   `json:"type"` // "market"
+polymarket/rtds.go-41-}
+polymarket/rtds.go-42-
+polymarket/rtds.go-43-// RTDSClient streams real-time price events from Polymarket's RTDS WebSocket.
+polymarket/rtds.go-44-type RTDSClient struct {
+polymarket/rtds.go-45-	wsURL    string
+polymarket/rtds.go-46-	tokenIDs []string
+polymarket/rtds.go-47-	logger   *zap.Logger
+polymarket/rtds.go-48-
+polymarket/rtds.go-49-	mu     sync.RWMutex
+polymarket/rtds.go-50-	conn   *websocket.Conn
+polymarket/rtds.go-51-	closed bool
+polymarket/rtds.go-52-
+polymarket/rtds.go-53-	// PriceC receives decoded PriceEvents. Caller must drain.
+polymarket/rtds.go-54-	PriceC chan PriceEvent
+polymarket/rtds.go-55-	// latestPrice tracks the last known price per token
+polymarket/rtds.go-56-	latestPrice map[string]float64
+polymarket/rtds.go-57-}
+polymarket/rtds.go-58-
+polymarket/rtds.go-59-// NewRTDSClient creates a new RTDS WebSocket client subscribing to the given tokenIDs.
+polymarket/rtds.go-60-func NewRTDSClient(wsURL string, tokenIDs []string, logger *zap.Logger) *RTDSClient {
+polymarket/rtds.go-61-	return &RTDSClient{
+polymarket/rtds.go-62-		wsURL:       wsURL,
+
+=== ORDERBOOK FETCH FUNCTIONS ===
+polymarket/orders.go-1390-	var rawNumber float64
+polymarket/orders.go-1391-	if err := json.Unmarshal(body, &rawNumber); err == nil {
+polymarket/orders.go-1392-		candidate := strconv.FormatFloat(rawNumber, 'f', -1, 64)
+polymarket/orders.go-1393-		if normalized := normalizeTickSize(candidate); normalized != "" {
+polymarket/orders.go-1394-			return normalized, nil
+polymarket/orders.go-1395-		}
+polymarket/orders.go-1396-	}
+polymarket/orders.go-1397-	return "", fmt.Errorf("parse tick-size: unrecognized response: %s", string(body))
+polymarket/orders.go-1398-}
+polymarket/orders.go-1399-
+polymarket/orders.go:1400:// GetOrderBook fetches the public order book for the given token.
+polymarket/orders.go:1401:func (o *OrdersClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+polymarket/orders.go-1402-	if o == nil || o.rest == nil {
+polymarket/orders.go-1403-		return nil, fmt.Errorf("nil REST client")
+polymarket/orders.go-1404-	}
+polymarket/orders.go:1405:	return o.rest.GetOrderBook(ctx, tokenID)
+polymarket/orders.go-1406-}
+polymarket/orders.go-1407-
+polymarket/orders.go-1408-// FetchFeeRate queries the CLOB for the taker fee on the given token.
+polymarket/orders.go-1409-// Returns the fee_rate_bps string ready to include in order payloads (e.g. "175").
+polymarket/orders.go-1410-// Fee-free markets return "0".
+polymarket/orders.go-1411-func (o *OrdersClient) FetchFeeRate(ctx context.Context, tokenID string) (string, error) {
+polymarket/orders.go-1412-	url := fmt.Sprintf("%s/fee-rate?token_id=%s", o.rest.baseURL, tokenID)
+polymarket/orders.go-1413-	resp, err := o.rest.doGet(ctx, url)
+polymarket/orders.go-1414-	if err != nil {
+polymarket/orders.go-1415-		return "", fmt.Errorf("fetch fee rate: %w", err)
+polymarket/orders.go-1416-	}
+polymarket/orders.go-1417-	defer resp.Body.Close()
+polymarket/orders.go-1418-	body, _ := io.ReadAll(resp.Body)
+polymarket/orders.go-1419-	if resp.StatusCode != http.StatusOK {
+polymarket/orders.go-1420-		return "", fmt.Errorf("fee-rate api error %d: %s", resp.StatusCode, string(body))
+polymarket/orders.go-1421-	}
+polymarket/orders.go-1422-	// Common JSON shape.
+polymarket/orders.go-1423-	var fr feeRateResponse
+polymarket/orders.go-1424-	if err := json.Unmarshal(body, &fr); err == nil {
+polymarket/orders.go-1425-		for _, v := range []string{fr.FeeRateBps, fr.FeeRateBpsAlt, fr.TakerFeeBps, fr.TakerFeeBpsAlt, fr.BaseFee, fr.BaseFeeAlt} {
+polymarket/orders.go-1426-			if v != "" {
+polymarket/orders.go-1427-				return v, nil
+polymarket/orders.go-1428-			}
+polymarket/orders.go-1429-		}
+polymarket/orders.go-1430-	}
+polymarket/orders.go-1431-
+polymarket/orders.go-1432-	// Fallback: try generic map with string/number values.
+polymarket/orders.go-1433-	var m map[string]any
+polymarket/orders.go-1434-	if err := json.Unmarshal(body, &m); err == nil {
+polymarket/orders.go-1435-		for _, k := range []string{"fee_rate_bps", "feeRateBps", "taker_fee_bps", "takerFeeBps", "base_fee", "baseFee"} {
+polymarket/orders.go-1436-			if raw, ok := m[k]; ok {
+polymarket/orders.go-1437-				switch t := raw.(type) {
+polymarket/orders.go-1438-				case string:
+polymarket/orders.go-1439-					if t != "" {
+polymarket/orders.go-1440-						return t, nil
+polymarket/orders.go-1441-					}
+polymarket/orders.go-1442-				case float64:
+polymarket/orders.go-1443-					return strconv.FormatInt(int64(t), 10), nil
+polymarket/orders.go-1444-				case int64:
+polymarket/orders.go-1445-					return strconv.FormatInt(t, 10), nil
+polymarket/orders.go-1446-				case json.Number:
+polymarket/orders.go-1447-					return t.String(), nil
+polymarket/orders.go-1448-				}
+polymarket/orders.go-1449-			}
+polymarket/orders.go-1450-		}
+--
+polymarket/market.go-26-	MinOrderSize float64 `json:"minimum_order_size"`
+polymarket/market.go-27-	Description  string  `json:"description"`
+polymarket/market.go-28-}
+polymarket/market.go-29-
+polymarket/market.go-30-// Token represents one side (YES / NO) of a binary market.
+polymarket/market.go-31-type Token struct {
+polymarket/market.go-32-	TokenID string `json:"token_id"`
+polymarket/market.go-33-	Outcome string `json:"outcome"` // "Yes" or "No"
+polymarket/market.go-34-}
+polymarket/market.go-35-
+polymarket/market.go:36:// OrderBook holds the current orderbook for a token.
+polymarket/market.go:37:type OrderBook struct {
+polymarket/market.go-38-	Market    string      `json:"market"`
+polymarket/market.go-39-	AssetID   string      `json:"asset_id"`
+polymarket/market.go:40:	Bids      []PriceSize `json:"bids"`
+polymarket/market.go:41:	Asks      []PriceSize `json:"asks"`
+polymarket/market.go-42-	Timestamp string      `json:"timestamp"`
+polymarket/market.go-43-	Hash      string      `json:"hash"`
+polymarket/market.go-44-}
+polymarket/market.go-45-
+polymarket/market.go-46-type PriceSize struct {
+polymarket/market.go-47-	Price string `json:"price"`
+polymarket/market.go-48-	Size  string `json:"size"`
+polymarket/market.go-49-}
+polymarket/market.go-50-
+polymarket/market.go-51-// RESTClient is a thin client wrapping the Polymarket CLOB REST API.
+polymarket/market.go-52-type RESTClient struct {
+polymarket/market.go-53-	baseURL          string
+polymarket/market.go-54-	creds            *L2Credentials
+polymarket/market.go-55-	httpClient       *http.Client
+polymarket/market.go-56-	submitHTTPClient *http.Client
+polymarket/market.go-57-	logger           *zap.Logger
+polymarket/market.go-58-}
+polymarket/market.go-59-
+polymarket/market.go-60-// timedRoundTripper wraps an inner RoundTripper and logs the method, URL path,
+polymarket/market.go-61-// and wall-clock duration in milliseconds for every HTTP request.
+polymarket/market.go-62-type timedRoundTripper struct {
+polymarket/market.go-63-	inner  http.RoundTripper
+polymarket/market.go-64-	logger *zap.Logger
+polymarket/market.go-65-	name   string
+polymarket/market.go-66-}
+polymarket/market.go-67-
+polymarket/market.go-68-func (t *timedRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+polymarket/market.go-69-	start := time.Now()
+polymarket/market.go-70-	resp, err := t.inner.RoundTrip(req)
+polymarket/market.go-71-	ms := time.Since(start).Milliseconds()
+polymarket/market.go-72-	if err != nil {
+polymarket/market.go-73-		t.logger.Debug("http request",
+polymarket/market.go-74-			zap.String("client", t.name),
+polymarket/market.go-75-			zap.String("method", req.Method),
+polymarket/market.go-76-			zap.String("path", req.URL.Path),
+polymarket/market.go-77-			zap.Int64("ms", ms),
+polymarket/market.go-78-			zap.Error(err),
+polymarket/market.go-79-		)
+polymarket/market.go-80-	} else {
+polymarket/market.go-81-		t.logger.Debug("http request",
+polymarket/market.go-82-			zap.String("client", t.name),
+polymarket/market.go-83-			zap.String("method", req.Method),
+polymarket/market.go-84-			zap.String("path", req.URL.Path),
+polymarket/market.go-85-			zap.Int("status", resp.StatusCode),
+polymarket/market.go-86-			zap.Int64("ms", ms),
+--
+polymarket/market.go-294-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-295-		return nil, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-296-	}
+polymarket/market.go-297-	var m Market
+polymarket/market.go-298-	if err := json.Unmarshal(body, &m); err != nil {
+polymarket/market.go-299-		return nil, fmt.Errorf("parse market: %w", err)
+polymarket/market.go-300-	}
+polymarket/market.go-301-	return &m, nil
+polymarket/market.go-302-}
+polymarket/market.go-303-
+polymarket/market.go:304:// GetOrderBook fetches the current order book for the given token ID.
+polymarket/market.go:305:func (c *RESTClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+polymarket/market.go:306:	url := fmt.Sprintf("%s/book?token_id=%s", c.baseURL, tokenID)
+polymarket/market.go-307-	resp, err := c.doGet(ctx, url)
+polymarket/market.go-308-	if err != nil {
+polymarket/market.go-309-		return nil, err
+polymarket/market.go-310-	}
+polymarket/market.go-311-	defer resp.Body.Close()
+polymarket/market.go-312-	body, _ := io.ReadAll(resp.Body)
+polymarket/market.go-313-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-314-		return nil, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-315-	}
+polymarket/market.go:316:	var ob OrderBook
+polymarket/market.go-317-	if err := json.Unmarshal(body, &ob); err != nil {
+polymarket/market.go:318:		return nil, fmt.Errorf("parse orderbook: %w", err)
+polymarket/market.go-319-	}
+polymarket/market.go-320-	return &ob, nil
+polymarket/market.go-321-}
+polymarket/market.go-322-
+polymarket/market.go-323-// GetMidPrice returns the mid-price for a token (average of best bid and best ask).
+polymarket/market.go-324-func (c *RESTClient) GetMidPrice(ctx context.Context, tokenID string) (float64, error) {
+polymarket/market.go-325-	url := fmt.Sprintf("%s/midpoint?token_id=%s", c.baseURL, tokenID)
+polymarket/market.go-326-	resp, err := c.doGet(ctx, url)
+polymarket/market.go-327-	if err != nil {
+polymarket/market.go-328-		return 0, err
+polymarket/market.go-329-	}
+polymarket/market.go-330-	defer resp.Body.Close()
+polymarket/market.go-331-	body, _ := io.ReadAll(resp.Body)
+polymarket/market.go-332-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-333-		return 0, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-334-	}
+polymarket/market.go-335-	type midResp struct {
+polymarket/market.go-336-		Mid string `json:"mid"`
+polymarket/market.go-337-	}
+polymarket/market.go-338-	var mr midResp
+polymarket/market.go-339-	if err := json.Unmarshal(body, &mr); err != nil {
+polymarket/market.go-340-		return 0, fmt.Errorf("parse mid: %w", err)
+polymarket/market.go-341-	}
+polymarket/market.go-342-	var mid float64
+polymarket/market.go-343-	_, err = fmt.Sscanf(mr.Mid, "%f", &mid)
+polymarket/market.go-344-	return mid, err
+polymarket/market.go-345-}
+polymarket/market.go-346-
+polymarket/market.go-347-// doGet performs an authenticated GET request to the given absolute URL.
+polymarket/market.go-348-func (c *RESTClient) doGet(ctx context.Context, url string) (*http.Response, error) {
+polymarket/market.go-349-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+polymarket/market.go-350-	if err != nil {
+polymarket/market.go-351-		return nil, err
+polymarket/market.go-352-	}
+polymarket/market.go-353-	if c.creds != nil {
+polymarket/market.go-354-		if err := c.creds.SignRequest(req, ""); err != nil {
+polymarket/market.go-355-			return nil, err
+polymarket/market.go-356-		}
+polymarket/market.go-357-	}
+polymarket/market.go-358-	return c.httpClient.Do(req)
+polymarket/market.go-359-}
+--
+polymarket/balance_allowance.go-74-		return nil, fmt.Errorf("balance-allowance api error %d: %s", resp.StatusCode, string(body))
+polymarket/balance_allowance.go-75-	}
+polymarket/balance_allowance.go-76-
+polymarket/balance_allowance.go-77-	var out BalanceAllowanceResponse
+polymarket/balance_allowance.go-78-	if err := json.Unmarshal(body, &out); err != nil {
+polymarket/balance_allowance.go-79-		return nil, fmt.Errorf("parse balance-allowance: %w", err)
+polymarket/balance_allowance.go-80-	}
+polymarket/balance_allowance.go-81-	return &out, nil
+polymarket/balance_allowance.go-82-}
+polymarket/balance_allowance.go-83-
+polymarket/balance_allowance.go:84:// UpdateCollateralAllowance asks Polymarket's gasless relayer to approve the
+polymarket/balance_allowance.go-85-// CTF Exchange to spend pUSD on behalf of the proxy wallet. This is required
+polymarket/balance_allowance.go-86-// before any BUY order can be accepted. The CLOB returns an empty HTTP 400
+polymarket/balance_allowance.go-87-// when this allowance is zero or insufficient.
+polymarket/balance_allowance.go-88-func (c *RESTClient) UpdateCollateralAllowance(ctx context.Context, sigType int) error {
+polymarket/balance_allowance.go-89-	u, err := url.Parse(fmt.Sprintf("%s/balance-allowance/update", c.baseURL))
+polymarket/balance_allowance.go-90-	if err != nil {
+polymarket/balance_allowance.go-91-		return err
+polymarket/balance_allowance.go-92-	}
+polymarket/balance_allowance.go-93-	q := u.Query()
+polymarket/balance_allowance.go-94-	q.Set("asset_type", string(AssetTypeCollateral))
+polymarket/balance_allowance.go-95-	q.Set("signature_type", sigTypeStr(sigType))
+polymarket/balance_allowance.go-96-	u.RawQuery = q.Encode()
+polymarket/balance_allowance.go-97-
+polymarket/balance_allowance.go-98-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+polymarket/balance_allowance.go-99-	if err != nil {
+polymarket/balance_allowance.go-100-		return err
+polymarket/balance_allowance.go-101-	}
+polymarket/balance_allowance.go-102-	if c.creds != nil {
+polymarket/balance_allowance.go-103-		if err := c.creds.SignRequest(req, ""); err != nil {
+polymarket/balance_allowance.go-104-			return err
+polymarket/balance_allowance.go-105-		}
+polymarket/balance_allowance.go-106-	}
+polymarket/balance_allowance.go-107-
+polymarket/balance_allowance.go-108-	resp, err := c.httpClient.Do(req)
+polymarket/balance_allowance.go-109-	if err != nil {
+polymarket/balance_allowance.go-110-		return err
+polymarket/balance_allowance.go-111-	}
+polymarket/balance_allowance.go-112-	defer resp.Body.Close()
+polymarket/balance_allowance.go-113-	body, _ := io.ReadAll(resp.Body)
+polymarket/balance_allowance.go-114-	if resp.StatusCode != http.StatusOK {
+polymarket/balance_allowance.go-115-		return fmt.Errorf("update-collateral-allowance api error %d: %s", resp.StatusCode, string(body))
+polymarket/balance_allowance.go-116-	}
+polymarket/balance_allowance.go-117-	return nil
+polymarket/balance_allowance.go-118-}
+polymarket/balance_allowance.go-119-
+polymarket/balance_allowance.go-120-// CheckAndEnsureCollateralAllowance checks the pUSD collateral allowance via the
+polymarket/balance_allowance.go-121-// CLOB API and triggers a gasless update if it is zero or missing. Returns the
+polymarket/balance_allowance.go-122-// current allowance as a float64 (pUSD units). Call this at startup before
+polymarket/balance_allowance.go-123-// placing the first BUY order.
+polymarket/balance_allowance.go-124-func (c *RESTClient) CheckAndEnsureCollateralAllowance(ctx context.Context, sigType int) (float64, error) {
+polymarket/balance_allowance.go-125-	ba, err := c.GetBalanceAllowance(ctx, AssetTypeCollateral, "", sigType)
+polymarket/balance_allowance.go-126-	if err != nil {
+polymarket/balance_allowance.go-127-		return 0, fmt.Errorf("check collateral allowance: %w", err)
+polymarket/balance_allowance.go-128-	}
+polymarket/balance_allowance.go-129-
+--
+polymarket/balance_allowance.go-161-				}
+polymarket/balance_allowance.go-162-			}
+polymarket/balance_allowance.go-163-			if time.Now().After(deadline) {
+polymarket/balance_allowance.go-164-				return 0, fmt.Errorf("collateral allowance not confirmed after 30s")
+polymarket/balance_allowance.go-165-			}
+polymarket/balance_allowance.go-166-		}
+polymarket/balance_allowance.go-167-	}
+polymarket/balance_allowance.go-168-	return allowance, nil
+polymarket/balance_allowance.go-169-}
+polymarket/balance_allowance.go-170-
+polymarket/balance_allowance.go:171:// UpdateConditionalAllowance asks Polymarket's gasless relayer to set
+polymarket/balance_allowance.go-172-// setApprovalForAll on the conditional-token contract on behalf of the proxy
+polymarket/balance_allowance.go-173-// wallet.  Call this once before the first SELL for a given token.
+polymarket/balance_allowance.go-174-// After a successful call the on-chain approval is usually mined within a few
+polymarket/balance_allowance.go-175-// seconds; use retryDelay > 0 to give the relayer time to broadcast.
+polymarket/balance_allowance.go-176-func (c *RESTClient) UpdateConditionalAllowance(ctx context.Context, tokenID string, sigType int, retryDelay time.Duration) error {
+polymarket/balance_allowance.go-177-	u, err := url.Parse(fmt.Sprintf("%s/balance-allowance/update", c.baseURL))
+polymarket/balance_allowance.go-178-	if err != nil {
+polymarket/balance_allowance.go-179-		return err
+polymarket/balance_allowance.go-180-	}
+polymarket/balance_allowance.go-181-	q := u.Query()
+polymarket/balance_allowance.go-182-	q.Set("asset_type", string(AssetTypeConditional))
+polymarket/balance_allowance.go-183-	q.Set("signature_type", sigTypeStr(sigType))
+polymarket/balance_allowance.go-184-	q.Set("token_id", tokenID)
+polymarket/balance_allowance.go-185-	u.RawQuery = q.Encode()
+polymarket/balance_allowance.go-186-
+polymarket/balance_allowance.go-187-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+polymarket/balance_allowance.go-188-	if err != nil {
+polymarket/balance_allowance.go-189-		return err
+polymarket/balance_allowance.go-190-	}
+polymarket/balance_allowance.go-191-	if c.creds != nil {
+polymarket/balance_allowance.go-192-		if err := c.creds.SignRequest(req, ""); err != nil {
+polymarket/balance_allowance.go-193-			return err
+polymarket/balance_allowance.go-194-		}
+polymarket/balance_allowance.go-195-	}
+polymarket/balance_allowance.go-196-
+polymarket/balance_allowance.go-197-	resp, err := c.httpClient.Do(req)
+polymarket/balance_allowance.go-198-	if err != nil {
+polymarket/balance_allowance.go-199-		return err
+polymarket/balance_allowance.go-200-	}
+polymarket/balance_allowance.go-201-	defer resp.Body.Close()
+polymarket/balance_allowance.go-202-	body, _ := io.ReadAll(resp.Body)
+polymarket/balance_allowance.go-203-	if resp.StatusCode != http.StatusOK {
+polymarket/balance_allowance.go-204-		return fmt.Errorf("update-allowance api error %d: %s", resp.StatusCode, string(body))
+polymarket/balance_allowance.go-205-	}
+polymarket/balance_allowance.go-206-
+polymarket/balance_allowance.go-207-	if retryDelay > 0 {
+polymarket/balance_allowance.go-208-		select {
+polymarket/balance_allowance.go-209-		case <-ctx.Done():
+polymarket/balance_allowance.go-210-			return ctx.Err()
+polymarket/balance_allowance.go-211-		case <-time.After(retryDelay):
+polymarket/balance_allowance.go-212-		}
+polymarket/balance_allowance.go-213-	}
+polymarket/balance_allowance.go-214-	return nil
+polymarket/balance_allowance.go-215-}
+polymarket/balance_allowance.go-216-
+--
+polymarket/rtds.go-225-			Side:    msg.Side,
+polymarket/rtds.go-226-			At:      ts,
+polymarket/rtds.go-227-		}
+polymarket/rtds.go-228-		select {
+polymarket/rtds.go-229-		case r.PriceC <- ev:
+polymarket/rtds.go-230-		default:
+polymarket/rtds.go-231-			r.logger.Warn("rtds: PriceC buffer full, dropping event")
+polymarket/rtds.go-232-		}
+polymarket/rtds.go-233-
+polymarket/rtds.go-234-	case "book":
+polymarket/rtds.go:235:		// Silently ignored; orderbook depth monitoring is done via Bitstamp.
+polymarket/rtds.go-236-
+polymarket/rtds.go-237-	default:
+polymarket/rtds.go-238-		r.logger.Debug("rtds: unhandled event type", zap.String("type", msg.EventType))
+polymarket/rtds.go-239-	}
+polymarket/rtds.go-240-}
+polymarket/rtds.go-241-
+polymarket/rtds.go-242-
+
+=== PAIR-ARB ENTRY CALL SITES ===
+
+=== TOKEN IDS / CURRENT MARKET STATE ===
+strategy/trader.go-173-		if minuteOfDay >= w.start && minuteOfDay < w.end {
+strategy/trader.go-174-			return true, ""
+strategy/trader.go-175-		}
+strategy/trader.go-176-	}
+strategy/trader.go-177-	return false, fmt.Sprintf("outside UTC schedule at %s (mode=%s windows=%q)", at.Format("15:04"), mode, strings.TrimSpace(windowsRaw))
+strategy/trader.go-178-}
+strategy/trader.go-179-
+strategy/trader.go-180-// Position tracks an open trade.
+strategy/trader.go-181-type Position struct {
+strategy/trader.go-182-	OrderID           string
+strategy/trader.go:183:	TokenID           string
+strategy/trader.go-184-	ConditionID       string
+strategy/trader.go-185-	StrategyName      string
+strategy/trader.go-186-	IsNoSide          bool
+strategy/trader.go-187-	BuyPrice          float64
+strategy/trader.go-188-	Shares            float64
+strategy/trader.go-189-	USDSpent          float64
+strategy/trader.go-190-	FeeShares         float64
+strategy/trader.go-191-	TargetPrice       float64
+strategy/trader.go-192-	OpenPrice         float64
+strategy/trader.go-193-	WindowEnd         time.Time
+strategy/trader.go-194-	OpenedAt          time.Time
+strategy/trader.go-195-	ExpiresAt         time.Time
+strategy/trader.go-196-	SellPending       bool
+strategy/trader.go-197-	SellDelayUntil    time.Time
+strategy/trader.go-198-	ActiveSellOrderID string
+strategy/trader.go-199-	LastSellLookupAt  time.Time `json:"-"`
+strategy/trader.go-200-	IsResolutionSnipe bool      `json:"is_resolution_snipe,omitempty"`
+strategy/trader.go-201-	IsEarlyResolution bool      `json:"is_early_resolution,omitempty"`
+strategy/trader.go-202-	IsConviction      bool      `json:"is_conviction,omitempty"`
+strategy/trader.go-203-	IsReversalSnipe   bool      `json:"is_reversal_snipe,omitempty"`
+--
+strategy/trader.go-215-
+strategy/trader.go-216-func (p *Position) Unrealized(currentPrice float64) float64 {
+strategy/trader.go-217-	if p == nil {
+strategy/trader.go-218-		return 0
+strategy/trader.go-219-	}
+strategy/trader.go-220-	return p.Shares*currentPrice - p.USDSpent
+strategy/trader.go-221-}
+strategy/trader.go-222-
+strategy/trader.go-223-type PairArbPosition struct {
+strategy/trader.go-224-	ConditionID string    `json:"condition_id"`
+strategy/trader.go:225:	YesTokenID  string    `json:"yes_token_id"`
+strategy/trader.go:226:	NoTokenID   string    `json:"no_token_id"`
+strategy/trader.go-227-	LeadSide    string    `json:"lead_side"`
+strategy/trader.go-228-	OpenPrice   float64   `json:"open_price"`
+strategy/trader.go-229-	WindowEnd   time.Time `json:"window_end"`
+strategy/trader.go-230-	OpenedAt    time.Time `json:"opened_at"`
+strategy/trader.go-231-	HedgeBy     time.Time `json:"hedge_by,omitempty"`
+strategy/trader.go-232-	BalancedAt  time.Time `json:"balanced_at,omitempty"`
+strategy/trader.go-233-	// LockedProfitCents overrides the default hedge locked-profit target for this position.
+strategy/trader.go-234-	// Non-zero for CVD momentum entries (typically 3¢ vs the standard 8¢).
+strategy/trader.go-235-	LockedProfitCents  float64 `json:"locked_profit_cents,omitempty"`
+strategy/trader.go-236-	YesShares          float64 `json:"yes_shares"`
+strategy/trader.go-237-	NoShares           float64 `json:"no_shares"`
+strategy/trader.go-238-	YesUSDSpent        float64 `json:"yes_usd_spent"`
+strategy/trader.go-239-	NoUSDSpent         float64 `json:"no_usd_spent"`
+strategy/trader.go-240-	YesWalletConfirmed bool    `json:"yes_wallet_confirmed,omitempty"`
+strategy/trader.go-241-	NoWalletConfirmed  bool    `json:"no_wallet_confirmed,omitempty"`
+strategy/trader.go-242-
+strategy/trader.go-243-	YesExitOrderID     string    `json:"yes_exit_order_id,omitempty"`
+strategy/trader.go-244-	NoExitOrderID      string    `json:"no_exit_order_id,omitempty"`
+strategy/trader.go-245-	YesExitOrderShares float64   `json:"yes_exit_order_shares,omitempty"`
+strategy/trader.go-246-	NoExitOrderShares  float64   `json:"no_exit_order_shares,omitempty"`
+--
+strategy/trader.go-409-	// UsePolymarketClaiming delegates CTF redemption to Polymarket's own claiming
+strategy/trader.go-410-	// infrastructure. When true enqueueClaimRetry is a no-op.
+strategy/trader.go-411-	UsePolymarketClaiming bool
+strategy/trader.go-412-}
+strategy/trader.go-413-
+strategy/trader.go-414-// pendingBuyState captures an in-flight buy order that was placed but not yet recorded
+strategy/trader.go-415-// as an open position. Written to disk immediately after PlaceOrder succeeds so a crash
+strategy/trader.go-416-// between PlaceOrder and position-open can be recovered on restart.
+strategy/trader.go-417-type pendingBuyState struct {
+strategy/trader.go-418-	OrderID      string    `json:"order_id"`
+strategy/trader.go:419:	TokenID      string    `json:"token_id"`
+strategy/trader.go-420-	IsNoSide     bool      `json:"is_no_side"`
+strategy/trader.go-421-	FillPrice    float64   `json:"fill_price"`
+strategy/trader.go-422-	RawShares    float64   `json:"raw_shares"`
+strategy/trader.go-423-	FeeShares    float64   `json:"fee_shares"`
+strategy/trader.go-424-	ActualShares float64   `json:"actual_shares"`
+strategy/trader.go-425-	TargetPrice  float64   `json:"target_price"`
+strategy/trader.go-426-	FeeRateBps   string    `json:"fee_rate_bps"`
+strategy/trader.go-427-	WindowEnd    time.Time `json:"window_end"`
+strategy/trader.go-428-	ExpiresAt    time.Time `json:"expires_at"`
+strategy/trader.go-429-	PlacedAt     time.Time `json:"placed_at"`
+strategy/trader.go-430-}
+strategy/trader.go-431-
+strategy/trader.go-432-// pairArbPendingOrderState tracks an ambiguous pair-arb buy submit where the
+strategy/trader.go-433-// exchange accepted the request but fill ownership could not be confirmed.
+strategy/trader.go-434-// While present, new pair-arb entries are blocked until reconciliation succeeds.
+strategy/trader.go-435-type pairArbPendingOrderState struct {
+strategy/trader.go-436-	OrderID       string    `json:"order_id"`
+strategy/trader.go:437:	TokenID       string    `json:"token_id"`
+strategy/trader.go-438-	RequestName   string    `json:"request_name"`
+strategy/trader.go-439-	Origin        string    `json:"origin,omitempty"`
+strategy/trader.go-440-	ConditionID   string    `json:"condition_id,omitempty"`
+strategy/trader.go-441-	WindowEnd     time.Time `json:"window_end,omitempty"`
+strategy/trader.go:442:	YesTokenID    string    `json:"yes_token_id,omitempty"`
+strategy/trader.go:443:	NoTokenID     string    `json:"no_token_id,omitempty"`
+strategy/trader.go-444-	LeadSide      string    `json:"lead_side,omitempty"`
+strategy/trader.go-445-	PlacedAt      time.Time `json:"placed_at"`
+strategy/trader.go-446-	RequestedSize float64   `json:"requested_size,omitempty"`
+strategy/trader.go-447-}
+strategy/trader.go-448-
+strategy/trader.go-449-// TradeRecord captures a completed round-trip (entry + exit) for the session journal.
+strategy/trader.go-450-// All fields are JSON-tagged so the record can be appended as a JSONL line for
+strategy/trader.go-451-// off-line analysis via `polyarbpro --analyze`.
+strategy/trader.go-452-type TradeRecord struct {
+strategy/trader.go-453-	OpenedAt time.Time `json:"opened_at"`
+strategy/trader.go-454-	ClosedAt time.Time `json:"closed_at"`
+strategy/trader.go-455-	HeldSec  float64   `json:"held_sec"`
+strategy/trader.go-456-	Strategy string    `json:"strategy"` // "lag", "resolution", "early_resolution", "flash"
+strategy/trader.go-457-	Side     string    `json:"side"`     // "YES", "NO", or pair labels like "PAIR_MATCHED"
+strategy/trader.go-458-	// BTC & market context at entry
+strategy/trader.go-459-	EntryBTCPrice     float64 `json:"entry_btc_price"`
+strategy/trader.go-460-	EntryEdgeUSD      float64 `json:"entry_edge_usd"`   // |BTC Ãƒâ€¹Ã¢â‚¬Â  open| at entry
+strategy/trader.go-461-	EntryCLLagUSD     float64 `json:"entry_cl_lag_usd"` // Chainlink lag at entry
+strategy/trader.go-462-	EntryATR          float64 `json:"entry_atr"`        // ATR over observation window at entry
+strategy/trader.go-463-	EntryWindowRemSec float64 `json:"entry_window_rem_sec"`
+--
+strategy/trader.go-793-	pairArbBuyOutcomeFilled    pairArbBuyOutcome = "filled"
+strategy/trader.go-794-	pairArbBuyOutcomeNotFilled pairArbBuyOutcome = "not_filled"
+strategy/trader.go-795-	pairArbBuyOutcomeHardError pairArbBuyOutcome = "hard_error"
+strategy/trader.go-796-)
+strategy/trader.go-797-
+strategy/trader.go-798-func isPairArbLeadBuyRequestName(requestName string) bool {
+strategy/trader.go-799-	req := strings.ToLower(strings.TrimSpace(requestName))
+strategy/trader.go-800-	return strings.Contains(req, "pair_arb_lead_buy")
+strategy/trader.go-801-}
+strategy/trader.go-802-
+strategy/trader.go:803:func (t *Trader) asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID string) {
+strategy/trader.go:804:	if orderID == "" || tokenID == "" {
+strategy/trader.go-805-		return
+strategy/trader.go-806-	}
+strategy/trader.go-807-	go func() {
+strategy/trader.go-808-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+strategy/trader.go-809-		defer cancel()
+strategy/trader.go-810-
+strategy/trader.go-811-		var avgFill float64
+strategy/trader.go-812-		var grossShares float64
+strategy/trader.go-813-		if gr, err := t.getOrderTimed(ctx, requestName+"_async_lookup", orderID, zap.String("request_id", requestID)); err == nil && gr != nil {
+strategy/trader.go-814-			if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+strategy/trader.go-815-				avgFill = prc
+strategy/trader.go-816-			}
+strategy/trader.go-817-			if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
+strategy/trader.go-818-				grossShares = sm
+strategy/trader.go-819-			}
+strategy/trader.go-820-		}
+strategy/trader.go-821-		if avgFill <= 0 || grossShares <= 0 {
+strategy/trader.go:822:			if fillsAvg, fillsGross, err := t.getFillsTimed(ctx, requestName+"_async_fills", orderID, tokenID, zap.String("request_id", requestID)); err == nil {
+strategy/trader.go-823-				if avgFill <= 0 && fillsAvg > 0 {
+strategy/trader.go-824-					avgFill = fillsAvg
+strategy/trader.go-825-				}
+strategy/trader.go-826-				if grossShares <= 0 && fillsGross > 0 {
+strategy/trader.go-827-					grossShares = fillsGross
+strategy/trader.go-828-				}
+strategy/trader.go-829-			}
+strategy/trader.go-830-		}
+strategy/trader.go-831-		if avgFill > 0 || grossShares > 0 {
+strategy/trader.go-832-			t.logger.Debug("trader: pair arb buy async reconciliation",
+strategy/trader.go-833-				zap.String("request", requestName),
+strategy/trader.go-834-				zap.String("request_id", requestID),
+strategy/trader.go-835-				zap.String("order_id", orderID),
+strategy/trader.go-836-				zap.Float64("avg_fill", avgFill),
+strategy/trader.go-837-				zap.Float64("gross_shares", grossShares),
+strategy/trader.go-838-			)
+strategy/trader.go-839-		}
+strategy/trader.go-840-	}()
+strategy/trader.go-841-}
+strategy/trader.go-842-
+strategy/trader.go-843-// asyncPairArbLeadCreditConfirm keeps lead-credit validation off the hot entry path.
+strategy/trader.go-844-// If credit appears after the synchronous path returned not-filled, immediately
+strategy/trader.go-845-// run pending-order reconciliation so the lead can be recovered and hedged.
+strategy/trader.go:846:func (t *Trader) asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID string, minExpected float64) {
+strategy/trader.go:847:	if t.cfg.PaperTrade || orderID == "" || tokenID == "" {
+strategy/trader.go-848-		return
+strategy/trader.go-849-	}
+strategy/trader.go-850-	if minExpected < pairArbShareDust {
+strategy/trader.go-851-		minExpected = pairArbShareDust
+strategy/trader.go-852-	}
+strategy/trader.go-853-	go func() {
+strategy/trader.go-854-		ctx, cancel := context.WithTimeout(context.Background(), pairArbLeadCreditGrace)
+strategy/trader.go-855-		defer cancel()
+strategy/trader.go-856-
+strategy/trader.go:857:		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
+strategy/trader.go-858-		if err != nil {
+strategy/trader.go-859-			t.logger.Warn("trader: async lead credit probe errored; keeping pending order for reconciliation",
+strategy/trader.go-860-				zap.String("request", requestName),
+strategy/trader.go-861-				zap.String("request_id", requestID),
+strategy/trader.go-862-				zap.String("order_id", orderID),
+strategy/trader.go-863-				zap.Error(err),
+strategy/trader.go-864-			)
+strategy/trader.go:865:			t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go-866-			return
+strategy/trader.go-867-		}
+strategy/trader.go-868-		if credited {
+strategy/trader.go-869-			t.logger.Info("trader: async lead credit confirmed",
+strategy/trader.go-870-				zap.String("request", requestName),
+strategy/trader.go-871-				zap.String("request_id", requestID),
+strategy/trader.go-872-				zap.String("order_id", orderID),
+strategy/trader.go-873-				zap.Float64("wallet_balance", bal),
+strategy/trader.go-874-				zap.Float64("min_expected", minExpected),
+strategy/trader.go-875-			)
+strategy/trader.go-876-			if t.pendingPairArb != nil && t.pendingPairArb.OrderID == orderID {
+strategy/trader.go-877-				reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 3*time.Second)
+strategy/trader.go-878-				defer reconcileCancel()
+strategy/trader.go-879-				if recErr := t.reconcilePendingPairArbOrder(reconcileCtx); recErr != nil {
+strategy/trader.go-880-					t.logger.Warn("trader: async lead credit reconcile failed",
+strategy/trader.go-881-						zap.String("request", requestName),
+strategy/trader.go-882-						zap.String("request_id", requestID),
+strategy/trader.go-883-						zap.String("order_id", orderID),
+strategy/trader.go-884-						zap.Error(recErr),
+strategy/trader.go-885-					)
+--
+strategy/trader.go-887-			}
+strategy/trader.go-888-			return
+strategy/trader.go-889-		}
+strategy/trader.go-890-		t.logger.Warn("trader: async lead credit not confirmed within grace; pending reconciliation remains active",
+strategy/trader.go-891-			zap.String("request", requestName),
+strategy/trader.go-892-			zap.String("request_id", requestID),
+strategy/trader.go-893-			zap.String("order_id", orderID),
+strategy/trader.go-894-			zap.Float64("wallet_balance", bal),
+strategy/trader.go-895-			zap.Float64("min_expected", minExpected),
+strategy/trader.go-896-		)
+strategy/trader.go:897:		t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go-898-	}()
+strategy/trader.go-899-}
+strategy/trader.go-900-
+strategy/trader.go-901-// executePairLimitBuy submits a buy and returns an explicit execution outcome:
+strategy/trader.go-902-// filled, not_filled, or hard_error.
+strategy/trader.go:903:func (t *Trader) executePairLimitBuy(ctx context.Context, requestName, tokenID string, signalPrice, limitPrice, rawShares float64) (outcome pairArbBuyOutcome, orderID string, fillPrice, actualShares, feeShares, usdSpent float64, err error) {
+strategy/trader.go-904-	entryStart := time.Now()
+strategy/trader.go-905-	requestID := fmt.Sprintf("%s-%d", requestName, time.Now().UnixNano())
+strategy/trader.go:906:	if tokenID == "" {
+strategy/trader.go-907-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: missing token id")
+strategy/trader.go-908-	}
+strategy/trader.go-909-	if signalPrice <= 0 || limitPrice <= 0 || rawShares <= 0 {
+strategy/trader.go-910-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: invalid buy inputs")
+strategy/trader.go-911-	}
+strategy/trader.go-912-	usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
+strategy/trader.go-913-	if usdSpent+0.0000001 < polymarket.MinMarketOrderNotionalUSD {
+strategy/trader.go-914-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: limit buy notional $%.4f below $%.2f minimum", usdSpent, polymarket.MinMarketOrderNotionalUSD)
+strategy/trader.go-915-	}
+strategy/trader.go-916-	fillPrice = math.Round(signalPrice*100) / 100
+strategy/trader.go-917-	feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+strategy/trader.go-918-	actualShares = math.Floor((rawShares-feeShares)*100) / 100
+strategy/trader.go-919-	if actualShares <= 0 {
+strategy/trader.go-920-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
+strategy/trader.go-921-	}
+strategy/trader.go-922-	preflightMS := time.Since(entryStart).Milliseconds()
+strategy/trader.go-923-
+strategy/trader.go-924-	priceStr := fmt.Sprintf("%.2f", limitPrice)
+strategy/trader.go-925-	if t.cfg.PaperTrade {
+strategy/trader.go-926-		// GTC limit orders fill exactly rawShares at the actual market price (fillPrice),
+--
+strategy/trader.go-944-	submitTimeout := pairArbSubmitTimeoutForRequest(requestName)
+strategy/trader.go-945-	maxAttempts := pairArbSubmitMaxAttemptsForRequest(requestName)
+strategy/trader.go-946-	orderType := polymarket.OrderTypeGTC
+strategy/trader.go-947-	if strings.Contains(requestName, "lead") || strings.Contains(requestName, "hedge_buy") {
+strategy/trader.go-948-		// Respect configured pair-arb entry execution mode (FAK/FOK/GTC).
+strategy/trader.go-949-		orderType = t.pairArbLeadOrderType()
+strategy/trader.go-950-	}
+strategy/trader.go-951-	submitBuy := func(shares float64) (*polymarket.OrderResponse, error) {
+strategy/trader.go-952-		return t.placeOrderTimed(ctx, requestName, &polymarket.NewOrderRequest{
+strategy/trader.go-953-			OrderType:      orderType,
+strategy/trader.go:954:			TokenID:        tokenID,
+strategy/trader.go-955-			Side:           polymarket.SideBuy,
+strategy/trader.go-956-			Price:          priceStr,
+strategy/trader.go-957-			Size:           fmt.Sprintf("%.2f", shares),
+strategy/trader.go-958-			Nonce:          polymarket.MakeNonce(),
+strategy/trader.go-959-			FeeRateBps:     t.feeRateBps,
+strategy/trader.go-960-			AttemptTimeout: submitTimeout,
+strategy/trader.go-961-			MaxAttempts:    maxAttempts,
+strategy/trader.go-962-		}, zap.String("request_id", requestID), zap.Int64("preflight_ms", preflightMS), zap.Int64("submit_timeout_ms", submitTimeout.Milliseconds()), zap.Int("submit_max_attempts", maxAttempts))
+strategy/trader.go-963-	}
+strategy/trader.go-964-
+strategy/trader.go-965-	resp, placeErr := submitBuy(rawShares)
+strategy/trader.go-966-	if placeErr != nil {
+strategy/trader.go-967-		allowAdaptiveResize := !strings.Contains(strings.ToLower(requestName), "hedge")
+strategy/trader.go-968-		if allowAdaptiveResize {
+strategy/trader.go-969-			if resizedShares, resizedOK := suggestedBuyResizeFromCollateralShortfall(placeErr, rawShares, orderType, limitPrice); resizedOK {
+strategy/trader.go-970-				t.logger.Warn("trader: pair arb buy collateral shortfall; retrying with reduced size",
+strategy/trader.go-971-					zap.String("request", requestName),
+strategy/trader.go:972:					zap.String("token_id", tokenID),
+strategy/trader.go-973-					zap.Float64("price", limitPrice),
+strategy/trader.go-974-					zap.Float64("raw_shares_original", rawShares),
+strategy/trader.go-975-					zap.Float64("raw_shares_retry", resizedShares),
+strategy/trader.go-976-				)
+strategy/trader.go-977-				rawShares = resizedShares
+strategy/trader.go-978-				usdSpent = marketBuyOrderNotional(rawShares, limitPrice)
+strategy/trader.go-979-				feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+strategy/trader.go-980-				actualShares = math.Floor((rawShares-feeShares)*100) / 100
+strategy/trader.go-981-				if actualShares <= 0 {
+strategy/trader.go-982-					return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: collateral-resized buy has non-positive shares")
+strategy/trader.go-983-				}
+strategy/trader.go-984-				resp, placeErr = submitBuy(rawShares)
+strategy/trader.go-985-			}
+strategy/trader.go-986-		}
+strategy/trader.go-987-	}
+strategy/trader.go-988-	if placeErr != nil {
+strategy/trader.go-989-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, placeErr
+strategy/trader.go-990-	}
+strategy/trader.go-991-	if !resp.Success {
+strategy/trader.go-992-		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: order rejected: %s", resp.ErrorMsg)
+--
+strategy/trader.go-996-	var correctedFill float64
+strategy/trader.go-997-	var grossFillShares float64
+strategy/trader.go-998-	fillSource := "submit_response"
+strategy/trader.go-999-	keepPendingForReconcile := false
+strategy/trader.go-1000-	postSubmitLookupMS := int64(0)
+strategy/trader.go-1001-
+strategy/trader.go-1002-	submitStatus := strings.ToLower(strings.TrimSpace(resp.Status))
+strategy/trader.go-1003-	switch {
+strategy/trader.go-1004-	case submitStatus == "matched" || submitStatus == "duplicated":
+strategy/trader.go-1005-		// Submit response is definitive: immediate execution happened.
+strategy/trader.go:1006:		t.setPendingPairArbOrder(orderID, tokenID, requestName)
+strategy/trader.go-1007-		// Order crossed the spread and filled immediately.
+strategy/trader.go-1008-		if resp.TakingAmount != "" && resp.MakingAmount != "" {
+strategy/trader.go-1009-			takingRaw, okT := new(big.Int).SetString(resp.TakingAmount, 10)
+strategy/trader.go-1010-			makingRaw, okM := new(big.Int).SetString(resp.MakingAmount, 10)
+strategy/trader.go-1011-			if okT && okM && takingRaw.Sign() > 0 && makingRaw.Sign() > 0 {
+strategy/trader.go-1012-				actualRat := new(big.Rat).SetFrac(takingRaw, big.NewInt(1_000_000))
+strategy/trader.go-1013-				if actualFillShares, _ := actualRat.Float64(); actualFillShares > 0 {
+strategy/trader.go-1014-					grossFillShares = actualFillShares
+strategy/trader.go-1015-				}
+strategy/trader.go-1016-				priceRat := new(big.Rat).SetFrac(makingRaw, takingRaw)
+strategy/trader.go-1017-				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
+strategy/trader.go-1018-					correctedFill = actualFillPrice
+strategy/trader.go-1019-				}
+strategy/trader.go-1020-			}
+strategy/trader.go-1021-		}
+strategy/trader.go-1022-		if correctedFill <= 0 || grossFillShares <= 0 {
+strategy/trader.go-1023-			// API is eventually consistent Ã¢â‚¬â€ hit a stale node.  Short parallel lookup.
+strategy/trader.go-1024-			lookupStart := time.Now()
+strategy/trader.go-1025-			lookupCtx, cancelLookup := context.WithTimeout(ctx, pairArbPostSubmitLookupTimeout)
+strategy/trader.go-1026-
+--
+strategy/trader.go-1040-						res.fill = prc
+strategy/trader.go-1041-					}
+strategy/trader.go-1042-					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
+strategy/trader.go-1043-						res.gross = sm
+strategy/trader.go-1044-					}
+strategy/trader.go-1045-				}
+strategy/trader.go-1046-				lookupResults <- res
+strategy/trader.go-1047-			}()
+strategy/trader.go-1048-
+strategy/trader.go-1049-			go func() {
+strategy/trader.go:1050:				avg, gross, trErr := t.getFillsTimed(lookupCtx, requestName+"_fills", resp.OrderID, tokenID, zap.String("request_id", requestID))
+strategy/trader.go-1051-				res := lookupResult{source: "get_fills", err: trErr}
+strategy/trader.go-1052-				if trErr == nil {
+strategy/trader.go-1053-					if avg > 0 {
+strategy/trader.go-1054-						res.fill = avg
+strategy/trader.go-1055-					}
+strategy/trader.go-1056-					if gross > 0 {
+strategy/trader.go-1057-						res.gross = gross
+strategy/trader.go-1058-					}
+strategy/trader.go-1059-				}
+strategy/trader.go-1060-				lookupResults <- res
+strategy/trader.go-1061-			}()
+strategy/trader.go-1062-
+strategy/trader.go-1063-			collected := 0
+strategy/trader.go-1064-			for collected < 2 {
+strategy/trader.go-1065-				select {
+strategy/trader.go-1066-				case res := <-lookupResults:
+strategy/trader.go-1067-					collected++
+strategy/trader.go-1068-					if res.err != nil {
+strategy/trader.go-1069-						continue
+strategy/trader.go-1070-					}
+--
+strategy/trader.go-1089-				// Order is confirmed MATCHED but fill API hasn't propagated yet.
+strategy/trader.go-1090-				// We know shares were received Ã¢â‚¬â€ fall back to preflight estimates.
+strategy/trader.go-1091-				fillSource = "preflight_fallback"
+strategy/trader.go-1092-				t.logger.Warn("trader: pair arb buy fill data unavailable after lookup; using preflight estimate",
+strategy/trader.go-1093-					zap.String("request", requestName),
+strategy/trader.go-1094-					zap.String("order_id", orderID),
+strategy/trader.go-1095-					zap.Float64("preflight_price", fillPrice),
+strategy/trader.go-1096-					zap.Float64("preflight_shares", actualShares),
+strategy/trader.go-1097-					zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
+strategy/trader.go-1098-				)
+strategy/trader.go:1099:				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
+strategy/trader.go-1100-			}
+strategy/trader.go-1101-		}
+strategy/trader.go-1102-
+strategy/trader.go-1103-	case submitStatus == "live" || submitStatus == "delayed":
+strategy/trader.go-1104-		if submitStatus == "live" && orderType != polymarket.OrderTypeGTC {
+strategy/trader.go-1105-			// Immediate order types (FAK/FOK) should not return LIVE, but API races can
+strategy/trader.go-1106-			// produce transient LIVE responses. Poll/reconcile instead of treating this
+strategy/trader.go-1107-			// as deterministic no-fill so we never lose a late/partial fill.
+strategy/trader.go-1108-			t.logger.Warn("trader: pair arb immediate order returned LIVE; entering reconcile poll",
+strategy/trader.go-1109-				zap.String("request", requestName),
+strategy/trader.go-1110-				zap.String("order_id", orderID),
+strategy/trader.go-1111-				zap.String("order_type", string(orderType)),
+strategy/trader.go-1112-			)
+strategy/trader.go-1113-		}
+strategy/trader.go-1114-		// GTC LIVE (resting in book) or DELAYED (processing deferred): poll until matched or timeout.
+strategy/trader.go:1115:		t.setPendingPairArbOrder(orderID, tokenID, requestName)
+strategy/trader.go-1116-		pollTimeout := pairArbGTCPollDefaultTimeout
+strategy/trader.go-1117-		if s := t.cfg.PairArbLeadBuyTimeoutSec; s > 0 {
+strategy/trader.go-1118-			pollTimeout = time.Duration(s) * time.Second
+strategy/trader.go-1119-		}
+strategy/trader.go-1120-		if strings.Contains(requestName, "urgent_rescue") {
+strategy/trader.go-1121-			// Hedge leg already matched and we are trying to rescue the opposite lead.
+strategy/trader.go-1122-			// Keep this window very short to avoid carrying one-sided exposure.
+strategy/trader.go-1123-			pollTimeout = 1500 * time.Millisecond
+strategy/trader.go-1124-		}
+strategy/trader.go-1125-		pollStart := time.Now()
+strategy/trader.go-1126-		pollDeadline := pollStart.Add(pollTimeout)
+strategy/trader.go-1127-		hedgeAbortTriggered := false
+strategy/trader.go-1128-		hedgeAbortOrderID := ""
+strategy/trader.go-1129-		gapGuardCancelled := false
+strategy/trader.go-1130-		lastHedgeGuardProbe := time.Time{}
+strategy/trader.go-1131-		for time.Now().Before(pollDeadline) {
+strategy/trader.go-1132-			select {
+strategy/trader.go-1133-			case <-ctx.Done():
+strategy/trader.go-1134-				_ = t.cancelOrderTimed(ctx, requestName+"_cancel_ctx", orderID)
+strategy/trader.go-1135-				t.clearPendingPairArbOrder()
+strategy/trader.go-1136-				return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, ctx.Err()
+strategy/trader.go-1137-			case <-time.After(pairArbGTCPollInterval):
+strategy/trader.go-1138-			}
+strategy/trader.go-1139-			gr, grErr := t.getOrderTimed(ctx, requestName+"_gtc_poll", orderID)
+strategy/trader.go-1140-			if grErr != nil || gr == nil {
+strategy/trader.go-1141-				// Matched orders may disappear from order lookup quickly; reconcile
+strategy/trader.go-1142-				// with trades to avoid false timeout/cancel on already-filled buys.
+strategy/trader.go:1143:				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+strategy/trader.go-1144-					grossFillShares = fillsGross
+strategy/trader.go-1145-					if fillsAvg > 0 {
+strategy/trader.go-1146-						correctedFill = fillsAvg
+strategy/trader.go-1147-					}
+strategy/trader.go-1148-					fillSource = "gtc_poll_fills"
+strategy/trader.go-1149-					break
+strategy/trader.go-1150-				}
+strategy/trader.go-1151-				continue
+strategy/trader.go-1152-			}
+strategy/trader.go-1153-			pollStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go-1154-			if pollStatus == "matched" || pollStatus == "filled" {
+strategy/trader.go-1155-				if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+strategy/trader.go-1156-					correctedFill = prc
+strategy/trader.go-1157-					fillSource = "gtc_poll"
+strategy/trader.go-1158-				}
+strategy/trader.go-1159-				if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
+strategy/trader.go-1160-					grossFillShares = sm
+strategy/trader.go-1161-					fillSource = "gtc_poll"
+strategy/trader.go-1162-				}
+strategy/trader.go-1163-				// The order-status SizeMatched field reflects CLOB-matched size, not actual
+strategy/trader.go-1164-				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
+strategy/trader.go-1165-				// Cross-check against the fills endpoint which reports actual token delivery.
+strategy/trader.go-1166-				// This is the same verification the MATCHED-on-submit path performs.
+strategy/trader.go:1167:				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+strategy/trader.go-1168-					grossFillShares = fillsGross
+strategy/trader.go-1169-					if fillsAvg > 0 {
+strategy/trader.go-1170-						correctedFill = fillsAvg
+strategy/trader.go-1171-					}
+strategy/trader.go-1172-					fillSource = "gtc_poll_fills"
+strategy/trader.go-1173-				}
+strategy/trader.go-1174-				break
+strategy/trader.go-1175-			}
+strategy/trader.go-1176-			if pollStatus == "unmatched" || pollStatus == "canceled" || pollStatus == "cancelled" || pollStatus == "expired" {
+strategy/trader.go:1177:				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+strategy/trader.go-1178-					grossFillShares = fillsGross
+strategy/trader.go-1179-					if fillsAvg > 0 {
+strategy/trader.go-1180-						correctedFill = fillsAvg
+strategy/trader.go-1181-					}
+strategy/trader.go-1182-					fillSource = "gtc_poll_fills"
+strategy/trader.go-1183-					break
+strategy/trader.go-1184-				}
+strategy/trader.go-1185-				logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: order became %s order=%s", orderType, activityRequestLabel(requestName), strings.ToUpper(pollStatus), orderID))
+strategy/trader.go-1186-				t.clearPendingPairArbOrder()
+strategy/trader.go-1187-				return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go-1188-			}
+strategy/trader.go-1189-			if !hedgeAbortTriggered && !gapGuardCancelled && pollStatus == "live" && isPairArbLeadBuyRequestName(requestName) {
+strategy/trader.go-1190-				now := time.Now()
+strategy/trader.go-1191-				if lastHedgeGuardProbe.IsZero() || now.Sub(lastHedgeGuardProbe) >= 750*time.Millisecond {
+strategy/trader.go-1192-					lastHedgeGuardProbe = now
+strategy/trader.go-1193-					// Gap guard: cancel lead if the BTC-vs-open gap has reverted below entry threshold.
+strategy/trader.go-1194-					if guardFn := t.pairArbLeadGapGuardFn; guardFn != nil {
+strategy/trader.go-1195-						if shouldCancel, guardReason := guardFn(); shouldCancel {
+strategy/trader.go-1196-							gapGuardCancelled = true
+strategy/trader.go-1197-							t.logger.Warn("trader: pair arb lead GTC cancelled: signal gap closed",
+--
+strategy/trader.go-1228-				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go-1229-				if pcStatus == "matched" || pcStatus == "filled" {
+strategy/trader.go-1230-					if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+strategy/trader.go-1231-						correctedFill = prc
+strategy/trader.go-1232-						fillSource = "post_cancel_lookup"
+strategy/trader.go-1233-					}
+strategy/trader.go-1234-					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+strategy/trader.go-1235-						grossFillShares = sm
+strategy/trader.go-1236-						fillSource = "post_cancel_lookup"
+strategy/trader.go-1237-					}
+strategy/trader.go:1238:					if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+strategy/trader.go-1239-						grossFillShares = fillsGross
+strategy/trader.go-1240-						if fillsAvg > 0 {
+strategy/trader.go-1241-							correctedFill = fillsAvg
+strategy/trader.go-1242-						}
+strategy/trader.go-1243-						fillSource = "post_cancel_fills"
+strategy/trader.go-1244-					}
+strategy/trader.go-1245-				}
+strategy/trader.go-1246-				if correctedFill <= 0 && grossFillShares <= 0 {
+strategy/trader.go-1247-					// Partial-fill hardening: canceled GTC orders can still report matched
+strategy/trader.go-1248-					// shares even when /data/trades lags. Treat non-zero size_matched as
+strategy/trader.go-1249-					// authoritative so we do not place a second lead buy on top.
+strategy/trader.go-1250-					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+strategy/trader.go-1251-						grossFillShares = sm
+strategy/trader.go-1252-						if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+strategy/trader.go-1253-							correctedFill = prc
+strategy/trader.go-1254-						}
+strategy/trader.go-1255-						fillSource = "post_cancel_size_matched"
+strategy/trader.go-1256-						t.logger.Warn("trader: pair arb buy recovered partial fill from post-cancel size_matched",
+strategy/trader.go-1257-							zap.String("request", requestName),
+strategy/trader.go-1258-							zap.String("order_id", orderID),
+strategy/trader.go-1259-							zap.String("status", gr.Status),
+strategy/trader.go-1260-							zap.String("size_matched", gr.SizeMatched),
+strategy/trader.go-1261-						)
+strategy/trader.go-1262-					}
+strategy/trader.go-1263-				}
+strategy/trader.go-1264-			}
+strategy/trader.go-1265-			if correctedFill <= 0 && grossFillShares <= 0 {
+strategy/trader.go:1266:				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+strategy/trader.go-1267-					grossFillShares = fillsGross
+strategy/trader.go-1268-					if fillsAvg > 0 {
+strategy/trader.go-1269-						correctedFill = fillsAvg
+strategy/trader.go-1270-					}
+strategy/trader.go-1271-					fillSource = "post_cancel_fills"
+strategy/trader.go-1272-				}
+strategy/trader.go-1273-			}
+strategy/trader.go-1274-			if correctedFill <= 0 && grossFillShares <= 0 {
+strategy/trader.go-1275-				if hedgeAbortTriggered {
+strategy/trader.go-1276-					abortReason := "pre-placed hedge filled first"
+strategy/trader.go-1277-					if hedgeAbortOrderID != "" {
+strategy/trader.go-1278-						abortReason = fmt.Sprintf("pre-placed hedge %s filled first", hedgeAbortOrderID)
+strategy/trader.go-1279-					}
+strategy/trader.go-1280-					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: aborted lead wait because %s order=%s", orderType, activityRequestLabel(requestName), abortReason, orderID))
+strategy/trader.go-1281-				} else if gapGuardCancelled {
+strategy/trader.go-1282-					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: cancelled because gap closed while order was LIVE order=%s", orderType, activityRequestLabel(requestName), orderID))
+strategy/trader.go-1283-				} else {
+strategy/trader.go-1284-					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: timed out after %d ms and no post-cancel fill data order=%s", orderType, activityRequestLabel(requestName), postSubmitLookupMS, orderID))
+strategy/trader.go-1285-				}
+strategy/trader.go-1286-				t.clearPendingPairArbOrder()
+--
+strategy/trader.go-1348-		//   non-preflight  — fills API confirmed but via a secondary lookup; 3 probes ≤1.5s.
+strategy/trader.go-1349-		//   preflight_fallback — fill data uncertain; keep full 20-probe / 10s wait.
+strategy/trader.go-1350-		creditAttempts := 20
+strategy/trader.go-1351-		creditInterval := 500 * time.Millisecond
+strategy/trader.go-1352-		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
+strategy/trader.go-1353-			creditAttempts = 1
+strategy/trader.go-1354-		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+strategy/trader.go-1355-			creditAttempts = 3
+strategy/trader.go-1356-			creditInterval = 500 * time.Millisecond
+strategy/trader.go-1357-		}
+strategy/trader.go:1358:		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
+strategy/trader.go-1359-		if cErr != nil {
+strategy/trader.go-1360-			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
+strategy/trader.go-1361-			// can verify whether the MATCHED buy eventually credited to the wallet.
+strategy/trader.go-1362-			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
+strategy/trader.go-1363-				zap.String("order_id", orderID),
+strategy/trader.go-1364-				zap.Error(cErr),
+strategy/trader.go-1365-			)
+strategy/trader.go-1366-			if requestName == "pair_arb_lead_buy" {
+strategy/trader.go:1367:				t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+strategy/trader.go-1368-			}
+strategy/trader.go-1369-			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, cErr
+strategy/trader.go-1370-		}
+strategy/trader.go-1371-		if !credited {
+strategy/trader.go-1372-			// Order is matched and money is spent. If we have any shares in the wallet
+strategy/trader.go-1373-			// (just below the expected threshold due to API lag or rounding), use the
+strategy/trader.go-1374-			// actual balance as shares rather than erroring and leaving pendingPairArb set.
+strategy/trader.go-1375-			if bal >= pairArbShareDust {
+strategy/trader.go-1376-				t.logger.Warn("trader: pair arb buy wallet credit short; using actual wallet balance as shares",
+strategy/trader.go-1377-					zap.String("order_id", orderID),
+strategy/trader.go-1378-					zap.Float64("expected", minExpected),
+strategy/trader.go-1379-					zap.Float64("actual_balance", bal),
+strategy/trader.go-1380-				)
+strategy/trader.go-1381-				effectiveGrossShares := grossFillShares
+strategy/trader.go-1382-				if effectiveGrossShares <= pairArbShareDust {
+strategy/trader.go-1383-					effectiveGrossShares = rawShares
+strategy/trader.go-1384-				}
+strategy/trader.go-1385-				if fillPrice <= 0 {
+strategy/trader.go-1386-					fillPrice = math.Round(limitPrice*100) / 100
+strategy/trader.go-1387-				}
+--
+strategy/trader.go-1397-				// set so reconciliation still guards future lead entries.
+strategy/trader.go-1398-				t.logger.Warn("trader: pair arb buy matched but wallet has no credited shares yet; proceeding with estimated shares and keeping pending order",
+strategy/trader.go-1399-					zap.String("order_id", orderID),
+strategy/trader.go-1400-					zap.Float64("wallet_balance", bal),
+strategy/trader.go-1401-					zap.Float64("min_expected", minExpected),
+strategy/trader.go-1402-				)
+strategy/trader.go-1403-				if requestName == "pair_arb_lead_buy" {
+strategy/trader.go-1404-					// Never open/hedge a lead until wallet credit is visible. Keep the
+strategy/trader.go-1405-					// pending order for reconcilePendingPairArbOrder() recovery instead.
+strategy/trader.go-1406-					logTimedActivityWarn(fmt.Sprintf("BUY %s %s delayed: MATCHED but wallet credit pending (balance=%.2f expected>=%.2f) order=%s", orderType, activityRequestLabel(requestName), bal, minExpected, orderID))
+strategy/trader.go:1407:					t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+strategy/trader.go-1408-					keepPendingForReconcile = true
+strategy/trader.go-1409-					return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go-1410-				}
+strategy/trader.go-1411-				effectiveGrossShares := grossFillShares
+strategy/trader.go-1412-				if effectiveGrossShares <= pairArbShareDust {
+strategy/trader.go-1413-					effectiveGrossShares = rawShares
+strategy/trader.go-1414-				}
+strategy/trader.go-1415-				if fillPrice <= 0 {
