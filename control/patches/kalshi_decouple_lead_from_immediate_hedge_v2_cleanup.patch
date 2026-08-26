@@ -1,0 +1,15 @@
+--- a/strategy/signal.go
++++ b/strategy/signal.go
+@@ -2692,13 +2692,11 @@
+ 	// when the gap is actively shrinking back toward zero.
+ 	sigType := SignalPairArbLeadNo
+ 	tokenPrice := noPrice
+-	oppPrice := yesPrice
+ 	if isYesLead {
+ 		tokenPrice = yesPrice
+-		oppPrice = noPrice
+ 		if reverseMode {
+ 			sigType = SignalPairArbReverseLeadYes
+ 		} else {
+ 			sigType = SignalPairArbLeadYes
+ 		}
