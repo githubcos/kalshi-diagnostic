@@ -1,49 +1,9 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-decouple-lead-hedge-paper-v1c-20260826-1800
-JOB_START_UTC=2026-08-26T17:58:10+00:00
+JOB_ID=kalshi-decouple-lead-hedge-paper-v2-20260826-1802
+JOB_START_UTC=2026-08-26T17:59:28+00:00
 LIVE_ALLOWED=false
-[2026-08-26T17:58:10+00:00] ACTION 1/9 STATUS START
-[2026-08-26T17:58:10+00:00] STATUS PASS
-[2026-08-26T17:58:10+00:00] ACTION 1/9 STATUS PASS
-[2026-08-26T17:58:10+00:00] ACTION 2/9 BACKUP START
-[2026-08-26T17:58:10+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175810.tar.gz
-[2026-08-26T17:58:20+00:00] BACKUP PASS files=115
-[2026-08-26T17:58:20+00:00] ACTION 2/9 BACKUP PASS
-[2026-08-26T17:58:20+00:00] ACTION 3/9 APPLY_PATCH START
-[2026-08-26T17:58:20+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175820.tar.gz
-[2026-08-26T17:58:30+00:00] BACKUP PASS files=115
-[2026-08-26T17:58:30+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-zg9bnw83.patch
-    checking file strategy/signal.go
-    Hunk #1 succeeded at 2707 with fuzz 1.
-[2026-08-26T17:58:30+00:00] PATCH_DRY_RUN END rc=0 duration=0.00s
-[2026-08-26T17:58:30+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-zg9bnw83.patch
-    patching file strategy/signal.go
-    Hunk #1 succeeded at 2707 with fuzz 1.
-[2026-08-26T17:58:30+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-26T17:58:30+00:00] ACTION 3/9 APPLY_PATCH PASS
-[2026-08-26T17:58:30+00:00] ACTION 4/9 GOFMT START
-[2026-08-26T17:58:30+00:00] GOFMT START: gofmt -w /home/ubuntu/KalshiArbo/kalshiarbo/strategy/signal.go
-[2026-08-26T17:58:30+00:00] GOFMT END rc=0 duration=0.05s
-[2026-08-26T17:58:30+00:00] ACTION 4/9 GOFMT PASS
-[2026-08-26T17:58:30+00:00] ACTION 5/9 GO_TEST START
-[2026-08-26T17:58:30+00:00] GO_TEST START: go test ./...
-    # github.com/polyarb/strategy
-    strategy/signal.go:2695:2: declared and not used: oppPrice
-    FAIL	github.com/polyarb [build failed]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    FAIL	github.com/polyarb/discord [build failed]
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    FAIL	github.com/polyarb/strategy [build failed]
-    FAIL	github.com/polyarb/web [build failed]
-    FAIL
-[2026-08-26T17:58:31+00:00] GO_TEST END rc=1 duration=1.60s
-[2026-08-26T17:58:31+00:00] JOB RESULT=FAIL ERROR=RuntimeError: tests failed
+[2026-08-26T17:59:28+00:00] ACTION 1/9 STATUS START
+[2026-08-26T17:59:28+00:00] STATUS PASS
+[2026-08-26T17:59:28+00:00] ACTION 1/9 STATUS PASS
+[2026-08-26T17:59:28+00:00] ACTION 2/9 BACKUP START
+[2026-08-26T17:59:28+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175928.tar.gz
