@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T01:24:18+00:00",
+  "utc": "2026-08-26T01:24:25+00:00",
   "publisher_pid": 4029128,
   "heartbeat": {
-    "utc": "2026-08-26T01:24:12+00:00",
-    "epoch": 1787707452.463746,
+    "utc": "2026-08-26T01:24:21+00:00",
+    "epoch": 1787707461.6086984,
     "pid": 3900720,
     "status": "working",
     "job_id": "kalshi-paper-locked-recycle-v1-retry1-20260826-0124"
   },
   "state": {
     "last_job_id": "kalshi-paper-locked-recycle-v1-20260826-0119",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_012300.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_012412.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T01:23:09+00:00"
   },
