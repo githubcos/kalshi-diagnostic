@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T00:29:39+00:00",
-  "cycle": 1787704179,
-  "phase": "SETTLEMENT",
-  "percent": 79,
-  "result": "EVIDENCE_CAPTURED",
-  "detail": "SETTLEMENT live execution context published (20 excerpts).",
-  "next": "FINAL_REGRESSION"
+  "utc": "2026-08-26T00:30:01+00:00",
+  "cycle": 1787704201,
+  "phase": "FINAL_REGRESSION",
+  "percent": 85,
+  "result": "RUNNING",
+  "detail": "All finite source-context gates captured. Running one final test/build and paper-health verification.",
+  "next": "PAPER_EVIDENCE"
 }
