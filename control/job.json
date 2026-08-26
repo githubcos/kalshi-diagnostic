@@ -1,10 +1,10 @@
 {
-  "id": "kalshi-window-rollover-expected-expiration-v2-retry1-20260826-0229",
+  "id": "kalshi-kxbtc15m-window-end-v3-20260826-0231",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_window_expected_expiration_v2.patch", "strip": 1},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_kxbtc15m_window_end_v3.patch", "strip": 1},
     {"name": "GOFMT", "files": ["kalshi/market.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
