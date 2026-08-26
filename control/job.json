@@ -1,13 +1,9 @@
 {
-  "id": "kalshi-professional-paper-phase2-20260826",
+  "id": "kalshi-install-current-latest-publisher-20260826-1820",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "STATUS"},
-    {"name": "BACKUP"},
-    {"name": "UPDATE_AUTOPILOT"},
     {"name": "UPDATE_TELEMETRY"},
-    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
