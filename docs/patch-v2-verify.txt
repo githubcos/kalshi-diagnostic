@@ -1,0 +1,73 @@
+=== V2 PATCH VERIFY ===
+Wed Aug 26 21:44:14 UTC 2026
+
+=== STANDARD LEAD GATE ===
+
+	sigCoeff := computeSigmaCoeff(d.dvolAnnual, d.dvolMarkPrice)
+	winProb := winProbGaussianSigma(absGap, windowRemSec, sigCoeff)
+	// Momentum mode buys WITH gap direction; reversal mode buys the opposite side
+	// when the gap is actively shrinking back toward zero.
+	sigType := SignalPairArbLeadNo
+	tokenPrice := noPrice
+	oppPrice := yesPrice
+	if isYesLead {
+		tokenPrice = yesPrice
+		oppPrice = noPrice
+		if reverseMode {
+			sigType = SignalPairArbReverseLeadYes
+		} else {
+			sigType = SignalPairArbLeadYes
+		}
+	} else if reverseMode {
+		sigType = SignalPairArbReverseLeadNo
+	}
+	if tokenPrice < d.params.PairArbMinTokenPrice || tokenPrice > d.params.PairArbMaxTokenPrice {
+		return Signal{Type: SignalNone}
+	}
+	// ACTUAL pair-lead preflight gate. The prior Kalshi translation intentionally
+	// removed this check and allowed naked lead legs. Historical PAPER evidence
+	// showed those exposed legs caused essentially all losses. Require the
+	// opposite side to already be close enough that the configured locked-profit
+	// target can be reached within PairArbMaxHedgeDistanceCents.
+	if d.params.PairArbMaxHedgeDistanceCents > 0 {
+		lockedProfit := d.params.PairArbMinLockedProfitCents / 100.0
+		maxHedgePrice := 1.0 - lockedProfit - tokenPrice
+		if oppPrice-maxHedgePrice > d.params.PairArbMaxHedgeDistanceCents/100.0 {
+			return Signal{Type: SignalNone}
+		}
+	}
+
+	if d.brain != nil {
+		var windowFraction float64
+		if windowTotal := elapsedSec + windowRemSec; windowTotal > 0 {
+			windowFraction = elapsedSec / windowTotal
+		}
+		if score := d.brain.Score(BrainFeatures{
+			GapVelocity:    gapVelocity,
+			AbsGap:         absGap,
+			CVD30s:         cvdNow,
+			BookImbalance:  bookImbNow,
+			TickRate5s:     tickRateNow,
+			WindowFraction: windowFraction,
+		}); score < d.brain.ScoreThreshold() {
+
+=== BINARY ===
+-rwxrwxr-x 1 ubuntu ubuntu 15M 2026-08-26 21:43 ./kalshiarbo
+
+=== GO TEST ===
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	(cached)
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+ok  	github.com/polyarb/strategy	(cached)
+ok  	github.com/polyarb/web	(cached)
+GO_TEST_RC=0
