@@ -1,10 +1,12 @@
 {
-  "utc": "2026-08-26T09:47:22+00:00",
+  "utc": "2026-08-26T09:47:29+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
-  "status": "PASS",
-  "status_reasons": [],
-  "paper_port_8085": true,
+  "status": "FAIL",
+  "status_reasons": [
+    "paper process is not listening on 8085"
+  ],
+  "paper_port_8085": false,
   "kalshi_feed_recent_connected_event": false,
   "kalshi_feed_recent_disconnect_event": false,
   "runtime_blocker": "",
@@ -49,7 +51,7 @@
     "PAIR_ARB_MAX_CL_AGE_SEC": "120",
     "PAIR_ARB_MAX_COINBASE_SPREAD_USD": 0,
     "PAIR_ARB_MAX_CONTRA_OI_DELTA_USD": "0",
-    "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS": 2.0,
+    "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS": 3.0,
     "PAIR_ARB_MAX_SIGNAL_AGE_SEC": 3,
     "PAIR_ARB_MAX_TOKEN_PRICE": 0.99,
     "PAIR_ARB_MAX_WINDOW_SEC": 850,
