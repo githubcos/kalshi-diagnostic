@@ -1,0 +1,39 @@
+diff --git a/kalshi/feed_source_probe_test.go b/kalshi/feed_source_probe_test.go
+new file mode 100644
+--- /dev/null
++++ b/kalshi/feed_source_probe_test.go
+@@ -0,0 +1,48 @@
++package kalshi
++
++import (
++	"os"
++	"strings"
++	"testing"
++)
++
++func sourceWindow(t *testing.T, path, marker string, maxLines int) string {
++	t.Helper()
++	b, err := os.ReadFile(path)
++	if err != nil {
++		return path + ": READ_ERROR: " + err.Error()
++	}
++	s := string(b)
++	i := strings.Index(s, marker)
++	if i < 0 {
++		return path + ": MARKER_NOT_FOUND: " + marker
++	}
++	lines := strings.Split(s[i:], "\n")
++	if len(lines) > maxLines {
++		lines = lines[:maxLines]
++	}
++	return path + ":\n" + strings.Join(lines, "\n")
++}
++
++// TestFeedSourceProbe intentionally fails so the restricted EC2 agent publishes
++// the exact current Kalshi market-data implementation needed to build a source-
++// matched compatibility patch. It performs no network calls and no trading.
++func TestFeedSourceProbe(t *testing.T) {
++	market := sourceWindow(t, "market.go", "func (c *Client) GetOrderBook", 80)
++	feed := sourceWindow(t, "feed.go", "func (f *FeedClient) pollOnce", 80)
++	t.Fatalf("KALSHI_FEED_SOURCE_PROBE\n%s\n\n%s", market, feed)
++}
