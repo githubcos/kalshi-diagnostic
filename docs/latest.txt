@@ -1,28 +1,28 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:44:43+00:00
+UPDATED_UTC=2026-08-26T21:44:50+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
-PROCESS=ALIVE
-PID=561625
-PORT_8085=LISTENING
+PROCESS=DOWN
+PID=none
+PORT_8085=DOWN
 TRADING_ENGINE=UNKNOWN
 
 === PROCESS ===
-561625 ./kalshiarbo -port 8085
+NO KALSHIARBO PROCESS
 
 === PORT 8085 ===
-LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=561625,fd=6))
+PORT 8085 NOT LISTENING
 
 === HTTP / DASHBOARD STATE ===
-/api/status HTTP=401
-unauthorized
-/api/bot/status HTTP=401
-unauthorized
-/api/state HTTP=401
-unauthorized
-/status HTTP=302
-<a href="/login">Found</a>.
+/api/status HTTP=000
+curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
+/api/bot/status HTTP=000
+curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
+/api/state HTTP=000
+curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
+/status HTTP=000
+curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
 
 === SAFE PAPER SETTINGS ===
 MARKET_TYPE=15m
