@@ -1,11 +1,9 @@
 {
-  "id": "kalshi-paper-parity-forensic-refresh-20260826-1649",
+  "id": "kalshi-live-inspect-20260826-1748",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
-    {"name": "COLLECT_PARITY_EVIDENCE"},
-    {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
