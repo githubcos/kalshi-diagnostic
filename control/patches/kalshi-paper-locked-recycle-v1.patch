@@ -1,6 +1,6 @@
 --- a/strategy/trader.go
 +++ b/strategy/trader.go
-@@ -730,6 +730,20 @@
+@@ -730,6 +730,21 @@
  func (t *Trader) setPairExitState(pair *PairArbPosition, state string, note string) {
  	if pair == nil {
  		return
