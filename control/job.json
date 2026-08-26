@@ -1,16 +1,11 @@
 {
-  "id": "kalshi-market-feed-auth-fallback-v1c-20260826-0824",
+  "id": "kalshi-feed-source-rollback-20260826-0826",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_market_feed_authenticated_fallback_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["kalshi/client.go", "kalshi/market.go", "kalshi/feed.go"]},
+    {"name": "ROLLBACK", "backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082156.tar.gz"},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
-    {"name": "STATUS"},
-    {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
 }
