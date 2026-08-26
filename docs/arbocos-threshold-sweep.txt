@@ -1,0 +1,70 @@
+ARBOCOS POLYMARKET THRESHOLD SWEEP
+========================================================================
+TOTAL_ROWS 4004
+MAJOR_GATE_ROWS 28
+
+THRESHOLD_1C
+  observations 2
+  approx_unique_events 1
+  best_edge_c 1.0
+  best_at 2026-08-26T22:56:53.735375698Z
+  best_yes 0.53
+  best_no 0.46
+
+THRESHOLD_2C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_3C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_4C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_5C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_6C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_7C
+  observations 0
+  approx_unique_events 0
+
+THRESHOLD_8C
+  observations 0
+  approx_unique_events 0
+
+TOP 30 MAJOR-GATE EDGES
+edge=  1.00c yes=0.53 no=0.46 gap=-22.20 vel=-0.765 rem=186.3 at=2026-08-26T22:56:53.735375698Z
+edge=  1.00c yes=0.53 no=0.46 gap=-22.20 vel=-0.765 rem=186.3 at=2026-08-26T22:56:53.735722169Z
+edge=  0.00c yes=0.48 no=0.52 gap=-21.83 vel=-0.681 rem=187.4 at=2026-08-26T22:56:52.598206881Z
+edge=  0.00c yes=0.48 no=0.52 gap=-21.83 vel=-0.681 rem=187.4 at=2026-08-26T22:56:52.642842708Z
+edge= -0.00c yes=0.54 no=0.46 gap=-22.20 vel=-0.869 rem=186.2 at=2026-08-26T22:56:53.754631252Z
+edge= -1.00c yes=0.49 no=0.52 gap=-23.49 vel=-0.709 rem=189.7 at=2026-08-26T22:56:50.337745692Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.85 vel=-0.652 rem=188.5 at=2026-08-26T22:56:51.517136776Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.85 vel=-0.652 rem=188.3 at=2026-08-26T22:56:51.677616737Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.85 vel=-0.720 rem=188.2 at=2026-08-26T22:56:51.777799955Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.85 vel=-0.720 rem=188.2 at=2026-08-26T22:56:51.818996071Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.83 vel=-0.681 rem=188.1 at=2026-08-26T22:56:51.942359265Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.83 vel=-0.681 rem=188.0 at=2026-08-26T22:56:51.964026565Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.83 vel=-0.681 rem=187.8 at=2026-08-26T22:56:52.165898999Z
+edge= -1.00c yes=0.50 no=0.51 gap=-21.83 vel=-0.681 rem=187.8 at=2026-08-26T22:56:52.181812391Z
+edge= -1.00c yes=0.47 no=0.54 gap=-22.20 vel=-0.765 rem=186.4 at=2026-08-26T22:56:53.577193384Z
+edge= -2.00c yes=0.48 no=0.54 gap=-23.49 vel=-0.709 rem=189.8 at=2026-08-26T22:56:50.187479751Z
+edge= -2.00c yes=0.49 no=0.53 gap=-23.49 vel=-0.709 rem=189.7 at=2026-08-26T22:56:50.346058386Z
+edge= -2.00c yes=0.50 no=0.52 gap=-21.83 vel=-0.681 rem=187.5 at=2026-08-26T22:56:52.48295081Z
+edge= -2.00c yes=0.48 no=0.54 gap=-22.20 vel=-0.765 rem=186.6 at=2026-08-26T22:56:53.434628453Z
+edge= -3.00c yes=0.49 no=0.54 gap=-23.49 vel=-0.709 rem=189.8 at=2026-08-26T22:56:50.187601827Z
+edge= -3.00c yes=0.50 no=0.53 gap=-23.49 vel=-0.709 rem=189.3 at=2026-08-26T22:56:50.716760109Z
+edge= -3.00c yes=0.50 no=0.53 gap=-21.85 vel=-0.652 rem=189.0 at=2026-08-26T22:56:50.981545121Z
+edge= -3.00c yes=0.50 no=0.53 gap=-21.85 vel=-0.652 rem=188.5 at=2026-08-26T22:56:51.482714486Z
+edge= -6.00c yes=0.52 no=0.54 gap=-23.49 vel=-0.709 rem=190.0 at=2026-08-26T22:56:49.99905462Z
+edge= -6.00c yes=0.52 no=0.54 gap=-23.49 vel=-0.709 rem=189.8 at=2026-08-26T22:56:50.153198687Z
+edge= -6.00c yes=0.52 no=0.54 gap=-22.20 vel=-0.765 rem=186.4 at=2026-08-26T22:56:53.577020336Z
+edge= -7.00c yes=0.53 no=0.54 gap=-22.20 vel=-0.765 rem=186.3 at=2026-08-26T22:56:53.726947878Z
+edge= -8.00c yes=0.54 no=0.54 gap=-22.20 vel=-0.765 rem=186.3 at=2026-08-26T22:56:53.682482449Z
