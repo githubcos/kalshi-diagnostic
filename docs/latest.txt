@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:11:02+00:00
+UPDATED_UTC=2026-08-26T22:11:09+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -176,3 +176,15 @@ BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 
 ◂  │ PAPER   6.46 shares  │  buy $0.7639 → sell $0.7300  │  fee $0.0900
 ◂  ▼ P&L  -$-0.3092  (--6.27%)  │  Reason: pair_stop_loss  │  Held: 1s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.87 open=78747.81 gap=$33.1 yes=0.7500 prob=0.60 rem=538s]
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78787.29 open=78747.81 gap=$39.5 yes=0.7700 prob=0.62 rem=533s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+▸  │ PAPER   6.30 shares @ $0.7700    fee: 0.0000 sh    cost: $4.93
+BTC $78787 │ open $78748 │ edge +39 │ CL $78765 0s ago CLedge +17 │ YES 0.77 │ 6.8/8.4 $41 │ PAIR 0sh@0.00 -0.08 │ 8m53s │ $993.26
+BTC $78787 │ open $78748 │ edge +39 │ CL $78765 0s ago CLedge +17 │ YES 0.77 │ 6.8/8.4 $41 │ PAIR 0sh@0.00 -0.08 │ 8m53s │ $993.26
+BTC $78787 │ open $78748 │ edge +39 │ CL $78765 1s ago CLedge +17 │ YES 0.77 │ 7.3/8.9 $41 │ PAIR 0sh@0.00 -0.08 │ 8m52s │ $993.26
+BTC $78787 │ open $78748 │ edge +39 │ CL $78765 0s ago CLedge +17 │ YES 0.77 │ 6.8/8.4 $41 │ PAIR 0sh@0.00 -0.08 │ 8m53s │ $993.26
+BTC $78787 │ open $78748 │ edge +39 │ CL $78765 1s ago CLedge +17 │ YES 0.77 │ 7.3/8.9 $41 │ PAIR 0sh@0.00 -0.08 │ 8m52s │ $993.26
+BTC $78788 │ open $78748 │ edge +40 │ CL $78765 1s ago CLedge +17 │ YES 0.77 │ 7.5/8.6 $37 │ PAIR 0sh@0.00 -0.08 │ 8m51s │ $993.26
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  │ PAPER   6.30 shares  │  buy $0.7827 → sell $0.7600  │  fee $0.0900
+◂  ▼ P&L  -$-0.2330  (--4.73%)  │  Reason: pair_stop_loss  │  Held: 1s
