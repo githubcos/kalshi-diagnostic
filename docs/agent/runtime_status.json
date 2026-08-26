@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T02:35:31+00:00",
+  "utc": "2026-08-26T02:35:38+00:00",
   "publisher_pid": 40050,
   "heartbeat": {
-    "utc": "2026-08-26T02:35:29+00:00",
-    "epoch": 1787711729.930144,
+    "utc": "2026-08-26T02:35:35+00:00",
+    "epoch": 1787711735.706188,
     "pid": 4075083,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-kxbtc15m-window-end-v3-retry2-20260826-0236"
   },
   "state": {
     "last_job_id": "kalshi-kxbtc15m-window-end-v3-retry1-20260826-0235",
