@@ -1,0 +1,4 @@
+# github.com/polyarb/web
+web/strategy_backtest_sweep_test.go:631:6: expected '(', found TestLocalPairArbCompareProfilesV3
+FAIL	github.com/polyarb/web [setup failed]
+FAIL
