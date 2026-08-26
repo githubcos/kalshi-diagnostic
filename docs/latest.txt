@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T20:47:43+00:00
+UPDATED_UTC=2026-08-26T20:47:50+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -10,6 +10,7 @@ TRADING_ENGINE=UNKNOWN
 
 === PROCESS ===
 403064 /home/ubuntu/KalshiArbo/kalshiarbo/kalshiarbo -port 8085
+522812 python3 gate_g_shadow_preflight.py --bot-log /home/ubuntu/KalshiArbo/kalshiarbo/polyarb.log --out /home/ubuntu/gate_g_shadow.jsonl --status /home/ubuntu/gate_g_status.txt --budget 5 --duration-sec 120
 
 === PORT 8085 ===
 LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=403064,fd=7))
