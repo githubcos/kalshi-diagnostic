@@ -1,55 +1,9 @@
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -89,9 +89,13 @@
+@@ -136,4 +136,4 @@
 -	endDate := m.CloseTime
--	if endDate == "" {
--		endDate = m.ExpirationTime
--	}
-+	// The strategy window must track the contract's scheduled expiration,
-+	// not Kalshi's administrative close_time. For short-duration markets,
-+	// close_time may extend beyond the actual outcome window and causes the
-+	// bot to sit on an already-finished market instead of rolling forward.
 +	endDate := m.ExpirationTime
-+	if endDate == "" {
+ 	if endDate == "" {
+-		endDate = m.ExpirationTime
 +		endDate = m.CloseTime
-+	}
- 
- 	description := m.RulesPrimary
- 	if description == "" {
---- /dev/null
-+++ b/kalshi/market_test.go
-@@ -0,0 +1,35 @@
-+package kalshi
-+
-+import "testing"
-+
-+func TestConvertMarketPrefersExpirationTimeForStrategyWindow(t *testing.T) {
-+	m := apiMarket{
-+		Ticker:         "KXBTC15M-TEST",
-+		EventTicker:    "KXBTC15M",
-+		Status:         "open",
-+		OpenTime:       "2026-08-26T02:15:00Z",
-+		ExpirationTime: "2026-08-26T02:30:00Z",
-+		CloseTime:      "2026-08-26T02:45:00Z",
-+	}
-+
-+	got := convertMarket(m)
-+	if got.EndDateISO != m.ExpirationTime {
-+		t.Fatalf("expected strategy end %q from expiration_time, got %q", m.ExpirationTime, got.EndDateISO)
-+	}
-+}
-+
-+func TestConvertMarketFallsBackToCloseTime(t *testing.T) {
-+	m := apiMarket{
-+		Ticker:      "KXBTC15M-TEST",
-+		EventTicker: "KXBTC15M",
-+		Status:      "open",
-+		OpenTime:    "2026-08-26T02:15:00Z",
-+		CloseTime:   "2026-08-26T02:30:00Z",
-+	}
-+
-+	got := convertMarket(m)
-+	if got.EndDateISO != m.CloseTime {
-+		t.Fatalf("expected fallback strategy end %q from close_time, got %q", m.CloseTime, got.EndDateISO)
-+	}
-+}
+ 	}
