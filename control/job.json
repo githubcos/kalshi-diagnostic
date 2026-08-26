@@ -1,13 +1,10 @@
 {
-  "id": "kalshi-unhedgeable-residual-test-v1-retry2-20260826-0159",
+  "id": "kalshi-adaptive-paper-optimizer-v5-20260826-0205",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_small_residual_test_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/trader.go", "strategy/pair_arb_test.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
+    {"name": "UPDATE_AUTOPILOT"},
     {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
