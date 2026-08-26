@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T00:15:08+00:00",
+  "utc": "2026-08-26T00:15:15+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:15:06+00:00",
-    "epoch": 1787703306.6170242,
+    "utc": "2026-08-26T00:15:12+00:00",
+    "epoch": 1787703312.3545947,
     "pid": 2004638,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-explicit-no-caller-probe-v1-20260826-0017"
   },
   "state": {
     "last_job_id": "kalshi-explicit-no-callers-v2-20260826-0015",
