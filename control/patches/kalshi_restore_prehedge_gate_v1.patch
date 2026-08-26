@@ -1,0 +1,40 @@
+--- a/strategy/signal.go
++++ b/strategy/signal.go
+@@ -2692,11 +2692,13 @@
+ 	// when the gap is actively shrinking back toward zero.
+ 	sigType := SignalPairArbLeadNo
+ 	tokenPrice := noPrice
++	oppPrice := yesPrice
+ 	if isYesLead {
+ 		tokenPrice = yesPrice
++		oppPrice = noPrice
+ 		if reverseMode {
+ 			sigType = SignalPairArbReverseLeadYes
+ 		} else {
+ 			sigType = SignalPairArbLeadYes
+ 		}
+@@ -2707,11 +2709,16 @@
+ 	if tokenPrice < d.params.PairArbMinTokenPrice || tokenPrice > d.params.PairArbMaxTokenPrice {
+ 		return Signal{Type: SignalNone}
+ 	}
+-	// Do not require the opposite leg to be within the hedge-distance band at
+-	// signal-generation time. Pair-arb is intentionally a lead-then-hedge
+-	// strategy: the trader owns the hedge timeout and fee-adjusted locked-profit
+-	// limit, and must still refuse a hedge that cannot preserve the configured
+-	// locked profit. Requiring that hedge to already exist here collapses the
+-	// strategy into an instantaneous complete-set scanner and suppresses leads.
++	// Kalshi safety gate: do not open a directional first leg unless the opposite
++	// contract is already close enough to a fee-adjusted locked pair. Historical
++	// PAPER results showed that exposed lead-first trades caused essentially all
++	// losses, while fully hedged pairs were profitable. This restores the original
++	// pre-hedge distance check that had been removed by the lead/hedge decoupling
++	// experiment.
++	if d.params.PairArbMaxHedgeDistanceCents > 0 {
++		lockedProfit := d.params.PairArbMinLockedProfitCents / 100.0
++		maxHedgePrice := 1.0 - lockedProfit - tokenPrice
++		if oppPrice-maxHedgePrice > d.params.PairArbMaxHedgeDistanceCents/100.0 {
++			return Signal{Type: SignalNone}
++		}
++	}
+ 
+ 	if d.brain != nil {
