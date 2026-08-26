@@ -1,8 +1,9 @@
 {
-  "id": "kalshi-paper-session-archive-v1-20260826-0604",
+  "id": "kalshi-feed-status-diagnostic-v1-20260826-0818",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "STATUS"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
