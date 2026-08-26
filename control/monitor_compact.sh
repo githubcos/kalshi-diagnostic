@@ -4,6 +4,7 @@ REPO="$HOME/kalshi-diagnostic"
 AUTO="$REPO/docs/agent/autopilot_status.json"
 RUNTIME="$REPO/docs/agent/runtime_status.json"
 PROGRESS="$REPO/docs/agent/progress.txt"
+TRADEMON="$REPO/docs/agent/live_trade_monitor.txt"
 SELF="$REPO/control/monitor_compact.sh"
 LAST_SYNC=0; SYNC_EVERY=5
 jsonget(){ python3 - "$1" "$2" <<'PY' 2>/dev/null
@@ -22,7 +23,7 @@ sync_repo(){
  remote=$(mktemp); git -C "$REPO" show origin/main:control/monitor_compact.sh > "$remote" 2>/dev/null || { rm -f "$remote"; return; }
  h1=$(sha256sum "$SELF"|awk '{print $1}'); h2=$(sha256sum "$remote"|awk '{print $1}')
  if [ "$h1" != "$h2" ]; then chmod +x "$remote"; mv "$remote" "$SELF"; exec bash "$SELF"; fi; rm -f "$remote"
- mkdir -p "$REPO/docs/agent"; sync_one docs/agent/autopilot_status.json "$AUTO"; sync_one docs/agent/runtime_status.json "$RUNTIME"; sync_one docs/agent/progress.txt "$PROGRESS"
+ mkdir -p "$REPO/docs/agent"; sync_one docs/agent/autopilot_status.json "$AUTO"; sync_one docs/agent/runtime_status.json "$RUNTIME"; sync_one docs/agent/progress.txt "$PROGRESS"; sync_one docs/agent/live_trade_monitor.txt "$TRADEMON"
 }
 render(){
  local lastjob lastresult agent paper active action step tmp
@@ -32,12 +33,21 @@ render(){
  action=$(grep -E 'ACTION [0-9]+/[0-9]+ .* (START|PASS)$' "$PROGRESS" 2>/dev/null|tail -1)
  step=$(grep -E '(START|END rc=|JOB RESULT=)' "$PROGRESS" 2>/dev/null|tail -1)
  tmp=$(mktemp); {
- echo 'KALSHIARBO - LIVE DEVELOPMENT PROGRESS'; echo '========================================'; printf 'UPDATED      %s\n' "$(date -u '+%H:%M:%S UTC')"
+ echo 'KALSHIARBO - LIVE TRADE / MATH AUDIT'; echo '====================================='; printf 'UPDATED      %s\n' "$(date -u '+%H:%M:%S UTC')"
  printf 'AGENT        %s\n' "${agent:-UNKNOWN}"; printf 'PAPER BOT    %s\n' "$paper"; echo 'LIVE MONEY   HARD-BLOCKED'; echo
- echo 'ACTIVE JOB'; printf '%s\n' "${active:-No new job running}" | fold -s -w 58; echo
- echo 'CURRENT STEP'; printf '%s\n' "${action:-Waiting for next agent action}" | fold -s -w 58; [ -n "${step:-}" ] && printf '%s\n' "$step" | fold -s -w 58; echo
- echo 'LATEST COMPLETED'; printf '%s  %s\n' "${lastjob:-none}" "${lastresult:-UNKNOWN}" | fold -s -w 58; echo
- echo 'RECENT PROGRESS'; tail -n 7 "$PROGRESS" 2>/dev/null | sed 's/^    /  /' | fold -s -w 58; echo; echo 'Auto-sync 5s | Ctrl+C closes monitor only'; } > "$tmp"
+ if [ -s "$TRADEMON" ]; then
+   grep -E '^(VERDICT|PAPER_8085|KALSHI_WS|BLOCKER|EVENTS|LATENCY lead|LATENCY hedge)' "$TRADEMON" | head -10 | fold -s -w 62
+   echo
+   echo 'LATEST MATH / EXECUTION'
+   awk '/RECENT MEANINGFUL EXECUTION \/ MATH LINES/{f=1;next}/^WARNINGS$/{f=0} f&&NF{print}' "$TRADEMON" | tail -8 | fold -s -w 62
+ else
+   echo 'Trade monitor telemetry is starting...'
+ fi
+ echo
+ echo 'ACTIVE ENGINEERING JOB'; printf '%s\n' "${active:-No new job running}" | fold -s -w 62
+ printf '%s\n' "${action:-Agent idle}" | fold -s -w 62; [ -n "${step:-}" ] && printf '%s\n' "$step" | fold -s -w 62
+ echo; echo 'LATEST COMPLETED'; printf '%s  %s\n' "${lastjob:-none}" "${lastresult:-UNKNOWN}" | fold -s -w 62
+ echo; echo 'Auto-sync 5s | Ctrl+C closes monitor only'; } > "$tmp"
  printf '\033[H\033[2J'; cat "$tmp"; rm -f "$tmp"
 }
 printf '\033[?25l'; trap 'printf "\033[?25h\033[0m\n"' EXIT INT TERM
