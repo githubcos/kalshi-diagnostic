@@ -1,15 +1,9 @@
 {
-  "id": "kalshi-decouple-lead-hedge-paper-v2-20260826-1802",
+  "id": "kalshi-postpatch-paper-status-20260826-1801",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
-    {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_decouple_lead_from_immediate_hedge_v2_cleanup.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/signal.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
