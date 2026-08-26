@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T01:59:17+00:00",
+  "utc": "2026-08-26T01:59:25+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -141,6 +141,8 @@
     "\u26a1 SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78785.92 open=78848.84 gap=$-62.9 no=0.8500 prob=0.73 rem=281s]",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR LEAD] EXECUTED",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR HEDGE] EXECUTED",
-    "\u25c2  \u25b2 P&L  +$0.0804  (+0.25%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 14s"
+    "\u25c2  \u25b2 P&L  +$0.0804  (+0.25%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 14s",
+    "\u2551     NET P&L   +$0.0804   (+1.44%)                                  \u2551",
+    "\u2551     Balance: $100.08 / $100.00                                     \u2551"
   ]
 }
