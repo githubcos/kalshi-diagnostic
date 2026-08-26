@@ -1,11 +1,11 @@
 {
-  "id": "kalshi-paper-positive-edge-profile-v1-20260826-1004",
+  "id": "kalshi-paper-parity-forensic-refresh-20260826-1649",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "APPLY_PATCH", "path": "control/patches/paper_positive_edge_profile_v1.patch", "strip": 1},
-    {"name": "START_PAPER"},
     {"name": "STATUS"},
+    {"name": "COLLECT_PARITY_EVIDENCE"},
+    {"name": "DETERMINISTIC_PARITY_TEST"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
