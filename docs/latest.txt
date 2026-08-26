@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:39:42+00:00
+UPDATED_UTC=2026-08-26T21:39:50+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -118,29 +118,6 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-BTC 15m Matched Pair Engine
-│  Mode           ░░ PAPER TRADE ░░
-│  Balance      $1000.00 starting
-│  Started      2026-08-26 21:37:57 UTC
-·  paper balance: $1000.00
-·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
-·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78764.20 open=78757.45 gap=$6.8 yes=0.5700 prob=0.52 rem=635s]
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78773.05 open=78757.45 gap=$15.6 yes=0.6400 prob=0.54 rem=630s]
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.10 open=78757.45 gap=$22.7 yes=0.6600 prob=0.56 rem=625s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸  │ PAPER   7.28 shares @ $0.6500    fee: 0.0000 sh    cost: $4.85
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 0s ago CLedge +1 │ YES 0.65 │ 8.6/11.3 $19 │ PAIR 0sh@0.00 -0.12 │ 10m24s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 0s ago CLedge +1 │ YES 0.65 │ 8.6/11.3 $19 │ PAIR 0sh@0.00 -0.12 │ 10m24s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 1s ago CLedge +1 │ YES 0.69 │ 8.5/10.3 $19 │ PAIR 0sh@0.00 +0.17 │ 10m23s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 0s ago CLedge +1 │ YES 0.65 │ 8.6/11.3 $19 │ PAIR 0sh@0.00 -0.12 │ 10m24s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 1s ago CLedge +1 │ YES 0.69 │ 8.5/10.3 $19 │ PAIR 0sh@0.00 +0.17 │ 10m23s │ $995.15
-BTC $78781 │ open $78757 │ edge +24 │ CL $78758 1s ago CLedge +1 │ YES 0.67 │ 9.1/10.8 $19 │ PAIR 0sh@0.00 +0.03 │ 10m23s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 0s ago CLedge +1 │ YES 0.65 │ 8.6/11.3 $19 │ PAIR 0sh@0.00 -0.12 │ 10m24s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 1s ago CLedge +1 │ YES 0.69 │ 8.5/10.3 $19 │ PAIR 0sh@0.00 +0.17 │ 10m23s │ $995.15
-BTC $78781 │ open $78757 │ edge +24 │ CL $78758 1s ago CLedge +1 │ YES 0.67 │ 9.1/10.8 $19 │ PAIR 0sh@0.00 +0.03 │ 10m23s │ $995.15
-BTC $78781 │ open $78757 │ edge +24 │ CL $78758 2s ago CLedge +1 │ YES 0.67 │ 9.6/10.8 $19 │ PAIR 0sh@0.00 +0.03 │ 10m22s │ $995.15
-BTC $78780 │ open $78757 │ edge +22 │ CL $78758 0s ago CLedge +1 │ YES 0.65 │ 8.6/11.3 $19 │ PAIR 0sh@0.00 -0.12 │ 10m24s │ $995.15
 BTC $78780 │ open $78757 │ edge +22 │ CL $78758 1s ago CLedge +1 │ YES 0.69 │ 8.5/10.3 $19 │ PAIR 0sh@0.00 +0.17 │ 10m23s │ $995.15
 BTC $78781 │ open $78757 │ edge +24 │ CL $78758 1s ago CLedge +1 │ YES 0.67 │ 9.1/10.8 $19 │ PAIR 0sh@0.00 +0.03 │ 10m23s │ $995.15
 BTC $78781 │ open $78757 │ edge +24 │ CL $78758 2s ago CLedge +1 │ YES 0.67 │ 9.6/10.8 $19 │ PAIR 0sh@0.00 +0.03 │ 10m22s │ $995.15
@@ -170,3 +147,54 @@ BTC $78780 │ open $78757 │ edge +22 │ CL $78775 0s ago CLedge +17 │ YES 
 BTC $78780 │ open $78757 │ edge +22 │ CL $78758 2s ago CLedge +1 │ YES 0.65 │ 9.4/11.8 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
 BTC $78780 │ open $78757 │ edge +22 │ CL $78775 0s ago CLedge +17 │ YES 0.65 │ 10.2/12.4 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
 BTC $78780 │ open $78757 │ edge +23 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m17s │ $994.76
+BTC $78780 │ open $78757 │ edge +22 │ CL $78758 2s ago CLedge +1 │ YES 0.65 │ 9.4/11.8 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
+BTC $78780 │ open $78757 │ edge +22 │ CL $78775 0s ago CLedge +17 │ YES 0.65 │ 10.2/12.4 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
+BTC $78780 │ open $78757 │ edge +23 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m17s │ $994.76
+BTC $78780 │ open $78757 │ edge +23 │ CL $78775 2s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m16s │ $994.76
+BTC $78780 │ open $78757 │ edge +22 │ CL $78758 2s ago CLedge +1 │ YES 0.65 │ 9.4/11.8 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
+BTC $78780 │ open $78757 │ edge +22 │ CL $78775 0s ago CLedge +17 │ YES 0.65 │ 10.2/12.4 $19 │ PAIR 0sh@0.00 -0.12 │ 10m18s │ $994.76
+BTC $78780 │ open $78757 │ edge +23 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m17s │ $994.76
+BTC $78780 │ open $78757 │ edge +23 │ CL $78775 2s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m16s │ $994.76
+BTC $78780 │ open $78757 │ edge +23 │ CL $78775 0s ago CLedge +17 │ YES 0.65 │ 10.2/12.6 $19 │ PAIR 0sh@0.00 -0.12 │ 10m16s │ $994.76
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  │ PAPER   7.39 shares  │  buy $0.6662 → sell $0.6300  │  fee $0.1300
+◂  ▼ P&L  -$-0.3978  (--8.08%)  │  Reason: pair_stop_loss  │  Held: 3s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78778.46 open=78757.45 gap=$21.0 yes=0.6400 prob=0.56 rem=614s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+▸  │ PAPER   7.50 shares @ $0.6400    fee: 0.0000 sh    cost: $4.93
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 10.0/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m10s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 10.0/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m10s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.9/12.3 $19 │ PAIR 0sh@0.00 -0.05 │ 10m10s │ $994.36
+BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 10.0/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m10s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.9/12.3 $19 │ PAIR 0sh@0.00 -0.05 │ 10m10s │ $994.36
+BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.66 │ 9.1/11.5 $19 │ PAIR 0sh@0.00 +0.02 │ 10m09s │ $994.36
