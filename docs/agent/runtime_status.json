@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T00:34:24+00:00",
+  "utc": "2026-08-26T00:34:31+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:34:20+00:00",
-    "epoch": 1787704460.2827246,
+    "utc": "2026-08-26T00:34:28+00:00",
+    "epoch": 1787704468.478982,
     "pid": 3900720,
     "status": "working",
     "job_id": "kalshi-public-quote-feed-fallback-v1-retry1-20260826-0037"
   },
   "state": {
     "last_job_id": "kalshi-public-quote-feed-fallback-v1-20260826-0035",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_003412.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_003420.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T00:32:52+00:00"
   },
