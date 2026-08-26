@@ -1,0 +1,566 @@
+=== LEAD ENTRY CALLS ===
+
+=== PAIR POSITION CREATION ===
+1487-				if actualShares <= pairArbShareDust {
+1488-					actualShares = math.Floor((rawShares-polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps))*100) / 100
+1489-				}
+1490-				if actualShares <= pairArbShareDust {
+1491-					actualShares = pairArbShareDust
+1492-				}
+1493-				usdSpent = marketBuyOrderNotional(effectiveGrossShares, fillPrice)
+1494-				if usdSpent <= 0 {
+1495-					usdSpent = marketBuyOrderNotional(rawShares, fillPrice)
+1496-				}
+1497-				fillSource = "wallet_credit_pending"
+1498-				keepPendingForReconcile = true
+1499-			}
+1500-		}
+1501-	}
+1502-	if !keepPendingForReconcile {
+1503-		t.clearPendingPairArbOrder()
+1504-	}
+1505-	entryToPositionMs := time.Since(entryStart).Milliseconds()
+1506-	t.logger.Info("trader: pair arb buy latency",
+1507-		zap.String("request", requestName),
+1508-		zap.String("request_id", requestID),
+1509-		zap.String("order_id", orderID),
+1510-		zap.Int64("preflight_ms", preflightMS),
+1511-		zap.Int64("sign_ms", resp.SignMs),
+1512-		zap.Int64("http_ms", resp.HTTPMs),
+1513-		zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
+1514-		zap.Int64("entry_to_position_ms", entryToPositionMs),
+1515-		zap.String("fill_source", fillSource),
+1516-	)
+1517-	if t.metrics != nil {
+1518-		t.metrics.Record("entry_preflight", preflightMS)
+1519-		t.metrics.Record("entry_to_position", entryToPositionMs)
+1520-	}
+1521-	return pairArbBuyOutcomeFilled, orderID, fillPrice, actualShares, feeShares, usdSpent, nil
+1522-}
+1523-
+1524-func (t *Trader) shouldAbortLeadWaitForFilledPreHedge(ctx context.Context, requestName string) (bool, string) {
+1525-	if t.cfg.PaperTrade || !isPairArbLeadBuyRequestName(requestName) {
+1526-		return false, ""
+1527-	}
+1528-	pending := t.pendingHedgePrePlace
+1529-	if pending == nil {
+1530-		return false, ""
+1531-	}
+1532-	hedgeOrderID := strings.TrimSpace(pending.OrderID)
+1533-	hedgeTokenID := strings.TrimSpace(pending.TokenID)
+1534-	if hedgeOrderID == "" || hedgeTokenID == "" {
+1535-		return false, hedgeOrderID
+1536-	}
+1537-	minExpected := pending.RequestedSize - pairArbWalletReconcileDelta
+1538-	if minExpected < pairArbShareDust {
+1539-		minExpected = pairArbShareDust
+1540-	}
+1541-	if gr, grErr := t.getOrderTimed(ctx, requestName+"_hedge_guard", hedgeOrderID); grErr == nil && gr != nil {
+1542-		status := strings.ToLower(strings.TrimSpace(gr.Status))
+1543-		matched := parseOrderSize(gr.SizeMatched)
+1544-		remaining := parseOrderSize(gr.SizeRemaining)
+1545-		if pending.RequestedSize > 0 {
+1546-			if matched >= minExpected {
+1547-				return true, hedgeOrderID
+1548-			}
+1549-			if matched > pairArbShareDust && remaining <= pairArbShareDust {
+1550-				return true, hedgeOrderID
+1551-			}
+1552-			if (status == "matched" || status == "filled") && matched > pairArbShareDust {
+1553-				t.logger.Warn("trader: pair arb hedge guard saw partial pre-hedge fill; continuing lead wait",
+1554-					zap.String("request", requestName),
+1555-					zap.String("hedge_order_id", hedgeOrderID),
+1556-					zap.Float64("matched_shares", matched),
+1557-					zap.Float64("remaining_shares", remaining),
+1558-					zap.Float64("requested_shares", pending.RequestedSize),
+1559-				)
+1560-			}
+1561-			return false, hedgeOrderID
+1562-		}
+1563-		if status == "matched" || status == "filled" {
+1564-			return true, hedgeOrderID
+1565-		}
+1566-		if matched > pairArbShareDust {
+1567-			return true, hedgeOrderID
+1568-		}
+1569-		return false, hedgeOrderID
+1570-	}
+1571-	if _, gross, fillsErr := t.getFillsTimed(ctx, requestName+"_hedge_guard_fills", hedgeOrderID, hedgeTokenID); fillsErr == nil {
+1572-		if pending.RequestedSize > 0 {
+1573-			return gross >= minExpected, hedgeOrderID
+1574-		}
+1575-		if gross > pairArbShareDust {
+1576-			return true, hedgeOrderID
+1577-		}
+1578-	}
+1579-	return false, hedgeOrderID
+1580-}
+1581-
+1582-// setPrePlacedHedgeOrder tracks a GTC hedge order that was placed before the lead filled.
+1583-func (t *Trader) setPrePlacedHedgeOrder(orderID, tokenID, requestName string, requestedSize float64) {
+1584-	if t.cfg.PaperTrade || orderID == "" || tokenID == "" {
+1585-		return
+1586-	}
+1587:	t.pendingHedgePrePlace = &pairArbPendingOrderState{
+1588-		OrderID:       orderID,
+1589-		TokenID:       tokenID,
+1590-		RequestName:   requestName,
+1591-		PlacedAt:      time.Now(),
+1592-		RequestedSize: requestedSize,
+1593-	}
+1594-	t.savePositionState()
+1595-}
+1596-
+1597-func (t *Trader) clearPrePlacedHedgeOrder() {
+1598-	if t.pendingHedgePrePlace == nil {
+1599-		return
+1600-	}
+1601-	t.pendingHedgePrePlace = nil
+1602-	t.savePositionState()
+1603-}
+1604-
+1605-// executeDualPrePlacePairArb places the lead buy AND the hedge buy simultaneously as
+1606-// resting GTC maker orders. The hedge rests at a passive price so when the market moves
+1607-// both legs can fill in the same second. Execution cases:
+1608-//   - Both fill:        open balanced position immediately, HedgeBy cleared.
+1609-//   - Lead fills only:  hedge order stays resting as pendingHedgePrePlace; normal hedge
+1610-//     management (maybeRebalancePairArb) will absorb it when polled.
+1611-//   - Neither fills:    cancel pre-placed hedge, return error (no position).
+1612-//   - Hedge only:       unexpected (NO collapsed without YES rising); cancel hedge, return error.
+1613-func (t *Trader) executeDualPrePlacePairArb(
+1614-	ctx context.Context,
+1615-	sig Signal,
+1616-	yesTokenID, noTokenID string,
+1617-	leadSide string,
+1618-	isNoLead bool,
+1619-	leadTokenID string,
+1620-	hedgeSide string,
+1621-	leadPrice, leadLimitPrice, rawLeadShares float64,
+1622-	currentHedgePrice, maxHedgePrice float64,
+1623-) error {
+1624-	// ── Compute hedge pre-place limit price ────────────────────────────────
+1625-	// Passive offset: place the hedge bid BELOW the current price so it rests as a maker.
+1626-	hedgeLimitPrice := currentHedgePrice
+1627-	if off := t.cfg.PairArbHedgePreOffsetCents; off > 0 {
+1628-		hedgeLimitPrice = math.Round((currentHedgePrice-off/100.0)*100) / 100
+1629-	}
+1630-	if hedgeLimitPrice <= 0 || hedgeLimitPrice >= 1.0 {
+1631-		return fmt.Errorf("pair arb: dual pre-place hedge limit price %.4f out of range", hedgeLimitPrice)
+1632-	}
+1633-	if hedgeLimitPrice > maxHedgePrice {
+1634-		hedgeLimitPrice = math.Round(maxHedgePrice*100) / 100
+1635-	}
+1636-	hedgeTokenID := yesTokenID
+1637-	if !isNoLead {
+1638-		hedgeTokenID = noTokenID // hedge is NO when lead is YES
+1639-	}
+1640-
+1641-	// ── Size the hedge leg based on estimated lead actual shares ───────────
+1642-	estimatedLeadActual := math.Floor((rawLeadShares-polymarket.ComputeBuyFeeShares(rawLeadShares, leadPrice, t.feeRateBps))*100) / 100
+1643-	hedgeRawShares, _, hedgeAllowed := pairArbExactHedgeSizing(estimatedLeadActual, hedgeLimitPrice, t.feeRateBps)
+1644-	if !hedgeAllowed || hedgeRawShares <= 0 {
+1645-		// Hedge sizing fails (e.g. price too close to max); fall back to sequential.
+1646-		t.logger.Warn("trader: dual pre-place hedge sizing failed, falling back to sequential",
+1647-			zap.Float64("hedge_limit", hedgeLimitPrice),
+1648-			zap.Float64("max_hedge_price", maxHedgePrice),
+1649-			zap.Float64("est_lead_actual", estimatedLeadActual),
+1650-		)
+1651-		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+1652-		if err != nil {
+1653-			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+1654-			return err
+1655-		}
+1656-		if outcome != pairArbBuyOutcomeFilled {
+1657-			pairConditionID := t.convConditionID
+1658-			if sig.OverrideConditionID != "" {
+1659-				pairConditionID = sig.OverrideConditionID
+1660-			}
+1661-			pairWindowEnd := t.detector.WindowEnd()
+1662-			if !sig.OverrideWindowEnd.IsZero() {
+1663-				pairWindowEnd = sig.OverrideWindowEnd
+1664-			}
+1665-			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+1666-			return fmt.Errorf("pair arb: lead buy not filled")
+1667-		}
+1668-		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+1669-	}
+1670-	if t.cfg.PaperTrade {
+1671-		// In paper mode we never place a live pre-hedge order.
+1672-		// Reuse the sequential path so lead/hedge are both simulated.
+1673-		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+1674-		if err != nil {
+1675-			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+1676-			return err
+1677-		}
+1678-		if outcome != pairArbBuyOutcomeFilled {
+1679-			pairConditionID := t.convConditionID
+1680-			if sig.OverrideConditionID != "" {
+1681-				pairConditionID = sig.OverrideConditionID
+1682-			}
+1683-			pairWindowEnd := t.detector.WindowEnd()
+1684-			if !sig.OverrideWindowEnd.IsZero() {
+1685-				pairWindowEnd = sig.OverrideWindowEnd
+1686-			}
+1687-			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+1688-			return fmt.Errorf("pair arb: lead buy not filled")
+1689-		}
+1690-		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+1691-	}
+1692-
+1693-	// ── Submit hedge GTC order immediately (non-blocking — rests in book) ──
+1694-	// Using placeOrderTimed directly (not executePairLimitBuy) so we don't poll
+1695-	// and auto-cancel on a fill-wait timeout.  The hedge stays in the book until
+1696-	// the market moves to its price, or forceClosePairArb cancels it.
+1697-	hedgeOrderID := ""
+1698-	hedgeSubmittedLive := false
+1699-	hedgeAlreadyFilled := false
+1700-	submitPreHedge := func(rawShares float64) (*polymarket.OrderResponse, error) {
+1701-		return t.placeOrderTimed(ctx, "pair_arb_hedge_pre", &polymarket.NewOrderRequest{
+1702-			OrderType:      polymarket.OrderTypeGTC,
+1703-			TokenID:        hedgeTokenID,
+1704-			Side:           polymarket.SideBuy,
+1705-			Price:          fmt.Sprintf("%.2f", hedgeLimitPrice),
+1706-			Size:           fmt.Sprintf("%.2f", rawShares),
+1707-			Nonce:          polymarket.MakeNonce(),
+1708-			FeeRateBps:     t.feeRateBps,
+1709-			AttemptTimeout: pairArbHedgeSubmitTimeout,
+1710-			MaxAttempts:    pairArbHedgeMaxAttempts,
+1711-		})
+1712-	}
+1713-
+1714-	hedgeResp, hedgePlaceErr := submitPreHedge(hedgeRawShares)
+1715-	if hedgePlaceErr == nil && hedgeResp != nil && hedgeResp.Success {
+1716-		hedgeOrderID = hedgeResp.OrderID
+1717-		status := strings.ToLower(strings.TrimSpace(hedgeResp.Status))
+1718-		switch status {
+1719-		case "matched", "duplicated":
+1720-			hedgeAlreadyFilled = true
+1721-		case "live":
+1722-			hedgeSubmittedLive = true
+1723-		default:
+1724-			t.logger.Warn("trader: dual pre-place hedge unexpected submit status",
+1725-				zap.String("status", hedgeResp.Status),
+1726-				zap.String("order_id", hedgeOrderID),
+1727-			)
+1728-		}
+1729-		t.logger.Info("trader: dual pre-place: hedge GTC order submitted",
+1730-			zap.String("hedge_order_id", hedgeOrderID),
+1731-			zap.String("hedge_status", hedgeResp.Status),
+1732-			zap.Float64("hedge_limit", hedgeLimitPrice),
+1733-			zap.String("hedge_token", hedgeTokenID),
+1734-		)
+1735-		// Persist hedge order ID immediately for crash recovery.
+1736-		// If we crash before lead fills, RestorePosition will see no PairPosition and cancel it.
+1737-		if hedgeSubmittedLive {
+1738-			t.setPrePlacedHedgeOrder(hedgeOrderID, hedgeTokenID, "pair_arb_hedge_pre", hedgeRawShares)
+1739-		}
+1740-	} else {
+1741-		t.logger.Warn("trader: dual pre-place: hedge submit failed; will proceed sequentially after lead fills",
+1742-			zap.NamedError("hedge_err", hedgePlaceErr),
+1743-		)
+1744-	}
+1745-
+1746-	// ── Execute lead buy (blocks until fill or PairArbLeadBuyTimeoutSec) ───
+1747-	leadRequestName := "pair_arb_lead_buy"
+1748-	leadExecLimitPrice := leadLimitPrice
+1749-	if hedgeAlreadyFilled {
+1750-		// If hedge filled first, do not wait a full lead timeout on the opposite side.
+1751-		// Try an urgent rescue at a more aggressive limit while still honoring the
+1752-		// configured lead order type (GTC/FAK/FOK).
+1753-		leadRequestName = "pair_arb_lead_buy_urgent_rescue"
+1754-		leadExecLimitPrice = math.Round(math.Min(0.99, leadLimitPrice+0.03)*100) / 100
+1755-		t.logger.Warn("trader: dual pre-place hedge filled before lead; switching lead to urgent rescue",
+1756-			zap.String("hedge_order_id", hedgeOrderID),
+1757-			zap.Float64("original_lead_limit", leadLimitPrice),
+1758-			zap.Float64("urgent_lead_limit", leadExecLimitPrice),
+1759-			zap.String("lead_order_type", string(t.pairArbLeadOrderType())),
+1760-		)
+1761-	}
+1762-	leadOutcome, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD, leadErr := t.executePairLimitBuy(ctx, leadRequestName, leadTokenID, leadPrice, leadExecLimitPrice, rawLeadShares)
+1763-	if leadErr != nil {
+1764-		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, leadErr)
+1765-		// Lead didn't fill — cancel any hedge order still in the book.
+1766-		orphanExposureLikely := hedgeAlreadyFilled
+1767-		if hedgeOrderID != "" && (hedgeSubmittedLive || hedgeAlreadyFilled) {
+--
+4094-				zap.String("outcome", pos.Outcome),
+4095-				zap.String("opposite_outcome", pos.OppositeOutcome),
+4096-				zap.Int("outcome_index", pos.OutcomeIndex),
+4097-			)
+4098-			continue
+4099-		}
+4100-		claim := pendingClaim{
+4101-			ConditionID:  pos.ConditionID,
+4102-			StrategyName: "external_reconcile",
+4103-			IsNoSide:     isNo,
+4104-			Shares:       pos.Size,
+4105-			WindowEnd:    parseExternalPositionEndDate(pos.EndDate),
+4106-			Claimable:    pos.Redeemable,
+4107-			Status:       "queued_external_positions",
+4108-		}
+4109-		t.enqueueClaimRetry(claim)
+4110-		claimsQueued++
+4111-	}
+4112-	return claimsQueued
+4113-}
+4114-
+4115-// RefreshLiveBalance fetches the current on-chain USDC balance and caches it
+4116-// so that OnPairArbSignal can do the pre-flight balance check without making
+4117-// a blocking RPC call in the hot path.  Call this once at window start (it is
+4118-// safe to call synchronously there) and then periodically in the background.
+4119-// No-op in paper-trade mode (paperBalance is tracked in-process).
+4120-func (t *Trader) RefreshLiveBalance(ctx context.Context) {
+4121-	if t.cfg.PaperTrade || t.orders == nil {
+4122-		return
+4123-	}
+4124-	bal, err := t.orders.FetchUSDCBalance(ctx)
+4125-	if err != nil {
+4126-		t.logger.Warn("pair arb: live balance refresh failed", zap.Error(err))
+4127-		return
+4128-	}
+4129-	atomic.StoreUint64(&t.cachedLiveBalance, math.Float64bits(bal))
+4130-	t.logger.Debug("pair arb: cached live balance refreshed", zap.Float64("usdc", bal))
+4131-}
+4132-
+4133-const (
+4134-	claimRetryInterval            = 20 * time.Second
+4135-	claimRetryMediumInterval      = 1 * time.Minute
+4136-	claimRetrySlowInterval        = 5 * time.Minute
+4137-	convictionSellLookupInterval  = 2 * time.Second
+4138-	sellableBalancePollInterval   = 1 * time.Second
+4139-	pairArbExposureProbeInterval  = 350 * time.Millisecond
+4140-	pairArbOrderProbeInterval     = 300 * time.Millisecond
+4141-	pairArbSellRetryInterval      = 500 * time.Millisecond
+4142-	pairArbSellRetryWindow        = 12 * time.Second
+4143-	pairArbSellPollInterval       = 2 * time.Second
+4144-	pairArbExitStatusTTL          = 10 * time.Second
+4145-	pairArbExitStatusProbeTimeout = 1200 * time.Millisecond
+4146-	pairArbSellClaimGrace         = 45 * time.Second
+4147-	pairArbSellArmLead            = 10 * time.Second
+4148-	pairArbSellAggressiveLead     = 3 * time.Second
+4149-	ambiguousSubmitRecoverTimeout = 18 * time.Second
+4150-	ambiguousSubmitRecoverPoll    = 500 * time.Millisecond
+4151-	pairCostProbeInterval         = 15 * time.Second
+4152-	pairCostProbeSampleDelay      = 160 * time.Millisecond
+4153-	pairArbIsolatedWatchTimeout   = 12 * time.Minute
+4154-	pairArbIsolatedWatchPoll      = 2 * time.Second
+4155-)
+4156-
+4157-const (
+4158-	pairExitStateIdle           = "idle"
+4159-	pairExitStatePlacingOrders  = "placing_orders"
+4160-	pairExitStateOrdersLive     = "orders_live"
+4161-	pairExitStateGraceWait      = "expiry_grace_wait"
+4162-	pairExitStateWinnerFilled   = "winner_filled"
+4163-	pairExitStateCancelingLoser = "canceling_loser"
+4164-	pairExitStateClaimQueued    = "claim_queued"
+4165-	pairExitStateResolvedCLOB   = "resolved_clob"
+4166-	pairExitStateResolvedClaim  = "resolved_claim"
+4167-	pairExitStateCleanup        = "stale_cleanup"
+4168-)
+4169-
+4170-const (
+4171-	pairArbExposureProbeAttempts   = 6
+4172-	pairArbExposureZeroConfirmMin  = 2
+4173-	pairArbOrderProbeAttempts      = 8
+4174-	pairArbShareDust               = 0.01
+4175-	pairArbWalletReconcileDelta    = 0.02
+4176-	pairArbSettleBalanceDust       = 0.05
+4177-	pairArbUnprofitableAbortGrace  = 12 * time.Second
+4178-	pairArbUnprofitableAbortExcess = 0.02
+4179-	pairArbHedgeSettleGrace        = 90 * time.Second
+4180-	pairArbLeadCreditGrace         = 20 * time.Second
+4181-	pairArbOrphanRecoveryWatch     = pairArbLeadCreditGrace + 12*time.Second
+4182-	pairArbReconcileLookupTimeout  = 8 * time.Second
+4183-	// pairArbInventoryEntryBlock is the threshold above which residual wallet
+4184-	// inventory blocks a new lead entry. Small partial-fill remnants (e.g. 0.05
+4185-	// shares left after a GTC residual sell) are acceptable and should not gate
+4186-	// the next signal.
+4187-	pairArbInventoryEntryBlock = 0.25
+4188-)
+4189-
+4190-func (t *Trader) setPendingPairArbOrder(orderID, tokenID, requestName string) {
+4191-	if t.cfg.PaperTrade || orderID == "" || tokenID == "" {
+4192-		return
+4193-	}
+4194:	t.pendingPairArb = &pairArbPendingOrderState{
+4195-		OrderID:     orderID,
+4196-		TokenID:     tokenID,
+4197-		RequestName: requestName,
+4198-		Origin:      "runtime_submit",
+4199-		PlacedAt:    time.Now(),
+4200-	}
+4201-	t.savePositionState()
+4202-}
+4203-
+4204-func (t *Trader) clearPendingPairArbOrder() {
+4205-	if t.pendingPairArb == nil {
+4206-		return
+4207-	}
+4208-	t.pendingPairArb = nil
+4209-	t.savePositionState()
+4210-}
+4211-
+4212-func (t *Trader) setPendingPairArbContext(orderID, conditionID, yesTokenID, noTokenID, leadSide string, windowEnd time.Time) {
+4213-	if t.cfg.PaperTrade || t.pendingPairArb == nil || strings.TrimSpace(orderID) == "" {
+4214-		return
+4215-	}
+4216-	if !strings.EqualFold(strings.TrimSpace(t.pendingPairArb.OrderID), strings.TrimSpace(orderID)) {
+4217-		return
+4218-	}
+4219-	if conditionID != "" {
+4220-		t.pendingPairArb.ConditionID = conditionID
+4221-	}
+4222-	if !windowEnd.IsZero() {
+4223-		t.pendingPairArb.WindowEnd = windowEnd
+4224-	}
+4225-	if yesTokenID != "" {
+4226-		t.pendingPairArb.YesTokenID = yesTokenID
+4227-	}
+4228-	if noTokenID != "" {
+4229-		t.pendingPairArb.NoTokenID = noTokenID
+4230-	}
+4231-	if side := strings.ToUpper(strings.TrimSpace(leadSide)); side == "YES" || side == "NO" {
+4232-		t.pendingPairArb.LeadSide = side
+4233-	}
+4234-	t.savePositionState()
+4235-}
+4236-
+4237-func (t *Trader) cancelStaleOrderAtWindowReset(orderID, requestName string) bool {
+4238-	if t.cfg.PaperTrade || strings.TrimSpace(orderID) == "" {
+4239-		return true
+4240-	}
+4241-	ctx, cancel := context.WithTimeout(context.Background(), 1200*time.Millisecond)
+4242-	defer cancel()
+4243-	if err := t.orders.CancelOrder(ctx, orderID); err != nil {
+4244-		if errors.Is(err, polymarket.ErrOrderNotCancellable) {
+4245-			t.logger.Debug("trader: stale carried order already not cancellable",
+4246-				zap.String("order_id", orderID),
+4247-				zap.String("request", requestName),
+4248-			)
+4249-			return false
+4250-		}
+4251-		t.logger.Warn("trader: stale carried order cancel failed",
+4252-			zap.String("order_id", orderID),
+4253-			zap.String("request", requestName),
+4254-			zap.Error(err),
+4255-		)
+4256-		return false
+4257-	}
+4258-	t.logger.Info("trader: stale carried order canceled at window reset",
+4259-		zap.String("order_id", orderID),
+4260-		zap.String("request", requestName),
+4261-	)
+4262-	return true
+4263-}
+4264-
+4265-func (t *Trader) pairArbBuyCreditConfirmed(ctx context.Context, tokenID string, minShares float64) (bool, float64, error) {
+4266-	return t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minShares, 6, 400*time.Millisecond)
+4267-}
+4268-
+4269-func (t *Trader) pairArbBuyCreditConfirmedWithRetry(ctx context.Context, tokenID string, minShares float64, attempts int, interval time.Duration) (bool, float64, error) {
+4270-	if t.cfg.PaperTrade {
+4271-		return true, minShares, nil
+4272-	}
+4273-	if tokenID == "" {
+4274-		return false, 0, nil
+4275-	}
+4276-	if minShares < pairArbShareDust {
+4277-		minShares = pairArbShareDust
+4278-	}
+4279-	if attempts <= 0 {
+4280-		attempts = 6
+4281-	}
+4282-	if interval <= 0 {
+4283-		interval = 400 * time.Millisecond
+4284-	}
+4285-	lastBal := 0.0
+4286-	for i := 0; i < attempts; i++ {
+4287-		if ctx.Err() != nil {
+4288-			return false, lastBal, ctx.Err()
+4289-		}
+4290-		bal, err := t.tokenBalanceShares(ctx, tokenID)
+4291-		if err == nil {
+4292-			lastBal = bal
+4293-			if bal+pairArbShareDust >= minShares {
+4294-				return true, bal, nil
+4295-			}
+4296-		}
+4297-		if i < attempts-1 {
+4298-			select {
+4299-			case <-ctx.Done():
+4300-				return false, lastBal, ctx.Err()
+4301-			case <-time.After(interval):
+4302-			}
+4303-		}
+4304-	}
+4305-	return false, lastBal, nil
+4306-}
+4307-
+4308-func isPendingHedgeCreditProbe(requestName string) bool {
+4309-	return strings.HasPrefix(requestName, "pair_arb_hedge_credit_probe")
+4310-}
+4311-
+4312-func isPendingHedgeBuy(requestName string) bool {
+4313-	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
+4314-}
+4315-
+4316-func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
+4317-	if t.pendingHedgePrePlace != nil {
+4318-		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
+4319-			return true
+4320-		}
+4321-	}
+4322-	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
+4323-		if t.pendingPairArb.PlacedAt.IsZero() || now.Sub(t.pendingPairArb.PlacedAt) < pairArbHedgeSettleGrace {
+4324-			return true
+4325-		}
+4326-	}
+4327-	return false
+4328-}
+4329-
+4330-func (t *Trader) reconcilePendingPairArbHedgeCredit(ctx context.Context, po *pairArbPendingOrderState) error {
+4331-	if po == nil {
+4332-		return nil
+4333-	}
+4334-	pair := t.pairedPosition
+4335-	if pair == nil {
+4336-		t.clearPendingPairArbOrder()
+4337-		return nil
+4338-	}
+4339-
+4340-	requestName := po.RequestName
+4341-	if requestName == "" {
+4342-		requestName = "pair_arb_hedge_credit_probe"
+4343-	}
+4344-	gr, grErr := t.getOrderTimed(ctx, requestName+"_reconcile", po.OrderID)
+4345-	status := ""
+4346-	if gr != nil {
+4347-		status = strings.ToLower(strings.TrimSpace(gr.Status))
+4348-	}
+4349-	if status == "unmatched" || status == "canceled" || status == "cancelled" || status == "expired" {
+4350-		t.logger.Warn("trader: pending hedge credit probe order is not filled; clearing pending state",
+4351-			zap.String("order_id", po.OrderID),
+4352-			zap.String("status", gr.Status),
+4353-		)
+4354-		t.clearPendingPairArbOrder()
+4355-		return nil
+4356-	}
+4357-
+4358-	buySide, _, anchorAvgPrice := pair.rebalanceState()
+4359-	if po.TokenID != "" {
+4360-		if po.TokenID == pair.YesTokenID {
+4361-			buySide = "YES"
+4362-		} else if po.TokenID == pair.NoTokenID {
+4363-			buySide = "NO"
+4364-		}
+4365-	}
+4366-	if buySide == "" {
+4367-		t.clearPendingPairArbOrder()
+4368-		return nil
+4369-	}
+4370-	trackedBefore := pair.YesShares
+4371-	if buySide != "YES" {
+4372-		trackedBefore = pair.NoShares
+4373-	}
+4374-
