@@ -24,3 +24,15 @@ LIVE_ALLOWED=false
 [2026-08-26T01:31:49+00:00] ACTION 3/8 GOFMT PASS
 [2026-08-26T01:31:49+00:00] ACTION 4/8 GO_TEST START
 [2026-08-26T01:31:49+00:00] GO_TEST START: go test ./...
+    ?   	github.com/polyarb	[no test files]
+    ?   	github.com/polyarb/binance	[no test files]
+    ?   	github.com/polyarb/bybit	[no test files]
+    ?   	github.com/polyarb/chainlink	[no test files]
+    ?   	github.com/polyarb/coinbase	[no test files]
+    ?   	github.com/polyarb/config	[no test files]
+    ?   	github.com/polyarb/deribit	[no test files]
+    ok  	github.com/polyarb/discord	(cached)
+    ?   	github.com/polyarb/display	[no test files]
+    ?   	github.com/polyarb/exchangefeed	[no test files]
+    ?   	github.com/polyarb/kalshi	[no test files]
+    ?   	github.com/polyarb/market	[no test files]
