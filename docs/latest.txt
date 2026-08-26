@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:10:18+00:00
+UPDATED_UTC=2026-08-26T22:10:25+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -133,6 +133,15 @@ BTC $78785 │ open $78748 │ edge +37 │ CL $78790 1s ago CLedge +42 │ YES 
 BTC $78785 │ open $78748 │ edge +37 │ CL $78790 1s ago CLedge +42 │ YES 0.74 │ 8.1/9.4 $37 │ PAIR 0sh@0.00 -0.09 │ 9m42s │ $994.76
 BTC $78785 │ open $78748 │ edge +37 │ CL $78790 1s ago CLedge +42 │ YES 0.74 │ 8.1/9.4 $37 │ PAIR 0sh@0.00 -0.09 │ 9m42s │ $994.76
 BTC $78785 │ open $78748 │ edge +37 │ CL $78790 2s ago CLedge +42 │ YES 0.74 │ 8.1/9.4 $37 │ PAIR 0sh@0.00 -0.09 │ 9m41s │ $994.76
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  │ PAPER   6.54 shares  │  buy $0.7538 → sell $0.7300  │  fee $0.1000
+◂  ▼ P&L  -$-0.2554  (--5.18%)  │  Reason: pair_stop_loss  │  Held: 1s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78784.95 open=78747.81 gap=$37.1 yes=0.7400 prob=0.61 rem=578s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+▸  │ PAPER   6.54 shares @ $0.7400    fee: 0.0000 sh    cost: $4.93
+BTC $78785 │ open $78748 │ edge +37 │ CL $78790 2s ago CLedge +42 │ YES 0.74 │ 7.7/9.8 $37 │ PAIR 0sh@0.00 -0.09 │ 9m37s │ $994.51
+BTC $78785 │ open $78748 │ edge +37 │ CL $78790 2s ago CLedge +42 │ YES 0.74 │ 7.7/9.8 $37 │ PAIR 0sh@0.00 -0.09 │ 9m37s │ $994.51
+BTC $78785 │ open $78748 │ edge +37 │ CL $78790 0s ago CLedge +42 │ YES 0.74 │ 7.8/10.2 $36 │ PAIR 0sh@0.00 -0.09 │ 9m36s │ $994.51
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  │ PAPER   6.54 shares  │  buy $0.7538 → sell $0.7300  │  fee $0.1000
 ◂  ▼ P&L  -$-0.2554  (--5.18%)  │  Reason: pair_stop_loss  │  Held: 1s
