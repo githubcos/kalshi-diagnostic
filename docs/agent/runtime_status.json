@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T00:32:34+00:00",
+  "utc": "2026-08-26T00:32:43+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:32:30+00:00",
-    "epoch": 1787704350.934675,
+    "utc": "2026-08-26T00:32:36+00:00",
+    "epoch": 1787704356.7713974,
     "pid": 3900720,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-public-quote-feed-fallback-v1-20260826-0035"
   },
   "state": {
     "last_job_id": "kalshi-paper-feed-audit-v1-20260826-0032",
