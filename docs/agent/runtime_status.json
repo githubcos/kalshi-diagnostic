@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T01:23:04+00:00",
+  "utc": "2026-08-26T01:23:11+00:00",
   "publisher_pid": 4029128,
   "heartbeat": {
-    "utc": "2026-08-26T01:23:00+00:00",
-    "epoch": 1787707380.2755094,
+    "utc": "2026-08-26T01:23:10+00:00",
+    "epoch": 1787707390.4222207,
     "pid": 3900720,
-    "status": "working",
-    "job_id": "kalshi-paper-locked-recycle-v1-20260826-0119"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-paper-high-volume-data-v3-hedge-safe-20260826-0112",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_012250.tar.gz",
-    "last_result": "PASS",
-    "last_run_utc": "2026-08-26T01:13:11+00:00"
+    "last_job_id": "kalshi-paper-locked-recycle-v1-20260826-0119",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_012300.tar.gz",
+    "last_result": "FAIL",
+    "last_run_utc": "2026-08-26T01:23:09+00:00"
   },
   "autopilot": null
 }
