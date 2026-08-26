@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T17:55:51+00:00",
+  "utc": "2026-08-26T17:55:59+00:00",
   "publisher_pid": 389330,
   "heartbeat": {
-    "utc": "2026-08-26T17:55:47+00:00",
-    "epoch": 1787766947.8322072,
+    "utc": "2026-08-26T17:55:53+00:00",
+    "epoch": 1787766953.6507487,
     "pid": 544,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-decouple-lead-hedge-paper-v1-20260826-1758"
   },
   "state": {
     "last_job_id": "kalshi-throughput-gate-confirm-20260826-1754",
