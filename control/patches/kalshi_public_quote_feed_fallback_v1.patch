@@ -1,19 +1,8 @@
 diff --git a/kalshi/feed.go b/kalshi/feed.go
 --- a/kalshi/feed.go
 +++ b/kalshi/feed.go
-@@ -51,16 +51,45 @@ func bestAsk(book *OrderBook) (float64, float64) {
- 	return p, q
- }
+@@ -1,4 +1,29 @@
  func (f *FeedClient) pollOnce(ctx context.Context) {
--	for _, id := range f.tokenIDs {
--		b, e := f.client.GetOrderBook(ctx, id)
--		if e != nil {
--			continue
--		}
--		p, q := bestAsk(b)
--		if p > 0 {
--			f.update(id, p, q, "SELL")
--		}
 +	ticker, yesID, noID, err := f.logicalIDs()
 +	if err != nil {
 +		return
@@ -39,14 +28,6 @@ diff --git a/kalshi/feed.go b/kalshi/feed.go
 +
 +	// If authenticated orderbook access is available, keep the deeper-book
 +	// fallback for markets whose top-level quote fields are temporarily empty.
-+	for _, id := range f.tokenIDs {
-+		b, e := f.client.GetOrderBook(ctx, id)
-+		if e != nil {
-+			continue
-+		}
-+		p, q := bestAsk(b)
-+		if p > 0 {
-+			f.update(id, p, q, "SELL")
-+		}
- 	}
- }
+ 	for _, id := range f.tokenIDs {
+ 		b, e := f.client.GetOrderBook(ctx, id)
+ 		if e != nil {
