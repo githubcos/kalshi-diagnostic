@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T00:43:17+00:00",
+  "utc": "2026-08-26T00:43:24+00:00",
   "publisher_pid": 3946876,
   "heartbeat": {
-    "utc": "2026-08-26T00:43:15+00:00",
-    "epoch": 1787704995.6283622,
+    "utc": "2026-08-26T00:43:24+00:00",
+    "epoch": 1787705004.383309,
     "pid": 3900720,
-    "status": "working",
-    "job_id": "kalshi-paper-stress-v2-20260826-0048"
+    "status": "polling",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-live-trade-math-monitor-v1-20260826-0045",
+    "last_job_id": "kalshi-paper-stress-v2-20260826-0048",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_003420.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T00:42:15+00:00"
+    "last_run_utc": "2026-08-26T00:43:18+00:00"
   },
   "autopilot": {
     "gate_index": 1,
