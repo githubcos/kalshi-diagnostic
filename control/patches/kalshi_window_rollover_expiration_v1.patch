@@ -1,9 +1,12 @@
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -136,4 +136,4 @@
+@@ -91,4 +91,8 @@ func convertMarket(m apiMarket) Market {
 -	endDate := m.CloseTime
-+	endDate := m.ExpirationTime
- 	if endDate == "" {
+-	if endDate == "" {
 -		endDate = m.ExpirationTime
++	// Use Kalshi's contract expiration for the strategy window. close_time can
++	// extend beyond the 15-minute outcome window and stall market rollover.
++	endDate := m.ExpirationTime
++	if endDate == "" {
 +		endDate = m.CloseTime
  	}
