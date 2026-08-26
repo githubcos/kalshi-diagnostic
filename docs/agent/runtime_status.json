@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T00:14:25+00:00",
+  "utc": "2026-08-26T00:14:32+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:14:18+00:00",
-    "epoch": 1787703258.6181328,
+    "utc": "2026-08-26T00:14:32+00:00",
+    "epoch": 1787703272.3444152,
     "pid": 2004638,
-    "status": "working",
-    "job_id": "kalshi-explicit-no-callers-v2-20260826-0015"
+    "status": "polling",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-explicit-no-mark-to-market-v1-retry1-20260826-0012",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_001410.tar.gz",
+    "last_job_id": "kalshi-explicit-no-callers-v2-20260826-0015",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_001418.tar.gz",
     "last_result": "FAIL",
-    "last_run_utc": "2026-08-26T00:11:50+00:00"
+    "last_run_utc": "2026-08-26T00:14:26+00:00"
   },
   "autopilot": {
     "gate_index": 4,
