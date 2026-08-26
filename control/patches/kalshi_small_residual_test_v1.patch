@@ -1,12 +1,12 @@
 --- a/strategy/pair_arb_test.go
 +++ b/strategy/pair_arb_test.go
-@@ -1,4 +1,4 @@
+@@ -330,4 +330,4 @@
 -func TestForceClosePairArbKeepsResidualWhenUnsold(t *testing.T) {
 +func TestForceClosePairArbSellsSmallKalshiPaperResidual(t *testing.T) {
  	now := time.Now()
  	trader := &Trader{
  		cfg:      TraderConfig{PaperTrade: true},
-@@ -17,23 +17,18 @@
+@@ -346,23 +346,18 @@
  	}
  
  	err := trader.forceClosePairArb(context.Background(), 0.42, "pair_fill_leg_timeout")
