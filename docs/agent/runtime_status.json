@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T10:03:29+00:00",
-  "publisher_pid": 548,
+  "utc": "2026-08-26T10:03:33+00:00",
+  "publisher_pid": 15958,
   "heartbeat": {
-    "utc": "2026-08-26T10:03:26+00:00",
-    "epoch": 1787738606.8060648,
+    "utc": "2026-08-26T10:03:32+00:00",
+    "epoch": 1787738612.9927568,
     "pid": 544,
-    "status": "working",
-    "job_id": "kalshi-paper-positive-edge-profile-v1-20260826-1004"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-feed-rest-diagnostics-v1b-20260826-0917",
+    "last_job_id": "kalshi-paper-positive-edge-profile-v1-20260826-1004",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_100317.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T09:16:46+00:00"
+    "last_run_utc": "2026-08-26T10:03:32+00:00"
   },
   "autopilot": null
 }
