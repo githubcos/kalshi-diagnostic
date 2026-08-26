@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T09:11:45+00:00",
+  "utc": "2026-08-26T09:12:26+00:00",
   "publisher_pid": 540,
   "heartbeat": {
-    "utc": "2026-08-26T09:11:45+00:00",
-    "epoch": 1787735505.4077528,
+    "utc": "2026-08-26T09:12:14+00:00",
+    "epoch": 1787735534.720164,
     "pid": 994,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-feed-source-probe-v1-20260826-0912"
   },
   "state": {
     "last_job_id": "kalshi-feed-one-shot-recovery-v3-20260826-0830",
