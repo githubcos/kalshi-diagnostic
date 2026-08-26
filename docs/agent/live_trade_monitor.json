@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T01:07:09+00:00",
+  "utc": "2026-08-26T01:07:17+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -102,7 +102,7 @@
     "TRADE_SIZE_USD": "5"
   },
   "counts_in_current_session": {
-    "lead_events": 1,
+    "lead_events": 0,
     "hedge_events": 0,
     "closed_events": 0
   },
@@ -134,9 +134,5 @@
     "mark-to-market uses explicit Kalshi YES and NO prices when available",
     "PAPER guard prevents any live order request"
   ],
-  "recent_math_execution_lines": [
-    "\u00b7  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false",
-    "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78682.05 open=78635.91 gap=$46.1 yes=0.6200 prob=0.61 rem=786s]",
-    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED"
-  ]
+  "recent_math_execution_lines": []
 }
