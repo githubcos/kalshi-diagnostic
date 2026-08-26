@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T02:47:35+00:00
+UPDATED_UTC=2026-08-26T02:47:43+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=8 hedge=2 closed=7
-CLOSE_REASONS={"pair_paper_locked_recycle": 2, "pair_stop_loss": 5}
+EVENTS lead=8 hedge=2 closed=8
+CLOSE_REASONS={"pair_paper_locked_recycle": 2, "pair_stop_loss": 6}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -117,11 +117,6 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.3585  (--7.39%)  │  Reason: pair_stop_loss  │  Held: 5s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79120.85 open=79147.72 gap=$-26.9 no=0.5900 prob=0.55 rem=1097s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.4392  (--9.08%)  │  Reason: pair_stop_loss  │  Held: 4s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79124.30 open=79147.72 gap=$-23.4 no=0.6000 prob=0.55 rem=1091s]
@@ -142,3 +137,8 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂  ▲ P&L  +$0.1215  (+0.18%)  │  Reason: pair_paper_locked_recycle  │  Held: 17s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79120.61 open=79147.72 gap=$-27.1 no=0.6300 prob=0.55 rem=1048s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.4100  (--8.44%)  │  Reason: pair_stop_loss  │  Held: 5s
+⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79121.25 open=79147.72 gap=$-26.5 no=0.6200 prob=0.55 rem=1043s]
+✗  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring
+⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79117.64 open=79147.72 gap=$-30.1 no=0.6300 prob=0.56 rem=1037s]
