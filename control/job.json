@@ -1,10 +1,15 @@
 {
-  "id": "kalshi-throughput-gate-confirm-20260826-1754",
+  "id": "kalshi-decouple-lead-hedge-paper-v1-20260826-1758",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
-    {"name": "COLLECT_AUDIT"},
+    {"name": "BACKUP"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_decouple_lead_from_immediate_hedge_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/signal.go"]},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
+    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
