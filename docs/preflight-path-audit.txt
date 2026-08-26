@@ -1,0 +1,732 @@
+=== PREFLIGHT CODE ===
+500-	PairArbMinBTCGapUSD float64
+501-	PairArbMaxBTCGapUSD float64
+502-	// PairArbCarryEnabled keeps short memory across window rollovers.
+503-	// When enabled, the first PairArbCarryEarlySec seconds of a new window may
+504-	// use PairArbCarryMinBTCGapUSD (instead of PairArbMinBTCGapUSD) if current
+505-	// gap direction matches the previous window close momentum and the prior
+506-	// close gap magnitude exceeded PairArbCarryMinPrevGapUSD.
+507-	PairArbCarryEnabled       bool
+508-	PairArbCarryEarlySec      int
+509-	PairArbCarryMinBTCGapUSD  float64
+510-	PairArbCarryMinPrevGapUSD float64
+511-	// PairArbMinGapVelocityUSD requires the BTC gap to be shrinking with enough speed.
+512-	PairArbMinGapVelocityUSD float64
+513-	// PairArbMinLockedProfitCents is the target locked spread used by pair-arb entry gating.
+514-	PairArbMinLockedProfitCents float64
+515:	// PairArbMaxHedgeDistanceCents caps how far above immediate hedgeability the opposite leg
+516-	// may be when opening a lead. 0 = disabled.
+517:	PairArbMaxHedgeDistanceCents float64
+518-	// PairArbMinCVDBTC requires aligned Binance CVD for pair-arb lead entry. 0 = disabled.
+519-	// YES lead (gap<0) requires CVD >= +min; NO lead (gap>0) requires CVD <= -min.
+520-	PairArbMinCVDBTC float64
+521-	// PairArbMinBookImbalance requires aligned order-book imbalance for pair-arb lead entry.
+522-	// YES lead (gap<0) requires imbalance >= +min; NO lead (gap>0) requires <= -min.
+523-	PairArbMinBookImbalance float64
+524-	// PairArbMinCoinbaseSpreadUSD requires aligned Coinbase-vs-fast-BTC spread.
+525-	// YES lead (gap<0) requires spread >= +min; NO lead (gap>0) requires <= -min.
+526-	PairArbMinCoinbaseSpreadUSD float64
+527-	// PairArbMaxCoinbaseSpreadUSD caps aligned Coinbase-vs-fast-BTC spread magnitude.
+528-	// YES lead (gap<0) requires spread <= +max; NO lead (gap>0) requires >= -max.
+529-	// 0 = disabled.
+530-	PairArbMaxCoinbaseSpreadUSD float64
+531-	// PairArbFlowMovementMode switches selected flow gates (CVD, book imbalance,
+532-	// Coinbase spread) from direction-aligned checks to absolute-magnitude checks.
+533-	PairArbFlowMovementMode bool
+534-	// PairArbMinCoinbaseTakerImbalance requires aligned Coinbase taker imbalance
+535-	// over the rolling 30s window. YES lead (gap<0) requires imbalance >= +min;
+536-	// NO lead (gap>0) requires imbalance <= -min. 0 = disabled.
+537-	PairArbMinCoinbaseTakerImbalance float64
+538-	// PairArbMinOIDeltaUSD requires OI delta alignment for pair-arb lead entries.
+539-	// YES lead (gap<0) requires oi_delta >= +min; NO lead (gap>0) requires
+540-	// oi_delta <= -min. 0 = disabled.
+541-	PairArbMinOIDeltaUSD float64
+542-	// PairArbMaxContraOIDeltaUSD blocks pair-arb entries when OI delta is strongly
+--
+2344-							return Signal{Type: SignalNone}
+2345-						}
+2346-						if !isYes && yesDriftCents < -cap {
+2347-							return Signal{Type: SignalNone}
+2348-						}
+2349-					}
+2350-					tokenP := yesPrice
+2351-					oppP := noPrice
+2352-					sigT := SignalPairArbCVDMomentumYes
+2353-					if !isYes {
+2354-						tokenP = noPrice
+2355-						oppP = yesPrice
+2356-						sigT = SignalPairArbCVDMomentumNo
+2357-					}
+2358-					if tokenP >= d.params.PairArbMinTokenPrice && tokenP <= d.params.PairArbMaxTokenPrice {
+2359:						if d.params.PairArbMaxHedgeDistanceCents > 0 {
+2360-							lockedP := d.params.PairArbCVDMomentumLockedProfitCents / 100.0
+2361-							if lockedP <= 0 {
+2362-								lockedP = 0.03
+2363-							}
+2364-							maxHedge := 1.0 - lockedP - tokenP
+2365:							if oppP-maxHedge > d.params.PairArbMaxHedgeDistanceCents/100.0 {
+2366-								return Signal{Type: SignalNone}
+2367-							}
+2368-						}
+2369-						windowRemSecNow := d.windowEnd.Sub(now).Seconds()
+2370-						sigCoeffNow := computeSigmaCoeff(d.dvolAnnual, d.dvolMarkPrice)
+2371-						return Signal{
+2372-							Type:            sigT,
+2373-							BitstampPrice:   btcPrice,
+2374-							ChainlinkPrice:  d.chainlinkPrice,
+2375-							OpenPrice:       d.openPrice,
+2376-							PolyYesPrice:    yesPrice,
+2377-							PolyNoPrice:     noPrice,
+2378-							WindowRemaining: windowRemSecNow,
+2379-							WinProb:         winProbGaussianSigma(absGap, windowRemSecNow, sigCoeffNow),
+2380-							At:              now,
+2381-						}
+2382-					}
+2383-				}
+2384-			}
+2385-			// In CVD zone but conditions not met — skip standard pair-arb path.
+2386-			return Signal{Type: SignalNone}
+2387-		}
+2388-	}
+2389-
+2390-	if gapUSD == 0 {
+
+=== ALL PAIR LEAD SIGNAL GENERATORS ===
+61-	SignalFlashBuyYes                      // YES dropped fast → buy YES (flash snap-back up)
+62-	SignalFlashBuyNo                       // YES spiked fast → buy NO  (flash snap-back down)
+63-	SignalResolutionBuyYes                 // Token ≥0.93 in final ~30s, BTC above open → buy YES
+64-	SignalResolutionBuyNo                  // Token ≥0.93 in final ~30s, BTC below open → buy NO
+65-	SignalResolutionEarlyBuyYes            // Token 0.85–0.93, 61–120s remaining, BTC above open → early-tier YES
+66-	SignalResolutionEarlyBuyNo             // Token 0.85–0.93, 61–120s remaining, BTC below open → early-tier NO
+67-	SignalConvictionBuyYes                 // Mid-window conviction: 60-90s left, token 60-70, high win-prob → buy YES
+68-	SignalConvictionBuyNo                  // Mid-window conviction: 60-90s left, token 60-70, high win-prob → buy NO
+69:	SignalPairArbLeadYes                   // Paired arb: BTC is above open (YES favored) → buy YES lead leg while cheap, hedge NO after
+70:	SignalPairArbLeadNo                    // Paired arb: BTC is below open (NO favored) → buy NO lead leg while cheap, hedge YES after
+71:	SignalPairArbReverseLeadYes            // Paired arb reverse: BTC below open but gap is shrinking/reversing → buy YES lead first
+72:	SignalPairArbReverseLeadNo             // Paired arb reverse: BTC above open but gap is shrinking/reversing → buy NO lead first
+73-	SignalPairArbPreOpenYes                // Pre-market-open carry: prev window closed YES-biased; enter YES in first few seconds of next window
+74-	SignalPairArbPreOpenNo                 // Pre-market-open carry: prev window closed NO-biased; enter NO in first few seconds of next window
+75-	SignalPairArbTruePreOpenYes            // True pre-open: discover next market early, buy YES on next window BEFORE current window ends
+76-	SignalPairArbTruePreOpenNo             // True pre-open: discover next market early, buy NO on next window BEFORE current window ends
+77-	SignalPairArbCVDMomentumYes            // CVD momentum: early-window low-gap, CVD>0 → buy YES lead leg
+78-	SignalPairArbCVDMomentumNo             // CVD momentum: early-window low-gap, CVD<0 → buy NO lead leg
+79-	SignalReversalSnipeYes                 // Last 10-40s: coinbase_spread > +threshold AND cvd > +threshold → buy YES (reversal flip up)
+80-	SignalReversalSnipeNo                  // Last 10-40s: coinbase_spread < -threshold AND cvd < -threshold → buy NO  (reversal flip down)
+81-	SignalCollapseSnipeYes                 // Last 4-9s: near-settled NO (≤6¢), overwhelming Coinbase/CVD crush → BTC flips up
+82-	SignalCollapseSnipeNo                  // Last 4-9s: near-settled YES (≤6¢), overwhelming Coinbase/CVD crash → BTC flips down
+83-	SignalDeepDiscountFadeYes              // 40-120s: YES 2-5¢ while BTC below open → contrarian fade (rebound)
+84-	SignalDeepDiscountFadeNo               // 40-120s: NO 2-5¢ while BTC above open → contrarian fade (revert)
+85-	SignalMidFlipYes                       // 40-120s: cheap side, gap shrinking fast → buy YES
+86-	SignalMidFlipNo                        // 40-120s: cheap side, gap shrinking fast → buy NO
+87-	SignalLateFlipYes                      // 15-30s: strong Coinbase + win_prob, no CVD → buy YES
+--
+111-	case SignalResolutionEarlyBuyYes:
+112-		return "RESOLUTION_EARLY_BUY_YES"
+113-	case SignalResolutionEarlyBuyNo:
+114-		return "RESOLUTION_EARLY_BUY_NO"
+115-	case SignalConvictionBuyYes:
+116-		return "CONVICTION_BUY_YES"
+117-	case SignalConvictionBuyNo:
+118-		return "CONVICTION_BUY_NO"
+119:	case SignalPairArbLeadYes:
+120-		return "PAIR_ARB_LEAD_YES"
+121:	case SignalPairArbLeadNo:
+122-		return "PAIR_ARB_LEAD_NO"
+123:	case SignalPairArbReverseLeadYes:
+124-		return "PAIR_ARB_REVERSE_LEAD_YES"
+125:	case SignalPairArbReverseLeadNo:
+126-		return "PAIR_ARB_REVERSE_LEAD_NO"
+127-	case SignalPairArbPreOpenYes:
+128-		return "PAIR_ARB_PRE_OPEN_YES"
+129-	case SignalPairArbPreOpenNo:
+130-		return "PAIR_ARB_PRE_OPEN_NO"
+131-	case SignalPairArbTruePreOpenYes:
+132-		return "PAIR_ARB_TRUE_PRE_OPEN_YES"
+133-	case SignalPairArbTruePreOpenNo:
+134-		return "PAIR_ARB_TRUE_PRE_OPEN_NO"
+135-	case SignalReversalSnipeYes:
+136-		return "REVERSAL_SNIPE_YES"
+137-	case SignalReversalSnipeNo:
+138-		return "REVERSAL_SNIPE_NO"
+139-	case SignalCollapseSnipeYes:
+140-		return "COLLAPSE_SNIPE_YES"
+--
+241-			s.FlashBookConfirmed, s.BitstampPrice, s.OpenPrice, s.PolyYesPrice, s.FlashTargetYes, s.WindowRemaining,
+242-		)
+243-	case SignalReversalSnipeNo:
+244-		return fmt.Sprintf(
+245-			"[btc=%.2f open=%.2f gap=$%.1f no=%.4f win_prob=%.2f rem=%.0fs]",
+246-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+247-			s.PolyNoPrice, s.WinProb, s.WindowRemaining,
+248-		)
+249:	case SignalPairArbLeadYes:
+250-		return fmt.Sprintf(
+251-			"PAIR_LEAD_YES [btc=%.2f open=%.2f gap=$%.1f yes=%.4f prob=%.2f rem=%.0fs]",
+252-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+253-			s.PolyYesPrice, s.WinProb, s.WindowRemaining,
+254-		)
+255:	case SignalPairArbLeadNo:
+256-		return fmt.Sprintf(
+257-			"PAIR_LEAD_NO [btc=%.2f open=%.2f gap=$%.1f no=%.4f prob=%.2f rem=%.0fs]",
+258-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+259-			s.PolyNoPrice, s.WinProb, s.WindowRemaining,
+260-		)
+261:	case SignalPairArbReverseLeadYes:
+262-		return fmt.Sprintf(
+263-			"PAIR_REVERSE_LEAD_YES [btc=%.2f open=%.2f gap=$%.1f yes=%.4f prob=%.2f rem=%.0fs]",
+264-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+265-			s.PolyYesPrice, s.WinProb, s.WindowRemaining,
+266-		)
+267:	case SignalPairArbReverseLeadNo:
+268-		return fmt.Sprintf(
+269-			"PAIR_REVERSE_LEAD_NO [btc=%.2f open=%.2f gap=$%.1f no=%.4f prob=%.2f rem=%.0fs]",
+270-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+271-			s.PolyNoPrice, s.WinProb, s.WindowRemaining,
+272-		)
+273-	case SignalReversalSnipeYes:
+274-		return fmt.Sprintf(
+275-			"[btc=%.2f open=%.2f gap=$%.1f yes=%.4f win_prob=%.2f rem=%.0fs]",
+276-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+277-			s.PolyYesPrice, s.WinProb, s.WindowRemaining,
+278-		)
+279-	case SignalCollapseSnipeNo:
+280-		return fmt.Sprintf(
+281-			"COLLAPSE [btc=%.2f open=%.2f gap=$%.1f no=%.4f rem=%.0fs]",
+282-			s.BitstampPrice, s.OpenPrice, s.BitstampPrice-s.OpenPrice,
+--
+2685-			return Signal{Type: SignalNone}
+2686-		}
+2687-	}
+2688-
+2689-	sigCoeff := computeSigmaCoeff(d.dvolAnnual, d.dvolMarkPrice)
+2690-	winProb := winProbGaussianSigma(absGap, windowRemSec, sigCoeff)
+2691-	// Momentum mode buys WITH gap direction; reversal mode buys the opposite side
+2692-	// when the gap is actively shrinking back toward zero.
+2693:	sigType := SignalPairArbLeadNo
+2694-	tokenPrice := noPrice
+2695-	if isYesLead {
+2696-		tokenPrice = yesPrice
+2697-		if reverseMode {
+2698:			sigType = SignalPairArbReverseLeadYes
+2699-		} else {
+2700:			sigType = SignalPairArbLeadYes
+2701-		}
+2702-	} else if reverseMode {
+2703:		sigType = SignalPairArbReverseLeadNo
+2704-	}
+2705-	if tokenPrice < d.params.PairArbMinTokenPrice || tokenPrice > d.params.PairArbMaxTokenPrice {
+2706-		return Signal{Type: SignalNone}
+2707-	}
+2708-	// Do not require the opposite leg to be within the hedge-distance band at
+2709-	// signal-generation time. Pair-arb is intentionally a lead-then-hedge
+2710-	// strategy: the trader owns the hedge timeout and fee-adjusted locked-profit
+2711-	// limit, and must still refuse a hedge that cannot preserve the configured
+2712-	// locked profit. Requiring that hedge to already exist here collapses the
+2713-	// strategy into an instantaneous complete-set scanner and suppresses leads.
+2714-
+2715-	if d.brain != nil {
+2716-		var windowFraction float64
+2717-		if windowTotal := elapsedSec + windowRemSec; windowTotal > 0 {
+2718-			windowFraction = elapsedSec / windowTotal
+
+=== PAIR LEAD EXECUTION CALLERS ===
+9633-						avg = p
+--
+9679-			zap.String("order_id", resp.OrderID),
+9680-			zap.String("hedge_side", buySide),
+9681-		)
+9682-	}
+9683-
+9684-	t.setPrePlacedHedgeOrder(resp.OrderID, tokenID, "pair_arb_hedge_pre", rawShares)
+9685-	t.logger.Info("trader: pair arb hedge GTC submitted",
+9686-		zap.String("order_id", resp.OrderID),
+9687-		zap.String("hedge_side", buySide),
+9688-		zap.Float64("hedge_limit", hedgeLimitPrice),
+9689-		zap.Float64("shares", rawShares),
+9690-		zap.Float64("lead_avg", anchorAvgPrice),
+9691:		zap.Float64("locked_profit_target", t.pairArbMinLockedProfit()),
+9692-	)
+9693-	return nil
+9694-}
+9695-
+9696-func (t *Trader) appendPairArbTrade(pair *PairArbPosition, closedAt time.Time, side string, shares float64, costBasis float64, exitPrice float64, proceeds float64, sellFeeUSD float64, reason string) {
+9697-	if pair == nil || shares <= 0 {
+9698-		return
+9699-	}
+9700-	buyPrice := 0.0
+9701-	if shares > 0 {
+9702-		buyPrice = costBasis / shares
+9703-	}
+9704-	t.appendJournalLine(TradeRecord{
+9705-		OpenedAt:          pair.OpenedAt,
+9706-		ClosedAt:          closedAt,
+9707-		HeldSec:           closedAt.Sub(pair.OpenedAt).Seconds(),
+9708-		Strategy:          "pair_arb",
+9709:		Side:              pairArbJournalSideLabel(side),
+9710-		EntryBTCPrice:     0,
+9711-		EntryEdgeUSD:      0,
+9712-		EntryCLLagUSD:     0,
+9713-		EntryATR:          0,
+9714-		EntryWindowRemSec: pair.WindowEnd.Sub(pair.OpenedAt).Seconds(),
+9715-		EntryOpenPrice:    pair.OpenPrice,
+9716-		BuyPrice:          buyPrice,
+9717-		SellPrice:         exitPrice,
+9718-		Shares:            shares,
+9719-		USDSpent:          costBasis,
+9720-		PnL:               proceeds - costBasis - sellFeeUSD,
+9721-		Reason:            reason,
+9722-		CfgMinEdgeUSD:     t.cfg.CfgMinEdgeUSD,
+9723-		CfgStopLossCents:  t.cfg.PairArbStopLossCents,
+9724:		CfgTradeSizeUSD:   t.pairArbTradeSizeUSD(),
+9725-	})
+9726-}
+9727-
+9728-func (t *Trader) closePairArbPosition(pair *PairArbPosition, matchedExitPrice float64, residualExitPrice float64, matchedReason string, residualReason string) {
+9729-	if pair == nil {
+9730-		return
+9731-	}
+9732-	// Kalshi settles finalized contracts automatically.
+9733-	// No Polygon/CTF post-window claim safety check is required.
+9734-	closedAt := time.Now()
+9735-	lockedShares := pair.lockedShares()
+9736-	matchedCost := pair.matchedCost()
+9737-	matchedProceeds := lockedShares * matchedExitPrice
+9738-	if t.cfg.PaperTrade {
+9739-		t.paperBalance += matchedProceeds
+9740-	}
+9741-	t.appendPairArbTrade(pair, closedAt, "PAIR", lockedShares, matchedCost, matchedExitPrice, matchedProceeds, 0, matchedReason)
+9742-
+9743-	residualSide, residualShares, residualAvgPrice := pair.residualPosition()
+9744-	if residualShares > 0 {
+9745-		residualCost := residualShares * residualAvgPrice
+9746-		residualProceeds := residualShares * residualExitPrice
+9747-		if t.cfg.PaperTrade {
+9748-			t.paperBalance += residualProceeds
+9749-		}
+--
+9799-		var (
+9800-			fillPrice float64
+9801-			filled    bool
+9802-		)
+9803-		var filledShares float64
+9804-		fillPrice, filledShares, filled, err = t.attemptSellWithFallback(ctx, residualTokenID, residualExitPrice, fmt.Sprintf("%.2f", sellableShares))
+9805-		if err != nil {
+9806-			return err
+9807-		}
+9808-		if !filled {
+9809-			return fmt.Errorf("pair arb: residual sell did not fill")
+9810-		}
+9811:		if filledShares <= pairArbShareDust {
+9812-			return fmt.Errorf("pair arb: residual sell returned zero fill")
+9813-		}
+9814-		if filledShares > sellableShares {
+9815-			filledShares = sellableShares
+9816-		}
+9817-		actualExitPrice = fillPrice
+9818-		sellFeeUSD = polymarket.ComputeSellFeeUSDC(filledShares, actualExitPrice, t.feeRateBps)
+9819-		proceeds = filledShares*actualExitPrice - sellFeeUSD
+9820-		residualShares = filledShares
+9821-	}
+9822-	closedAt := time.Now()
+9823-	residualCost := residualShares * residualAvgPrice
+9824-	t.appendPairArbTrade(pair, closedAt, residualSide, residualShares, residualCost, actualExitPrice, proceeds+sellFeeUSD, sellFeeUSD, reason)
+9825-	display.TradeClose(residualSide+" [PAIR RESIDUAL]", residualAvgPrice, actualExitPrice, residualShares, proceeds-residualCost, sellFeeUSD, reason, time.Since(pair.OpenedAt).Round(time.Second), t.cfg.PaperTrade)
+9826-	if residualSide == "YES" {
+9827-		pair.YesShares -= residualShares
+9828-		pair.YesUSDSpent -= residualCost
+9829-		if pair.YesShares < 0.01 {
+9830-			pair.YesShares = 0
+9831-			pair.YesUSDSpent = 0
+9832-		}
+9833-	} else {
+9834-		pair.NoShares -= residualShares
+9835-		pair.NoUSDSpent -= residualCost
+9836-		if pair.NoShares < 0.01 {
+--
+9889-			return fmt.Errorf("pair exit %s balance: %w", side, err)
+9890-		}
+9891-		if sellable < polymarket.MinOrderShares {
+9892-			return nil
+9893-		}
+9894-		fillPrice, filledShares, filled, err := t.attemptSellWithFallback(ctx, tokenID, startPrice, fmt.Sprintf("%.2f", sellable))
+9895-		if err != nil {
+9896-			return fmt.Errorf("pair exit %s sell: %w", side, err)
+9897-		}
+9898-		if !filled {
+9899-			return fmt.Errorf("pair exit %s sell did not fill", side)
+9900-		}
+9901:		if filledShares <= pairArbShareDust {
+9902-			return fmt.Errorf("pair exit %s sell returned zero fill", side)
+9903-		}
+9904-		if filledShares > sellable {
+9905-			filledShares = sellable
+9906-		}
+9907:		if filledShares < sellable-pairArbShareDust {
+9908-			return fmt.Errorf("pair exit %s partial fill %.2f/%.2f", side, filledShares, sellable)
+9909-		}
+9910-		sellFee := polymarket.ComputeSellFeeUSDC(filledShares, fillPrice, t.feeRateBps)
+9911-		grossProceeds := filledShares * fillPrice
+9912-		netProceeds := grossProceeds - sellFee
+9913-		costBasis := filledShares * avgEntryPrice
+9914-		netPnL := netProceeds - costBasis
+9915-		t.appendPairArbTrade(pair, closedAt, side, filledShares, costBasis, fillPrice, grossProceeds, sellFee, reason)
+9916-		display.TradeClose(side+" [PAIR EXIT]", avgEntryPrice, fillPrice, filledShares, netPnL, sellFee, reason, held, false)
+9917-		return nil
+9918-	}
+9919-
+9920-	if err := sellSide("YES", pair.YesTokenID, pair.YesShares, pair.sideAveragePrice("YES"), currentYesPrice); err != nil {
+9921-		return err
+9922-	}
+9923-	if err := sellSide("NO", pair.NoTokenID, pair.NoShares, pair.sideAveragePrice("NO"), currentNoPrice); err != nil {
+9924-		return err
+9925-	}
+9926-
+9927-	t.pairedPosition = nil
+9928-	t.lastPairArbCloseAt = time.Now()
+9929-	t.detector.SetInPosition(false)
+9930-	t.savePositionState()
+9931-	return nil
+9932-}
+--
+9976-						zap.String("order_id", php.OrderID),
+9977-						zap.String("hedge_side", buySide),
+9978-						zap.Float64("fill_price", avg),
+9979-						zap.Float64("shares", actual),
+9980-						zap.Float64("locked_shares", pair.lockedShares()),
+9981-					)
+9982-				}
+9983-			}
+9984-		}
+9985-		if !absorbed {
+9986-			// Hedge not absorbed (still live → cancel it; or data unavailable).
+9987-			// Set orphan flag in case the cancel fails (already matched — tokens in wallet).
+9988:			t.pairArbHedgeOrphanFlag = true
+9989-			cancelErr := t.cancelOrderTimed(ctx, "pair_arb_dual_cancel_pre_place_"+reason, php.OrderID)
+9990-			if cancelErr != nil && errors.Is(cancelErr, polymarket.ErrOrderNotCancellable) {
+9991-				// Cancel race: order likely matched while we were closing. Queue explicit
+9992-				// hedge-credit reconciliation so the next lead is blocked until resolved.
+9993-				t.setPendingPairArbOrder(php.OrderID, php.TokenID, "pair_arb_hedge_credit_probe_force_close")
+9994-				t.logger.Warn("trader: force-close: pre-placed hedge not cancellable; queued credit reconciliation",
+9995-					zap.String("order_id", php.OrderID),
+9996-					zap.String("token_id", php.TokenID),
+9997-				)
+9998-			} else if cancelErr != nil {
+9999-				t.logger.Warn("trader: force-close: pre-placed hedge cancel failed; blocking next lead until reconciled",
+10000-					zap.Error(cancelErr),
+10001-					zap.String("order_id", php.OrderID),
+10002-				)
+10003-				t.setPendingPairArbOrder(php.OrderID, php.TokenID, "pair_arb_hedge_credit_probe_force_close")
+10004-			} else if gr, grErr := t.getOrderTimed(ctx, "pair_arb_hedge_pre_post_cancel_poll", php.OrderID); grErr == nil && gr != nil {
+10005-				postStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+10006-				if postStatus == "matched" || postStatus == "filled" {
+10007-					t.setPendingPairArbOrder(php.OrderID, php.TokenID, "pair_arb_hedge_credit_probe_force_close")
+10008-					t.logger.Warn("trader: force-close: pre-placed hedge matched during cancel; queued credit reconciliation",
+10009-						zap.String("order_id", php.OrderID),
+10010-					)
+10011-				}
+10012-			}
+10013-			t.clearPrePlacedHedgeOrder()
+10014-		}
+10015-	}
+10016-	if residualSide, residualShares, _ := pair.residualPosition(); residualSide != "" && residualShares > 0 {
+10017-		if err := t.closePairArbResidual(ctx, currentYesPrice, reason); err != nil {
+10018-			return err
+10019-		}
+10020-		pair = t.pairedPosition
+10021-		if pair == nil {
+10022-			return nil
+10023-		}
+10024:		if remainingSide, remainingShares, _ := pair.residualPosition(); remainingSide != "" && remainingShares > pairArbShareDust {
+10025-			return fmt.Errorf("pair arb: forced close residual %s %.2f remains unsold", remainingSide, remainingShares)
+10026-		}
+10027-	}
+10028-	matchedExitPrice := math.Round((currentYesPrice+(1.0-currentYesPrice))*100) / 100
+10029-	t.closePairArbPosition(pair, matchedExitPrice, 0, reason, reason)
+10030-	t.lastPairArbCloseConditionID = pair.ConditionID
+10031-	if reason == "pair_stop_loss" {
+10032-		t.lastPairArbStopLossAt = time.Now()
+10033-	}
+10034-	return nil
+10035-}
+10036-
+10037-func (t *Trader) enqueuePairArbClaimRetry(conditionID string, windowEnd time.Time, yesShares float64, noShares float64, winningIsNo bool, logReason string) {
+10038-	// Legacy Polymarket CTF claim retry.
+10039-	// Kalshi requires no claim transaction.
+10040-	return
+10041-}
+10042-
+10043-func (t *Trader) ReconcilePairArbExitState(ctx context.Context) error {
+10044-	pair := t.pairedPosition
+10045-	if pair == nil || t.cfg.PaperTrade {
+10046-		return nil
+10047-	}
+10048:	if pair.WindowEnd.IsZero() || time.Now().Before(pair.WindowEnd.Add(pairArbSellClaimGrace)) {
+10049-		return nil
+10050-	}
+10051-	reconcileCtx, cancel := context.WithTimeout(ctx, 6*time.Second)
+10052-	defer cancel()
+10053-	resolvedYes := t.resolvePairArbResolvedYes(reconcileCtx, pair, false)
+10054-	t.setPairExitState(pair, pairExitStateCleanup, "reconciling stale pair exit state from persisted orders")
+10055-	t.settlePairArbPosition(reconcileCtx, resolvedYes)
+10056-	return nil
+10057-}
+10058-
+10059-func (t *Trader) settlePairArbPosition(ctx context.Context, resolvedYes bool) {
+10060-	pair := t.pairedPosition
+10061-	if pair == nil {
+10062-		return
+10063-	}
+10064-	// Record settlement and close position accounting immediately Ã¢â‚¬â€ do NOT wait for
+10065-	// the on-chain CTF redemption, which can block the main loop for 60-90 seconds
+10066-	// (builder-relayer Node.js script + Polygon tx confirmation). Fire it in the
+10067-	// background; the USDC will arrive in the wallet regardless of timing.
+10068-	residualExitPrice := 0.0
+10069-	residualSide, _, _ := pair.residualPosition()
+10070-	if residualSide == "YES" && resolvedYes {
+10071-		residualExitPrice = 1.0
+10072-	}
+10073-	if residualSide == "NO" && !resolvedYes {
+--
+10092-				pair.NoExitOrderShares = 0
+10093-			}
+10094-			if (yesKnown && yesCanceled) || (noKnown && noCanceled) {
+10095-				t.setPairExitState(pair, pairExitStatePlacingOrders, "replacing canceled pair exit order")
+10096-				t.savePositionState()
+10097-				if err := t.manageBalancedPairArbSellAt99(ctx, pair); err != nil {
+10098-					t.logger.Warn("trader: pair arb settle: unable to replace canceled sell-at-99 order", zap.Error(err))
+10099-				}
+10100-				return
+10101-			}
+10102-			if !pair.WindowEnd.IsZero() && time.Now().Before(pair.WindowEnd) {
+10103-				remaining := pair.WindowEnd.Sub(time.Now())
+10104:				if remaining > 0 && remaining <= pairArbSellAggressiveLead {
+10105-					t.aggressiveRepostPairArbExitOrders(ctx, pair, remaining)
+10106-				}
+10107-				t.setPairExitState(pair, pairExitStateOrdersLive, "orders live; waiting for window completion")
+10108-				return
+10109-			}
+10110:			yesFilled, _, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_window_end_settle")
+10111-			if yesErr != nil {
+10112-				t.logger.Warn("trader: pair arb settle: YES window-end sell-at-99 lookup failed", zap.Error(yesErr))
+10113-				return
+10114-			}
+10115:			noFilled, _, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_window_end_settle")
+10116-			if noErr != nil {
+10117-				t.logger.Warn("trader: pair arb settle: NO window-end sell-at-99 lookup failed", zap.Error(noErr))
+10118-				return
+10119-			}
+10120-			if yesFilled || noFilled {
+10121:				settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+10122-				if settleErr != nil {
+10123-					t.logger.Warn("trader: pair arb settle: window-end settlement probe failed", zap.Error(settleErr))
+10124-					return
+10125-				}
+10126-				if !settled {
+10127-					t.setPairExitState(pair, pairExitStateGraceWait, "window complete; fill seen, awaiting settlement confirmation")
+10128-					return
+10129-				}
+10130:				walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+10131-				if balErr != nil {
+10132-					t.logger.Warn("trader: pair arb settle: wallet exit confirmation failed", zap.Error(balErr))
+10133-					return
+10134-				}
+10135-				if !walletFlat {
+10136-					winningBal := yesBal
+10137-					losingBal := noBal
+10138-					if !resolvedYes {
+10139-						winningBal = noBal
+10140-						losingBal = yesBal
+10141-					}
+10142:					if winningBal <= pairArbSettleBalanceDust && losingBal > pairArbSettleBalanceDust {
+10143-						t.setPairExitState(pair, pairExitStateResolvedCLOB, fmt.Sprintf("resolved winner settled; closing with losing residual marked to $0 (YES=%.2f NO=%.2f)", yesBal, noBal))
+10144-						t.clearPairArbExitOrders(pair)
+10145-						t.closePairArbPosition(pair, 0.99, 0.0, "pair_sell_at_99", "pair_sell_at_99")
+10146-						return
+10147-					}
+10148-					t.setPairExitState(pair, pairExitStateGraceWait, fmt.Sprintf("window complete; waiting full-size exit confirmation (YES=%.2f NO=%.2f)", yesBal, noBal))
+10149-					return
+10150-				}
+10151-				if residualExitPrice == 1.0 {
+10152-					residualExitPrice = 0.99
+10153-				}
+10154-				t.setPairExitState(pair, pairExitStateResolvedCLOB, "window complete; sell-at-99 fill confirmed")
+10155-				t.clearPairArbExitOrders(pair)
+10156-				t.closePairArbPosition(pair, 0.99, residualExitPrice, "pair_sell_at_99", "pair_sell_at_99")
+10157-				return
+10158-			}
+10159-			t.setPairExitState(pair, pairExitStateGraceWait, "window complete; exit fills not confirmed yet")
+10160-			return
+10161-		}
+10162-		if pair.YesExitOrderID == "" || pair.NoExitOrderID == "" {
+10163-			if err := t.manageBalancedPairArbSellAt99(ctx, pair); err != nil {
+10164-				t.logger.Warn("trader: pair arb settle: unable to refresh sell-at-99 orders", zap.Error(err))
+10165-			}
+10166-		}
+10167:		yesFilled, _, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_settle")
+10168-		if yesErr != nil {
+10169-			t.logger.Warn("trader: pair arb settle: YES sell-at-99 lookup failed", zap.Error(yesErr))
+10170-		}
+10171:		noFilled, _, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_settle")
+10172-		if noErr != nil {
+10173-			t.logger.Warn("trader: pair arb settle: NO sell-at-99 lookup failed", zap.Error(noErr))
+10174-		}
+10175-		if yesFilled || noFilled {
+10176:			settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+10177-			if settleErr != nil {
+10178-				t.logger.Warn("trader: pair arb settle: balance settlement probe failed", zap.Error(settleErr))
+10179-				return
+10180-			}
+10181-			if !settled {
+10182-				t.setPairExitState(pair, pairExitStateGraceWait, "fill reported; awaiting balance settlement confirmation")
+10183-				// Do not return here: if settlement never converges due to tiny dust,
+10184-				// we still want the grace-expiry fallback below to fire.
+10185-			} else {
+10186:				walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+10187-				if balErr != nil {
+10188-					t.logger.Warn("trader: pair arb settle: wallet exit confirmation failed", zap.Error(balErr))
+10189-					return
+10190-				}
+10191-				if !walletFlat {
+10192-					winningBal := yesBal
+10193-					losingBal := noBal
+10194-					if !resolvedYes {
+10195-						winningBal = noBal
+10196-						losingBal = yesBal
+10197-					}
+10198:					if winningBal <= pairArbSettleBalanceDust && losingBal > pairArbSettleBalanceDust {
+10199-						t.setPairExitState(pair, pairExitStateResolvedCLOB, fmt.Sprintf("resolved winner settled; closing with losing residual marked to $0 (YES=%.2f NO=%.2f)", yesBal, noBal))
+10200-						t.clearPairArbExitOrders(pair)
+10201-						t.closePairArbPosition(pair, 0.99, 0.0, "pair_sell_at_99", "pair_sell_at_99")
+10202-						return
+10203-					}
+10204-					t.setPairExitState(pair, pairExitStateGraceWait, fmt.Sprintf("waiting full-size exit confirmation (YES=%.2f NO=%.2f)", yesBal, noBal))
+10205-					return
+10206-				}
+10207-				if residualExitPrice == 1.0 {
+10208-					residualExitPrice = 0.99
+10209-				}
+10210-				t.setPairExitState(pair, pairExitStateResolvedCLOB, "sell-at-99 fill confirmed during settlement")
+10211-				t.clearPairArbExitOrders(pair)
+10212-				t.closePairArbPosition(pair, 0.99, residualExitPrice, "pair_sell_at_99", "pair_sell_at_99")
+10213-				return
+10214-			}
+10215-		}
+10216-		graceStart := pair.ExitOrdersPlacedAt
+10217-		if graceStart.IsZero() {
+10218-			graceStart = pair.WindowEnd
+10219-		}
+10220:		if !graceStart.IsZero() && time.Since(graceStart) < pairArbSellClaimGrace {
+10221:			remaining := pairArbSellClaimGrace - time.Since(graceStart)
+10222-			if remaining < 0 {
+10223-				remaining = 0
+10224-			}
+10225-			t.setPairExitState(pair, pairExitStateGraceWait, fmt.Sprintf("waiting %.0fs more before claim fallback", remaining.Seconds()))
+10226-			return
+10227-		}
+10228-		t.setPairExitState(pair, pairExitStateCleanup, "sell-at-99 grace expired; canceling live orders before claim")
+10229-		if err := t.cancelPairArbExitOrder(ctx, pair.YesExitOrderID, "pair_arb_sell_99_settle_cancel_yes"); err != nil {
+10230-			t.logger.Warn("trader: pair arb settle: cancel YES sell-at-99 failed", zap.Error(err))
+10231-		}
+10232-		if err := t.cancelPairArbExitOrder(ctx, pair.NoExitOrderID, "pair_arb_sell_99_settle_cancel_no"); err != nil {
+10233-			t.logger.Warn("trader: pair arb settle: cancel NO sell-at-99 failed", zap.Error(err))
+10234-		}
+10235-		t.clearPairArbExitOrders(pair)
+10236-		t.setPairExitState(pair, pairExitStateResolvedClaim, "Kalshi market finalized; accounting at settlement value")
+10237-		t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+10238-		return
+10239-	}
+10240-
+10241-	// Kalshi hold-to-settlement path.
+10242-	// Kalshi credits finalized contracts automatically; there is no CTF claim.
+10243-	t.setPairExitState(pair, pairExitStateResolvedClaim, "Kalshi market finalized; settlement automatic")
+10244-	t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+10245-}
+10246-
+--
+10350-
+10351-// savePositionState persists the full trading state to disk atomically (write-tmp + rename).
+10352-// When position is nil (flat) the file reflects that so RestorePosition returns clean.
+10353-// No-op in paper-trade mode.
+10354-func (t *Trader) savePositionState() {
+10355-	if t.cfg.PaperTrade {
+10356-		return
+10357-	}
+10358-	t.claimMu.Lock()
+10359-	pendingClaims := append([]pendingClaim(nil), t.pendingClaims...)
+10360-	t.claimMu.Unlock()
+10361-	t.isolatedPendingMu.Lock()
+10362:	isolatedPending := append([]pairArbPendingOrderState(nil), t.isolatedPending...)
+10363-	t.isolatedPendingMu.Unlock()
+10364-	type posState struct {
+10365-		Position             *Position                  `json:"position"`
+10366-		PairPosition         *PairArbPosition           `json:"pair_position,omitempty"`
+10367-		PendingBuy           *pendingBuyState           `json:"pending_buy,omitempty"`
+10368:		PendingPairArb       *pairArbPendingOrderState  `json:"pending_pair_arb,omitempty"`
+10369:		PendingHedgePrePlace *pairArbPendingOrderState  `json:"pending_hedge_pre_place,omitempty"`
+10370:		IsolatedPending      []pairArbPendingOrderState `json:"isolated_pending_orders,omitempty"`
+10371-		PendingClaims        []pendingClaim             `json:"pending_claims,omitempty"`
+10372-		BotConditionIDs      []string                   `json:"bot_condition_ids,omitempty"`
+10373-		FeeRateBps           string                     `json:"fee_rate_bps"`
+10374-	}
+10375-	botConditions := make([]string, 0, len(t.botConditionIDs))
+10376-	for key := range t.botConditionIDs {
+10377-		botConditions = append(botConditions, key)
+10378-	}
+10379-	b, err := json.Marshal(posState{
+10380-		Position:             t.position,
+10381-		PairPosition:         t.pairedPosition,
+10382-		PendingBuy:           t.pendingBuy,
+10383-		PendingPairArb:       t.pendingPairArb,
+10384-		PendingHedgePrePlace: t.pendingHedgePrePlace,
+10385-		IsolatedPending:      isolatedPending,
+10386-		PendingClaims:        pendingClaims,
+10387-		BotConditionIDs:      botConditions,
+10388-		FeeRateBps:           t.feeRateBps,
+10389-	})
+10390-	if err != nil {
+10391-		t.logger.Error("trader: failed to marshal position state", zap.Error(err))
+10392-		return
+10393-	}
+10394-	// Atomic write: write to .tmp then rename to avoid partial-write corruption.
+10395-	tmp := t.stateFile + ".tmp"
+--
+10418-func (t *Trader) RestorePosition(ctx context.Context) bool {
+10419-	if t.cfg.PaperTrade {
+10420-		return false
+10421-	}
+10422-	b, err := os.ReadFile(t.stateFile)
+10423-	if err != nil {
+10424-		return false // clean start (no state file)
+10425-	}
+10426-	type posState struct {
+10427-		Position             *Position                  `json:"position"`
+10428-		PairPosition         *PairArbPosition           `json:"pair_position,omitempty"`
+10429-		PendingBuy           *pendingBuyState           `json:"pending_buy,omitempty"`
+10430:		PendingPairArb       *pairArbPendingOrderState  `json:"pending_pair_arb,omitempty"`
+10431:		PendingHedgePrePlace *pairArbPendingOrderState  `json:"pending_hedge_pre_place,omitempty"`
+10432:		IsolatedPending      []pairArbPendingOrderState `json:"isolated_pending_orders,omitempty"`
+10433-		PendingClaims        []pendingClaim             `json:"pending_claims,omitempty"`
+10434-		BotConditionIDs      []string                   `json:"bot_condition_ids,omitempty"`
+10435-		FeeRateBps           string                     `json:"fee_rate_bps"`
+10436-	}
+10437-	var s posState
+10438-	if err := json.Unmarshal(b, &s); err != nil {
+10439-		t.logger.Error("trader: corrupt position state file; ignoring",
+10440-			zap.String("file", t.stateFile), zap.Error(err))
+10441-		return false
+10442-	}
+10443-	if s.FeeRateBps != "" {
+10444-		t.feeRateBps = s.FeeRateBps
+10445-	}
+10446-	if len(s.BotConditionIDs) > 0 {
+10447-		for _, key := range s.BotConditionIDs {
+10448-			k := normalizeConditionID(key)
+10449-			if k == "" {
+10450-				continue
+10451-			}
+10452-			t.botConditionIDs[k] = struct{}{}
+10453-		}
+10454-	}
+10455-	t.pendingPairArb = s.PendingPairArb
+10456-	if t.pendingPairArb != nil {
+10457-		if strings.TrimSpace(t.pendingPairArb.Origin) == "" {
