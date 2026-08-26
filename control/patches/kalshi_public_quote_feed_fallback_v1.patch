@@ -1,0 +1,52 @@
+diff --git a/kalshi/feed.go b/kalshi/feed.go
+--- a/kalshi/feed.go
++++ b/kalshi/feed.go
+@@ -51,16 +51,45 @@ func bestAsk(book *OrderBook) (float64, float64) {
+ 	return p, q
+ }
+ func (f *FeedClient) pollOnce(ctx context.Context) {
+-	for _, id := range f.tokenIDs {
+-		b, e := f.client.GetOrderBook(ctx, id)
+-		if e != nil {
+-			continue
+-		}
+-		p, q := bestAsk(b)
+-		if p > 0 {
+-			f.update(id, p, q, "SELL")
+-		}
++	ticker, yesID, noID, err := f.logicalIDs()
++	if err != nil {
++		return
++	}
++
++	// The market-details endpoint is public and carries authoritative YES/NO
++	// executable asks. Use it first so PAPER mode has a real Kalshi price feed
++	// even when websocket/orderbook authentication is unavailable.
++	m, err := f.client.GetMarket(ctx, ticker)
++	if err == nil && m != nil {
++		yesAsk, _ := strconv.ParseFloat(m.YesAsk, 64)
++		noAsk, _ := strconv.ParseFloat(m.NoAsk, 64)
++		if yesID != "" && yesAsk > 0 && yesAsk < 1 {
++			f.update(yesID, yesAsk, 0, "SELL")
++		}
++		if noID != "" && noAsk > 0 && noAsk < 1 {
++			f.update(noID, noAsk, 0, "SELL")
++		}
++		if yesAsk > 0 || noAsk > 0 {
++			return
++		}
++	}
++
++	// If authenticated orderbook access is available, keep the deeper-book
++	// fallback for markets whose top-level quote fields are temporarily empty.
++	for _, id := range f.tokenIDs {
++		b, e := f.client.GetOrderBook(ctx, id)
++		if e != nil {
++			continue
++		}
++		p, q := bestAsk(b)
++		if p > 0 {
++			f.update(id, p, q, "SELL")
++		}
+ 	}
+ }
