@@ -11,13 +11,13 @@
 +	if t.pairArbLeadOrderType() != polymarket.OrderTypeFOK {
 +		_, deficitShares, anchorAvgPrice := pair.rebalanceState()
 +		if deficitShares > pairArbShareDust && anchorAvgPrice > 0 {
-+			hegdeLimitPrice := pairKalshiMaxHedgePrice(anchorAvgPrice, deficitShares, t.pairArbMinLockedProfit())
-+			rawHedgeShares, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(deficitShares, hegdeLimitPrice, t.feeRateBps)
-+			if hegdeLimitPrice <= 0 || hegdeLimitPrice >= 1.0 || !hedgeAllowed || rawHedgeShares <= 0 {
++			hedgeLimitPrice := pairKalshiMaxHedgePrice(anchorAvgPrice, deficitShares, t.pairArbMinLockedProfit())
++			rawHedgeShares, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(deficitShares, hedgeLimitPrice, t.feeRateBps)
++			if hedgeLimitPrice <= 0 || hedgeLimitPrice >= 1.0 || !hedgeAllowed || rawHedgeShares <= 0 {
 +				t.logger.Warn("trader: actual lead fill cannot form venue-valid hedge; force-closing immediately",
 +					zap.String("lead_side", leadSide),
 +					zap.Float64("actual_lead_shares", actualShares),
-+					zap.Float64("hedge_limit", hegdeLimitPrice),
++					zap.Float64("hedge_limit", hedgeLimitPrice),
 +					zap.Float64("hedge_notional", hedgeNotional),
 +				)
 +				return t.forceClosePairArb(ctx, sig.PolyYesPrice, "pair_hedge_below_venue_minimum")
