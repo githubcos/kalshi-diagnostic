@@ -1,47 +1,12 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-paper-positive-edge-profile-v1-20260826-1004
-JOB_START_UTC=2026-08-26T10:03:17+00:00
+JOB_ID=kalshi-paper-parity-forensic-refresh-20260826-1649
+JOB_START_UTC=2026-08-26T16:50:07+00:00
 LIVE_ALLOWED=false
-[2026-08-26T10:03:17+00:00] ACTION 1/5 APPLY_PATCH START
-[2026-08-26T10:03:17+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_100317.tar.gz
-[2026-08-26T10:03:26+00:00] BACKUP PASS files=114
-[2026-08-26T10:03:26+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-50s6giae.patch
-    checking file config.json
-    Hunk #1 succeeded at 47 (offset 12 lines).
-    Hunk #2 succeeded at 48 (offset 12 lines).
-    Hunk #3 succeeded at 56 (offset 11 lines).
-    Hunk #4 succeeded at 57 (offset 11 lines).
-    Hunk #5 succeeded at 58 (offset 11 lines).
-    Hunk #6 succeeded at 68 (offset 10 lines).
-    Hunk #7 succeeded at 70 (offset 10 lines).
-    Hunk #8 succeeded at 97 (offset 12 lines).
-    Hunk #9 succeeded at 101 (offset 11 lines).
-[2026-08-26T10:03:26+00:00] PATCH_DRY_RUN END rc=0 duration=0.00s
-[2026-08-26T10:03:26+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-50s6giae.patch
-    patching file config.json
-    Hunk #1 succeeded at 47 (offset 12 lines).
-    Hunk #2 succeeded at 48 (offset 12 lines).
-    Hunk #3 succeeded at 56 (offset 11 lines).
-    Hunk #4 succeeded at 57 (offset 11 lines).
-    Hunk #5 succeeded at 58 (offset 11 lines).
-    Hunk #6 succeeded at 68 (offset 10 lines).
-    Hunk #7 succeeded at 70 (offset 10 lines).
-    Hunk #8 succeeded at 97 (offset 12 lines).
-    Hunk #9 succeeded at 101 (offset 11 lines).
-[2026-08-26T10:03:26+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-26T10:03:26+00:00] ACTION 1/5 APPLY_PATCH PASS
-[2026-08-26T10:03:26+00:00] ACTION 2/5 START_PAPER START
-[2026-08-26T10:03:26+00:00] STOP_PAPER START
-[2026-08-26T10:03:29+00:00] STOP_PAPER PASS
-[2026-08-26T10:03:32+00:00] START_PAPER PASS
-[2026-08-26T10:03:32+00:00] ACTION 2/5 START_PAPER PASS
-[2026-08-26T10:03:32+00:00] ACTION 3/5 STATUS START
-[2026-08-26T10:03:32+00:00] STATUS PASS
-[2026-08-26T10:03:32+00:00] ACTION 3/5 STATUS PASS
-[2026-08-26T10:03:32+00:00] ACTION 4/5 UPDATE_TELEMETRY START
-[2026-08-26T10:03:32+00:00] UPDATE kalshi-agent-telemetry.service PASS
-[2026-08-26T10:03:32+00:00] ACTION 4/5 UPDATE_TELEMETRY PASS
-[2026-08-26T10:03:32+00:00] ACTION 5/5 STATUS START
-[2026-08-26T10:03:32+00:00] STATUS PASS
-[2026-08-26T10:03:32+00:00] ACTION 5/5 STATUS PASS
-[2026-08-26T10:03:32+00:00] JOB RESULT=PASS
+[2026-08-26T16:50:07+00:00] ACTION 1/5 STATUS START
+[2026-08-26T16:50:07+00:00] STATUS PASS
+[2026-08-26T16:50:07+00:00] ACTION 1/5 STATUS PASS
+[2026-08-26T16:50:07+00:00] ACTION 2/5 COLLECT_PARITY_EVIDENCE START
+[2026-08-26T16:50:07+00:00] COLLECT_PARITY_EVIDENCE PASS excerpts=40
+[2026-08-26T16:50:07+00:00] ACTION 2/5 COLLECT_PARITY_EVIDENCE PASS
+[2026-08-26T16:50:07+00:00] ACTION 3/5 DETERMINISTIC_PARITY_TEST START
+[2026-08-26T16:50:07+00:00] DETERMINISTIC_PARITY_TEST START: go test ./strategy -run TestKalshiDeterministic -count=1 -v
