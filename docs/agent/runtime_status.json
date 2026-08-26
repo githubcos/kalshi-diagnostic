@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T01:54:40+00:00",
+  "utc": "2026-08-26T01:54:47+00:00",
   "publisher_pid": 4137582,
   "heartbeat": {
-    "utc": "2026-08-26T01:54:37+00:00",
-    "epoch": 1787709277.84834,
+    "utc": "2026-08-26T01:54:46+00:00",
+    "epoch": 1787709286.9723847,
     "pid": 4075083,
     "status": "working",
     "job_id": "kalshi-unhedgeable-residual-v1-20260826-0155"
   },
   "state": {
     "last_job_id": "kalshi-paper-hedgeability-v4-20260826-0152",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015329.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015437.tar.gz",
     "last_result": "PASS",
     "last_run_utc": "2026-08-26T01:53:46+00:00"
   },
