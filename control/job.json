@@ -1,9 +1,10 @@
 {
-  "id": "kalshi-no-trades-gate-audit-20260826-0243",
+  "id": "kalshi-paper-highflow-token-range-v1-20260826-0245",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "COLLECT_AUDIT"},
+    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
