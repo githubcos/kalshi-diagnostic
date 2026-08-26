@@ -1,61 +1,14 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-kxbtc15m-window-end-v3-retry3-20260826-0238
-JOB_START_UTC=2026-08-26T02:38:06+00:00
+JOB_ID=kalshi-no-trades-gate-audit-20260826-0243
+JOB_START_UTC=2026-08-26T02:42:45+00:00
 LIVE_ALLOWED=false
-[2026-08-26T02:38:06+00:00] ACTION 1/9 STOP_PAPER START
-[2026-08-26T02:38:06+00:00] STOP_PAPER START
-[2026-08-26T02:38:09+00:00] STOP_PAPER PASS
-[2026-08-26T02:38:09+00:00] ACTION 1/9 STOP_PAPER PASS
-[2026-08-26T02:38:09+00:00] ACTION 2/9 BACKUP START
-[2026-08-26T02:38:09+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023809.tar.gz
-[2026-08-26T02:38:19+00:00] BACKUP PASS files=112
-[2026-08-26T02:38:19+00:00] ACTION 2/9 BACKUP PASS
-[2026-08-26T02:38:19+00:00] ACTION 3/9 APPLY_PATCH START
-[2026-08-26T02:38:19+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023819.tar.gz
-[2026-08-26T02:38:29+00:00] BACKUP PASS files=112
-[2026-08-26T02:38:29+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-mxvfqzdf.patch
-    checking file kalshi/market.go
-[2026-08-26T02:38:29+00:00] PATCH_DRY_RUN END rc=0 duration=0.01s
-[2026-08-26T02:38:29+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-mxvfqzdf.patch
-    patching file kalshi/market.go
-[2026-08-26T02:38:29+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-26T02:38:29+00:00] ACTION 3/9 APPLY_PATCH PASS
-[2026-08-26T02:38:29+00:00] ACTION 4/9 GOFMT START
-[2026-08-26T02:38:29+00:00] GOFMT START: gofmt -w /home/ubuntu/KalshiArbo/kalshiarbo/kalshi/market.go
-[2026-08-26T02:38:29+00:00] GOFMT END rc=0 duration=0.04s
-[2026-08-26T02:38:29+00:00] ACTION 4/9 GOFMT PASS
-[2026-08-26T02:38:29+00:00] ACTION 5/9 GO_TEST START
-[2026-08-26T02:38:29+00:00] GO_TEST START: go test ./...
-    ?   	github.com/polyarb	[no test files]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    ok  	github.com/polyarb/discord	(cached)
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    ok  	github.com/polyarb/strategy	(cached)
-    ok  	github.com/polyarb/web	(cached)
-[2026-08-26T02:38:41+00:00] GO_TEST END rc=0 duration=11.75s
-[2026-08-26T02:38:41+00:00] ACTION 5/9 GO_TEST PASS
-[2026-08-26T02:38:41+00:00] ACTION 6/9 GO_BUILD START
-[2026-08-26T02:38:41+00:00] GO_BUILD START: go build -o kalshiarbo .
-[2026-08-26T02:38:46+00:00] GO_BUILD END rc=0 duration=5.94s
-[2026-08-26T02:38:46+00:00] ACTION 6/9 GO_BUILD PASS
-[2026-08-26T02:38:46+00:00] ACTION 7/9 START_PAPER START
-[2026-08-26T02:38:46+00:00] STOP_PAPER START
-[2026-08-26T02:38:50+00:00] STOP_PAPER PASS
-[2026-08-26T02:38:53+00:00] START_PAPER PASS
-[2026-08-26T02:38:53+00:00] ACTION 7/9 START_PAPER PASS
-[2026-08-26T02:38:53+00:00] ACTION 8/9 UPDATE_TELEMETRY START
-[2026-08-26T02:38:53+00:00] UPDATE kalshi-agent-telemetry.service PASS
-[2026-08-26T02:38:53+00:00] ACTION 8/9 UPDATE_TELEMETRY PASS
-[2026-08-26T02:38:53+00:00] ACTION 9/9 STATUS START
-[2026-08-26T02:38:53+00:00] STATUS PASS
-[2026-08-26T02:38:53+00:00] ACTION 9/9 STATUS PASS
-[2026-08-26T02:38:53+00:00] JOB RESULT=PASS
+[2026-08-26T02:42:45+00:00] ACTION 1/3 COLLECT_AUDIT START
+[2026-08-26T02:42:45+00:00] STATUS PASS
+[2026-08-26T02:42:45+00:00] ACTION 1/3 COLLECT_AUDIT PASS
+[2026-08-26T02:42:45+00:00] ACTION 2/3 UPDATE_TELEMETRY START
+[2026-08-26T02:42:46+00:00] UPDATE kalshi-agent-telemetry.service PASS
+[2026-08-26T02:42:46+00:00] ACTION 2/3 UPDATE_TELEMETRY PASS
+[2026-08-26T02:42:46+00:00] ACTION 3/3 STATUS START
+[2026-08-26T02:42:46+00:00] STATUS PASS
+[2026-08-26T02:42:46+00:00] ACTION 3/3 STATUS PASS
+[2026-08-26T02:42:46+00:00] JOB RESULT=PASS

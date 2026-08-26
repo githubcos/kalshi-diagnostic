@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T02:42:42+00:00",
-  "publisher_pid": 65239,
+  "utc": "2026-08-26T02:42:46+00:00",
+  "publisher_pid": 75602,
   "heartbeat": {
-    "utc": "2026-08-26T02:42:40+00:00",
-    "epoch": 1787712160.2687242,
+    "utc": "2026-08-26T02:42:46+00:00",
+    "epoch": 1787712166.6658506,
     "pid": 4075083,
     "status": "idle",
     "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-kxbtc15m-window-end-v3-retry3-20260826-0238",
+    "last_job_id": "kalshi-no-trades-gate-audit-20260826-0243",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023819.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T02:38:53+00:00"
+    "last_run_utc": "2026-08-26T02:42:46+00:00"
   },
   "autopilot": null
 }
