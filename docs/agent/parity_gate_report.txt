@@ -1,307 +1,307 @@
-KALSHI FINITE PARITY GATE: SETTLEMENT
-UTC=2026-08-26T00:29:39+00:00
-TITLE=settlement and final mark-to-market semantics
-PAPER_ALIVE=True
+KALSHI FINITE PARITY GATE: PARTIAL_FILL
+UTC=2026-08-26T00:43:13+00:00
+TITLE=authoritative partial-fill quantity handling
+PAPER_ALIVE=False
 LIVE_ALLOWED=false
 HITS=20
 
---- markToMarket at strategy/trader.go:360 (context 354-366) ---
-00354: 	if p.NoShares < p.YesShares {
-00355: 		return "NO", p.YesShares - p.NoShares, p.sideAveragePrice("YES")
-00356: 	}
-00357: 	return "", 0, 0
-00358: }
-00359: 
-00360: func (p *PairArbPosition) markToMarket(yesPrice float64, noPrices ...float64) float64 {
-00361: 	if p == nil || yesPrice <= 0 {
-00362: 		return 0
-00363: 	}
-00364: 
-00365: 	noPrice := 0.0
-00366: 	if len(noPrices) > 0 {
+--- grossFillShares at strategy/trader.go:1197 (context 1191-1203) ---
+01191: 	if !resp.Success {
+01192: 		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: order rejected: %s", resp.ErrorMsg)
+01193: 	}
+01194: 	orderID = resp.OrderID
+01195: 
+01196: 	var correctedFill float64
+01197: 	var grossFillShares float64
+01198: 	fillSource := "submit_response"
+01199: 	keepPendingForReconcile := false
+01200: 	postSubmitLookupMS := int64(0)
+01201: 
+01202: 	submitStatus := strings.ToLower(strings.TrimSpace(resp.Status))
+01203: 	switch {
 
---- markToMarket at strategy/trader.go:545 (context 539-551) ---
-00539: 	PairExpectedProfit     float64
-00540: 	PairExpectedROIPct     float64
-00541: 	PairResidualSide       string
-00542: 	PairResidualShares     float64
-00543: 	PairHedgeSide          string
-00544: 	PairHedgeMaxPrice      float64
-00545: 	PairMarkToMarket       float64
-00546: 	PairExitState          string
-00547: 	PairExitStateNote      string
-00548: 	PairYesExitOrderID     string
-00549: 	PairNoExitOrderID      string
-00550: 	PairExitPlacedAt       time.Time
-00551: }
+--- grossFillShares at strategy/trader.go:1214 (context 1208-1220) ---
+01208: 		if resp.TakingAmount != "" && resp.MakingAmount != "" {
+01209: 			takingRaw, okT := new(big.Int).SetString(resp.TakingAmount, 10)
+01210: 			makingRaw, okM := new(big.Int).SetString(resp.MakingAmount, 10)
+01211: 			if okT && okM && takingRaw.Sign() > 0 && makingRaw.Sign() > 0 {
+01212: 				actualRat := new(big.Rat).SetFrac(takingRaw, big.NewInt(1_000_000))
+01213: 				if actualFillShares, _ := actualRat.Float64(); actualFillShares > 0 {
+01214: 					grossFillShares = actualFillShares
+01215: 				}
+01216: 				priceRat := new(big.Rat).SetFrac(makingRaw, takingRaw)
+01217: 				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
+01218: 					correctedFill = actualFillPrice
+01219: 				}
+01220: 			}
 
---- markToMarket at strategy/trader.go:8184 (context 8178-8190) ---
-08178: 			avgCost = p.totalSpent() / lockedShares
-08179: 		}
-08180: 		currentNoPrice := 0.0
-08181: 		if len(currentNoPrices) > 0 {
-08182: 			currentNoPrice = currentNoPrices[0]
-08183: 		}
-08184: 		pnl := p.markToMarket(currentYesPrice, currentNoPrice)
-08185: 		return fmt.Sprintf(
-08186: 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
-08187: 			lockedShares,
-08188: 			avgCost,
-08189: 			p.YesShares,
-08190: 			p.NoShares,
+--- grossFillShares at strategy/trader.go:1222 (context 1216-1228) ---
+01216: 				priceRat := new(big.Rat).SetFrac(makingRaw, takingRaw)
+01217: 				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
+01218: 					correctedFill = actualFillPrice
+01219: 				}
+01220: 			}
+01221: 		}
+01222: 		if correctedFill <= 0 || grossFillShares <= 0 {
+01223: 			// API is eventually consistent Ã¢â‚¬â€ hit a stale node.  Short parallel lookup.
+01224: 			lookupStart := time.Now()
+01225: 			lookupCtx, cancelLookup := context.WithTimeout(ctx, pairArbPostSubmitLookupTimeout)
+01226: 
+01227: 			type lookupResult struct {
+01228: 				source string
 
---- markToMarket at strategy/trader.go:8232 (context 8226-8238) ---
-08226: 			avgCost = p.totalSpent() / lockedShares
-08227: 		}
-08228: 		currentNoPrice := 0.0
-08229: 		if len(currentNoPrices) > 0 {
-08230: 			currentNoPrice = currentNoPrices[0]
-08231: 		}
-08232: 		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice, currentNoPrice)
-08233: 	}
-08234: 	p := t.position
-08235: 	tokenPrice := currentYesPrice
-08236: 	side := "YES"
-08237: 	if p.IsNoSide {
-08238: 		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+--- grossFillShares at strategy/trader.go:1275 (context 1269-1281) ---
+01269: 						continue
+01270: 					}
+01271: 					if correctedFill <= 0 && res.fill > 0 {
+01272: 						correctedFill = res.fill
+01273: 						fillSource = res.source
+01274: 					}
+01275: 					if grossFillShares <= 0 && res.gross > 0 {
+01276: 						grossFillShares = res.gross
+01277: 						fillSource = res.source
+01278: 					}
+01279: 					if correctedFill > 0 && grossFillShares > 0 {
+01280: 						collected = 2
+01281: 					}
 
---- markToMarket at strategy/trader.go:8284 (context 8278-8290) ---
-08278: 			HasPosition:            true,
-08279: 			Side:                   "PAIR",
-08280: 			Type:                   "pair_arb",
-08281: 			BuyPrice:               avgCost,
-08282: 			Shares:                 lockedShares,
-08283: 			USDSpent:               pair.totalSpent(),
-08284: 			UnrealizedPnL:          pair.markToMarket(currentYesPrice, currentNoPrice),
-08285: 			HeldSec:                time.Since(pair.OpenedAt).Seconds(),
-08286: 			PairActive:             true,
-08287: 			PairLeadSide:           pair.LeadSide,
-08288: 			PairYesFilled:          pair.YesShares > 0,
-08289: 			PairNoFilled:           pair.NoShares > 0,
-08290: 			PairYesAvgPrice:        pair.sideAveragePrice("YES"),
+--- grossFillShares at strategy/trader.go:1276 (context 1270-1282) ---
+01270: 					}
+01271: 					if correctedFill <= 0 && res.fill > 0 {
+01272: 						correctedFill = res.fill
+01273: 						fillSource = res.source
+01274: 					}
+01275: 					if grossFillShares <= 0 && res.gross > 0 {
+01276: 						grossFillShares = res.gross
+01277: 						fillSource = res.source
+01278: 					}
+01279: 					if correctedFill > 0 && grossFillShares > 0 {
+01280: 						collected = 2
+01281: 					}
+01282: 				case <-lookupCtx.Done():
 
---- markToMarket at strategy/trader.go:8306 (context 8300-8312) ---
-08300: 			PairExpectedProfit:     expectedProfit,
-08301: 			PairExpectedROIPct:     expectedROIPct,
-08302: 			PairResidualSide:       residualSide,
-08303: 			PairResidualShares:     residualShares,
-08304: 			PairHedgeSide:          hedgeSide,
-08305: 			PairHedgeMaxPrice:      hedgeMaxPrice,
-08306: 			PairMarkToMarket:       pair.markToMarket(currentYesPrice, currentNoPrice),
-08307: 			PairExitState:          pair.ExitState,
-08308: 			PairExitStateNote:      pair.ExitStateNote,
-08309: 			PairYesExitOrderID:     pair.YesExitOrderID,
-08310: 			PairNoExitOrderID:      pair.NoExitOrderID,
-08311: 			PairExitPlacedAt:       pair.ExitOrdersPlacedAt,
-08312: 		}
+--- grossFillShares at strategy/trader.go:1279 (context 1273-1285) ---
+01273: 						fillSource = res.source
+01274: 					}
+01275: 					if grossFillShares <= 0 && res.gross > 0 {
+01276: 						grossFillShares = res.gross
+01277: 						fillSource = res.source
+01278: 					}
+01279: 					if correctedFill > 0 && grossFillShares > 0 {
+01280: 						collected = 2
+01281: 					}
+01282: 				case <-lookupCtx.Done():
+01283: 					collected = 2
+01284: 				}
+01285: 			}
 
---- settlement at strategy/trader.go:3371 (context 3365-3377) ---
-03365: 	display.Info(fmt.Sprintf("resolution pre-close entry filled for %s at %.3f", label, fillPrice))
-03366: 	if time.Now().After(windowEnd) {
-03367: 		resolveCtx, resolveCancel := context.WithTimeout(context.Background(), 65*time.Second)
-03368: 		resolvedYes, resolveErr := resolveWinningSide(resolveCtx)
-03369: 		resolveCancel()
-03370: 		if resolveErr != nil {
-03371: 			display.Warn(fmt.Sprintf("resolution pre-close settlement fallback used for %s: %v", label, resolveErr))
-03372: 		}
-03373: 		t.SettleExpiredPosition(ctx, resolvedYes)
-03374: 	}
-03375: 	return true
-03376: }
-03377: 
+--- grossFillShares at strategy/trader.go:1288 (context 1282-1294) ---
+01282: 				case <-lookupCtx.Done():
+01283: 					collected = 2
+01284: 				}
+01285: 			}
+01286: 			cancelLookup()
+01287: 			postSubmitLookupMS = time.Since(lookupStart).Milliseconds()
+01288: 			if correctedFill <= 0 || grossFillShares <= 0 {
+01289: 				// KALSHI SAFETY: MATCHED status without authoritative price AND
+01290: 				// quantity is not sufficient to record inventory.
+01291: 				t.logger.Warn("trader: Kalshi matched order missing authoritative fill data; deferring to reconciliation",
+01292: 					zap.String("request", requestName),
+01293: 					zap.String("order_id", orderID),
+01294: 					zap.Float64("resolved_price", correctedFill),
 
---- settlement at strategy/trader.go:3900 (context 3894-3906) ---
-03894: 	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
-03895: 	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
-03896: 	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
-03897: 	FetchUSDCBalance(context.Context) (float64, error)
-03898: 	ResolveMarket(context.Context, string) (bool, bool, error)
-03899: 
-03900: 	// Legacy Polymarket settlement/allowance methods.
-03901: 	// Kalshi adapter will explicitly reject these; Kalshi does not use CTF,
-03902: 	// Polygon token allowances, or claim redemption.
-03903: 	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
-03904: 	HasCTFBalance(context.Context, string) (bool, error)
-03905: 	RedeemCTFPosition(context.Context, string, bool) error
-03906: 	TriggerConditionalApproval(context.Context, string, time.Duration) error
+--- grossFillShares at strategy/trader.go:1295 (context 1289-1301) ---
+01289: 				// KALSHI SAFETY: MATCHED status without authoritative price AND
+01290: 				// quantity is not sufficient to record inventory.
+01291: 				t.logger.Warn("trader: Kalshi matched order missing authoritative fill data; deferring to reconciliation",
+01292: 					zap.String("request", requestName),
+01293: 					zap.String("order_id", orderID),
+01294: 					zap.Float64("resolved_price", correctedFill),
+01295: 					zap.Float64("resolved_shares", grossFillShares),
+01296: 					zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
+01297: 				)
+01298: 				t.setPendingPairArbOrder(orderID, tokenID, requestName)
+01299: 				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
+01300: 				return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
+01301: 					fmt.Errorf("pair arb: Kalshi order %s matched but authoritative fill data is not available yet", orderID)
 
---- settlement at strategy/trader.go:3986 (context 3980-3992) ---
-03980: 	tickSizeMu                  sync.RWMutex
-03981: 	tickSizeByToken             map[string]tickSizeSnapshot
-03982: 	pairArbRetryAfter           time.Time
-03983: 	pairArbForceCloseRetryAfter time.Time
-03984: 	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
-03985: 	// Used to suppress the orphan-liquidation trigger when the wallet API still shows
-03986: 	// the just-sold shares (settlement / indexing lag).
-03987: 	lastPairArbCloseAt time.Time
-03988: 	// lastPairArbCloseConditionID is the condition ID tied to lastPairArbCloseAt.
-03989: 	// Used to scope short post-close re-entry holds to the same market only.
-03990: 	lastPairArbCloseConditionID string
-03991: 	// pairArbHedgeOrphanFlag is set when forceClosePairArb fires while a pre-placed hedge
-03992: 	// order was still tracked (pendingHedgePrePlace != nil). In that case the hedge may
+--- grossFillShares at strategy/trader.go:1346 (context 1340-1352) ---
+01340: 			}
+01341: 			gr, grErr := t.getOrderTimed(ctx, requestName+"_gtc_poll", orderID)
+01342: 			if grErr != nil || gr == nil {
+01343: 				// Matched orders may disappear from order lookup quickly; reconcile
+01344: 				// with trades to avoid false timeout/cancel on already-filled buys.
+01345: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01346: 					grossFillShares = fillsGross
+01347: 					if fillsAvg > 0 {
+01348: 						correctedFill = fillsAvg
+01349: 					}
+01350: 					fillSource = "gtc_poll_fills"
+01351: 					break
+01352: 				}
 
---- settlement at strategy/trader.go:4632 (context 4626-4638) ---
-04626: }
-04627: 
-04628: func isPendingHedgeBuy(requestName string) bool {
-04629: 	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
-04630: }
-04631: 
-04632: func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
-04633: 	if t.pendingHedgePrePlace != nil {
-04634: 		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
-04635: 			return true
-04636: 		}
-04637: 	}
-04638: 	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
+--- grossFillShares at strategy/trader.go:1362 (context 1356-1368) ---
+01356: 			if pollStatus == "matched" || pollStatus == "filled" {
+01357: 				if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+01358: 					correctedFill = prc
+01359: 					fillSource = "gtc_poll"
+01360: 				}
+01361: 				if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
+01362: 					grossFillShares = sm
+01363: 					fillSource = "gtc_poll"
+01364: 				}
+01365: 				// The order-status SizeMatched field reflects CLOB-matched size, not actual
+01366: 				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
+01367: 				// Cross-check against the fills endpoint which reports actual token delivery.
+01368: 				// This is the same verification the MATCHED-on-submit path performs.
 
---- settlement at strategy/trader.go:5106 (context 5100-5112) ---
-05100: 		zap.String("yes_token", yesTokenID),
-05101: 		zap.String("no_token", noTokenID),
-05102: 	)
-05103: 	t.liquidateOrphanedPairArbInventory(ctx, yesTokenID, noTokenID, approxYesPrice)
-05104: 	// Always clear the pending order after liquidation: the sell has been submitted so the
-05105: 	// order-ID no longer represents live exposure. ensureNoPairArbInventory may fail due to
-05106: 	// settlement lag even after a successful sell, which previously left pendingPairArb set
-05107: 	// forever and blocked every future entry with "pending order is MATCHED".
-05108: 	t.clearPendingPairArbOrder()
-05109: 	go t.monitorAndLiquidateOrphanedPairArbInventory(yesTokenID, noTokenID, approxYesPrice)
-05110: }
-05111: 
-05112: func (t *Trader) reconcilePendingPairArbOrder(ctx context.Context) error {
+--- grossFillShares at strategy/trader.go:1370 (context 1364-1376) ---
+01364: 				}
+01365: 				// The order-status SizeMatched field reflects CLOB-matched size, not actual
+01366: 				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
+01367: 				// Cross-check against the fills endpoint which reports actual token delivery.
+01368: 				// This is the same verification the MATCHED-on-submit path performs.
+01369: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01370: 					grossFillShares = fillsGross
+01371: 					if fillsAvg > 0 {
+01372: 						correctedFill = fillsAvg
+01373: 					}
+01374: 					fillSource = "gtc_poll_fills"
+01375: 				}
+01376: 				break
 
---- settlement at strategy/trader.go:5813 (context 5807-5819) ---
-05807: 		side = "no"
-05808: 	}
-05809: 	return conditionID + ":" + side
-05810: }
-05811: 
-05812: func (t *Trader) enqueueClaimRetry(claim pendingClaim) {
-05813: 	// Kalshi settlement is automatic after market finalization.
-05814: 	return
-05815: }
-05816: 
-05817: func (t *Trader) DashboardClaimSnapshot() DashboardClaimSnapshot {
-05818: 	t.claimMu.Lock()
-05819: 	defer t.claimMu.Unlock()
+--- grossFillShares at strategy/trader.go:1380 (context 1374-1386) ---
+01374: 					fillSource = "gtc_poll_fills"
+01375: 				}
+01376: 				break
+01377: 			}
+01378: 			if pollStatus == "unmatched" || pollStatus == "canceled" || pollStatus == "cancelled" || pollStatus == "expired" {
+01379: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01380: 					grossFillShares = fillsGross
+01381: 					if fillsAvg > 0 {
+01382: 						correctedFill = fillsAvg
+01383: 					}
+01384: 					fillSource = "gtc_poll_fills"
+01385: 					break
+01386: 				}
 
---- settlement at strategy/trader.go:6303 (context 6297-6309) ---
-06297: 				zap.Float64("tracked_shares", pos.Shares),
-06298: 			)
-06299: 			sellShares = pos.Shares
-06300: 		}
-06301: 		if sellShares <= 0 {
-06302: 			pos.SellPending = false
-06303: 			// Shares not yet visible in balance API (common if settlement is delayed).
-06304: 			// Back off for 2s to avoid hammering the API on every 500ms tick.
-06305: 			pos.SellDelayUntil = time.Now().Add(2 * time.Second)
-06306: 			t.savePositionState()
-06307: 			return fmt.Errorf("place sell order: no sellable conditional token balance available (will retry in 2s)")
-06308: 		}
-06309: 		if sellShares < pos.Shares {
+--- grossFillShares at strategy/trader.go:1424 (context 1418-1430) ---
+01418: 						break
+01419: 					}
+01420: 				}
+01421: 			}
+01422: 		}
+01423: 		postSubmitLookupMS = time.Since(pollStart).Milliseconds()
+01424: 		if correctedFill <= 0 && grossFillShares <= 0 {
+01425: 			_ = t.cancelOrderTimed(ctx, requestName+"_cancel_timeout", orderID)
+01426: 			// Cancel-vs-match race hardening: the order can be MATCHED while the cancel
+01427: 			// request is in-flight or while status propagation lags. Reconcile once more
+01428: 			// before declaring timeout so we can continue hedge flow immediately.
+01429: 			if gr, grErr := t.getOrderTimed(ctx, requestName+"_post_cancel_lookup", orderID); grErr == nil && gr != nil {
+01430: 				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
 
---- settlement at strategy/trader.go:7132 (context 7126-7138) ---
-07126: 				return false, lastBal, ctx.Err()
-07127: 			case <-time.After(settleProbeInterval):
-07128: 			}
-07129: 		}
-07130: 	}
-07131: 	if lastErr != nil {
-07132: 		t.logger.Warn("trader: pair arb sell-at-99 settlement probe error",
-07133: 			zap.String("side", side),
-07134: 			zap.String("token_id", tokenID),
-07135: 			zap.Float64("last_balance", lastBal),
-07136: 			zap.Error(lastErr),
-07137: 		)
-07138: 	}
+--- grossFillShares at strategy/trader.go:1437 (context 1431-1443) ---
+01431: 				if pcStatus == "matched" || pcStatus == "filled" {
+01432: 					if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+01433: 						correctedFill = prc
+01434: 						fillSource = "post_cancel_lookup"
+01435: 					}
+01436: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+01437: 						grossFillShares = sm
+01438: 						fillSource = "post_cancel_lookup"
+01439: 					}
+01440: 					if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01441: 						grossFillShares = fillsGross
+01442: 						if fillsAvg > 0 {
+01443: 							correctedFill = fillsAvg
 
---- settlement at strategy/trader.go:7466 (context 7460-7472) ---
-07460: 			settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
-07461: 			if settleErr != nil {
-07462: 				return settleErr
-07463: 			}
-07464: 			if !settled {
-07465: 				t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
-07466: 				t.setPairExitState(pair, pairExitStateOrdersLive, "window complete; fill seen, awaiting settlement confirmation")
-07467: 				t.savePositionState()
-07468: 				return nil
-07469: 			}
-07470: 			walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
-07471: 			if balErr != nil {
-07472: 				return balErr
+--- grossFillShares at strategy/trader.go:1441 (context 1435-1447) ---
+01435: 					}
+01436: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+01437: 						grossFillShares = sm
+01438: 						fillSource = "post_cancel_lookup"
+01439: 					}
+01440: 					if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01441: 						grossFillShares = fillsGross
+01442: 						if fillsAvg > 0 {
+01443: 							correctedFill = fillsAvg
+01444: 						}
+01445: 						fillSource = "post_cancel_fills"
+01446: 					}
+01447: 				}
 
---- settlement at strategy/trader.go:7528 (context 7522-7534) ---
-07522: 	settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
-07523: 	if settleErr != nil {
-07524: 		return settleErr
-07525: 	}
-07526: 	if !settled {
-07527: 		t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
-07528: 		t.setPairExitState(pair, pairExitStateOrdersLive, "fill reported; awaiting balance settlement confirmation")
-07529: 		t.savePositionState()
-07530: 		return nil
-07531: 	}
-07532: 	walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
-07533: 	if balErr != nil {
-07534: 		return balErr
+--- grossFillShares at strategy/trader.go:1448 (context 1442-1454) ---
+01442: 						if fillsAvg > 0 {
+01443: 							correctedFill = fillsAvg
+01444: 						}
+01445: 						fillSource = "post_cancel_fills"
+01446: 					}
+01447: 				}
+01448: 				if correctedFill <= 0 && grossFillShares <= 0 {
+01449: 					// Partial-fill hardening: canceled GTC orders can still report matched
+01450: 					// shares even when /data/trades lags. Treat non-zero size_matched as
+01451: 					// authoritative so we do not place a second lead buy on top.
+01452: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+01453: 						grossFillShares = sm
+01454: 						if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
 
---- settlement at strategy/trader.go:7616 (context 7610-7622) ---
-07610: 		if pos.IsResolutionSnipe {
-07611: 			if !winning {
-07612: 				return t.closePosition(ctx, tokenPrice,
-07613: 					fmt.Sprintf("resolution_snipe_losing_end (rem=%.0fs)", time.Until(pos.WindowEnd).Seconds()))
-07614: 			}
-07615: 			// Winning resolution snipe: sell at 0.99 now rather than waiting for CTF
-07616: 			// settlement (which takes 1-2 minutes after window close).
-07617: 			return t.closePosition(ctx, 0.99,
-07618: 				fmt.Sprintf("resolution_snipe_winning_sell99 (btc=%.2f, open=%.2f, rem=%.0fs)",
-07619: 					btcLatest, openPrice, time.Until(pos.WindowEnd).Seconds()))
-07620: 		}
-07621: 		// Conviction positions manage their own expiry via the 5s gate below;
-07622: 		// do NOT apply the normal safeExitBuffer close here (would fire too early).
+--- grossFillShares at strategy/trader.go:1453 (context 1447-1459) ---
+01447: 				}
+01448: 				if correctedFill <= 0 && grossFillShares <= 0 {
+01449: 					// Partial-fill hardening: canceled GTC orders can still report matched
+01450: 					// shares even when /data/trades lags. Treat non-zero size_matched as
+01451: 					// authoritative so we do not place a second lead buy on top.
+01452: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+01453: 						grossFillShares = sm
+01454: 						if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+01455: 							correctedFill = prc
+01456: 						}
+01457: 						fillSource = "post_cancel_size_matched"
+01458: 						t.logger.Warn("trader: pair arb buy recovered partial fill from post-cancel size_matched",
+01459: 							zap.String("request", requestName),
 
---- settlement at strategy/trader.go:7684 (context 7678-7690) ---
-07678: 	if now.After(pos.ExpiresAt) {
-07679: 		if pos.IsScalp {
-07680: 			return t.closePosition(ctx, tokenPrice, "max_hold_timeout")
-07681: 		}
-07682: 		if winning {
-07683: 			if pos.IsResolutionSnipe {
-07684: 				// Winning resolution positions hold through settlement and claim.
-07685: 				return nil
-07686: 			}
-07687: 			if pos.IsConviction {
-07688: 				// Hold-to-resolution entries exit at 0.99 near expiry once they are winning.
-07689: 				reason := "conviction_expiry_sell99"
-07690: 				if pos.IsReversalSnipe {
+--- grossFillShares at strategy/trader.go:1467 (context 1461-1473) ---
+01461: 							zap.String("status", gr.Status),
+01462: 							zap.String("size_matched", gr.SizeMatched),
+01463: 						)
+01464: 					}
+01465: 				}
+01466: 			}
+01467: 			if correctedFill <= 0 && grossFillShares <= 0 {
+01468: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01469: 					grossFillShares = fillsGross
+01470: 					if fillsAvg > 0 {
+01471: 						correctedFill = fillsAvg
+01472: 					}
+01473: 					fillSource = "post_cancel_fills"
 
---- settlement at strategy/trader.go:7815 (context 7809-7821) ---
-07809: // PostCloseGraceSell attempts to sell any remaining winning position on the CLOB
-07810: // during the ~30-60 second grace window that remains open after the market closes.
-07811: // The CLOB typically matches orders at 0.99 for the winning side during this period.
-07812: //
-07813: // It is a no-op for:
-07814: //   - flat positions (nothing to sell)
-07815: //   - paper mode (settlement is handled by SettleExpiredPosition)
-07816: //   - the losing side (tokens will be worth $0.00; selling at 0.99 would be a loss)
-07817: //
-07818: // resolvedYes should reflect the final BTC vs open-price comparison.
-07819: // Any shares not sold within graceDuration are left for SettleExpiredPosition.
-07820: func (t *Trader) PostCloseGraceSell(ctx context.Context, resolvedYes bool, graceDuration time.Duration) error {
-07821: 	if t.pairedPosition != nil {
+--- grossFillShares at strategy/trader.go:1469 (context 1463-1475) ---
+01463: 						)
+01464: 					}
+01465: 				}
+01466: 			}
+01467: 			if correctedFill <= 0 && grossFillShares <= 0 {
+01468: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
+01469: 					grossFillShares = fillsGross
+01470: 					if fillsAvg > 0 {
+01471: 						correctedFill = fillsAvg
+01472: 					}
+01473: 					fillSource = "post_cancel_fills"
+01474: 				}
+01475: 			}
 
---- settlement at strategy/trader.go:7832 (context 7826-7838) ---
-07826: 	}
-07827: 	if t.cfg.PaperTrade {
-07828: 		return nil
-07829: 	}
-07830: 	pos := t.position
-07831: 	if pos.IsResolutionSnipe {
-07832: 		t.logger.Info("trader: post-close grace sell skipped for resolution position; waiting for settlement claim",
-07833: 			zap.String("condition_id", pos.ConditionID),
-07834: 			zap.Bool("is_no_side", pos.IsNoSide),
-07835: 		)
-07836: 		return nil
-07837: 	}
-07838: 	onWinningSide := (!pos.IsNoSide && resolvedYes) || (pos.IsNoSide && !resolvedYes)
+--- grossFillShares at strategy/trader.go:1476 (context 1470-1482) ---
+01470: 					if fillsAvg > 0 {
+01471: 						correctedFill = fillsAvg
+01472: 					}
+01473: 					fillSource = "post_cancel_fills"
+01474: 				}
+01475: 			}
+01476: 			if correctedFill <= 0 && grossFillShares <= 0 {
+01477: 				if hedgeAbortTriggered {
+01478: 					abortReason := "pre-placed hedge filled first"
+01479: 					if hedgeAbortOrderID != "" {
+01480: 						abortReason = fmt.Sprintf("pre-placed hedge %s filled first", hedgeAbortOrderID)
+01481: 					}
+01482: 					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: aborted lead wait because %s order=%s", orderType, activityRequestLabel(requestName), abortReason, orderID))
 

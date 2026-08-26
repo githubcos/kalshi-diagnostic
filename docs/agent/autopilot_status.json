@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T00:35:13+00:00",
-  "cycle": 1787704513,
-  "phase": "PAPER_EVIDENCE",
-  "percent": 95,
-  "result": "PASS",
-  "detail": "Finite gates captured; tests=PASS build=PASS paper=RUNNING. High-frequency PAPER profile remains configured.",
-  "next": "OBSERVE_PAPER_TRADES"
+  "utc": "2026-08-26T00:43:13+00:00",
+  "cycle": 1787704993,
+  "phase": "PARTIAL_FILL",
+  "percent": 25,
+  "result": "EVIDENCE_CAPTURED",
+  "detail": "PARTIAL_FILL live execution context published (20 excerpts).",
+  "next": "HEDGE_TIMING"
 }
