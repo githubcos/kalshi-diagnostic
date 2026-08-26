@@ -1,62 +1,14 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-decouple-lead-hedge-paper-v2-20260826-1802
-JOB_START_UTC=2026-08-26T17:59:28+00:00
+JOB_ID=kalshi-postpatch-paper-status-20260826-1801
+JOB_START_UTC=2026-08-26T18:01:03+00:00
 LIVE_ALLOWED=false
-[2026-08-26T17:59:28+00:00] ACTION 1/9 STATUS START
-[2026-08-26T17:59:28+00:00] STATUS PASS
-[2026-08-26T17:59:28+00:00] ACTION 1/9 STATUS PASS
-[2026-08-26T17:59:28+00:00] ACTION 2/9 BACKUP START
-[2026-08-26T17:59:28+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175928.tar.gz
-[2026-08-26T17:59:38+00:00] BACKUP PASS files=116
-[2026-08-26T17:59:38+00:00] ACTION 2/9 BACKUP PASS
-[2026-08-26T17:59:38+00:00] ACTION 3/9 APPLY_PATCH START
-[2026-08-26T17:59:38+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175938.tar.gz
-[2026-08-26T17:59:48+00:00] BACKUP PASS files=116
-[2026-08-26T17:59:48+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-t39x6cml.patch
-    checking file strategy/signal.go
-    Hunk #1 succeeded at 2692 with fuzz 1.
-[2026-08-26T17:59:48+00:00] PATCH_DRY_RUN END rc=0 duration=0.00s
-[2026-08-26T17:59:48+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-t39x6cml.patch
-    patching file strategy/signal.go
-    Hunk #1 succeeded at 2692 with fuzz 1.
-[2026-08-26T17:59:48+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-26T17:59:48+00:00] ACTION 3/9 APPLY_PATCH PASS
-[2026-08-26T17:59:48+00:00] ACTION 4/9 GOFMT START
-[2026-08-26T17:59:48+00:00] GOFMT START: gofmt -w /home/ubuntu/KalshiArbo/kalshiarbo/strategy/signal.go
-[2026-08-26T17:59:48+00:00] GOFMT END rc=0 duration=0.02s
-[2026-08-26T17:59:48+00:00] ACTION 4/9 GOFMT PASS
-[2026-08-26T17:59:48+00:00] ACTION 5/9 GO_TEST START
-[2026-08-26T17:59:48+00:00] GO_TEST START: go test ./...
-    ?   	github.com/polyarb	[no test files]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    ok  	github.com/polyarb/discord	(cached)
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    ok  	github.com/polyarb/strategy	0.018s
-    ok  	github.com/polyarb/web	(cached)
-[2026-08-26T17:59:58+00:00] GO_TEST END rc=0 duration=10.05s
-[2026-08-26T17:59:58+00:00] ACTION 5/9 GO_TEST PASS
-[2026-08-26T17:59:58+00:00] ACTION 6/9 GO_BUILD START
-[2026-08-26T17:59:58+00:00] GO_BUILD START: go build -o kalshiarbo .
-[2026-08-26T18:00:00+00:00] GO_BUILD END rc=0 duration=2.61s
-[2026-08-26T18:00:00+00:00] ACTION 6/9 GO_BUILD PASS
-[2026-08-26T18:00:00+00:00] ACTION 7/9 START_PAPER START
-[2026-08-26T18:00:00+00:00] STOP_PAPER START
-[2026-08-26T18:00:03+00:00] STOP_PAPER PASS
-[2026-08-26T18:00:06+00:00] START_PAPER PASS
-[2026-08-26T18:00:06+00:00] ACTION 7/9 START_PAPER PASS
-[2026-08-26T18:00:06+00:00] ACTION 8/9 UPDATE_TELEMETRY START
-[2026-08-26T18:00:07+00:00] UPDATE kalshi-agent-telemetry.service PASS
-[2026-08-26T18:00:07+00:00] ACTION 8/9 UPDATE_TELEMETRY PASS
-[2026-08-26T18:00:07+00:00] ACTION 9/9 STATUS START
-[2026-08-26T18:00:07+00:00] STATUS PASS
-[2026-08-26T18:00:07+00:00] ACTION 9/9 STATUS PASS
-[2026-08-26T18:00:07+00:00] JOB RESULT=PASS
+[2026-08-26T18:01:03+00:00] ACTION 1/3 STATUS START
+[2026-08-26T18:01:04+00:00] STATUS PASS
+[2026-08-26T18:01:04+00:00] ACTION 1/3 STATUS PASS
+[2026-08-26T18:01:04+00:00] ACTION 2/3 UPDATE_TELEMETRY START
+[2026-08-26T18:01:04+00:00] UPDATE kalshi-agent-telemetry.service PASS
+[2026-08-26T18:01:04+00:00] ACTION 2/3 UPDATE_TELEMETRY PASS
+[2026-08-26T18:01:04+00:00] ACTION 3/3 STATUS START
+[2026-08-26T18:01:04+00:00] STATUS PASS
+[2026-08-26T18:01:04+00:00] ACTION 3/3 STATUS PASS
+[2026-08-26T18:01:04+00:00] JOB RESULT=PASS
