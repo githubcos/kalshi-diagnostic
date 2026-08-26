@@ -1,0 +1,94 @@
+=== LOCATION ===
+/home/ubuntu/PolyArb/polyarbpro_2.4
+
+=== FILES ===
+total 51M
+drwxrwxrwx 15 ubuntu ubuntu 4.0K Aug 25 08:17 .
+drwxrwxr-x  3 ubuntu ubuntu 4.0K Aug 23 23:04 ..
+-rw-rw-rw-  1 ubuntu ubuntu 8.4K Mar 31 18:55 README.md
+-rw-rw-rw-  1 ubuntu ubuntu  365 Mar  6 07:49 ansi_other.go
+-rw-rw-rw-  1 ubuntu ubuntu 2.3K Mar  6 07:49 ansi_windows.go
+drwxr-xr-x  2 ubuntu ubuntu 4.0K Aug 25 06:08 archive_signals
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 binance
+-rw-rw-rw-  1 ubuntu ubuntu  14K Apr 29 20:54 builder_relayer_claim.js
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 bybit
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 coinbase
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 config
+-rw-------  1 ubuntu ubuntu 5.5K Aug 24 00:07 config.json
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 deribit
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 discord
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 display
+-rw-rw-rw-  1 ubuntu ubuntu  998 Mar 29 15:41 go.mod
+-rw-rw-rw-  1 ubuntu ubuntu  13K Mar  6 07:49 go.sum
+drwxr-xr-x  2 ubuntu ubuntu 4.0K Aug 26 08:00 logs
+-rw-rw-rw-  1 ubuntu ubuntu 110K Apr 29 21:18 main.go
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 market
+-rw-rw-rw-  1 ubuntu ubuntu  471 Feb 18  2026 package.json
+-rwxrwxr-x  1 ubuntu ubuntu  15M Aug 23 23:04 polyarb-original
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 polymarket
+-rw-r--r--  1 ubuntu ubuntu  36M Aug 25 08:17 signals.jsonl
+drwxrwxrwx  2 ubuntu ubuntu 4.0K Apr 28 20:17 strategy
+-rw-rw-rw-  1 ubuntu ubuntu  19K Mar 30 18:47 strategy_presets.json
+-rw-r--r--  1 ubuntu ubuntu  25K Aug 25 07:58 trades.jsonl
+drwxrwxrwx  3 ubuntu ubuntu 4.0K Apr 28 20:17 web
+-rw-------  1 ubuntu ubuntu   85 Aug 23 23:05 web_auth.json
+
+=== BINARY ===
+./polyarb-original: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=2278c98027d223e388fe2571df7d49e694b61f3a, for GNU/Linux 3.2.0, with debug_info, not stripped
+a7f76d1ed8c6369b2bf858aaeea5a9feda85d7cae3d0dba0ce7fec89b70e1fea  ./polyarb-original
+
+=== CONFIG FILES ===
+./strategy_presets.json
+./package.json
+./config.json
+./config/config.go
+./web_auth.json
+
+=== PAPER / LIVE SETTINGS ===
+./strategy_presets.json:8:                  "PAIR_ARB_TRADE_SIZE_USD": "6",
+./strategy_presets.json:9:                  "TRADE_SIZE_USD": "5",
+./strategy_presets.json:72:                  "PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD": "0",
+./strategy_presets.json:137:                  "PAIR_ARB_TRADE_SIZE_USD": "6",
+./strategy_presets.json:141:                  "TRADE_SIZE_USD": "5"
+./strategy_presets.json:148:                  "PAIR_ARB_TRADE_SIZE_USD": "8",
+./strategy_presets.json:149:                  "TRADE_SIZE_USD": "5",
+./strategy_presets.json:214:                  "PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD": "0",
+./strategy_presets.json:242:                  "PAIR_ARB_TRADE_SIZE_USD": "4",
+./strategy_presets.json:243:                  "TRADE_SIZE_USD": "5",
+./strategy_presets.json:306:                  "PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD": "0",
+./config.json:2:  "ACTIVITY_WS_URL": "wss://ws-live-data.polymarket.com/",
+./config.json:45:  "PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD": "0",
+./config.json:109:  "PAIR_ARB_TRADE_SIZE_USD": "5",
+./config.json:113:  "PAPER_START_BALANCE": "20",
+./config.json:114:  "PAPER_TRADE": "true",
+./config.json:121:  "PROXY_WALLET_ADDRESS": "0xd68f0fe396736D105a624698f7e234c53788adE5",
+./config.json:129:  "TRADE_SIZE_USD": "5"
+
+=== RECENT LOGS ===
+total 14M
+-rw-r--r-- 1 ubuntu ubuntu 235K Aug 26 08:23 polyarb_20260826_08.log
+-rw-r--r-- 1 ubuntu ubuntu 592K Aug 26 07:59 polyarb_20260826_07.log
+-rw-r--r-- 1 ubuntu ubuntu 556K Aug 26 06:59 polyarb_20260826_06.log
+-rw-r--r-- 1 ubuntu ubuntu 576K Aug 26 05:59 polyarb_20260826_05.log
+-rw-r--r-- 1 ubuntu ubuntu 514K Aug 26 04:59 polyarb_20260826_04.log
+-rw-r--r-- 1 ubuntu ubuntu 448K Aug 26 03:59 polyarb_20260826_03.log
+-rw-r--r-- 1 ubuntu ubuntu 493K Aug 26 02:59 polyarb_20260826_02.log
+-rw-r--r-- 1 ubuntu ubuntu 560K Aug 26 01:59 polyarb_20260826_01.log
+-rw-r--r-- 1 ubuntu ubuntu 624K Aug 26 00:59 polyarb_20260826_00.log
+-rw-r--r-- 1 ubuntu ubuntu 535K Aug 25 23:59 polyarb_20260825_23.log
+-rw-r--r-- 1 ubuntu ubuntu 526K Aug 25 22:59 polyarb_20260825_22.log
+-rw-r--r-- 1 ubuntu ubuntu 620K Aug 25 21:59 polyarb_20260825_21.log
+-rw-r--r-- 1 ubuntu ubuntu 601K Aug 25 20:59 polyarb_20260825_20.log
+-rw-r--r-- 1 ubuntu ubuntu 546K Aug 25 19:59 polyarb_20260825_19.log
+-rw-r--r-- 1 ubuntu ubuntu 522K Aug 25 18:59 polyarb_20260825_18.log
+-rw-r--r-- 1 ubuntu ubuntu 592K Aug 25 17:59 polyarb_20260825_17.log
+-rw-r--r-- 1 ubuntu ubuntu 596K Aug 25 16:59 polyarb_20260825_16.log
+-rw-r--r-- 1 ubuntu ubuntu 656K Aug 25 15:59 polyarb_20260825_15.log
+-rw-r--r-- 1 ubuntu ubuntu 751K Aug 25 14:59 polyarb_20260825_14.log
+
+=== POSSIBLE START COMMAND / FLAGS ===
+Usage of ./polyarb-original:
+  -live
+    	disable paper-trade mode and submit real orders
+  -port string
+    	HTTP port for the web dashboard (default 8080) (default "8080")
