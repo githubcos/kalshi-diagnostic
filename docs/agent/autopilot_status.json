@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T01:53:23+00:00",
-  "cycle": 1787709203,
-  "phase": "PAPER_HIGH_VOLUME_STRESS",
+  "utc": "2026-08-26T01:53:45+00:00",
+  "cycle": 1787709225,
+  "phase": "PAPER_HEDGEABILITY_STRESS",
   "percent": 50,
   "result": "RUNNING",
-  "detail": "High-volume PAPER v3 running; current=$100.00. Logs preserved.",
-  "next": "CONTINUE_UNTIL_200_OR_0"
+  "detail": "Hedgeability PAPER v4 running; current=$100.00. Logs preserved.",
+  "next": "COMPARE_HEDGE_RATE_TIMEOUT_RATE_EV"
 }

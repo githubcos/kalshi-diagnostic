@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T01:53:35+00:00
+UPDATED_UTC=2026-08-26T01:53:47+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=37 hedge=1 closed=37
-CLOSE_REASONS={"force_close:user_stop": 1, "pair_fill_leg_timeout": 35, "pair_paper_locked_recycle": 1}
+EVENTS lead=0 hedge=0 closed=0
+CLOSE_REASONS={}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -45,18 +45,18 @@ PAIR_ARB_DUAL_PRE_PLACE=true
 PAIR_ARB_ENABLED=True
 PAIR_ARB_FLOW_MOVEMENT_MODE=false
 PAIR_ARB_HEDGE_PRE_OFFSET_CENTS=0
-PAIR_ARB_HEDGE_TIMEOUT_SEC=8
+PAIR_ARB_HEDGE_TIMEOUT_SEC=20
 PAIR_ARB_LEAD_BUY_SLIP_TICKS=2
 PAIR_ARB_LEAD_BUY_TIMEOUT_SEC=0
 PAIR_ARB_LEAD_ORDER_TYPE=FAK
-PAIR_ARB_MAX_ADVERSE_YES_DRIFT_CENTS=3
+PAIR_ARB_MAX_ADVERSE_YES_DRIFT_CENTS=2
 PAIR_ARB_MAX_BTC_GAP_USD=0
 PAIR_ARB_MAX_CL_AGE_SEC=120
 PAIR_ARB_MAX_COINBASE_SPREAD_USD=0
 PAIR_ARB_MAX_CONTRA_OI_DELTA_USD=0
-PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=0
-PAIR_ARB_MAX_SIGNAL_AGE_SEC=10
-PAIR_ARB_MAX_TOKEN_PRICE=0.95
+PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=2
+PAIR_ARB_MAX_SIGNAL_AGE_SEC=3
+PAIR_ARB_MAX_TOKEN_PRICE=0.9
 PAIR_ARB_MAX_WINDOW_SEC=850
 PAIR_ARB_MIN_BOOK_IMBALANCE=0
 PAIR_ARB_MIN_BTC_GAP_USD=5
@@ -66,9 +66,9 @@ PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE=0
 PAIR_ARB_MIN_CVD_BTC=0
 PAIR_ARB_MIN_GAP_HOLD_SEC=0
 PAIR_ARB_MIN_GAP_VELOCITY_USD=0
-PAIR_ARB_MIN_LOCKED_PROFIT_CENTS=3
+PAIR_ARB_MIN_LOCKED_PROFIT_CENTS=1
 PAIR_ARB_MIN_OI_DELTA_USD=0
-PAIR_ARB_MIN_TOKEN_PRICE=0.05
+PAIR_ARB_MIN_TOKEN_PRICE=0.1
 PAIR_ARB_MIN_WINDOW_SEC=0
 PAIR_ARB_ML_FILTER_AUTO_TRAIN=false
 PAIR_ARB_ML_FILTER_AUTO_TRAIN_INTERVAL_MIN=60
@@ -95,11 +95,11 @@ PAIR_ARB_SELL_AT_99=false
 PAIR_ARB_SIGNALS_RETENTION_HOURS=0
 PAIR_ARB_SIGNAL_MIN_GAP_USD=1
 PAIR_ARB_STOP_COOLDOWN_SEC=0
-PAIR_ARB_STOP_LOSS_CENTS=0
+PAIR_ARB_STOP_LOSS_CENTS=2
 PAIR_ARB_STOP_LOSS_MIN_GAP_AGAINST_USD=0
-PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC=0
+PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC=1
 PAIR_ARB_TRADE_SIZE_USD=5
-PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC=12
+PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC=6
 PAIR_ARB_UNPROFITABLE_ABORT_MIN_GAP_AGAINST_USD=2
 PAIR_ARB_YES_DRIFT_WINDOW_SEC=10
 PAPER_START_BALANCE=100
@@ -117,28 +117,4 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.3838  (--7.89%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78813.94 open=78848.84 gap=$-34.9 no=0.6500 prob=0.60 rem=547s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▲ P&L  +$0.0612  (+1.26%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78801.88 open=78848.84 gap=$-47.0 no=0.7000 prob=0.63 rem=538s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.5500  (--11.32%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78812.02 open=78848.84 gap=$-36.8 no=0.6700 prob=0.60 rem=527s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.0884  (--1.84%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78809.58 open=78848.84 gap=$-39.3 no=0.6900 prob=0.61 rem=517s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.1510  (--3.10%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78802.49 open=78848.84 gap=$-46.3 no=0.7200 prob=0.63 rem=509s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.2663  (--5.46%)  │  Reason: force_close:user_stop  │  Held: 2s
-║     NET P&L   -$10.8470   (-5.97%)                                 ║
-║     Balance: $89.15 / $100.00                                      ║
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false

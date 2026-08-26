@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T01:53:35+00:00",
-  "publisher_pid": 4080093,
+  "utc": "2026-08-26T01:53:46+00:00",
+  "publisher_pid": 4137582,
   "heartbeat": {
-    "utc": "2026-08-26T01:53:29+00:00",
-    "epoch": 1787709209.987818,
+    "utc": "2026-08-26T01:53:46+00:00",
+    "epoch": 1787709226.8659651,
     "pid": 4075083,
-    "status": "working",
-    "job_id": "kalshi-paper-hedgeability-v4-20260826-0152"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-paper-locked-recycle-v1-retry3-20260826-0131",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_013140.tar.gz",
+    "last_job_id": "kalshi-paper-hedgeability-v4-20260826-0152",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015329.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T01:32:16+00:00"
+    "last_run_utc": "2026-08-26T01:53:46+00:00"
   },
   "autopilot": null
 }
