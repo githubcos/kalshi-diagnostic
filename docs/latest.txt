@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:39:28+00:00
+UPDATED_UTC=2026-08-26T21:39:35+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -126,3 +126,7 @@ BTC 15m Matched Pair Engine
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78764.20 open=78757.45 gap=$6.8 yes=0.5700 prob=0.52 rem=635s]
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78773.05 open=78757.45 gap=$15.6 yes=0.6400 prob=0.54 rem=630s]
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.10 open=78757.45 gap=$22.7 yes=0.6600 prob=0.56 rem=625s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+▸  │ PAPER   7.28 shares @ $0.6500    fee: 0.0000 sh    cost: $4.85
