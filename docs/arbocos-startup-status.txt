@@ -1,0 +1,42 @@
+=== ARBOCOS FRESH STARTUP ===
+Wed Aug 26 22:20:32 UTC 2026
+
+=== PID ===
+596230
+
+=== PROCESS ===
+UID          PID    PPID  C STIME TTY          TIME CMD
+ubuntu    596230  592877  0 22:19 pts/1    00:00:00 ./arbocos -port 8086
+
+=== PORT 8086 ===
+LISTEN 0      4096               *:8086            *:*    users:(("arbocos",pid=596230,fd=6))                   
+
+=== STARTUP LOG ===
+nohup: ignoring input
+warning: env POLY_API_KEY not set
+warning: env POLY_API_SECRET not set
+warning: env POLY_API_PASSPHRASE not set
+warning: env PRIVATE_KEY_HEX not set
+warning: env PROXY_WALLET_ADDRESS not set
+
+
+  PolyArbPro  First-run setup                       
+                                                     
+  Required credentials are missing from all.env.     
+  Open the setup wizard to configure the bot:        
+                                                     
+       http://localhost:8086/wizard                  
+                                                     
+  Default password: changeme  (change on first login)
+  Press Ctrl-C to exit.                              
+
+
+
+╔══════════════════════════════════════════════════════╗
+║  Dashboard password: changeme                        ║
+║  Change it at: http://localhost:8080/settings        ║
+╚══════════════════════════════════════════════════════╝
+
+
+=== HISTORY FILES ===
+No trade/signal history yet
