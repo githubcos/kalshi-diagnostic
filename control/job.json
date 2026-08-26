@@ -1,15 +1,9 @@
 {
-  "id": "kalshi-kxbtc15m-window-end-v3-retry3-20260826-0238",
+  "id": "kalshi-no-trades-gate-audit-20260826-0243",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "STOP_PAPER"},
-    {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_kxbtc15m_window_end_v3.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["kalshi/market.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
+    {"name": "COLLECT_AUDIT"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
