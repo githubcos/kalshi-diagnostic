@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T17:11:53+00:00",
+  "utc": "2026-08-26T17:12:01+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -134,7 +134,5 @@
     "mark-to-market uses explicit Kalshi YES and NO prices when available",
     "PAPER guard prevents any live order request"
   ],
-  "recent_math_execution_lines": [
-    "\u00b7  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false"
-  ]
+  "recent_math_execution_lines": []
 }
