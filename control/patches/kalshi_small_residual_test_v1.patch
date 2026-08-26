@@ -1,0 +1,42 @@
+--- a/strategy/pair_arb_test.go
++++ b/strategy/pair_arb_test.go
+@@ -1,4 +1,4 @@
+-func TestForceClosePairArbKeepsResidualWhenUnsold(t *testing.T) {
++func TestForceClosePairArbSellsSmallKalshiPaperResidual(t *testing.T) {
+ 	now := time.Now()
+ 	trader := &Trader{
+ 		cfg:      TraderConfig{PaperTrade: true},
+@@ -17,23 +17,18 @@
+ 	}
+ 
+ 	err := trader.forceClosePairArb(context.Background(), 0.42, "pair_fill_leg_timeout")
+-	if err == nil {
+-		t.Fatal("expected forceClosePairArb to fail when residual shares remain unsold")
++	if err != nil {
++		t.Fatalf("expected small Kalshi paper residual to liquidate, got %v", err)
+ 	}
+-	if !strings.Contains(err.Error(), "remains unsold") {
+-		t.Fatalf("expected residual-unsold error, got %v", err)
++	if trader.pairedPosition != nil {
++		t.Fatal("expected pair position to close after residual liquidation")
+ 	}
+-	if trader.pairedPosition == nil {
+-		t.Fatal("expected pair position to remain open when residual cannot be sold")
++	if len(trader.journal) != 2 {
++		t.Fatalf("expected residual and matched close journal records, got %d", len(trader.journal))
+ 	}
+-	if len(trader.journal) != 0 {
+-		t.Fatalf("expected no close journal records, got %d", len(trader.journal))
+-	}
+-	side, shares, _ := trader.pairedPosition.residualPosition()
+-	if side != "YES" {
+-		t.Fatalf("expected YES residual side, got %q", side)
+-	}
+-	if !almostEqual(shares, 3.5) {
+-		t.Fatalf("expected residual shares 3.5, got %.4f", shares)
++	for i, rec := range trader.journal {
++		if !strings.EqualFold(rec.Reason, "pair_fill_leg_timeout") {
++			t.Fatalf("journal[%d] expected pair_fill_leg_timeout reason, got %q", i, rec.Reason)
++		}
+ 	}
+ }
