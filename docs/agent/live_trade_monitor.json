@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T01:08:09+00:00",
+  "utc": "2026-08-26T01:08:17+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -134,5 +134,8 @@
     "mark-to-market uses explicit Kalshi YES and NO prices when available",
     "PAPER guard prevents any live order request"
   ],
-  "recent_math_execution_lines": []
+  "recent_math_execution_lines": [
+    "\u2551     NET P&L   +$0.0000   (+0.00%)                                  \u2551",
+    "\u2551     Balance: $99.52 / $100.00                                      \u2551"
+  ]
 }
