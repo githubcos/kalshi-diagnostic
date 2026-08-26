@@ -1,9 +1,10 @@
 {
-  "id": "kalshi-live-trade-math-monitor-v1-20260826-0045",
+  "id": "kalshi-paper-stress-v2-20260826-0048",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_TELEMETRY"},
+    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
