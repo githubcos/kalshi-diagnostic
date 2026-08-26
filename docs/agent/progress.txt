@@ -40,3 +40,8 @@ LIVE_ALLOWED=false
     ?   	github.com/polyarb/market	[no test files]
     ok  	github.com/polyarb/polymarket	(cached)
     ok  	github.com/polyarb/strategy	(cached)
+    ok  	github.com/polyarb/web	(cached)
+[2026-08-26T09:15:37+00:00] GO_TEST END rc=0 duration=27.63s
+[2026-08-26T09:15:37+00:00] ACTION 4/9 GO_TEST PASS
+[2026-08-26T09:15:37+00:00] ACTION 5/9 GO_BUILD START
+[2026-08-26T09:15:37+00:00] GO_BUILD START: go build -o kalshiarbo .
