@@ -1,9 +1,10 @@
 {
-  "id": "kalshi-live-inspect-20260826-1748",
+  "id": "kalshi-throughput-gate-confirm-20260826-1754",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
+    {"name": "COLLECT_AUDIT"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
