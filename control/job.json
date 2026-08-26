@@ -1,8 +1,9 @@
 {
-  "id": "kalshi-orderbook-auth-fallback-v2-20260826-0828",
+  "id": "kalshi-feed-one-shot-recovery-v3-20260826-0830",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "ROLLBACK", "backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082156.tar.gz"},
     {"name": "BACKUP"},
     {"name": "APPLY_PATCH", "path": "control/patches/kalshi_orderbook_auth_fallback_v2.patch", "strip": 1},
     {"name": "GOFMT", "files": ["kalshi/market.go", "kalshi/feed.go"]},
