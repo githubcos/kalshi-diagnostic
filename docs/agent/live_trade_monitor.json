@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T00:54:17+00:00",
+  "utc": "2026-08-26T00:54:23+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -101,11 +101,12 @@
     "PAPER_TRADE": true,
     "TRADE_SIZE_USD": "5"
   },
-  "counts_in_log_tail": {
+  "counts_in_current_session": {
     "lead_events": 0,
     "hedge_events": 0,
     "closed_events": 0
   },
+  "close_reason_counts": {},
   "execution_latency_ms": {
     "all_count": 0,
     "all_avg": null,
@@ -122,7 +123,7 @@
     "lookup_count": 0,
     "lookup_avg": null
   },
-  "speed_verdict": "NO_EXECUTION_SAMPLE",
+  "speed_verdict": "NO_EXECUTION_LATENCY_SAMPLE",
   "algorithm_invariants": [
     "lead admission uses configured window/gap/token/filter gates",
     "Kalshi inventory uses authoritative filled contract quantity; cash fees do not reduce shares",
