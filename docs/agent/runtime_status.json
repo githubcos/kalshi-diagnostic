@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T02:28:43+00:00",
+  "utc": "2026-08-26T02:28:50+00:00",
   "publisher_pid": 20576,
   "heartbeat": {
-    "utc": "2026-08-26T02:28:39+00:00",
-    "epoch": 1787711319.0554135,
+    "utc": "2026-08-26T02:28:50+00:00",
+    "epoch": 1787711330.0771194,
     "pid": 4075083,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-window-rollover-expected-expiration-v2-retry1-20260826-0229"
   },
   "state": {
     "last_job_id": "kalshi-window-rollover-expected-expiration-v2-20260826-0227",
