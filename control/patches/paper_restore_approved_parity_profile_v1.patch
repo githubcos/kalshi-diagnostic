@@ -1,25 +1,24 @@
 diff --git a/config.json b/config.json
 --- a/config.json
 +++ b/config.json
-@@ -1,0 +1,0 @@
-@@
+@@ -35,1 +35,1 @@
 -  "PAIR_ARB_HEDGE_TIMEOUT_SEC": 3,
 +  "PAIR_ARB_HEDGE_TIMEOUT_SEC": 8,
-@@
+@@ -40,1 +40,1 @@
 -  "PAIR_ARB_MAX_BTC_GAP_USD": 40.0,
 +  "PAIR_ARB_MAX_BTC_GAP_USD": 0,
-@@
+@@ -45,1 +45,1 @@
 -  "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS": 0.0,
 +  "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS": 1.0,
-@@
+@@ -47,1 +47,1 @@
 -  "PAIR_ARB_MAX_TOKEN_PRICE": 0.8,
 +  "PAIR_ARB_MAX_TOKEN_PRICE": 0.95,
-@@
+@@ -50,1 +50,1 @@
 -  "PAIR_ARB_MIN_BTC_GAP_USD": 30.0,
 +  "PAIR_ARB_MIN_BTC_GAP_USD": 1.0,
-@@
+@@ -60,1 +60,1 @@
 -  "PAIR_ARB_MIN_TOKEN_PRICE": 0.7,
 +  "PAIR_ARB_MIN_TOKEN_PRICE": 0.05,
-@@
+@@ -90,1 +90,1 @@
 -  "PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC": 1,
 +  "PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC": 2,
