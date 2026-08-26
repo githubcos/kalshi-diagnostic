@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T01:58:26+00:00",
+  "utc": "2026-08-26T01:58:34+00:00",
   "publisher_pid": 4137582,
   "heartbeat": {
-    "utc": "2026-08-26T01:58:20+00:00",
-    "epoch": 1787709500.6176178,
+    "utc": "2026-08-26T01:58:30+00:00",
+    "epoch": 1787709510.5677812,
     "pid": 4075083,
-    "status": "working",
-    "job_id": "kalshi-unhedgeable-residual-test-v1-20260826-0158"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-unhedgeable-residual-v1-retry2-20260826-0156",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015810.tar.gz",
+    "last_job_id": "kalshi-unhedgeable-residual-test-v1-20260826-0158",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015820.tar.gz",
     "last_result": "FAIL",
-    "last_run_utc": "2026-08-26T01:57:08+00:00"
+    "last_run_utc": "2026-08-26T01:58:29+00:00"
   },
   "autopilot": null
 }
