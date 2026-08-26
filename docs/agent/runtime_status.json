@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T09:16:18+00:00",
-  "publisher_pid": 540,
+  "utc": "2026-08-26T09:16:29+00:00",
+  "publisher_pid": 7435,
   "heartbeat": {
-    "utc": "2026-08-26T09:15:37+00:00",
-    "epoch": 1787735737.7672791,
+    "utc": "2026-08-26T09:16:28+00:00",
+    "epoch": 1787735788.848316,
     "pid": 994,
-    "status": "working",
-    "job_id": "kalshi-feed-rest-diagnostics-v1-20260826-0915"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-feed-source-probe-v1-20260826-0912",
+    "last_job_id": "kalshi-feed-rest-diagnostics-v1-20260826-0915",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_091448.tar.gz",
-    "last_result": "FAIL",
-    "last_run_utc": "2026-08-26T09:12:57+00:00"
+    "last_result": "PASS",
+    "last_run_utc": "2026-08-26T09:16:28+00:00"
   },
   "autopilot": null
 }
