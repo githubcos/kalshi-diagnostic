@@ -1,10 +1,13 @@
 {
-  "id": "kalshi-paper-hedgeability-v4-20260826-0152",
+  "id": "kalshi-unhedgeable-residual-v1-20260826-0155",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_unhedgeable_residual_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go"]},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
     {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
