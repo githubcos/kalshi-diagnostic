@@ -1,0 +1,21 @@
+=== ARBOCOS BASELINE ===
+Wed Aug 26 22:33:00 UTC 2026
+
+=== PROCESS ===
+605288 ./arbocos -port 8086
+
+=== PORT ===
+LISTEN 0      4096               *:8086            *:*    users:(("arbocos",pid=605288,fd=9))                   
+
+=== MODE / STRATEGY ===
+52:  "PAIR_ARB_DUAL_PRE_PLACE": "true",
+53:  "PAIR_ARB_ENABLED": "true",
+56:  "PAIR_ARB_HEDGE_TIMEOUT_SEC": "5",
+77:  "PAIR_ARB_MIN_LOCKED_PROFIT_CENTS": "8",
+109:  "PAIR_ARB_TRADE_SIZE_USD": "5",
+114:  "PAPER_TRADE": "true",
+
+=== DATA FILES ===
+-rw-r--r-- 1 ubuntu ubuntu 72K Aug 26 22:33 signals.jsonl
+
+=== RECENT ENGINE LOG ===
