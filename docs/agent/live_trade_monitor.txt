@@ -1,9 +1,9 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T01:30:22+00:00
+UPDATED_UTC=2026-08-26T01:30:29+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
-VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
-PAPER_8085=UP
+VERDICT=FAIL SPEED=NO_EXECUTION_LATENCY_SAMPLE
+PAPER_8085=DOWN
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
@@ -142,3 +142,6 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂  ▼ P&L  -$-0.3000  (--6.20%)  │  Reason: force_close:user_stop  │  Held: 4s
 ║     NET P&L   -$8.9005   (-4.57%)                                  ║
 ║     Balance: $91.10 / $100.00                                      ║
+
+WARNINGS
+- paper process is not listening on 8085
