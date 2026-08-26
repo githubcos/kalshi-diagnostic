@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T09:16:29+00:00",
+  "utc": "2026-08-26T09:16:39+00:00",
   "publisher_pid": 7435,
   "heartbeat": {
-    "utc": "2026-08-26T09:16:28+00:00",
-    "epoch": 1787735788.848316,
+    "utc": "2026-08-26T09:16:39+00:00",
+    "epoch": 1787735799.097937,
     "pid": 994,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-feed-rest-diagnostics-v1b-20260826-0917"
   },
   "state": {
     "last_job_id": "kalshi-feed-rest-diagnostics-v1-20260826-0915",
