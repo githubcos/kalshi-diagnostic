@@ -1,10 +1,12 @@
 {
-  "utc": "2026-08-26T18:09:07+00:00",
+  "utc": "2026-08-26T18:09:16+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
-  "status": "PASS",
-  "status_reasons": [],
-  "paper_port_8085": true,
+  "status": "FAIL",
+  "status_reasons": [
+    "paper process is not listening on 8085"
+  ],
+  "paper_port_8085": false,
   "kalshi_feed_recent_connected_event": false,
   "kalshi_feed_recent_disconnect_event": false,
   "runtime_blocker": "",
