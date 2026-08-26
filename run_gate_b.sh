@@ -5,7 +5,15 @@ PUB="$HOME/kalshi-termux-publisher"
 BOTDIR="$HOME/KalshiArbo/kalshiarbo"
 STAMP="$(date -u +%Y%m%d_%H%M%S)"
 RUNDIR="$HOME/gate_b_$STAMP"
+DURATION_SEC="${1:-1800}"
+PAIR_BUDGET="${2:-10}"
+INTERVAL_MS="${GATE_B_INTERVAL_MS:-250}"
 mkdir -p "$RUNDIR"
+
+if ! [[ "$DURATION_SEC" =~ ^[0-9]+$ ]] || [ "$DURATION_SEC" -lt 60 ]; then
+  echo "Usage: $0 [duration_sec>=60] [pair_budget_usd]" >&2
+  exit 2
+fi
 
 cd "$PUB"
 git pull --rebase origin main
@@ -29,9 +37,9 @@ PORTLINE="$(ss -ltnp 2>/dev/null | grep ':8085' || true)"
   echo 'LIVE_ORDERS_ALLOWED=false'
   echo "BOT_PID=${BOTPID:-NONE}"
   echo "PORT_8085=${PORTLINE:-NOT_LISTENING}"
-  echo 'RECORDER_INTERVAL_MS=250'
-  echo 'RECORDER_DURATION_SEC=21600'
-  echo 'PAIR_COMPARISON_BUDGET_USD=10'
+  echo "RECORDER_INTERVAL_MS=$INTERVAL_MS"
+  echo "RECORDER_DURATION_SEC=$DURATION_SEC"
+  echo "PAIR_COMPARISON_BUDGET_USD=$PAIR_BUDGET"
   echo '=================================================='
 } > docs/termux-latest.txt
 
@@ -43,9 +51,9 @@ nohup python3 "$RUNDIR/gate_b_recorder.py" \
   --bot-log "$BOTDIR/polyarb.log" \
   --out "$RUNDIR/market.jsonl" \
   --status "$RUNDIR/status.txt" \
-  --interval-ms 250 \
-  --duration-sec 21600 \
-  --pair-budget 10 \
+  --interval-ms "$INTERVAL_MS" \
+  --duration-sec "$DURATION_SEC" \
+  --pair-budget "$PAIR_BUDGET" \
   > "$RUNDIR/recorder.log" 2>&1 &
 PID=$!
 echo "$PID" > "$RUNDIR/recorder.pid"
@@ -68,6 +76,7 @@ fi
   echo "RECORDER_PID=$PID"
   echo "BOT_PID=${BOTPID:-NONE}"
   echo "PORT_8085=${PORTLINE:-NOT_LISTENING}"
+  echo "RECORDER_DURATION_SEC=$DURATION_SEC"
   echo
   cat "$RUNDIR/status.txt" 2>/dev/null || true
   echo
@@ -81,3 +90,4 @@ for i in {1..20}; do git pull --rebase origin main && git push origin HEAD:main 
 
 echo "GATE B RUNNING PID=$PID"
 echo "RUN=$RUNDIR"
+echo "DURATION_SEC=$DURATION_SEC"
