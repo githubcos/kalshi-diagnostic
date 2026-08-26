@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:39:57+00:00
+UPDATED_UTC=2026-08-26T21:40:05+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -118,13 +118,6 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
-BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
-BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
-BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 10.0/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m10s │ $994.36
-BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.65 │ 10.9/12.3 $19 │ PAIR 0sh@0.00 -0.05 │ 10m10s │ $994.36
-BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 0.66 │ 9.1/11.5 $19 │ PAIR 0sh@0.00 +0.02 │ 10m09s │ $994.36
-BTC $78778 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.5 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
 BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.6 $19 │ PAIR 0sh@0.00 -0.13 │ 10m13s │ $994.36
 BTC $78779 │ open $78757 │ edge +21 │ CL $78775 0s ago CLedge +17 │ YES 0.64 │ 9.1/12.8 $19 │ PAIR 0sh@0.00 -0.13 │ 10m12s │ $994.36
 BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.64 │ 9.1/12.7 $19 │ PAIR 0sh@0.00 -0.13 │ 10m11s │ $994.36
@@ -198,3 +191,10 @@ BTC $78779 │ open $78757 │ edge +22 │ CL $78775 1s ago CLedge +17 │ YES 
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  │ PAPER   7.28 shares  │  buy $0.6665 → sell $0.6300  │  fee $0.1200
 ◂  ▼ P&L  -$-0.3856  (--7.95%)  │  Reason: pair_stop_loss  │  Held: 1s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78778.88 open=78757.45 gap=$21.4 yes=0.6600 prob=0.56 rem=600s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+▸  │ PAPER   7.28 shares @ $0.6600    fee: 0.0000 sh    cost: $4.92
+BTC $78779 │ open $78757 │ edge +21 │ CL $78775 1s ago CLedge +17 │ YES 0.66 │ 11.0/12.4 $19 │ PAIR 0sh@0.00 -0.12 │ 9m59s │ $993.72
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  │ PAPER   7.28 shares  │  buy $0.6765 → sell $0.5200  │  fee $0.1300
+◂  ▼ P&L  -$-1.2692  (--25.77%)  │  Reason: pair_stop_loss  │  Held: 1s
