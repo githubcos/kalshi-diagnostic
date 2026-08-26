@@ -1,6 +1,6 @@
 --- a/strategy/signal.go
 +++ b/strategy/signal.go
-@@ -2707,12 +2707,12 @@
+@@ -2707,12 +2707,11 @@
  	if tokenPrice < d.params.PairArbMinTokenPrice || tokenPrice > d.params.PairArbMaxTokenPrice {
  		return Signal{Type: SignalNone}
  	}
