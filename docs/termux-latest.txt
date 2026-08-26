@@ -1,6 +1,6 @@
 ==================================================
 KALSHI PROFESSIONAL TEST — GATE A
-UTC=2026-08-26T18:36:23Z
+UTC=2026-08-26T19:59:55Z
 ==================================================
 
 === PROCESS / PORT ===
@@ -1382,14 +1382,14 @@ strategy/trader.go:8164:		CfgScalpTargetCents:       cfgScalpCentsResolved,
 ?   	github.com/polyarb/coinbase	[no test files]
 ?   	github.com/polyarb/config	[no test files]
 ?   	github.com/polyarb/deribit	[no test files]
-ok  	github.com/polyarb/discord	0.033s
+ok  	github.com/polyarb/discord	0.029s
 ?   	github.com/polyarb/display	[no test files]
 ?   	github.com/polyarb/exchangefeed	[no test files]
 ?   	github.com/polyarb/kalshi	[no test files]
 ?   	github.com/polyarb/market	[no test files]
-ok  	github.com/polyarb/polymarket	0.038s
-ok  	github.com/polyarb/strategy	0.026s
-ok  	github.com/polyarb/web	0.017s
+ok  	github.com/polyarb/polymarket	0.027s
+ok  	github.com/polyarb/strategy	0.024s
+ok  	github.com/polyarb/web	0.028s
 
 === BUILD ===
 BUILD_RC=0
