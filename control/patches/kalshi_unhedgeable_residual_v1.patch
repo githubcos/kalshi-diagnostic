@@ -1,6 +1,6 @@
 --- a/strategy/trader.go
 +++ b/strategy/trader.go
-@@ -8765,6 +8765,29 @@
+@@ -8765,4 +8765,26 @@
  	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
 +
 +	// Kalshi compatibility: an IOC/FAK lead can partially fill with fewer
