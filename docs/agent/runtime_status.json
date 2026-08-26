@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T02:19:30+00:00",
+  "utc": "2026-08-26T02:19:37+00:00",
   "publisher_pid": 4174283,
   "heartbeat": {
-    "utc": "2026-08-26T02:19:23+00:00",
-    "epoch": 1787710763.076586,
+    "utc": "2026-08-26T02:19:32+00:00",
+    "epoch": 1787710772.452935,
     "pid": 4075083,
     "status": "working",
     "job_id": "kalshi-window-rollover-expiration-v1-20260826-0218"
   },
   "state": {
     "last_job_id": "kalshi-adaptive-paper-optimizer-v5-20260826-0205",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_020713.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_021923.tar.gz",
     "last_result": "PASS",
     "last_run_utc": "2026-08-26T02:07:29+00:00"
   },
