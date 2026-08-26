@@ -1,14 +1,8 @@
 {
-  "id": "kalshi-public-quote-feed-fallback-v1-retry1-20260826-0037",
+  "id": "kalshi-feed-postfix-status-v1-20260826-0039",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_public_quote_feed_fallback_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["kalshi/feed.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
