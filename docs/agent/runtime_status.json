@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T00:28:53+00:00",
+  "utc": "2026-08-26T00:29:00+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:28:52+00:00",
-    "epoch": 1787704132.4337735,
+    "utc": "2026-08-26T00:28:57+00:00",
+    "epoch": 1787704137.9396265,
     "pid": 3900720,
     "status": "idle",
     "job_id": ""
@@ -15,10 +15,15 @@
     "last_run_utc": "2026-08-26T00:28:40+00:00"
   },
   "autopilot": {
-    "gate_index": 1,
+    "gate_index": 2,
     "completed": {
       "PARTIAL_FILL": {
         "utc": "2026-08-26T00:28:35+00:00",
+        "evidence_hits": 20,
+        "state": "EVIDENCE_CAPTURED"
+      },
+      "HEDGE_TIMING": {
+        "utc": "2026-08-26T00:28:57+00:00",
         "evidence_hits": 20,
         "state": "EVIDENCE_CAPTURED"
       }

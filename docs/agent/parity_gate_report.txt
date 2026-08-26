@@ -1,307 +1,307 @@
-KALSHI FINITE PARITY GATE: PARTIAL_FILL
-UTC=2026-08-26T00:28:35+00:00
-TITLE=authoritative partial-fill quantity handling
-PAPER_ALIVE=False
+KALSHI FINITE PARITY GATE: HEDGE_TIMING
+UTC=2026-08-26T00:28:57+00:00
+TITLE=hedge admission and timing
+PAPER_ALIVE=True
 LIVE_ALLOWED=false
 HITS=20
 
---- grossFillShares at strategy/trader.go:1197 (context 1191-1203) ---
-01191: 	if !resp.Success {
-01192: 		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: order rejected: %s", resp.ErrorMsg)
-01193: 	}
-01194: 	orderID = resp.OrderID
-01195: 
-01196: 	var correctedFill float64
-01197: 	var grossFillShares float64
-01198: 	fillSource := "submit_response"
-01199: 	keepPendingForReconcile := false
-01200: 	postSubmitLookupMS := int64(0)
-01201: 
-01202: 	submitStatus := strings.ToLower(strings.TrimSpace(resp.Status))
-01203: 	switch {
+--- HedgeBy at strategy/trader.go:232 (context 226-238) ---
+00226: 	YesTokenID  string    `json:"yes_token_id"`
+00227: 	NoTokenID   string    `json:"no_token_id"`
+00228: 	LeadSide    string    `json:"lead_side"`
+00229: 	OpenPrice   float64   `json:"open_price"`
+00230: 	WindowEnd   time.Time `json:"window_end"`
+00231: 	OpenedAt    time.Time `json:"opened_at"`
+00232: 	HedgeBy     time.Time `json:"hedge_by,omitempty"`
+00233: 	BalancedAt  time.Time `json:"balanced_at,omitempty"`
+00234: 	// LockedProfitCents overrides the default hedge locked-profit target for this position.
+00235: 	// Non-zero for CVD momentum entries (typically 3¢ vs the standard 8¢).
+00236: 	LockedProfitCents  float64 `json:"locked_profit_cents,omitempty"`
+00237: 	YesShares          float64 `json:"yes_shares"`
+00238: 	NoShares           float64 `json:"no_shares"`
 
---- grossFillShares at strategy/trader.go:1214 (context 1208-1220) ---
-01208: 		if resp.TakingAmount != "" && resp.MakingAmount != "" {
-01209: 			takingRaw, okT := new(big.Int).SetString(resp.TakingAmount, 10)
-01210: 			makingRaw, okM := new(big.Int).SetString(resp.MakingAmount, 10)
-01211: 			if okT && okM && takingRaw.Sign() > 0 && makingRaw.Sign() > 0 {
-01212: 				actualRat := new(big.Rat).SetFrac(takingRaw, big.NewInt(1_000_000))
-01213: 				if actualFillShares, _ := actualRat.Float64(); actualFillShares > 0 {
-01214: 					grossFillShares = actualFillShares
-01215: 				}
-01216: 				priceRat := new(big.Rat).SetFrac(makingRaw, takingRaw)
-01217: 				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
-01218: 					correctedFill = actualFillPrice
-01219: 				}
-01220: 			}
+--- HedgeBy at strategy/trader.go:1739 (context 1733-1745) ---
+01733: 	t.savePositionState()
+01734: }
+01735: 
+01736: // executeDualPrePlacePairArb places the lead buy AND the hedge buy simultaneously as
+01737: // resting GTC maker orders. The hedge rests at a passive price so when the market moves
+01738: // both legs can fill in the same second. Execution cases:
+01739: //   - Both fill:        open balanced position immediately, HedgeBy cleared.
+01740: //   - Lead fills only:  hedge order stays resting as pendingHedgePrePlace; normal hedge
+01741: //     management (maybeRebalancePairArb) will absorb it when polled.
+01742: //   - Neither fills:    cancel pre-placed hedge, return error (no position).
+01743: //   - Hedge only:       unexpected (NO collapsed without YES rising); cancel hedge, return error.
+01744: func (t *Trader) executeDualPrePlacePairArb(
+01745: 	ctx context.Context,
 
---- grossFillShares at strategy/trader.go:1222 (context 1216-1228) ---
-01216: 				priceRat := new(big.Rat).SetFrac(makingRaw, takingRaw)
-01217: 				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
-01218: 					correctedFill = actualFillPrice
-01219: 				}
-01220: 			}
-01221: 		}
-01222: 		if correctedFill <= 0 || grossFillShares <= 0 {
-01223: 			// API is eventually consistent Ã¢â‚¬â€ hit a stale node.  Short parallel lookup.
-01224: 			lookupStart := time.Now()
-01225: 			lookupCtx, cancelLookup := context.WithTimeout(ctx, pairArbPostSubmitLookupTimeout)
-01226: 
-01227: 			type lookupResult struct {
-01228: 				source string
+--- HedgeBy at strategy/trader.go:2211 (context 2205-2217) ---
+02205: 
+02206: 		if pair.isBalanced() {
+02207: 			// The complete position is economically protected. Do NOT create
+02208: 			// additional market risk merely because execution finished below
+02209: 			// the preferred locked-profit target.
+02210: 			pair.BalancedAt = now
+02211: 			pair.HedgeBy = time.Time{}
+02212: 
+02213: 			if !targetMet {
+02214: 				t.logger.Warn(
+02215: 					"trader: pair protected but post-fill locked-profit target was NOT achieved",
+02216: 					zap.Float64("locked_shares", pair.lockedShares()),
+02217: 					zap.Float64("total_spent", pair.totalSpent()),
 
---- grossFillShares at strategy/trader.go:1275 (context 1269-1281) ---
-01269: 						continue
-01270: 					}
-01271: 					if correctedFill <= 0 && res.fill > 0 {
-01272: 						correctedFill = res.fill
-01273: 						fillSource = res.source
-01274: 					}
-01275: 					if grossFillShares <= 0 && res.gross > 0 {
-01276: 						grossFillShares = res.gross
-01277: 						fillSource = res.source
-01278: 					}
-01279: 					if correctedFill > 0 && grossFillShares > 0 {
-01280: 						collected = 2
-01281: 					}
+--- HedgeBy at strategy/trader.go:2227 (context 2221-2233) ---
+02221: 						actualLockedProfit/pair.lockedShares()),
+02222: 					zap.Float64("required_profit_per_share",
+02223: 						t.pairArbMinLockedProfit()),
+02224: 				)
+02225: 			}
+02226: 		} else {
+02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
+02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02229: 				pair.HedgeBy = pair.WindowEnd
+02230: 			}
+02231: 		}
+02232: 		t.pairedPosition = pair
+02233: 		t.rememberBotConditionID(pair.ConditionID)
 
---- grossFillShares at strategy/trader.go:1276 (context 1270-1282) ---
-01270: 					}
-01271: 					if correctedFill <= 0 && res.fill > 0 {
-01272: 						correctedFill = res.fill
-01273: 						fillSource = res.source
-01274: 					}
-01275: 					if grossFillShares <= 0 && res.gross > 0 {
-01276: 						grossFillShares = res.gross
-01277: 						fillSource = res.source
-01278: 					}
-01279: 					if correctedFill > 0 && grossFillShares > 0 {
-01280: 						collected = 2
-01281: 					}
-01282: 				case <-lookupCtx.Done():
+--- HedgeBy at strategy/trader.go:2228 (context 2222-2234) ---
+02222: 					zap.Float64("required_profit_per_share",
+02223: 						t.pairArbMinLockedProfit()),
+02224: 				)
+02225: 			}
+02226: 		} else {
+02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
+02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02229: 				pair.HedgeBy = pair.WindowEnd
+02230: 			}
+02231: 		}
+02232: 		t.pairedPosition = pair
+02233: 		t.rememberBotConditionID(pair.ConditionID)
+02234: 		t.detector.SetInPosition(true)
 
---- grossFillShares at strategy/trader.go:1279 (context 1273-1285) ---
-01273: 						fillSource = res.source
-01274: 					}
-01275: 					if grossFillShares <= 0 && res.gross > 0 {
-01276: 						grossFillShares = res.gross
-01277: 						fillSource = res.source
-01278: 					}
-01279: 					if correctedFill > 0 && grossFillShares > 0 {
-01280: 						collected = 2
-01281: 					}
-01282: 				case <-lookupCtx.Done():
-01283: 					collected = 2
-01284: 				}
-01285: 			}
+--- HedgeBy at strategy/trader.go:2229 (context 2223-2235) ---
+02223: 						t.pairArbMinLockedProfit()),
+02224: 				)
+02225: 			}
+02226: 		} else {
+02227: 			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
+02228: 			if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02229: 				pair.HedgeBy = pair.WindowEnd
+02230: 			}
+02231: 		}
+02232: 		t.pairedPosition = pair
+02233: 		t.rememberBotConditionID(pair.ConditionID)
+02234: 		t.detector.SetInPosition(true)
+02235: 		t.savePositionState()
 
---- grossFillShares at strategy/trader.go:1288 (context 1282-1294) ---
-01282: 				case <-lookupCtx.Done():
-01283: 					collected = 2
-01284: 				}
-01285: 			}
-01286: 			cancelLookup()
-01287: 			postSubmitLookupMS = time.Since(lookupStart).Milliseconds()
-01288: 			if correctedFill <= 0 || grossFillShares <= 0 {
-01289: 				// KALSHI SAFETY: MATCHED status without authoritative price AND
-01290: 				// quantity is not sufficient to record inventory.
-01291: 				t.logger.Warn("trader: Kalshi matched order missing authoritative fill data; deferring to reconciliation",
-01292: 					zap.String("request", requestName),
-01293: 					zap.String("order_id", orderID),
-01294: 					zap.Float64("resolved_price", correctedFill),
+--- HedgeBy at strategy/trader.go:2389 (context 2383-2395) ---
+02383: 		YesTokenID:  yesTokenID,
+02384: 		NoTokenID:   noTokenID,
+02385: 		LeadSide:    "YES",
+02386: 		OpenPrice:   sig.OpenPrice,
+02387: 		WindowEnd:   pairWindowEnd,
+02388: 		OpenedAt:    now,
+02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
+02390: 		YesShares:   actualSharesYes,
+02391: 		YesUSDSpent: usdSpentYes,
+02392: 	}
+02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02394: 		pair.HedgeBy = pair.WindowEnd
+02395: 	}
 
---- grossFillShares at strategy/trader.go:1295 (context 1289-1301) ---
-01289: 				// KALSHI SAFETY: MATCHED status without authoritative price AND
-01290: 				// quantity is not sufficient to record inventory.
-01291: 				t.logger.Warn("trader: Kalshi matched order missing authoritative fill data; deferring to reconciliation",
-01292: 					zap.String("request", requestName),
-01293: 					zap.String("order_id", orderID),
-01294: 					zap.Float64("resolved_price", correctedFill),
-01295: 					zap.Float64("resolved_shares", grossFillShares),
-01296: 					zap.Int64("post_submit_lookup_ms", postSubmitLookupMS),
-01297: 				)
-01298: 				t.setPendingPairArbOrder(orderID, tokenID, requestName)
-01299: 				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
-01300: 				return pairArbBuyOutcomeHardError, orderID, 0, 0, 0, 0,
-01301: 					fmt.Errorf("pair arb: Kalshi order %s matched but authoritative fill data is not available yet", orderID)
+--- HedgeBy at strategy/trader.go:2393 (context 2387-2399) ---
+02387: 		WindowEnd:   pairWindowEnd,
+02388: 		OpenedAt:    now,
+02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
+02390: 		YesShares:   actualSharesYes,
+02391: 		YesUSDSpent: usdSpentYes,
+02392: 	}
+02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02394: 		pair.HedgeBy = pair.WindowEnd
+02395: 	}
+02396: 	t.pairedPosition = pair
+02397: 	t.rememberBotConditionID(pairConditionID)
+02398: 	t.detector.SetInPosition(true)
+02399: 	t.savePositionState()
 
---- grossFillShares at strategy/trader.go:1346 (context 1340-1352) ---
-01340: 			}
-01341: 			gr, grErr := t.getOrderTimed(ctx, requestName+"_gtc_poll", orderID)
-01342: 			if grErr != nil || gr == nil {
-01343: 				// Matched orders may disappear from order lookup quickly; reconcile
-01344: 				// with trades to avoid false timeout/cancel on already-filled buys.
-01345: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01346: 					grossFillShares = fillsGross
-01347: 					if fillsAvg > 0 {
-01348: 						correctedFill = fillsAvg
-01349: 					}
-01350: 					fillSource = "gtc_poll_fills"
-01351: 					break
-01352: 				}
+--- HedgeBy at strategy/trader.go:2394 (context 2388-2400) ---
+02388: 		OpenedAt:    now,
+02389: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
+02390: 		YesShares:   actualSharesYes,
+02391: 		YesUSDSpent: usdSpentYes,
+02392: 	}
+02393: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02394: 		pair.HedgeBy = pair.WindowEnd
+02395: 	}
+02396: 	t.pairedPosition = pair
+02397: 	t.rememberBotConditionID(pairConditionID)
+02398: 	t.detector.SetInPosition(true)
+02399: 	t.savePositionState()
+02400: 	t.logger.Info("trader: pair arb dual: YES leg opened",
 
---- grossFillShares at strategy/trader.go:1362 (context 1356-1368) ---
-01356: 			if pollStatus == "matched" || pollStatus == "filled" {
-01357: 				if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
-01358: 					correctedFill = prc
-01359: 					fillSource = "gtc_poll"
-01360: 				}
-01361: 				if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > 0 {
-01362: 					grossFillShares = sm
-01363: 					fillSource = "gtc_poll"
-01364: 				}
-01365: 				// The order-status SizeMatched field reflects CLOB-matched size, not actual
-01366: 				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
-01367: 				// Cross-check against the fills endpoint which reports actual token delivery.
-01368: 				// This is the same verification the MATCHED-on-submit path performs.
+--- HedgeBy at strategy/trader.go:2426 (context 2420-2432) ---
+02420: 		return t.managePairArbPosition(ctx, liveYes, liveNo, 0)
+02421: 	}
+02422: 
+02423: 	pair.NoShares = actualSharesNo
+02424: 	pair.NoUSDSpent = usdSpentNo
+02425: 	pair.BalancedAt = now
+02426: 	pair.HedgeBy = time.Time{} // both legs present; no hedge deadline needed
+02427: 	t.savePositionState()
+02428: 	t.logger.Info("trader: pair arb dual: NO leg opened; fully hedged from entry",
+02429: 		zap.String("order_id", orderIDNo),
+02430: 		zap.Float64("fill_price", fillPriceNo),
+02431: 		zap.Float64("shares", actualSharesNo),
+02432: 		zap.Float64("usd_spent", usdSpentNo),
 
---- grossFillShares at strategy/trader.go:1370 (context 1364-1376) ---
-01364: 				}
-01365: 				// The order-status SizeMatched field reflects CLOB-matched size, not actual
-01366: 				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
-01367: 				// Cross-check against the fills endpoint which reports actual token delivery.
-01368: 				// This is the same verification the MATCHED-on-submit path performs.
-01369: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01370: 					grossFillShares = fillsGross
-01371: 					if fillsAvg > 0 {
-01372: 						correctedFill = fillsAvg
-01373: 					}
-01374: 					fillSource = "gtc_poll_fills"
-01375: 				}
-01376: 				break
+--- HedgeBy at strategy/trader.go:2465 (context 2459-2471) ---
+02459: 		YesTokenID:  yesTokenID,
+02460: 		NoTokenID:   noTokenID,
+02461: 		LeadSide:    leadSide,
+02462: 		OpenPrice:   sig.OpenPrice,
+02463: 		WindowEnd:   pairWindowEnd,
+02464: 		OpenedAt:    now,
+02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+02466: 	}
+02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02468: 		pair.HedgeBy = pair.WindowEnd
+02469: 	}
+02470: 	if isNoLead {
+02471: 		pair.NoShares = actualShares
 
---- grossFillShares at strategy/trader.go:1380 (context 1374-1386) ---
-01374: 					fillSource = "gtc_poll_fills"
-01375: 				}
-01376: 				break
-01377: 			}
-01378: 			if pollStatus == "unmatched" || pollStatus == "canceled" || pollStatus == "cancelled" || pollStatus == "expired" {
-01379: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_gtc_poll_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01380: 					grossFillShares = fillsGross
-01381: 					if fillsAvg > 0 {
-01382: 						correctedFill = fillsAvg
-01383: 					}
-01384: 					fillSource = "gtc_poll_fills"
-01385: 					break
-01386: 				}
+--- HedgeBy at strategy/trader.go:2467 (context 2461-2473) ---
+02461: 		LeadSide:    leadSide,
+02462: 		OpenPrice:   sig.OpenPrice,
+02463: 		WindowEnd:   pairWindowEnd,
+02464: 		OpenedAt:    now,
+02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+02466: 	}
+02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02468: 		pair.HedgeBy = pair.WindowEnd
+02469: 	}
+02470: 	if isNoLead {
+02471: 		pair.NoShares = actualShares
+02472: 		pair.NoUSDSpent = usdSpent
+02473: 	} else {
 
---- grossFillShares at strategy/trader.go:1424 (context 1418-1430) ---
-01418: 						break
-01419: 					}
-01420: 				}
-01421: 			}
-01422: 		}
-01423: 		postSubmitLookupMS = time.Since(pollStart).Milliseconds()
-01424: 		if correctedFill <= 0 && grossFillShares <= 0 {
-01425: 			_ = t.cancelOrderTimed(ctx, requestName+"_cancel_timeout", orderID)
-01426: 			// Cancel-vs-match race hardening: the order can be MATCHED while the cancel
-01427: 			// request is in-flight or while status propagation lags. Reconcile once more
-01428: 			// before declaring timeout so we can continue hedge flow immediately.
-01429: 			if gr, grErr := t.getOrderTimed(ctx, requestName+"_post_cancel_lookup", orderID); grErr == nil && gr != nil {
-01430: 				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+--- HedgeBy at strategy/trader.go:2468 (context 2462-2474) ---
+02462: 		OpenPrice:   sig.OpenPrice,
+02463: 		WindowEnd:   pairWindowEnd,
+02464: 		OpenedAt:    now,
+02465: 		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+02466: 	}
+02467: 	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+02468: 		pair.HedgeBy = pair.WindowEnd
+02469: 	}
+02470: 	if isNoLead {
+02471: 		pair.NoShares = actualShares
+02472: 		pair.NoUSDSpent = usdSpent
+02473: 	} else {
+02474: 		pair.YesShares = actualShares
 
---- grossFillShares at strategy/trader.go:1437 (context 1431-1443) ---
-01431: 				if pcStatus == "matched" || pcStatus == "filled" {
-01432: 					if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
-01433: 						correctedFill = prc
-01434: 						fillSource = "post_cancel_lookup"
-01435: 					}
-01436: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-01437: 						grossFillShares = sm
-01438: 						fillSource = "post_cancel_lookup"
-01439: 					}
-01440: 					if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01441: 						grossFillShares = fillsGross
-01442: 						if fillsAvg > 0 {
-01443: 							correctedFill = fillsAvg
+--- HedgeBy at strategy/trader.go:2596 (context 2590-2602) ---
+02590: 			} else {
+02591: 				pair.NoShares += hActual
+02592: 				pair.NoUSDSpent += hUSD
+02593: 			}
+02594: 			if pair.isBalanced() {
+02595: 				pair.BalancedAt = time.Now()
+02596: 				pair.HedgeBy = time.Time{}
+02597: 			}
+02598: 			t.clearPendingPairArbOrder()
+02599: 			t.savePositionState()
+02600: 			lockedPerShare := 1.0 - pair.sideAveragePrice("YES") - pair.sideAveragePrice("NO")
+02601: 			display.TradeOpen(buySide+" [PAIR HEDGE]", hFill, hActual, hFeeShares, hUSD, lockedPerShare, t.cfg.PaperTrade)
+02602: 			t.logger.Info("trader: FOK hedge filled; pair balanced",
 
---- grossFillShares at strategy/trader.go:1441 (context 1435-1447) ---
-01435: 					}
-01436: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-01437: 						grossFillShares = sm
-01438: 						fillSource = "post_cancel_lookup"
-01439: 					}
-01440: 					if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01441: 						grossFillShares = fillsGross
-01442: 						if fillsAvg > 0 {
-01443: 							correctedFill = fillsAvg
-01444: 						}
-01445: 						fillSource = "post_cancel_fills"
-01446: 					}
-01447: 				}
+--- HedgeBy at strategy/trader.go:2687 (context 2681-2693) ---
+02681: 		}
+02682: 		return false, ""
+02683: 	}
+02684: }
+02685: 
+02686: // shouldAbortUnprofitableUnhedgedPairArb returns true when an unhedged pair position
+02687: // should be force-closed before HedgeBy because the lead is already losing and the
+02688: // original signal has weakened, reversed momentum, or flipped direction.
+02689: //
+02690: // It applies PairArbUnprofitableAbortGraceSec and PairArbUnprofitableAbortMinGapAgainstUSD.
+02691: func (t *Trader) shouldAbortUnprofitableUnhedgedPairArb(pair *PairArbPosition, currentYesPrice float64, currentNoPrice float64, now time.Time) (bool, float64, string) {
+02692: 	if pair == nil || pair.isBalanced() || t.detector == nil {
+02693: 		return false, 0, ""
 
---- grossFillShares at strategy/trader.go:1448 (context 1442-1454) ---
-01442: 						if fillsAvg > 0 {
-01443: 							correctedFill = fillsAvg
-01444: 						}
-01445: 						fillSource = "post_cancel_fills"
-01446: 					}
-01447: 				}
-01448: 				if correctedFill <= 0 && grossFillShares <= 0 {
-01449: 					// Partial-fill hardening: canceled GTC orders can still report matched
-01450: 					// shares even when /data/trades lags. Treat non-zero size_matched as
-01451: 					// authoritative so we do not place a second lead buy on top.
-01452: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-01453: 						grossFillShares = sm
-01454: 						if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+--- HedgeBy at strategy/trader.go:4751 (context 4745-4757) ---
+04745: 	} else {
+04746: 		pair.NoShares += actualShares
+04747: 		pair.NoUSDSpent += usdSpent
+04748: 	}
+04749: 	if pair.isBalanced() {
+04750: 		pair.BalancedAt = time.Now()
+04751: 		pair.HedgeBy = time.Time{}
+04752: 	}
+04753: 	t.clearPendingPairArbOrder()
+04754: 	t.savePositionState()
+04755: 	t.logger.Info("trader: pending hedge credit probe reconciled and absorbed",
+04756: 		zap.String("order_id", po.OrderID),
+04757: 		zap.String("hedge_side", buySide),
 
---- grossFillShares at strategy/trader.go:1453 (context 1447-1459) ---
-01447: 				}
-01448: 				if correctedFill <= 0 && grossFillShares <= 0 {
-01449: 					// Partial-fill hardening: canceled GTC orders can still report matched
-01450: 					// shares even when /data/trades lags. Treat non-zero size_matched as
-01451: 					// authoritative so we do not place a second lead buy on top.
-01452: 					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
-01453: 						grossFillShares = sm
-01454: 						if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
-01455: 							correctedFill = prc
-01456: 						}
-01457: 						fillSource = "post_cancel_size_matched"
-01458: 						t.logger.Warn("trader: pair arb buy recovered partial fill from post-cancel size_matched",
-01459: 							zap.String("request", requestName),
+--- HedgeBy at strategy/trader.go:5240 (context 5234-5246) ---
+05234: 						ConditionID: pairConditionID,
+05235: 						YesTokenID:  yesID,
+05236: 						NoTokenID:   noID,
+05237: 						LeadSide:    leadSide,
+05238: 						WindowEnd:   pairWindowEnd,
+05239: 						OpenedAt:    po.PlacedAt,
+05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
+05241: 					}
+05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+05243: 						pair.HedgeBy = pair.WindowEnd
+05244: 					}
+05245: 					if isNoLead {
+05246: 						pair.NoShares = walletBal
 
---- grossFillShares at strategy/trader.go:1467 (context 1461-1473) ---
-01461: 							zap.String("status", gr.Status),
-01462: 							zap.String("size_matched", gr.SizeMatched),
-01463: 						)
-01464: 					}
-01465: 				}
-01466: 			}
-01467: 			if correctedFill <= 0 && grossFillShares <= 0 {
-01468: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01469: 					grossFillShares = fillsGross
-01470: 					if fillsAvg > 0 {
-01471: 						correctedFill = fillsAvg
-01472: 					}
-01473: 					fillSource = "post_cancel_fills"
+--- HedgeBy at strategy/trader.go:5242 (context 5236-5248) ---
+05236: 						NoTokenID:   noID,
+05237: 						LeadSide:    leadSide,
+05238: 						WindowEnd:   pairWindowEnd,
+05239: 						OpenedAt:    po.PlacedAt,
+05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
+05241: 					}
+05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+05243: 						pair.HedgeBy = pair.WindowEnd
+05244: 					}
+05245: 					if isNoLead {
+05246: 						pair.NoShares = walletBal
+05247: 						pair.NoUSDSpent = usdSpent
+05248: 						pair.NoWalletConfirmed = true
 
---- grossFillShares at strategy/trader.go:1469 (context 1463-1475) ---
-01463: 						)
-01464: 					}
-01465: 				}
-01466: 			}
-01467: 			if correctedFill <= 0 && grossFillShares <= 0 {
-01468: 				if fillsAvg, fillsGross, fillsErr := t.getFillsTimed(ctx, requestName+"_post_cancel_fills", orderID, tokenID); fillsErr == nil && fillsGross > 0 {
-01469: 					grossFillShares = fillsGross
-01470: 					if fillsAvg > 0 {
-01471: 						correctedFill = fillsAvg
-01472: 					}
-01473: 					fillSource = "post_cancel_fills"
-01474: 				}
-01475: 			}
+--- HedgeBy at strategy/trader.go:5243 (context 5237-5249) ---
+05237: 						LeadSide:    leadSide,
+05238: 						WindowEnd:   pairWindowEnd,
+05239: 						OpenedAt:    po.PlacedAt,
+05240: 						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
+05241: 					}
+05242: 					if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+05243: 						pair.HedgeBy = pair.WindowEnd
+05244: 					}
+05245: 					if isNoLead {
+05246: 						pair.NoShares = walletBal
+05247: 						pair.NoUSDSpent = usdSpent
+05248: 						pair.NoWalletConfirmed = true
+05249: 					} else {
 
---- grossFillShares at strategy/trader.go:1476 (context 1470-1482) ---
-01470: 					if fillsAvg > 0 {
-01471: 						correctedFill = fillsAvg
-01472: 					}
-01473: 					fillSource = "post_cancel_fills"
-01474: 				}
-01475: 			}
-01476: 			if correctedFill <= 0 && grossFillShares <= 0 {
-01477: 				if hedgeAbortTriggered {
-01478: 					abortReason := "pre-placed hedge filled first"
-01479: 					if hedgeAbortOrderID != "" {
-01480: 						abortReason = fmt.Sprintf("pre-placed hedge %s filled first", hedgeAbortOrderID)
-01481: 					}
-01482: 					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: aborted lead wait because %s order=%s", orderType, activityRequestLabel(requestName), abortReason, orderID))
+--- HedgeBy at strategy/trader.go:5613 (context 5607-5619) ---
+05607: 			t.reconcileBalancedPairCostBasis(ctx, pair)
+05608: 		}
+05609: 		return
+05610: 	}
+05611: 	if pair.isBalanced() {
+05612: 		pair.BalancedAt = time.Now()
+05613: 		pair.HedgeBy = time.Time{}
+05614: 	}
+05615: 	t.savePositionState()
+05616: 
+05617: 	pair = t.pairedPosition
+05618: 	if pair == nil || !pair.isBalanced() {
+05619: 		return
 
