@@ -1,13 +1,13 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T09:56:51+00:00
+UPDATED_UTC=2026-08-26T09:56:58+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=7 hedge=3 closed=7
+EVENTS lead=8 hedge=3 closed=7
 CLOSE_REASONS={"pair_paper_locked_recycle": 3, "pair_stop_loss": 4}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
@@ -117,8 +117,6 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-◂  ▼ P&L  -$-0.8152  (--18.40%)  │  Reason: pair_stop_loss  │  Held: 5s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78419.38 open=78372.69 gap=$46.7 yes=0.7900 prob=0.64 rem=542s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.5956  (--12.20%)  │  Reason: pair_stop_loss  │  Held: 1s
@@ -142,3 +140,5 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.2832  (--5.80%)  │  Reason: pair_stop_loss  │  Held: 3s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78411.83 open=78372.69 gap=$39.1 yes=0.7900 prob=0.62 rem=487s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED

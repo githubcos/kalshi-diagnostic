@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T09:56:51+00:00",
+  "utc": "2026-08-26T09:56:58+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -102,7 +102,7 @@
     "TRADE_SIZE_USD": "5"
   },
   "counts_in_current_session": {
-    "lead_events": 7,
+    "lead_events": 8,
     "hedge_events": 3,
     "closed_events": 7
   },
@@ -166,6 +166,8 @@
     "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78416.25 open=78372.69 gap=$43.6 yes=0.7800 prob=0.63 rem=497s]",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED",
     "\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2  \u25c0 SELL YES [PAIR RESIDUAL] EXECUTED",
-    "\u25c2  \u25bc P&L  -$-0.2832  (--5.80%)  \u2502  Reason: pair_stop_loss  \u2502  Held: 3s"
+    "\u25c2  \u25bc P&L  -$-0.2832  (--5.80%)  \u2502  Reason: pair_stop_loss  \u2502  Held: 3s",
+    "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78411.83 open=78372.69 gap=$39.1 yes=0.7900 prob=0.62 rem=487s]",
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED"
   ]
 }
