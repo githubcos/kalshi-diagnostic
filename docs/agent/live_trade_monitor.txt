@@ -1,6 +1,6 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T00:47:51+00:00
+UPDATED_UTC=2026-08-26T00:47:58+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_SAMPLE
 PAPER_8085=UP
@@ -118,10 +118,6 @@ OK-CHECK PAPER guard prevents any live order request
 RECENT MEANINGFUL EXECUTION / MATH LINES
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.2164  (--4.48%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78410.06 open=78381.60 gap=$28.5 yes=0.5800 prob=0.57 rem=769s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.7760  (--16.04%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78368.75 open=78381.60 gap=$-12.9 no=0.5200 prob=0.53 rem=754s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
@@ -140,4 +136,8 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.4646  (--9.60%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78404.02 open=78381.60 gap=$22.4 yes=0.5600 prob=0.56 rem=729s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.4672  (--9.67%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78400.10 open=78381.60 gap=$18.5 yes=0.5500 prob=0.55 rem=723s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
