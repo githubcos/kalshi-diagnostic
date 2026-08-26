@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T18:08:59+00:00",
+  "utc": "2026-08-26T18:09:07+00:00",
   "publisher_pid": 395485,
   "heartbeat": {
-    "utc": "2026-08-26T18:08:57+00:00",
-    "epoch": 1787767737.482827,
+    "utc": "2026-08-26T18:09:07+00:00",
+    "epoch": 1787767747.1287782,
     "pid": 544,
     "status": "working",
     "job_id": "kalshi-professional-paper-phase1-20260826"
   },
   "state": {
     "last_job_id": "kalshi-postpatch-paper-status-20260826-1801",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175938.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_180857.tar.gz",
     "last_result": "PASS",
     "last_run_utc": "2026-08-26T18:01:04+00:00"
   },
