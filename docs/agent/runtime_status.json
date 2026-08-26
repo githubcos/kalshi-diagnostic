@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T06:06:28+00:00",
-  "publisher_pid": 83828,
+  "utc": "2026-08-26T06:06:31+00:00",
+  "publisher_pid": 640336,
   "heartbeat": {
-    "utc": "2026-08-26T06:06:25+00:00",
-    "epoch": 1787724385.0922937,
+    "utc": "2026-08-26T06:06:31+00:00",
+    "epoch": 1787724391.6400602,
     "pid": 4075083,
     "status": "idle",
     "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-paper-highflow-token-range-v1-20260826-0245",
+    "last_job_id": "kalshi-paper-session-archive-v1-20260826-0604",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023819.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T02:45:47+00:00"
+    "last_run_utc": "2026-08-26T06:06:31+00:00"
   },
   "autopilot": null
 }
