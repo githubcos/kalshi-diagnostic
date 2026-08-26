@@ -33,3 +33,10 @@ LIVE_ALLOWED=false
     ?   	github.com/polyarb/coinbase	[no test files]
     ?   	github.com/polyarb/config	[no test files]
     ?   	github.com/polyarb/deribit	[no test files]
+    ok  	github.com/polyarb/discord	(cached)
+    ?   	github.com/polyarb/display	[no test files]
+    ?   	github.com/polyarb/exchangefeed	[no test files]
+    ?   	github.com/polyarb/kalshi	[no test files]
+    ?   	github.com/polyarb/market	[no test files]
+    ok  	github.com/polyarb/polymarket	(cached)
+    ok  	github.com/polyarb/strategy	(cached)
