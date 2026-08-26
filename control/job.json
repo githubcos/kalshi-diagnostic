@@ -1,10 +1,9 @@
 {
-  "id": "kalshi-paper-profit-stress-v1-20260826-0055",
+  "id": "kalshi-forensic-counter-refresh-v1-20260826-0056",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_AUTOPILOT"},
-    {"name": "START_PAPER"},
+    {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
 }
