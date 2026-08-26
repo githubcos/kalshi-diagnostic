@@ -1,11 +1,11 @@
 {
-  "id": "kalshi-unhedgeable-residual-v1-retry2-20260826-0156",
+  "id": "kalshi-unhedgeable-residual-test-v1-20260826-0158",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_unhedgeable_residual_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["strategy/trader.go"]},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_small_residual_test_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["strategy/trader.go", "strategy/pair_arb_test.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "START_PAPER"},
