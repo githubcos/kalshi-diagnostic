@@ -1,11 +1,11 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T00:44:08+00:00
+UPDATED_UTC=2026-08-26T00:44:16+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
-VERDICT=WARN SPEED=NO_EXECUTION_SAMPLE
+VERDICT=PASS SPEED=NO_EXECUTION_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
-BLOCKER=✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
+BLOCKER=none
 
 EVENTS lead=0 hedge=0 closed=0
 LATENCY all avg/p95/max=None/None/None ms
@@ -116,31 +116,4 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78430.01 open=78559.51 gap=$-129.5 no=0.9150 prob=0.89 rem=322s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78407.33 open=78559.51 gap=$-152.2 no=0.9460 prob=0.92 rem=317s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78380.41 open=78559.51 gap=$-179.1 no=0.9490 prob=0.96 rem=301s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78406.93 open=78559.51 gap=$-152.6 no=0.9280 prob=0.93 rem=295s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78403.48 open=78559.51 gap=$-156.0 no=0.9460 prob=0.94 rem=289s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78390.70 open=78559.51 gap=$-168.8 no=0.9490 prob=0.96 rem=265s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78410.57 open=78559.51 gap=$-148.9 no=0.9470 prob=0.94 rem=260s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78408.17 open=78559.51 gap=$-151.3 no=0.9500 prob=0.95 rem=238s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78414.99 open=78559.51 gap=$-144.5 no=0.9300 prob=0.94 rem=233s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78441.87 open=78559.51 gap=$-117.6 no=0.9360 prob=0.90 rem=226s]
-✗  [PAIR ARB LEAD NO] risk controls: position limit: 1/1 trades completed this session
-║     NET P&L   +$0.3072   (+6.37%)                                  ║
-║     Balance: $20.31 / $20.00                                       ║
-│  Balance      $20.00 starting
-·  paper balance: $20.00
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
-
-WARNINGS
-- runtime blocker active
