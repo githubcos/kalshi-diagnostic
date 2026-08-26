@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:12:10+00:00
+UPDATED_UTC=2026-08-26T22:12:17+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -118,24 +118,6 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.68 open=78747.81 gap=$32.9 yes=0.7700 prob=0.60 rem=557s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸  │ PAPER   6.30 shares @ $0.7700    fee: 0.0000 sh    cost: $4.93
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 0.77 │ 5.4/8.1 $51 │ PAIR 0sh@0.00 -0.08 │ 9m16s │ $993.87
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 0.77 │ 5.4/8.1 $51 │ PAIR 0sh@0.00 -0.08 │ 9m16s │ $993.87
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 0.77 │ 6.0/8.7 $51 │ PAIR 0sh@0.00 -0.08 │ 9m15s │ $993.87
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
-◂  │ PAPER   6.30 shares  │  buy $0.7827 → sell $0.7500  │  fee $0.0900
-◂  ▼ P&L  -$-0.2960  (--6.00%)  │  Reason: pair_stop_loss  │  Held: 1s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.65 open=78747.81 gap=$32.8 yes=0.7500 prob=0.60 rem=552s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸  │ PAPER   6.46 shares @ $0.7500    fee: 0.0000 sh    cost: $4.93
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 0s ago CLedge +35 │ YES 0.75 │ 7.9/9.8 $51 │ PAIR 0sh@0.00 -0.09 │ 9m10s │ $993.57
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 0s ago CLedge +35 │ YES 0.75 │ 7.9/9.8 $51 │ PAIR 0sh@0.00 -0.09 │ 9m10s │ $993.57
-BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 0.75 │ 8.5/10.0 $51 │ PAIR 0sh@0.00 -0.09 │ 9m10s │ $993.57
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
-◂  │ PAPER   6.46 shares  │  buy $0.7639 → sell $0.7300  │  fee $0.0900
-◂  ▼ P&L  -$-0.3092  (--6.27%)  │  Reason: pair_stop_loss  │  Held: 1s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.87 open=78747.81 gap=$33.1 yes=0.7500 prob=0.60 rem=538s]
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78787.29 open=78747.81 gap=$39.5 yes=0.7700 prob=0.62 rem=533s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
