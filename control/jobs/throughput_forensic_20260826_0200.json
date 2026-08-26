@@ -1,0 +1,20 @@
+{
+  "job_id": "throughput-forensic-20260826-0200",
+  "action": "diagnose_pair_arb_signal_throughput",
+  "paper_only": true,
+  "live_trading": false,
+  "objective": "Determine why permissive PAIR-ARB paper configuration produces too few executable transactions. Do not loosen strategy blindly. Preserve all raw evidence.",
+  "requirements": [
+    "Keep paper bot and all existing logs/data; do not truncate or delete telemetry",
+    "Capture every detector evaluation and every rejection/gate reason for at least one full 15m market window or until 1000 detector evaluations, whichever occurs first",
+    "Count detector evaluations, raw candidate signals, admitted leads, lead fills, hedge attempts, hedge fills, closes, and each rejection reason",
+    "Audit source path producing 'detector produced no signal (untracked gate or mode)' and identify the exact untracked condition(s)",
+    "Verify configured PAIR_ARB_SIGNAL_MIN_GAP_USD=1 versus PAIR_ARB_MIN_BTC_GAP_USD=5 semantics and report which threshold actually controls lead generation",
+    "Report effective runtime values for every gate used by PAIR-ARB detector/admission",
+    "Do not alter locked-profit mathematics, Kalshi quantity/fee accounting, hedge safety, paper guard, bankroll stop conditions, or enable live orders",
+    "If an unintended hidden/untracked gate is verified, make the smallest source/config correction needed to expose/track it; run gofmt, go test ./..., and go build before restart",
+    "If low throughput is intentional strategy behavior rather than a bug, do not patch strategy semantics; report the dominant gates and counterfactual candidate counts at progressively looser thresholds using logged observations",
+    "Publish full forensic result to docs/agent/throughput_forensic.txt and machine-readable counts to docs/agent/throughput_forensic.json",
+    "Refresh docs/agent/live_trade_monitor.json after completion"
+  ]
+}
