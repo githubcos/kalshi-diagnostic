@@ -1,8 +1,10 @@
 {
-  "id": "kalshi-install-current-latest-publisher-20260826-1820",
+  "id": "kalshi-paper-parity-audit-refresh-20260826-1850",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "STATUS"},
+    {"name": "COLLECT_AUDIT"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
