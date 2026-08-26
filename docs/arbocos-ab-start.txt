@@ -1,0 +1,35 @@
+=== CONTROL 8086 ===
+LISTEN 0      4096               *:8086            *:*    users:(("arbocos",pid=605288,fd=9))                   
+
+=== REALPAPER 8087 ===
+617385
+UID          PID    PPID  C STIME TTY          TIME CMD
+ubuntu    617385  603442  1 22:45 pts/5    00:00:00 ./run-bot -port 8087
+LISTEN 0      4096               *:8087            *:*    users:(("run-bot",pid=617385,fd=9))                   
+nohup: ignoring input
+
+[1m[36m[0m
+     [2m[37mPoly Arb Pro[0m
+     [2m[37mBTC 5m Matched Pair Engine[0m
+     [90mPolymarket CLOB  |  5-Min BTC/USD[0m
+
+  [90m────────────────────────────────────────────────────────────────────[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [90m│[0m  Wallet       [96m0xd68f..adE5[0m
+  [90m│[0m  Trade Size   [97m$5.00[0m per entry
+  [90m│[0m  Balance      [92m$20.00[0m starting
+  [90m│[0m  Started      [37m2026-08-26 22:45:19 UTC[0m
+  [90m│[0m  Logs         [2m[90mpolyarb.log[0m
+  [90m────────────────────────────────────────────────────────────────────[0m
+
+  [92m✓[0m  [2m[37mproxy wallet 0xd68f..adE5[0m
+  [2m[36m·[0m  [2m[37mbalance: $269.68 pUSD[0m
+  [2m[36m·[0m  [2m[37mDashboard: http://localhost:8087[0m
+  [2m[36m·[0m  [2m[37mLOGGING ENABLED[0m
+  [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/ArboCos/realpaper config=/home/ubuntu/ArboCos/realpaper/config.json env=/home/ubuntu/ArboCos/realpaper/all.env[0m
+  [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=neg_risk pair_arb=true pair_arb_sell_at_99=false ml_filter=false[0m
+  [92m✓[0m  [2m[37mDeribit WS (BTC spot index + order book + DVOL)[0m
+  [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDT CVD)[0m
+  [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
+  [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
+  [2m[36m·[0m  [2m[37mWaiting for Start command from dashboard: http://localhost:8087[0m
