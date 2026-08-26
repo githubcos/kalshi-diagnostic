@@ -1,7 +1,6 @@
-CURRENT PHASE: APPLYING VERIFIED KALSHI NO-PRICE MARK-TO-MARKET FIX.
-PREVIOUS FAILURE: first explicit-NO patch attempt failed safely at patch --dry-run because the unified diff was malformed. No source was changed and PAPER stayed running on :8085.
-FIX NOW: the patch file has been rewritten into valid minimal hunks. Retry job kalshi-explicit-no-mark-to-market-v1-retry1-20260826-0012 is queued with LIVE=false.
-RETRY SEQUENCE: BACKUP -> APPLY_PATCH dry-run/apply -> GOFMT main.go + strategy/trader.go -> GO_TEST ./... -> GO_BUILD -> START_PAPER -> COLLECT_PARITY_EVIDENCE -> STATUS.
-VERIFIED DEFECT BEING FIXED: active terminal/dashboard position snapshots were synthesizing Kalshi NO as 1-YES instead of using the actual live NO contract price, which can misstate mark-to-market/P&L when YES and NO executable prices are not exact complements.
-NO STRATEGY CHANGE: PolyArbPro thresholds, signal logic, sizing, hedge timing and credentials are untouched.
-SAFETY: LIVE=false remains hard-blocked until this patch passes tests/build and the patched PAPER binary is confirmed on :8085.
+CURRENT PHASE: KALSHI NO-PRICE MARK-TO-MARKET VERIFICATION COMPLETE.
+FINAL EC2 RESULT: kalshi-explicit-no-finalize-v1-20260826-0020 PASS. Temporary probe test removed; full go test ./... PASS; go build PASS; PAPER restarted successfully on :8085 as PID 3889047; LIVE_ALLOWED=false.
+IMPORTANT CORRECTION: the attempted explicit-NO caller patch was unnecessary because the current production source was already carrying authoritative Kalshi NO into active snapshots: main.go uses currentNoPrice := detector.PairArbSnapshot().NoPrice then trader.PositionSnapshot(yes, currentNoPrice), and noSnap := detector.PairArbSnapshot().NoPrice then trader.DashboardPositionSnapshot(yesSnap, noSnap). The probe failure exposed this exact current source. The earlier claim that active callers still synthesized NO from 1-YES was based on stale source context.
+SOURCE PARITY: strategy/trader.go already supports explicit NO for PAIR markToMarket via the previously deployed kalshi_pair_authoritative_no_mark_v1 compatibility patch. No additional trading-code change was required in this cycle.
+REGRESSION HEALTH: tests and build are clean after removing the temporary source-probe file. PAPER is healthy and collecting live Kalshi market data; latest runtime log shows balance about $19.64 and flat state.
+SAFETY: LIVE remains hard-blocked; credentials, signal thresholds, sizing, hedge timing and PolyArbPro strategy semantics were not changed.
