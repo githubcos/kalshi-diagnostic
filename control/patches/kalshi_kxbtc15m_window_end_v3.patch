@@ -1,6 +1,6 @@
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -137,9 +137,18 @@
+@@ -137,9 +137,17 @@
 -	endDate := m.ExpectedExpirationTime
 -	if endDate == "" {
 -		endDate = m.CloseTime
