@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T21:43:35+00:00",
+  "utc": "2026-08-26T21:43:43+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "kalshiarbo_pid": "561625",
@@ -81,7 +81,7 @@
     "PAIR_ARB_MIN_CVD_BTC": 0,
     "PAIR_ARB_MIN_GAP_HOLD_SEC": 0,
     "PAIR_ARB_MIN_GAP_VELOCITY_USD": 0,
-    "PAIR_ARB_MIN_LOCKED_PROFIT_CENTS": 3,
+    "PAIR_ARB_MIN_LOCKED_PROFIT_CENTS": 3.0,
     "PAIR_ARB_MIN_OI_DELTA_USD": "0",
     "PAIR_ARB_MIN_TOKEN_PRICE": 0.05,
     "PAIR_ARB_MIN_WINDOW_SEC": 0,
