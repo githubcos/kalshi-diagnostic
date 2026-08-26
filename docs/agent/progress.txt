@@ -1,64 +1,19 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-professional-paper-phase1-20260826
-JOB_START_UTC=2026-08-26T18:08:57+00:00
+JOB_ID=kalshi-professional-paper-phase2-20260826
+JOB_START_UTC=2026-08-26T18:10:33+00:00
 LIVE_ALLOWED=false
-[2026-08-26T18:08:57+00:00] ACTION 1/9 STATUS START
-[2026-08-26T18:08:57+00:00] STATUS PASS
-[2026-08-26T18:08:57+00:00] ACTION 1/9 STATUS PASS
-[2026-08-26T18:08:57+00:00] ACTION 2/9 BACKUP START
-[2026-08-26T18:08:57+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_180857.tar.gz
-[2026-08-26T18:09:07+00:00] BACKUP PASS files=116
-[2026-08-26T18:09:07+00:00] ACTION 2/9 BACKUP PASS
-[2026-08-26T18:09:07+00:00] ACTION 3/9 COLLECT_PARITY_EVIDENCE START
-[2026-08-26T18:09:07+00:00] COLLECT_PARITY_EVIDENCE PASS excerpts=40
-[2026-08-26T18:09:07+00:00] ACTION 3/9 COLLECT_PARITY_EVIDENCE PASS
-[2026-08-26T18:09:07+00:00] ACTION 4/9 DETERMINISTIC_PARITY_TEST START
-[2026-08-26T18:09:07+00:00] DETERMINISTIC_PARITY_TEST START: go test ./strategy -run TestKalshiDeterministic -count=1 -v
-    === RUN   TestKalshiDeterministicPairEconomics
-    === RUN   TestKalshiDeterministicPairEconomics/balanced
-    === RUN   TestKalshiDeterministicPairEconomics/partial_hedge
-    === RUN   TestKalshiDeterministicPairEconomics/fractional_contracts
-    --- PASS: TestKalshiDeterministicPairEconomics (0.00s)
-        --- PASS: TestKalshiDeterministicPairEconomics/balanced (0.00s)
-        --- PASS: TestKalshiDeterministicPairEconomics/partial_hedge (0.00s)
-        --- PASS: TestKalshiDeterministicPairEconomics/fractional_contracts (0.00s)
-    PASS
-    ok  	github.com/polyarb/strategy	0.017s
-[2026-08-26T18:09:10+00:00] DETERMINISTIC_PARITY_TEST END rc=0 duration=3.30s
-[2026-08-26T18:09:10+00:00] DETERMINISTIC_PARITY_TEST PASS
-[2026-08-26T18:09:10+00:00] ACTION 4/9 DETERMINISTIC_PARITY_TEST PASS
-[2026-08-26T18:09:10+00:00] ACTION 5/9 GO_TEST START
-[2026-08-26T18:09:10+00:00] GO_TEST START: go test ./...
-    ?   	github.com/polyarb	[no test files]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    ok  	github.com/polyarb/discord	(cached)
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    ok  	github.com/polyarb/strategy	(cached)
-    ok  	github.com/polyarb/web	(cached)
-[2026-08-26T18:09:13+00:00] GO_TEST END rc=0 duration=2.71s
-[2026-08-26T18:09:13+00:00] ACTION 5/9 GO_TEST PASS
-[2026-08-26T18:09:13+00:00] ACTION 6/9 GO_BUILD START
-[2026-08-26T18:09:13+00:00] GO_BUILD START: go build -o kalshiarbo .
-[2026-08-26T18:09:13+00:00] GO_BUILD END rc=0 duration=0.34s
-[2026-08-26T18:09:13+00:00] ACTION 6/9 GO_BUILD PASS
-[2026-08-26T18:09:13+00:00] ACTION 7/9 START_PAPER START
-[2026-08-26T18:09:13+00:00] STOP_PAPER START
-[2026-08-26T18:09:16+00:00] STOP_PAPER PASS
-[2026-08-26T18:09:19+00:00] START_PAPER PASS
-[2026-08-26T18:09:19+00:00] ACTION 7/9 START_PAPER PASS
-[2026-08-26T18:09:19+00:00] ACTION 8/9 UPDATE_TELEMETRY START
-[2026-08-26T18:09:19+00:00] UPDATE kalshi-agent-telemetry.service PASS
-[2026-08-26T18:09:19+00:00] ACTION 8/9 UPDATE_TELEMETRY PASS
-[2026-08-26T18:09:19+00:00] ACTION 9/9 STATUS START
-[2026-08-26T18:09:19+00:00] STATUS PASS
-[2026-08-26T18:09:19+00:00] ACTION 9/9 STATUS PASS
-[2026-08-26T18:09:19+00:00] JOB RESULT=PASS
+[2026-08-26T18:10:33+00:00] ACTION 1/6 STATUS START
+[2026-08-26T18:10:33+00:00] STATUS PASS
+[2026-08-26T18:10:33+00:00] ACTION 1/6 STATUS PASS
+[2026-08-26T18:10:33+00:00] ACTION 2/6 BACKUP START
+[2026-08-26T18:10:33+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_181033.tar.gz
+[2026-08-26T18:10:42+00:00] BACKUP PASS files=116
+[2026-08-26T18:10:42+00:00] ACTION 2/6 BACKUP PASS
+[2026-08-26T18:10:42+00:00] ACTION 3/6 UPDATE_AUTOPILOT START
+[2026-08-26T18:10:42+00:00] UPDATE kalshi-autopilot.service PASS
+[2026-08-26T18:10:42+00:00] ACTION 3/6 UPDATE_AUTOPILOT PASS
+[2026-08-26T18:10:42+00:00] ACTION 4/6 UPDATE_TELEMETRY START
+[2026-08-26T18:10:43+00:00] UPDATE kalshi-agent-telemetry.service PASS
+[2026-08-26T18:10:43+00:00] ACTION 4/6 UPDATE_TELEMETRY PASS
+[2026-08-26T18:10:43+00:00] ACTION 5/6 START_PAPER START
+[2026-08-26T18:10:43+00:00] STOP_PAPER START
