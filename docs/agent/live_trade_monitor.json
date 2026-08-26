@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T00:45:13+00:00",
+  "utc": "2026-08-26T00:45:20+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -144,6 +144,8 @@
     "\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2  \u25c0 SELL NO [PAIR RESIDUAL] EXECUTED",
     "\u25c2  \u25bc P&L  -$-0.5026  (--10.44%)  \u2502  Reason: pair_fill_leg_timeout  \u2502  Held: 5s",
     "\u26a1 SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78370.78 open=78381.60 gap=$-10.8 no=0.5000 prob=0.52 rem=887s]",
-    "\u2717  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring"
+    "\u2717  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring",
+    "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78402.12 open=78381.60 gap=$20.5 yes=0.5900 prob=0.55 rem=882s]",
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED"
   ]
 }
