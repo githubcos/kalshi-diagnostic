@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T02:12:00+00:00",
+  "utc": "2026-08-26T02:12:07+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -102,12 +102,12 @@
     "TRADE_SIZE_USD": "5"
   },
   "counts_in_current_session": {
-    "lead_events": 7,
+    "lead_events": 8,
     "hedge_events": 3,
-    "closed_events": 7
+    "closed_events": 8
   },
   "close_reason_counts": {
-    "pair_stop_loss": 4,
+    "pair_stop_loss": 5,
     "pair_paper_locked_recycle": 3
   },
   "execution_latency_ms": {
@@ -168,6 +168,10 @@
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR HEDGE] EXECUTED",
     "\u25c2  \u25b2 P&L  +$0.0852  (+0.21%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 7s",
     "\u26a1 SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78770.91 open=78804.30 gap=$-33.4 no=0.8400 prob=0.66 rem=181s]",
-    "\u2717  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring"
+    "\u2717  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring",
+    "\u26a1 SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78760.96 open=78804.30 gap=$-43.3 no=0.8500 prob=0.71 rem=175s]",
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR LEAD] EXECUTED",
+    "\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2\u25c2  \u25c0 SELL NO [PAIR RESIDUAL] EXECUTED",
+    "\u25c2  \u25bc P&L  -$-0.1768  (--3.62%)  \u2502  Reason: pair_stop_loss  \u2502  Held: 1s"
   ]
 }
