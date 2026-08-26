@@ -1,59 +1,6 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-unhedgeable-residual-test-v1-retry2-20260826-0159
-JOB_START_UTC=2026-08-26T01:59:38+00:00
+JOB_ID=kalshi-adaptive-paper-optimizer-v5-20260826-0205
+JOB_START_UTC=2026-08-26T02:07:13+00:00
 LIVE_ALLOWED=false
-[2026-08-26T01:59:38+00:00] ACTION 1/8 BACKUP START
-[2026-08-26T01:59:38+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015938.tar.gz
-[2026-08-26T01:59:47+00:00] BACKUP PASS files=111
-[2026-08-26T01:59:47+00:00] ACTION 1/8 BACKUP PASS
-[2026-08-26T01:59:47+00:00] ACTION 2/8 APPLY_PATCH START
-[2026-08-26T01:59:47+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_015947.tar.gz
-[2026-08-26T01:59:56+00:00] BACKUP PASS files=111
-[2026-08-26T01:59:56+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-hyddu484.patch
-    checking file strategy/pair_arb_test.go
-    Hunk #2 succeeded at 346 with fuzz 1.
-[2026-08-26T01:59:56+00:00] PATCH_DRY_RUN END rc=0 duration=0.00s
-[2026-08-26T01:59:56+00:00] PATCH_APPLY START: patch --batch -p1 -i /tmp/kalshi-agent-hyddu484.patch
-    patching file strategy/pair_arb_test.go
-    Hunk #2 succeeded at 346 with fuzz 1.
-[2026-08-26T01:59:56+00:00] PATCH_APPLY END rc=0 duration=0.00s
-[2026-08-26T01:59:56+00:00] ACTION 2/8 APPLY_PATCH PASS
-[2026-08-26T01:59:56+00:00] ACTION 3/8 GOFMT START
-[2026-08-26T01:59:56+00:00] GOFMT START: gofmt -w /home/ubuntu/KalshiArbo/kalshiarbo/strategy/trader.go /home/ubuntu/KalshiArbo/kalshiarbo/strategy/pair_arb_test.go
-[2026-08-26T01:59:56+00:00] GOFMT END rc=0 duration=0.08s
-[2026-08-26T01:59:56+00:00] ACTION 3/8 GOFMT PASS
-[2026-08-26T01:59:56+00:00] ACTION 4/8 GO_TEST START
-[2026-08-26T01:59:56+00:00] GO_TEST START: go test ./...
-    ?   	github.com/polyarb	[no test files]
-    ?   	github.com/polyarb/binance	[no test files]
-    ?   	github.com/polyarb/bybit	[no test files]
-    ?   	github.com/polyarb/chainlink	[no test files]
-    ?   	github.com/polyarb/coinbase	[no test files]
-    ?   	github.com/polyarb/config	[no test files]
-    ?   	github.com/polyarb/deribit	[no test files]
-    ok  	github.com/polyarb/discord	(cached)
-    ?   	github.com/polyarb/display	[no test files]
-    ?   	github.com/polyarb/exchangefeed	[no test files]
-    ?   	github.com/polyarb/kalshi	[no test files]
-    ?   	github.com/polyarb/market	[no test files]
-    ok  	github.com/polyarb/polymarket	(cached)
-    ok  	github.com/polyarb/strategy	0.028s
-    ok  	github.com/polyarb/web	(cached)
-[2026-08-26T02:00:11+00:00] GO_TEST END rc=0 duration=14.72s
-[2026-08-26T02:00:11+00:00] ACTION 4/8 GO_TEST PASS
-[2026-08-26T02:00:11+00:00] ACTION 5/8 GO_BUILD START
-[2026-08-26T02:00:11+00:00] GO_BUILD START: go build -o kalshiarbo .
-[2026-08-26T02:00:15+00:00] GO_BUILD END rc=0 duration=4.34s
-[2026-08-26T02:00:15+00:00] ACTION 5/8 GO_BUILD PASS
-[2026-08-26T02:00:15+00:00] ACTION 6/8 START_PAPER START
-[2026-08-26T02:00:15+00:00] STOP_PAPER START
-[2026-08-26T02:00:18+00:00] STOP_PAPER PASS
-[2026-08-26T02:00:21+00:00] START_PAPER PASS
-[2026-08-26T02:00:21+00:00] ACTION 6/8 START_PAPER PASS
-[2026-08-26T02:00:21+00:00] ACTION 7/8 UPDATE_TELEMETRY START
-[2026-08-26T02:00:22+00:00] UPDATE kalshi-agent-telemetry.service PASS
-[2026-08-26T02:00:22+00:00] ACTION 7/8 UPDATE_TELEMETRY PASS
-[2026-08-26T02:00:22+00:00] ACTION 8/8 STATUS START
-[2026-08-26T02:00:22+00:00] STATUS PASS
-[2026-08-26T02:00:22+00:00] ACTION 8/8 STATUS PASS
-[2026-08-26T02:00:22+00:00] JOB RESULT=PASS
+[2026-08-26T02:07:13+00:00] ACTION 1/5 BACKUP START
+[2026-08-26T02:07:13+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_020713.tar.gz

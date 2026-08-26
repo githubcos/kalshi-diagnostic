@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T02:07:09+00:00",
+  "utc": "2026-08-26T02:07:17+00:00",
   "publisher_pid": 4155252,
   "heartbeat": {
-    "utc": "2026-08-26T02:07:08+00:00",
-    "epoch": 1787710028.3984423,
+    "utc": "2026-08-26T02:07:13+00:00",
+    "epoch": 1787710033.9137247,
     "pid": 4075083,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-adaptive-paper-optimizer-v5-20260826-0205"
   },
   "state": {
     "last_job_id": "kalshi-unhedgeable-residual-test-v1-retry2-20260826-0159",
