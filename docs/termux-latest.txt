@@ -1,5 +1,1547 @@
-TERMUX OUTPUT CHANNEL WORKING
-UTC=2026-08-26T18:30:27Z
-HOST=ip-172-31-6-80
-USER=ubuntu
-TEST=SUCCESS
+==================================================
+KALSHI PROFESSIONAL TEST — GATE A
+UTC=2026-08-26T18:36:23Z
+==================================================
+
+=== PROCESS / PORT ===
+403064 /home/ubuntu/KalshiArbo/kalshiarbo/kalshiarbo -port 8085
+LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=403064,fd=7))                
+
+=== PAPER SAFETY ===
+  "MARKET_TYPE": "15m",
+  "PAIR_ARB_ENABLED": true,
+  "PAIR_ARB_TRADE_SIZE_USD": 5,
+  "PAPER_START_BALANCE": 1000,
+  "PAPER_TRADE": true,
+
+=== KALSHI ORDERBOOK / PRICE CONVERSION CODE ===
+kalshi/orders.go:268:	// Kalshi adapter uses a YES bid/ask book:
+kalshi/orders.go:271:	// SELL YES P  -> ASK YES P
+kalshi/orders.go:275:	// BUY NO   P  -> ASK YES (1-P)
+kalshi/orders.go:279:	// ASK YES @ 0.33, not ASK YES @ 0.67.
+kalshi/orders.go:292:		yesPrice = 1.0 - price
+kalshi/orders.go:428:			price = 1.0 - yesPrice
+kalshi/orders.go.pre-v2-price-fix:278:		yesPrice = 1.0 - price
+kalshi/orders.go.pre-v2-price-fix:415:			price = 1.0 - yesPrice
+kalshi/market.go.orig:37:	YesAsk       string
+kalshi/market.go.orig:39:	NoAsk        string
+kalshi/market.go.orig:54:// OrderBook is deliberately shaped like the existing Polymarket orderbook.
+kalshi/market.go.orig:55:type OrderBook struct {
+kalshi/market.go.orig:79:	YesAskDollars            string  `json:"yes_ask_dollars"`
+kalshi/market.go.orig:81:	NoAskDollars             string  `json:"no_ask_dollars"`
+kalshi/market.go.orig:100:type orderbookResponse struct {
+kalshi/market.go.orig:101:	Orderbook struct {
+kalshi/market.go.orig:102:		YesDollars [][]string `json:"yes_dollars"`
+kalshi/market.go.orig:103:		NoDollars  [][]string `json:"no_dollars"`
+kalshi/market.go.orig:104:	} `json:"orderbook_fp"`
+kalshi/market.go.orig:175:		YesAsk:       m.YesAskDollars,
+kalshi/market.go.orig:177:		NoAsk:        m.NoAskDollars,
+kalshi/market.go.orig:230:// GetOrderBook accepts the logical YES/NO token IDs used by the adapter.
+kalshi/market.go.orig:234://	YES bid P  == NO ask 1-P
+kalshi/market.go.orig:235://	NO bid P   == YES ask 1-P
+kalshi/market.go.orig:239:func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+kalshi/market.go.orig:245:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go.orig:247:	var response orderbookResponse
+kalshi/market.go.orig:256:		ownBids = response.Orderbook.YesDollars
+kalshi/market.go.orig:257:		oppositeBids = response.Orderbook.NoDollars
+kalshi/market.go.orig:259:		ownBids = response.Orderbook.NoDollars
+kalshi/market.go.orig:260:		oppositeBids = response.Orderbook.YesDollars
+kalshi/market.go.orig:263:	book := &OrderBook{
+kalshi/execution_adapter.go:524:func (a *ExecutionAdapter) GetOrderBook(ctx context.Context, tokenID string) (*polymarket.OrderBook, error) {
+kalshi/execution_adapter.go:528:	kb, err := a.Client.GetOrderBook(ctx, tokenID)
+kalshi/execution_adapter.go:532:	out := &polymarket.OrderBook{Market: kb.Market, AssetID: kb.AssetID, Timestamp: kb.Timestamp, Hash: kb.Hash}
+kalshi/feed.go.orig:59:func bestAsk(book *OrderBook) (float64, float64) {
+kalshi/feed.go.orig:75:	// even when websocket/orderbook authentication is unavailable.
+kalshi/feed.go.orig:78:		yesAsk, _ := strconv.ParseFloat(m.YesAsk, 64)
+kalshi/feed.go.orig:79:		noAsk, _ := strconv.ParseFloat(m.NoAsk, 64)
+kalshi/feed.go.orig:80:		if yesID != "" && yesAsk > 0 && yesAsk < 1 {
+kalshi/feed.go.orig:81:			f.update(yesID, yesAsk, 0, "SELL")
+kalshi/feed.go.orig:83:		if noID != "" && noAsk > 0 && noAsk < 1 {
+kalshi/feed.go.orig:84:			f.update(noID, noAsk, 0, "SELL")
+kalshi/feed.go.orig:86:		if yesAsk > 0 || noAsk > 0 {
+kalshi/feed.go.orig:91:	// If authenticated orderbook access is available, keep the deeper-book
+kalshi/feed.go.orig:94:		b, e := f.client.GetOrderBook(ctx, id)
+kalshi/feed.go.orig:135:	Yes          [][]string `json:"yes_dollars_fp"`
+kalshi/feed.go.orig:136:	No           [][]string `json:"no_dollars_fp"`
+kalshi/feed.go.orig:215:	sub := map[string]any{"id": 1, "cmd": "subscribe", "params": map[string]any{"channels": []string{"orderbook_delta"}, "market_tickers": []string{ticker}, "use_yes_price": false}}
+kalshi/feed.go.orig:220:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/feed.go.orig:246:		case "orderbook_snapshot":
+kalshi/feed.go.orig:253:		case "orderbook_delta":
+kalshi/market.go:37:	YesAsk       string
+kalshi/market.go:39:	NoAsk        string
+kalshi/market.go:54:// OrderBook is deliberately shaped like the existing Polymarket orderbook.
+kalshi/market.go:55:type OrderBook struct {
+kalshi/market.go:80:	YesAskDollars            string  `json:"yes_ask_dollars"`
+kalshi/market.go:82:	NoAskDollars             string  `json:"no_ask_dollars"`
+kalshi/market.go:101:type orderbookResponse struct {
+kalshi/market.go:102:	Orderbook struct {
+kalshi/market.go:103:		YesDollars [][]string `json:"yes_dollars"`
+kalshi/market.go:104:		NoDollars  [][]string `json:"no_dollars"`
+kalshi/market.go:105:	} `json:"orderbook_fp"`
+kalshi/market.go:187:		YesAsk:       m.YesAskDollars,
+kalshi/market.go:189:		NoAsk:        m.NoAskDollars,
+kalshi/market.go:242:// GetOrderBook accepts the logical YES/NO token IDs used by the adapter.
+kalshi/market.go:246://	YES bid P  == NO ask 1-P
+kalshi/market.go:247://	NO bid P   == YES ask 1-P
+kalshi/market.go:251:func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+kalshi/market.go:257:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go:259:	var response orderbookResponse
+kalshi/market.go:268:		ownBids = response.Orderbook.YesDollars
+kalshi/market.go:269:		oppositeBids = response.Orderbook.NoDollars
+kalshi/market.go:271:		ownBids = response.Orderbook.NoDollars
+kalshi/market.go:272:		oppositeBids = response.Orderbook.YesDollars
+kalshi/market.go:275:	book := &OrderBook{
+kalshi/feed.go:61:func bestAsk(book *OrderBook) (float64, float64) {
+kalshi/feed.go:77:	// even when websocket/orderbook authentication is unavailable.
+kalshi/feed.go:80:		yesAsk, _ := strconv.ParseFloat(m.YesAsk, 64)
+kalshi/feed.go:81:		noAsk, _ := strconv.ParseFloat(m.NoAsk, 64)
+kalshi/feed.go:82:		if yesID != "" && yesAsk > 0 && yesAsk < 1 {
+kalshi/feed.go:83:			f.update(yesID, yesAsk, 0, "SELL")
+kalshi/feed.go:85:		if noID != "" && noAsk > 0 && noAsk < 1 {
+kalshi/feed.go:86:			f.update(noID, noAsk, 0, "SELL")
+kalshi/feed.go:88:		if yesAsk > 0 || noAsk > 0 {
+kalshi/feed.go:93:	// If authenticated orderbook access is available, keep the deeper-book
+kalshi/feed.go:96:		b, e := f.client.GetOrderBook(ctx, id)
+kalshi/feed.go:147:	Yes          [][]string `json:"yes_dollars_fp"`
+kalshi/feed.go:148:	No           [][]string `json:"no_dollars_fp"`
+kalshi/feed.go:227:	sub := map[string]any{"id": 1, "cmd": "subscribe", "params": map[string]any{"channels": []string{"orderbook_delta"}, "market_tickers": []string{ticker}, "use_yes_price": false}}
+kalshi/feed.go:232:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/feed.go:258:		case "orderbook_snapshot":
+kalshi/feed.go:265:		case "orderbook_delta":
+kalshi/market.go.pre-kalshi-resolution:36:	YesAsk       string
+kalshi/market.go.pre-kalshi-resolution:38:	NoAsk        string
+kalshi/market.go.pre-kalshi-resolution:53:// OrderBook is deliberately shaped like the existing Polymarket orderbook.
+kalshi/market.go.pre-kalshi-resolution:54:type OrderBook struct {
+kalshi/market.go.pre-kalshi-resolution:77:	YesAskDollars            string  `json:"yes_ask_dollars"`
+kalshi/market.go.pre-kalshi-resolution:79:	NoAskDollars             string  `json:"no_ask_dollars"`
+kalshi/market.go.pre-kalshi-resolution:98:type orderbookResponse struct {
+kalshi/market.go.pre-kalshi-resolution:99:	Orderbook struct {
+kalshi/market.go.pre-kalshi-resolution:100:		YesDollars [][]string `json:"yes_dollars"`
+kalshi/market.go.pre-kalshi-resolution:101:		NoDollars  [][]string `json:"no_dollars"`
+kalshi/market.go.pre-kalshi-resolution:102:	} `json:"orderbook_fp"`
+kalshi/market.go.pre-kalshi-resolution:172:		YesAsk:       m.YesAskDollars,
+kalshi/market.go.pre-kalshi-resolution:174:		NoAsk:        m.NoAskDollars,
+kalshi/market.go.pre-kalshi-resolution:227:// GetOrderBook accepts the logical YES/NO token IDs used by the adapter.
+kalshi/market.go.pre-kalshi-resolution:231://	YES bid P  == NO ask 1-P
+kalshi/market.go.pre-kalshi-resolution:232://	NO bid P   == YES ask 1-P
+kalshi/market.go.pre-kalshi-resolution:236:func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+kalshi/market.go.pre-kalshi-resolution:242:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go.pre-kalshi-resolution:244:	var response orderbookResponse
+kalshi/market.go.pre-kalshi-resolution:253:		ownBids = response.Orderbook.YesDollars
+kalshi/market.go.pre-kalshi-resolution:254:		oppositeBids = response.Orderbook.NoDollars
+kalshi/market.go.pre-kalshi-resolution:256:		ownBids = response.Orderbook.NoDollars
+kalshi/market.go.pre-kalshi-resolution:257:		oppositeBids = response.Orderbook.YesDollars
+kalshi/market.go.pre-kalshi-resolution:260:	book := &OrderBook{
+strategy/trader.go:373:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go:660:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+strategy/trader.go:743:	if rawShares < 0.01 || hedgePrice <= 0 || hedgePrice >= 1.0 {
+strategy/trader.go:758:		pq := price * (1.0 - price)
+strategy/trader.go:944:	GetOrderBook(context.Context, string) (*polymarket.OrderBook, error)
+strategy/trader.go:960:	return math.Ceil((rate*contracts*price*(1.0-price))*100.0-1e-9) / 100.0
+strategy/trader.go:966:		p, e1 := strconv.ParseFloat(strings.TrimSpace(l.Price), 64)
+strategy/trader.go:988:		book, err := bp.GetOrderBook(ctx, tokenID)
+strategy/trader.go:1026:		book, err := bp.GetOrderBook(ctx, tokenID)
+strategy/trader.go:1965:			math.Floor((1.0-preLeadHedgeFillPrice-requiredLockedProfit)*100) / 100
+strategy/trader.go:2268:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go:2270:	if yesPrice <= 0 || yesPrice >= 1.0 || noPrice <= 0 || noPrice >= 1.0 {
+strategy/trader.go:2406:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go:2433:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+strategy/trader.go:2435:	display.TradeOpen("NO [PAIR DUAL]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go:2489:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2600:			lockedPerShare := 1.0 - pair.sideAveragePrice("YES") - pair.sideAveragePrice("NO")
+strategy/trader.go:2706:			leadNow = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:4928:	approxNoPrice := math.Round((1.0-approxYesPrice)*100) / 100
+strategy/trader.go:5551:					price = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:6221:		// the token is converging to $1.00  placing at currentPrice (not -1) gives
+strategy/trader.go:6245:	// Jumping straight to 0.01 collapses all three price tiers into one.
+strategy/trader.go:6572:		// attempt 1 = current/reference price
+strategy/trader.go:6576:		limitPrice := math.Round(math.Max(0.01, basePrice-slippage)*100) / 100
+strategy/trader.go:7620:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:7744:		stalePrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:7819:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:8214:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:8253:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:8333:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:8384:	if yesPrice <= 0 || yesPrice >= 1.0 || noPrice <= 0 || noPrice >= 1.0 {
+strategy/trader.go:8471:	display.TradeOpen("YES [DCA HEDGE]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go:8500:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+strategy/trader.go:8502:	display.TradeOpen("NO [DCA HEDGE]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go:8743:		return fmt.Errorf("pair arb: exact %s hedge %.4f contracts at %.4f is below Kalshi 0.01-contract granularity", hedgeSide, estimatedActualShares, hedgePrice)
+strategy/trader.go:8782:			maxHedgePrice := math.Round((1.0-leadPrice-t.pairArbMinLockedProfit())*100) / 100
+strategy/trader.go:8885:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:9080:				leadNow = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:9277:			buyPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:9388:	if buySide == "" || deficitShares < 0.01 || anchorAvgPrice <= 0 {
+strategy/trader.go:9403:			hedgePrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:9468:		display.TradeOpen(buySide+" [PAIR HEDGE]", fillPrice, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), true)
+strategy/trader.go:9531:				display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go:9587:				display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go:9672:					display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go:9779:		residualExitPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:9859:		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:10028:	matchedExitPrice := math.Round((currentYesPrice+(1.0-currentYesPrice))*100) / 100
+strategy/trader.go:10237:		t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+strategy/trader.go:10244:	t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+strategy/signal.go.orig:18://     1. Coinbase spot price has already moved >$8 against the BTC open price
+strategy/signal.go.orig:212:	FlashBookConfirmed bool    // orderbook collapse detected (wall pull confirmed)
+strategy/signal.go.orig:355:	// MinBookDepthBTC is the minimum near-mid BTC orderbook depth on the
+strategy/signal.go.orig:356:	// supporting side to allow entry. If bids (for YES) or asks (for NO) are
+strategy/signal.go.orig:395:	// e.g. 0.50 = fire when 50% of peak spread wiped out AND orderbook support was pulled.
+strategy/signal.go.orig:415:	// ── Bitstamp orderbook spoof detection ─────────────────────
+strategy/signal.go.orig:697:	// BookImbalanceMin: minimum absolute normalised bid/ask imbalance from the Deribit
+strategy/signal.go.orig:700:	// bids not dominated by asks). 0 = disabled (recommended when NearMidUSD is narrow).
+strategy/signal.go.orig:794:	//   1. Coinbase spot price is >SnipeCoinbaseSpreadUSD below (for NO) or above
+strategy/signal.go.orig:987:		// Orderbook
+strategy/signal.go.orig:1044:		ConvictionOrderFlowMinImbalance:     0.20,  // bids 20%+ heavier than asks
+strategy/signal.go.orig:1161:	// Bitstamp orderbook depth state (spoof detection – near-mid)
+strategy/signal.go.orig:1174:	// Orderbook depth in the spread zone (between BTC price and open price)
+strategy/signal.go.orig:1361://  1. Latest spot price → Coinbase–Binance spread (institutional premium).
+strategy/signal.go.orig:1414:		coeff := (dvolAnnual / 100.0) * dvolMarkPrice / math.Sqrt(secsPerYear)
+strategy/signal.go.orig:1927:// BookDepthSnapshot returns the current near-mid orderbook depth + recent BTC
+strategy/signal.go.orig:1988:	// "NO" when yes_price ≤ 0.01. All rows in the same window (same open_price) share
+strategy/signal.go.orig:2019:		snap.NoPrice = math.Round((1.0-snap.YesPrice)*100) / 100
+strategy/signal.go.orig:2844:	//   > 1.0  → price bounced on the way up (swing → allow)
+strategy/signal.go.orig:2932:	if movedPrice*shares < 1.0 || oppPrice*shares < 1.0 {
+strategy/signal.go.orig:2987:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/signal.go.orig:3048:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/signal.go.orig:3185:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/signal.go.orig:3539:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/signal.go.orig:3546:	return false, fmt.Sprintf("YES=%.0f¢  NO=%.0f¢  (need ≤%.0f¢)", yesPrice*100, noPrice*100, maxPenny*100)
+strategy/signal.go.orig:3585:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/signal.go.orig:3720:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/pair_arb_test.go:118:		t.Fatalf("expected residual YES winner to settle at 1.0, got %.4f", residual.SellPrice)
+strategy/trader.go.pre-kalshi-mtm-fix:341:	noPrice := math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:626:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+strategy/trader.go.pre-kalshi-mtm-fix:719:		pq := price * (1.0 - price)
+strategy/trader.go.pre-kalshi-mtm-fix:1914:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:1916:	if yesPrice <= 0 || yesPrice >= 1.0 || noPrice <= 0 || noPrice >= 1.0 {
+strategy/trader.go.pre-kalshi-mtm-fix:2052:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:2079:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+strategy/trader.go.pre-kalshi-mtm-fix:2081:	display.TradeOpen("NO [PAIR DUAL]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:2135:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:2178:	hedgeLimitPrice := math.Round((1.0-anchorAvgPrice-t.pairArbMinLockedProfit())*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:2244:			lockedPerShare := 1.0 - pair.sideAveragePrice("YES") - pair.sideAveragePrice("NO")
+strategy/trader.go.pre-kalshi-mtm-fix:2348:			leadNow = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:4553:	approxNoPrice := math.Round((1.0-approxYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:5176:					price = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:5909:		// the token is converging to $1.00  placing at currentPrice (not -1) gives
+strategy/trader.go.pre-kalshi-mtm-fix:5933:	// Jumping straight to 0.01 collapses all three price tiers into one.
+strategy/trader.go.pre-kalshi-mtm-fix:7344:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:7468:		stalePrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:7543:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:7969:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:8004:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:8080:		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:8131:	if yesPrice <= 0 || yesPrice >= 1.0 || noPrice <= 0 || noPrice >= 1.0 {
+strategy/trader.go.pre-kalshi-mtm-fix:8218:	display.TradeOpen("YES [DCA HEDGE]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:8247:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+strategy/trader.go.pre-kalshi-mtm-fix:8249:	display.TradeOpen("NO [DCA HEDGE]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:8518:			maxHedgePrice := math.Round((1.0-leadPrice-t.pairArbMinLockedProfit())*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:8617:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:8786:				leadNow = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:8983:			buyPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:9094:	if buySide == "" || deficitShares < 0.01 || anchorAvgPrice <= 0 {
+strategy/trader.go.pre-kalshi-mtm-fix:9099:	hedgeLimitPrice := math.Round((1.0-anchorAvgPrice-t.pairArbMinLockedProfit())*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:9109:			hedgePrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:9178:		display.TradeOpen(buySide+" [PAIR HEDGE]", fillPrice, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), true)
+strategy/trader.go.pre-kalshi-mtm-fix:9241:				display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:9307:				display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:9392:					display.TradeOpen(buySide+" [PAIR HEDGE]", avg, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), t.cfg.PaperTrade)
+strategy/trader.go.pre-kalshi-mtm-fix:9581:		residualExitPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:9658:		currentNoPrice = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:9832:	matchedExitPrice := math.Round((currentYesPrice+(1.0-currentYesPrice))*100) / 100
+strategy/trader.go.pre-kalshi-mtm-fix:10091:		t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+strategy/trader.go.pre-kalshi-mtm-fix:10098:	t.closePairArbPosition(pair, 1.0, residualExitPrice, "pair_window_resolved", "pair_unhedged_resolved")
+strategy/trader.go.orig:373:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go.orig:660:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+strategy/trader.go.orig:743:	if rawShares < 0.01 || hedgePrice <= 0 || hedgePrice >= 1.0 {
+strategy/trader.go.orig:758:		pq := price * (1.0 - price)
+strategy/trader.go.orig:944:	GetOrderBook(context.Context, string) (*polymarket.OrderBook, error)
+strategy/trader.go.orig:960:	return math.Ceil((rate*contracts*price*(1.0-price))*100.0-1e-9) / 100.0
+strategy/trader.go.orig:966:		p, e1 := strconv.ParseFloat(strings.TrimSpace(l.Price), 64)
+strategy/trader.go.orig:988:		book, err := bp.GetOrderBook(ctx, tokenID)
+strategy/trader.go.orig:1026:		book, err := bp.GetOrderBook(ctx, tokenID)
+strategy/trader.go.orig:1965:			math.Floor((1.0-preLeadHedgeFillPrice-requiredLockedProfit)*100) / 100
+strategy/trader.go.orig:2268:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go.orig:2270:	if yesPrice <= 0 || yesPrice >= 1.0 || noPrice <= 0 || noPrice >= 1.0 {
+strategy/trader.go.orig:2406:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+
+=== FEE CODE ===
+kalshi/orders.go:43:	TakerFillCostDollars string `json:"taker_fill_cost_dollars"`
+kalshi/orders.go:45:	TakerFeesDollars     string `json:"taker_fees_dollars"`
+kalshi/orders.go:46:	MakerFeesDollars     string `json:"maker_fees_dollars"`
+kalshi/orders.go:63:func (o Order) FeesUSD() float64 {
+kalshi/orders.go:64:	t, _ := strconv.ParseFloat(o.TakerFeesDollars, 64)
+kalshi/orders.go:65:	m, _ := strconv.ParseFloat(o.MakerFeesDollars, 64)
+kalshi/orders.go:76:	FeesPaidDollars       string `json:"fees_paid_dollars"`
+kalshi/orders.go:161:	AverageFeePaid   string `json:"average_fee_paid,omitempty"`
+kalshi/orders.go:202:		req.SelfTradePreventionType = "taker_at_cross"
+kalshi/orders.go:388:		SelfTradePreventionType: "taker_at_cross",
+kalshi/orders.go:409:	FeesUSD          float64
+kalshi/orders.go:438:		FeesUSD:          o.FeesUSD(),
+kalshi/orders.go.pre-v2-price-fix:43:	TakerFillCostDollars string `json:"taker_fill_cost_dollars"`
+kalshi/orders.go.pre-v2-price-fix:45:	TakerFeesDollars     string `json:"taker_fees_dollars"`
+kalshi/orders.go.pre-v2-price-fix:46:	MakerFeesDollars     string `json:"maker_fees_dollars"`
+kalshi/orders.go.pre-v2-price-fix:63:func (o Order) FeesUSD() float64 {
+kalshi/orders.go.pre-v2-price-fix:64:	t, _ := strconv.ParseFloat(o.TakerFeesDollars, 64)
+kalshi/orders.go.pre-v2-price-fix:65:	m, _ := strconv.ParseFloat(o.MakerFeesDollars, 64)
+kalshi/orders.go.pre-v2-price-fix:76:	FeesPaidDollars       string `json:"fees_paid_dollars"`
+kalshi/orders.go.pre-v2-price-fix:161:	AverageFeePaid   string `json:"average_fee_paid,omitempty"`
+kalshi/orders.go.pre-v2-price-fix:202:		req.SelfTradePreventionType = "taker_at_cross"
+kalshi/orders.go.pre-v2-price-fix:377:		SelfTradePreventionType: "taker_at_cross",
+kalshi/orders.go.pre-v2-price-fix:396:	FeesUSD          float64
+kalshi/orders.go.pre-v2-price-fix:425:		FeesUSD:          o.FeesUSD(),
+kalshi/execution_adapter.go:202:func (a *ExecutionAdapter) GetFillsByTakerOrderID(
+kalshi/execution_adapter.go:559:	GetFillsByTakerOrderID(context.Context, string, string) (float64, float64, error)
+kalshi/feed.go.orig:14:	"github.com/polyarb/exchangefeed"
+kalshi/feed.go.orig:20:type FeedClient struct {
+kalshi/feed.go.orig:26:	PriceC      chan exchangefeed.PriceEvent
+kalshi/feed.go.orig:29:func NewFeedClient(client *Client, tokenIDs []string, logger *zap.Logger) *FeedClient {
+kalshi/feed.go.orig:30:	return &FeedClient{client: client, tokenIDs: tokenIDs, logger: logger, latestPrice: make(map[string]float64), PriceC: make(chan exchangefeed.PriceEvent, 512)}
+kalshi/feed.go.orig:32:func (f *FeedClient) LatestPrice(tokenID string) float64 {
+kalshi/feed.go.orig:37:func (f *FeedClient) Events() <-chan exchangefeed.PriceEvent { return f.PriceC }
+kalshi/feed.go.orig:38:func (f *FeedClient) update(tokenID string, price, size float64, side string) {
+kalshi/feed.go.orig:50:	ev := exchangefeed.PriceEvent{TokenID: tokenID, Price: price, Size: size, Side: side, At: time.Now()}
+kalshi/feed.go.orig:55:			f.logger.Warn("kalshi feed: PriceC buffer full")
+kalshi/feed.go.orig:67:func (f *FeedClient) pollOnce(ctx context.Context) {
+kalshi/feed.go.orig:74:	// executable asks. Use it first so PAPER mode has a real Kalshi price feed
+kalshi/feed.go.orig:105:func (f *FeedClient) logicalIDs() (ticker, yesID, noID string, err error) {
+kalshi/feed.go.orig:115:			return "", "", "", fmt.Errorf("kalshi feed: multiple tickers not supported")
+kalshi/feed.go.orig:124:		return "", "", "", fmt.Errorf("kalshi feed: no valid token IDs")
+kalshi/feed.go.orig:179:func (f *FeedClient) publishFromBids(yesBids, noBids map[float64]float64, yesID, noID string) {
+kalshi/feed.go.orig:190:func (f *FeedClient) runWS(stopCh <-chan struct{}) error {
+kalshi/feed.go.orig:192:		return fmt.Errorf("kalshi feed: websocket auth unavailable")
+kalshi/feed.go.orig:220:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/feed.go.orig:266:			return fmt.Errorf("kalshi feed websocket error: %s", string(env.Msg))
+kalshi/feed.go.orig:271:func (f *FeedClient) Run(stopCh <-chan struct{}) {
+kalshi/feed.go.orig:288:			f.logger.Warn("kalshi feed: websocket disconnected; REST fallback + reconnect", zap.Error(err))
+kalshi/feed.go:14:	"github.com/polyarb/exchangefeed"
+kalshi/feed.go:20:type FeedClient struct {
+kalshi/feed.go:26:	PriceC        chan exchangefeed.PriceEvent
+kalshi/feed.go:31:func NewFeedClient(client *Client, tokenIDs []string, logger *zap.Logger) *FeedClient {
+kalshi/feed.go:32:	return &FeedClient{client: client, tokenIDs: tokenIDs, logger: logger, latestPrice: make(map[string]float64), PriceC: make(chan exchangefeed.PriceEvent, 512)}
+kalshi/feed.go:34:func (f *FeedClient) LatestPrice(tokenID string) float64 {
+kalshi/feed.go:39:func (f *FeedClient) Events() <-chan exchangefeed.PriceEvent { return f.PriceC }
+kalshi/feed.go:40:func (f *FeedClient) update(tokenID string, price, size float64, side string) {
+kalshi/feed.go:52:	ev := exchangefeed.PriceEvent{TokenID: tokenID, Price: price, Size: size, Side: side, At: time.Now()}
+kalshi/feed.go:57:			f.logger.Warn("kalshi feed: PriceC buffer full")
+kalshi/feed.go:69:func (f *FeedClient) pollOnce(ctx context.Context) {
+kalshi/feed.go:76:	// executable asks. Use it first so PAPER mode has a real Kalshi price feed
+kalshi/feed.go:100:					f.logger.Warn("kalshi feed: REST quote fallback failed", zap.String("token_id", id), zap.Error(e))
+kalshi/feed.go:110:					f.logger.Info("kalshi feed: REST quote fallback primed", zap.String("token_id", id), zap.Float64("ask", p))
+kalshi/feed.go:117:func (f *FeedClient) logicalIDs() (ticker, yesID, noID string, err error) {
+kalshi/feed.go:127:			return "", "", "", fmt.Errorf("kalshi feed: multiple tickers not supported")
+kalshi/feed.go:136:		return "", "", "", fmt.Errorf("kalshi feed: no valid token IDs")
+kalshi/feed.go:191:func (f *FeedClient) publishFromBids(yesBids, noBids map[float64]float64, yesID, noID string) {
+kalshi/feed.go:202:func (f *FeedClient) runWS(stopCh <-chan struct{}) error {
+kalshi/feed.go:204:		return fmt.Errorf("kalshi feed: websocket auth unavailable")
+kalshi/feed.go:232:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/feed.go:278:			return fmt.Errorf("kalshi feed websocket error: %s", string(env.Msg))
+kalshi/feed.go:283:func (f *FeedClient) Run(stopCh <-chan struct{}) {
+kalshi/feed.go:300:			f.logger.Warn("kalshi feed: websocket disconnected; REST fallback + reconnect", zap.Error(err))
+strategy/trader.go:191:	FeeShares         float64
+strategy/trader.go:457:	FeeShares    float64   `json:"fee_shares"`
+strategy/trader.go:460:	FeeRateBps   string    `json:"fee_rate_bps"`
+strategy/trader.go:644:func computeFAKBuySizing(tradeSizeUSD, limitPrice, fillPrice float64, feeRateBps string, enforceMinOrder bool) (rawShares, feeShares, actualShares float64, err error) {
+strategy/trader.go:650:	feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, feeRateBps)
+strategy/trader.go:651:	actualShares = rawShares - feeShares
+strategy/trader.go:653:		return 0, 0, 0, fmt.Errorf("fee eats all shares (raw=%.2f fee=%.4f)", rawShares, feeShares)
+strategy/trader.go:656:		feeRate := 0.0
+strategy/trader.go:657:		if bps, parseErr := strconv.ParseFloat(feeRateBps, 64); parseErr == nil && bps > 0 {
+strategy/trader.go:658:			feeRate = bps / 10000.0
+strategy/trader.go:660:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+strategy/trader.go:662:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, feeRateBps)
+strategy/trader.go:663:		actualShares = rawShares - feeShares
+strategy/trader.go:665:			return 0, 0, 0, fmt.Errorf("fee eats all shares after min-order bump (raw=%.2f fee=%.4f)", rawShares, feeShares)
+strategy/trader.go:669:	return rawShares, feeShares, actualShares, nil
+strategy/trader.go:736:func pairArbExactHedgeSizing(targetActualShares, hedgePrice float64, feeRateBps string) (rawShares, notional float64, ok bool) {
+strategy/trader.go:737:	// Kalshi fees are charged in cash, not deducted from contract quantity.
+strategy/trader.go:740:	// granularity. Keep feeRateBps in the signature for compatibility with the
+strategy/trader.go:741:	// original PolyArb call sites, but do not use Polymarket fee-share math here.
+strategy/trader.go:750:func solveRawSharesForTargetActual(targetActualShares, price float64, feeRateBps string) float64 {
+strategy/trader.go:755:	bps, err := strconv.ParseFloat(feeRateBps, 64)
+strategy/trader.go:765:		feeShares := polymarket.ComputeBuyFeeShares(rawShares, price, feeRateBps)
+strategy/trader.go:766:		actualShares := math.Floor((rawShares-feeShares)*100) / 100
+strategy/trader.go:947:// kalshiTakerFeeUSD implements the standard Kalshi event-contract taker fee:
+strategy/trader.go:948:// ceil-to-cent(0.07 * contracts * p * (1-p)). The rate is configurable for
+strategy/trader.go:949:// paper experiments because some series can have a special fee schedule.
+strategy/trader.go:950:func kalshiTakerFeeUSD(contracts, price float64) float64 {
+strategy/trader.go:954:	rate := 0.07
+strategy/trader.go:955:	if raw := strings.TrimSpace(os.Getenv("KALSHI_TAKER_FEE_RATE")); raw != "" {
+strategy/trader.go:982:// totalCost includes the conservative Kalshi taker fee.
+strategy/trader.go:983:func (t *Trader) pairPaperBuyQuote(ctx context.Context, tokenID string, qty, limitPrice, fallbackPrice float64) (vwap, totalCost, fee float64, ok bool) {
+strategy/trader.go:1007:			fee = kalshiTakerFeeUSD(qty, vwap)
+strategy/trader.go:1008:			return vwap, raw + fee, fee, true
+strategy/trader.go:1016:	fee = kalshiTakerFeeUSD(qty, vwap)
+strategy/trader.go:1017:	return vwap, qty*vwap + fee, fee, true
+strategy/trader.go:1020:// pairPaperSellQuote sweeps executable bids. Proceeds are net of Kalshi fee.
+strategy/trader.go:1021:func (t *Trader) pairPaperSellQuote(ctx context.Context, tokenID string, qty, fallbackPrice float64) (vwap, proceeds, fee float64, ok bool) {
+strategy/trader.go:1042:			fee = kalshiTakerFeeUSD(qty, vwap)
+strategy/trader.go:1043:			return vwap, raw - fee, fee, true
+strategy/trader.go:1050:	fee = kalshiTakerFeeUSD(qty, vwap)
+strategy/trader.go:1051:	return vwap, qty*vwap - fee, fee, true
+strategy/trader.go:1055:// Kalshi cash fees. anchorEffective is the already-paid lead cost per contract,
+strategy/trader.go:1056:// including the lead fee folded into USDSpent.
+strategy/trader.go:1069:		eff := p + kalshiTakerFeeUSD(qty, p)/qty
+strategy/trader.go:1084:		if q*price+kalshiTakerFeeUSD(q, price) <= budget+1e-9 {
+strategy/trader.go:1094:func (t *Trader) executePairLimitBuy(ctx context.Context, requestName, tokenID string, signalPrice, limitPrice, rawShares float64) (outcome pairArbBuyOutcome, orderID string, fillPrice, actualShares, feeShares, usdSpent float64, err error) {
+strategy/trader.go:1108:	// Kalshi charges trading fees in cash. A fill of N contracts leaves N
+strategy/trader.go:1109:	// contracts in inventory; unlike Polymarket there is no fee-share deduction.
+strategy/trader.go:1110:	feeShares = 0
+strategy/trader.go:1120:		// venue fee in CASH. Unlike Polymarket, fees do not reduce contract count.
+strategy/trader.go:1121:		vwap, paperCost, paperFee, filled := t.pairPaperBuyQuote(ctx, tokenID, rawShares, limitPrice, fillPrice)
+strategy/trader.go:1126:			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: insufficient paper balance ($%.2f) for Kalshi trade ($%.2f incl fee)", t.paperBalance, paperCost)
+strategy/trader.go:1129:		feeShares = 0
+strategy/trader.go:1132:		t.logger.Info("pair arb: Kalshi paper fill", zap.String("request", requestName), zap.Float64("vwap", vwap), zap.Float64("contracts", rawShares), zap.Float64("fee_usd", paperFee), zap.Float64("total_cost_usd", paperCost))
+strategy/trader.go:1139:		return pairArbBuyOutcomeFilled, fmt.Sprintf("PAPER-%s-%d", strings.ToUpper(requestName), time.Now().UnixMilli()), fillPrice, actualShares, feeShares, paperCost, nil
+strategy/trader.go:1157:			FeeRateBps:     t.feeRateBps,
+strategy/trader.go:1178:				// quantity; venue fees are cash charges, never share deductions.
+strategy/trader.go:1179:				feeShares = 0
+strategy/trader.go:1366:				// conditional tokens delivered (fees are deducted downstream by the CTF contract).
+strategy/trader.go:1508:		// fees are cash charges and must never be deducted from contract inventory
+strategy/trader.go:1509:		// as Polymarket/CTF fee-shares. Preserve 0.01-contract granularity.
+strategy/trader.go:1510:		feeShares = 0
+strategy/trader.go:1586:				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+strategy/trader.go:1616:				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+strategy/trader.go:1617:				actualShares = math.Floor((effectiveGrossShares-feeShares)*100) / 100
+strategy/trader.go:1619:					actualShares = math.Floor((rawShares-polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps))*100) / 100
+strategy/trader.go:1652:	return pairArbBuyOutcomeFilled, orderID, fillPrice, actualShares, feeShares, usdSpent, nil
+strategy/trader.go:1773:	estimatedLeadActual := math.Floor((rawLeadShares-polymarket.ComputeBuyFeeShares(rawLeadShares, leadPrice, t.feeRateBps))*100) / 100
+strategy/trader.go:1774:	hedgeRawShares, _, hedgeAllowed := pairArbExactHedgeSizing(estimatedLeadActual, hedgeLimitPrice, t.feeRateBps)
+strategy/trader.go:1782:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+strategy/trader.go:1799:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1804:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+strategy/trader.go:1821:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1839:			FeeRateBps:     t.feeRateBps,
+strategy/trader.go:2019:	leadOutcome, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD, leadErr := t.executePairLimitBuy(ctx, leadRequestName, leadTokenID, leadPrice, leadExecLimitPrice, rawLeadShares)
+strategy/trader.go:2069:	hedgeFilledFeeShares := 0.0
+strategy/trader.go:2079:				hedgeFilledFeeShares = polymarket.ComputeBuyFeeShares(
+strategy/trader.go:2082:					t.feeRateBps,
+strategy/trader.go:2085:					(preLeadHedgeGrossShares-hedgeFilledFeeShares)*100,
+strategy/trader.go:2107:						hedgeFilledFeeShares = polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
+strategy/trader.go:2108:						hedgeFilledActual = math.Floor((gross-hedgeFilledFeeShares)*100) / 100
+strategy/trader.go:2150:			return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2153:		// immediate taker portion while leaving a maker remainder resting in the book),
+strategy/trader.go:2160:			t.logger.Warn("trader: dual pre-place: partial taker fill detected; cancelling GTC remainder to prevent ghost fills",
+strategy/trader.go:2165:				zap.Float64("remainder_raw", hedgeRawShares-(hedgeFilledActual+hedgeFilledFeeShares)),
+strategy/trader.go:2249:		display.TradeOpen(leadSide+" [PAIR LEAD]", leadFill, leadActual, leadFeeShares, leadUSD, 1.0-leadFill-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2250:		display.TradeOpen(hedgeSide+" [PAIR HEDGE]", hedgeFilledPrice, hedgeFilledActual, hedgeFilledFeeShares, hedgeFilledUSD, 0, t.cfg.PaperTrade)
+strategy/trader.go:2257:	return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2321:	// to half of what is available (leaving a small reserve for fees/slippage).
+strategy/trader.go:2329:		// Reserve 5% for fees/slippage; each leg gets half of what remains.
+strategy/trader.go:2361:	outcomeYes, orderIDYes, fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, errYes := t.executePairLimitBuy(ctx, "pair_arb_dual_yes_buy", yesTokenID, yesPrice, yesLimit, rawShares)
+strategy/trader.go:2406:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go:2409:	outcomeNo, orderIDNo, fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, errNo := t.executePairLimitBuy(ctx, "pair_arb_dual_no_buy", noTokenID, noPrice, noLimit, rawShares)
+strategy/trader.go:2435:	display.TradeOpen("NO [PAIR DUAL]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go:2447:func (t *Trader) openLeadOnlyPosition(ctx context.Context, sig Signal, yesTokenID, noTokenID, leadSide string, isNoLead bool, orderID string, fillPrice, actualShares, feeShares, usdSpent float64) error {
+strategy/trader.go:2489:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2551:	rawShares, _, hedgeAllowed := pairArbExactHedgeSizing(deficitShares, hedgeLimitPrice, t.feeRateBps)
+strategy/trader.go:2575:		ho, _, hFill, hActual, hFeeShares, hUSD, hErr := t.executePairLimitBuy(
+strategy/trader.go:2601:			display.TradeOpen(buySide+" [PAIR HEDGE]", hFill, hActual, hFeeShares, hUSD, lockedPerShare, t.cfg.PaperTrade)
+strategy/trader.go:3070:	avgPrice, grossShares, err := t.orders.GetFillsByTakerOrderID(ctx, orderID, tokenID)
+strategy/trader.go:3270:func (t *Trader) openResolutionPositionAfterFill(resp *polymarket.OrderResponse, tokenID string, isNoSide bool, fillPrice, actualShares, feeShares, usdSpent float64, windowEnd time.Time) {
+strategy/trader.go:3281:		FeeShares:         feeShares,
+strategy/trader.go:3316:	feeShares := polymarket.ComputeBuyFeeShares(rawShares, fillEstimate, t.feeRateBps)
+strategy/trader.go:3317:	actualShares := rawShares - feeShares
+strategy/trader.go:3319:		feeRate := 0.0
+strategy/trader.go:3320:		if bps, err := strconv.ParseFloat(t.feeRateBps, 64); err == nil && bps > 0 {
+strategy/trader.go:3321:			feeRate = bps / 10000.0
+strategy/trader.go:3323:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillEstimate))
+strategy/trader.go:3325:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillEstimate, t.feeRateBps)
+strategy/trader.go:3326:		actualShares = rawShares - feeShares
+strategy/trader.go:3334:		FeeShares:    feeShares,
+strategy/trader.go:3337:		FeeRateBps:   t.feeRateBps,
+strategy/trader.go:3343:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, windowEnd.Add(60*time.Second))
+strategy/trader.go:3359:		t.pendingBuy.FeeShares = feeShares
+strategy/trader.go:3364:	t.openResolutionPositionAfterFill(resp, tokenID, isNoSide, fillPrice, actualShares, feeShares, usdSpent, windowEnd)
+strategy/trader.go:3398:	feeShares := polymarket.ComputeBuyFeeShares(rawShares, fillEstimate, t.feeRateBps)
+strategy/trader.go:3399:	actualShares := math.Floor((rawShares-feeShares)*100) / 100
+strategy/trader.go:3401:		feeRate := 0.0
+strategy/trader.go:3402:		if bps, err := strconv.ParseFloat(t.feeRateBps, 64); err == nil && bps > 0 {
+strategy/trader.go:3403:			feeRate = bps / 10000.0
+strategy/trader.go:3405:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillEstimate))
+strategy/trader.go:3407:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillEstimate, t.feeRateBps)
+strategy/trader.go:3408:		actualShares = math.Floor((rawShares-feeShares)*100) / 100
+strategy/trader.go:3410:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, time.Now().Add(15*time.Second))
+strategy/trader.go:3429:		FeeShares:         feeShares,
+strategy/trader.go:3577:func (t *Trader) placeResolutionFAKBuy(ctx context.Context, tokenID, tickSize string, limitPrice, signalPrice, rawShares, estimatedShares, estimatedFeeShares float64) (*polymarket.OrderResponse, float64, float64, float64, error) {
+strategy/trader.go:3588:		FeeRateBps: t.feeRateBps,
+strategy/trader.go:3596:	grossShares, netShares := estimatedShares+estimatedFeeShares, estimatedShares
+strategy/trader.go:3602:	feeShares := estimatedFeeShares
+strategy/trader.go:3604:		if computedFee := polymarket.ComputeBuyFeeShares(grossShares, fillPrice, t.feeRateBps); computedFee >= 0 {
+strategy/trader.go:3605:			feeShares = computedFee
+strategy/trader.go:3607:		netShares = math.Floor((grossShares-feeShares)*100) / 100
+strategy/trader.go:3612:	return resp, fillPrice, netShares, feeShares, nil
+strategy/trader.go:3615:func (t *Trader) placeResolutionGTCBuy(ctx context.Context, tokenID, tickSize string, limitPrice, signalPrice, rawShares, estimatedShares, estimatedFeeShares float64, windowEnd time.Time) (*polymarket.OrderResponse, float64, float64, float64, error) {
+strategy/trader.go:3626:		FeeRateBps: t.feeRateBps,
+strategy/trader.go:3637:	feeShares := estimatedFeeShares
+strategy/trader.go:3655:			feeShares = polymarket.ComputeBuyFeeShares(grossShares, fillPrice, t.feeRateBps)
+strategy/trader.go:3656:			actualShares = math.Floor((grossShares-feeShares)*100) / 100
+strategy/trader.go:3689:			return resp, fillPrice, actualShares, feeShares, nil
+strategy/trader.go:3705:				return resp, fillPrice, actualShares, feeShares, nil
+strategy/trader.go:3892:	GetFillsByTakerOrderID(context.Context, string, string) (float64, float64, error)
+strategy/trader.go:3929:	feeRateBps string // taker fee for current window's token (e.g. "175")
+strategy/trader.go:4021:	// record is written to disk. Set from main to feed the web dashboard in real-time
+strategy/trader.go:4724:	feeShares := polymarket.ComputeBuyFeeShares(gross, avg, t.feeRateBps)
+strategy/trader.go:4725:	actualShares := math.Floor((gross-feeShares)*100) / 100
+strategy/trader.go:5190:					feeShares := polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+strategy/trader.go:5257:					display.TradeOpen(leadSide+" [PAIR LEAD RECOVERED]", fillPrice, walletBal, feeShares, usdSpent, 0, t.cfg.PaperTrade)
+strategy/trader.go:6176:// SetFeeRate stores the taker fee for the current window's tokens.
+strategy/trader.go:6178:func (t *Trader) SetFeeRate(bps string) {
+strategy/trader.go:6179:	t.feeRateBps = bps
+strategy/trader.go:6180:	t.logger.Debug("trader: fee rate set", zap.String("fee_rate_bps", bps))
+strategy/trader.go:6183:func (t *Trader) FeeRateBps() string {
+strategy/trader.go:6184:	return t.feeRateBps
+strategy/trader.go:6322:	// Compute sell fee for PnL accuracy: sell fee is deducted in USDC
+strategy/trader.go:6323:	sellFeeUSD := polymarket.ComputeSellFeeUSDC(pos.Shares, sellPrice, t.feeRateBps)
+strategy/trader.go:6325:	netPnL := grossPnL - sellFeeUSD
+strategy/trader.go:6332:		zap.Float64("sell_fee_usd", sellFeeUSD),
+strategy/trader.go:6338:		// Credit proceeds back to paper balance: shares  sellPrice - sellFee
+strategy/trader.go:6339:		proceeds := pos.Shares*currentPrice - sellFeeUSD
+strategy/trader.go:6346:			zap.Float64("fee_shares_buy", pos.FeeShares),
+strategy/trader.go:6347:			zap.Float64("fee_usd_sell", sellFeeUSD),
+strategy/trader.go:6382:		display.TradeClose(side, pos.BuyPrice, currentPrice, pos.Shares, netPnL, sellFeeUSD, reason, time.Since(pos.OpenedAt).Round(time.Second), true)
+strategy/trader.go:6428:	// Recalculate PnL and fee using the actual fill price (not the trigger price).
+strategy/trader.go:6432:	actualSellFeeUSD := polymarket.ComputeSellFeeUSDC(filledShares, actualFillPrice, t.feeRateBps)
+strategy/trader.go:6434:	actualNetPnL := actualGrossPnL - actualSellFeeUSD
+strategy/trader.go:6474:	display.TradeClose(side, pos.BuyPrice, actualFillPrice, filledShares, actualNetPnL, actualSellFeeUSD, reason, time.Since(pos.OpenedAt).Round(time.Second), false)
+strategy/trader.go:6588:				FeeRateBps: t.feeRateBps,
+strategy/trader.go:6933:				FeeRateBps: t.feeRateBps,
+strategy/trader.go:7595:func (t *Trader) CheckExpiry(ctx context.Context, currentYesPrice float64, safeExitBuffer time.Duration) error {
+strategy/trader.go:7597:		return t.managePairArbPosition(ctx, currentYesPrice, 0, safeExitBuffer)
+strategy/trader.go:7624:	if !pos.WindowEnd.IsZero() && now.Add(safeExitBuffer).After(pos.WindowEnd) {
+strategy/trader.go:7637:		// do NOT apply the normal safeExitBuffer close here (would fire too early).
+strategy/trader.go:7751:	stallFeeUSD := polymarket.ComputeSellFeeUSDC(pos.Shares, stalePrice, t.feeRateBps)
+strategy/trader.go:7752:	staleNetPnL := pos.Unrealized(stalePrice) - stallFeeUSD
+strategy/trader.go:7788:	display.TradeClose(staleSide, pos.BuyPrice, stalePrice, pos.Shares, staleNetPnL, stallFeeUSD, reason, time.Since(pos.OpenedAt).Round(time.Second), false)
+strategy/trader.go:7989:		actualSellFeeUSD := polymarket.ComputeSellFeeUSDC(filledShares, actualFillPrice, t.feeRateBps)
+strategy/trader.go:7991:		actualNetPnL := actualGrossPnL - actualSellFeeUSD
+strategy/trader.go:8030:		display.TradeClose(side, pos.BuyPrice, actualFillPrice, filledShares, actualNetPnL, actualSellFeeUSD,
+
+=== TICK / PRICE VALIDATION ===
+kalshi/orders.go:27:	Ticker        string `json:"ticker"`
+kalshi/orders.go:70:	Ticker                string `json:"ticker"`
+kalshi/orders.go:125:func (c *Client) GetPositions(ctx context.Context, ticker string) ([]MarketPosition, error) {
+kalshi/orders.go:128:	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go:129:		path += "?ticker=" + url.QueryEscape(strings.TrimSpace(ticker))
+kalshi/orders.go:141:	Ticker                  string `json:"ticker"`
+kalshi/orders.go:176:	if strings.TrimSpace(req.Ticker) == "" {
+kalshi/orders.go:177:		return nil, fmt.Errorf("kalshi: empty ticker")
+kalshi/orders.go:252:) (ticker, bookSide string, kalshiPrice float64, err error) {
+kalshi/orders.go:253:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/orders.go:304:	yesPrice = math.Round(yesPrice*10000) / 10000
+kalshi/orders.go:313:	return ticker, side, yesPrice, nil
+kalshi/orders.go:356:	ticker, side, yesPrice, err := LogicalOrderToV2(
+kalshi/orders.go:382:		Ticker:                  ticker,
+kalshi/orders.go:449:	ticker string,
+kalshi/orders.go:459:	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go:460:		q.Set("ticker", strings.TrimSpace(ticker))
+kalshi/orders.go.pre-v2-price-fix:27:	Ticker        string `json:"ticker"`
+kalshi/orders.go.pre-v2-price-fix:70:	Ticker                string `json:"ticker"`
+kalshi/orders.go.pre-v2-price-fix:125:func (c *Client) GetPositions(ctx context.Context, ticker string) ([]MarketPosition, error) {
+kalshi/orders.go.pre-v2-price-fix:128:	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go.pre-v2-price-fix:129:		path += "?ticker=" + url.QueryEscape(strings.TrimSpace(ticker))
+kalshi/orders.go.pre-v2-price-fix:141:	Ticker                  string `json:"ticker"`
+kalshi/orders.go.pre-v2-price-fix:176:	if strings.TrimSpace(req.Ticker) == "" {
+kalshi/orders.go.pre-v2-price-fix:177:		return nil, fmt.Errorf("kalshi: empty ticker")
+kalshi/orders.go.pre-v2-price-fix:252:) (ticker, bookSide string, yesPrice float64, err error) {
+kalshi/orders.go.pre-v2-price-fix:253:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/orders.go.pre-v2-price-fix:293:	yesPrice = math.Round(yesPrice*10000) / 10000
+kalshi/orders.go.pre-v2-price-fix:302:	return ticker, bookSide, yesPrice, nil
+kalshi/orders.go.pre-v2-price-fix:345:	ticker, side, yesPrice, err := LogicalOrderToV2(
+kalshi/orders.go.pre-v2-price-fix:371:		Ticker:                  ticker,
+kalshi/orders.go.pre-v2-price-fix:436:	ticker string,
+kalshi/orders.go.pre-v2-price-fix:446:	if strings.TrimSpace(ticker) != "" {
+kalshi/orders.go.pre-v2-price-fix:447:		q.Set("ticker", strings.TrimSpace(ticker))
+kalshi/market.go.orig:15:// ConditionID maps to the Kalshi market ticker.
+kalshi/market.go.orig:16:// QuestionID maps to the Kalshi event ticker.
+kalshi/market.go.orig:28:	MinTickSize  float64
+kalshi/market.go.orig:32:	KalshiTicker string
+kalshi/market.go.orig:33:	EventTicker  string
+kalshi/market.go.orig:65:	Ticker                   string  `json:"ticker"`
+kalshi/market.go.orig:66:	EventTicker              string  `json:"event_ticker"`
+kalshi/market.go.orig:107:func logicalTokenID(ticker, outcome string) string {
+kalshi/market.go.orig:108:	return ticker + ":" + strings.ToUpper(outcome)
+kalshi/market.go.orig:111:func parseLogicalTokenID(tokenID string) (ticker, outcome string, err error) {
+kalshi/market.go.orig:117:	ticker = tokenID[:i]
+kalshi/market.go.orig:124:	return ticker, outcome, nil
+kalshi/market.go.orig:128:	minTick := 0.01
+kalshi/market.go.orig:132:			minTick = v
+kalshi/market.go.orig:147:		ConditionID: m.Ticker,
+kalshi/market.go.orig:148:		QuestionID:  m.EventTicker,
+kalshi/market.go.orig:150:		Slug:        m.Ticker,
+kalshi/market.go.orig:158:				TokenID: logicalTokenID(m.Ticker, "YES"),
+kalshi/market.go.orig:162:				TokenID: logicalTokenID(m.Ticker, "NO"),
+kalshi/market.go.orig:166:		MinTickSize:  minTick,
+kalshi/market.go.orig:170:		KalshiTicker: m.Ticker,
+kalshi/market.go.orig:171:		EventTicker:  m.EventTicker,
+kalshi/market.go.orig:184:	seriesTicker string,
+kalshi/market.go.orig:199:	if seriesTicker != "" {
+kalshi/market.go.orig:200:		q.Set("series_ticker", seriesTicker)
+kalshi/market.go.orig:218:func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
+kalshi/market.go.orig:219:	path := "/markets/" + url.PathEscape(ticker)
+kalshi/market.go.orig:240:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/market.go.orig:245:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go.orig:264:		Market:  ticker,
+kalshi/market.go.orig:319:	seriesTicker string,
+kalshi/market.go.orig:322:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go.orig:330:			seriesTicker,
+kalshi/market.go.orig:368:	seriesTicker string,
+kalshi/market.go.orig:372:	markets, err := c.ListMarkets(ctx, "", seriesTicker, 100)
+kalshi/market.go.orig:401:			seriesTicker,
+kalshi/market.go.orig:414:// for a market ticker.
+kalshi/market.go.orig:419:	ticker string,
+kalshi/market.go.orig:421:	m, err := c.GetMarket(ctx, ticker)
+kalshi/market.go.orig:437:			ticker,
+kalshi/execution_adapter.go:124:	ticker string,
+kalshi/execution_adapter.go:149:		orders, listErr := a.Client.GetOrders(ctx, ticker, 200)
+kalshi/execution_adapter.go:194:	tokenID := logicalTokenID(o.Ticker, "YES")
+kalshi/execution_adapter.go:196:		tokenID = logicalTokenID(o.Ticker, "NO")
+kalshi/execution_adapter.go:211:	ticker, _, parseErr := parseLogicalTokenID(tokenID)
+kalshi/execution_adapter.go:216:	o, err := a.getKalshiOrderResilient(ctx, orderID, ticker)
+kalshi/execution_adapter.go:236:func (a *ExecutionAdapter) GetTickSize(
+kalshi/execution_adapter.go:244:	ticker, _, err := parseLogicalTokenID(tokenID)
+kalshi/execution_adapter.go:249:	m, err := a.Client.GetMarket(ctx, ticker)
+kalshi/execution_adapter.go:254:	if m.MinTickSize <= 0 {
+kalshi/execution_adapter.go:258:	return strconv.FormatFloat(m.MinTickSize, 'f', -1, 64), nil
+kalshi/execution_adapter.go:286:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/execution_adapter.go:291:	orders, err := a.Client.GetOrders(ctx, ticker, 100)
+kalshi/execution_adapter.go:297:		if !strings.EqualFold(o.Ticker, ticker) {
+kalshi/execution_adapter.go:320:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/execution_adapter.go:325:	orders, err := a.Client.GetOrders(ctx, ticker, 100)
+kalshi/execution_adapter.go:331:		if !strings.EqualFold(o.Ticker, ticker) {
+kalshi/execution_adapter.go:362:		tokenID = logicalTokenID(o.Ticker, outcome)
+kalshi/execution_adapter.go:401:		Market:        o.Ticker,
+kalshi/execution_adapter.go:454:			ConditionID:     kp.Ticker,
+kalshi/execution_adapter.go:560:	GetTickSize(context.Context, string) (string, error)
+kalshi/feed.go.orig:68:	ticker, yesID, noID, err := f.logicalIDs()
+kalshi/feed.go.orig:76:	m, err := f.client.GetMarket(ctx, ticker)
+kalshi/feed.go.orig:105:func (f *FeedClient) logicalIDs() (ticker, yesID, noID string, err error) {
+kalshi/feed.go.orig:111:		if ticker == "" {
+kalshi/feed.go.orig:112:			ticker = t
+kalshi/feed.go.orig:114:		if t != ticker {
+kalshi/feed.go.orig:115:			return "", "", "", fmt.Errorf("kalshi feed: multiple tickers not supported")
+kalshi/feed.go.orig:123:	if ticker == "" {
+kalshi/feed.go.orig:126:	return ticker, yesID, noID, nil
+kalshi/feed.go.orig:134:	MarketTicker string     `json:"market_ticker"`
+kalshi/feed.go.orig:139:	MarketTicker string `json:"market_ticker"`
+kalshi/feed.go.orig:194:	ticker, yesID, noID, err := f.logicalIDs()
+kalshi/feed.go.orig:215:	sub := map[string]any{"id": 1, "cmd": "subscribe", "params": map[string]any{"channels": []string{"orderbook_delta"}, "market_tickers": []string{ticker}, "use_yes_price": false}}
+kalshi/feed.go.orig:220:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/market.go:15:// ConditionID maps to the Kalshi market ticker.
+kalshi/market.go:16:// QuestionID maps to the Kalshi event ticker.
+kalshi/market.go:28:	MinTickSize  float64
+kalshi/market.go:32:	KalshiTicker string
+kalshi/market.go:33:	EventTicker  string
+kalshi/market.go:65:	Ticker                   string  `json:"ticker"`
+kalshi/market.go:66:	EventTicker              string  `json:"event_ticker"`
+kalshi/market.go:108:func logicalTokenID(ticker, outcome string) string {
+kalshi/market.go:109:	return ticker + ":" + strings.ToUpper(outcome)
+kalshi/market.go:112:func parseLogicalTokenID(tokenID string) (ticker, outcome string, err error) {
+kalshi/market.go:118:	ticker = tokenID[:i]
+kalshi/market.go:125:	return ticker, outcome, nil
+kalshi/market.go:129:	minTick := 0.01
+kalshi/market.go:133:			minTick = v
+kalshi/market.go:141:	if strings.EqualFold(m.EventTicker, "KXBTC15M") && m.CloseTime != "" {
+kalshi/market.go:159:		ConditionID: m.Ticker,
+kalshi/market.go:160:		QuestionID:  m.EventTicker,
+kalshi/market.go:162:		Slug:        m.Ticker,
+kalshi/market.go:170:				TokenID: logicalTokenID(m.Ticker, "YES"),
+kalshi/market.go:174:				TokenID: logicalTokenID(m.Ticker, "NO"),
+kalshi/market.go:178:		MinTickSize:  minTick,
+kalshi/market.go:182:		KalshiTicker: m.Ticker,
+kalshi/market.go:183:		EventTicker:  m.EventTicker,
+kalshi/market.go:196:	seriesTicker string,
+kalshi/market.go:211:	if seriesTicker != "" {
+kalshi/market.go:212:		q.Set("series_ticker", seriesTicker)
+kalshi/market.go:230:func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
+kalshi/market.go:231:	path := "/markets/" + url.PathEscape(ticker)
+kalshi/market.go:252:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/market.go:257:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go:276:		Market:  ticker,
+kalshi/market.go:331:	seriesTicker string,
+kalshi/market.go:334:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go:342:			seriesTicker,
+kalshi/market.go:380:	seriesTicker string,
+kalshi/market.go:384:	markets, err := c.ListMarkets(ctx, "", seriesTicker, 100)
+kalshi/market.go:413:			seriesTicker,
+kalshi/market.go:426:// for a market ticker.
+kalshi/market.go:431:	ticker string,
+kalshi/market.go:433:	m, err := c.GetMarket(ctx, ticker)
+kalshi/market.go:449:			ticker,
+kalshi/feed.go:70:	ticker, yesID, noID, err := f.logicalIDs()
+kalshi/feed.go:78:	m, err := f.client.GetMarket(ctx, ticker)
+kalshi/feed.go:117:func (f *FeedClient) logicalIDs() (ticker, yesID, noID string, err error) {
+kalshi/feed.go:123:		if ticker == "" {
+kalshi/feed.go:124:			ticker = t
+kalshi/feed.go:126:		if t != ticker {
+kalshi/feed.go:127:			return "", "", "", fmt.Errorf("kalshi feed: multiple tickers not supported")
+kalshi/feed.go:135:	if ticker == "" {
+kalshi/feed.go:138:	return ticker, yesID, noID, nil
+kalshi/feed.go:146:	MarketTicker string     `json:"market_ticker"`
+kalshi/feed.go:151:	MarketTicker string `json:"market_ticker"`
+kalshi/feed.go:206:	ticker, yesID, noID, err := f.logicalIDs()
+kalshi/feed.go:227:	sub := map[string]any{"id": 1, "cmd": "subscribe", "params": map[string]any{"channels": []string{"orderbook_delta"}, "market_tickers": []string{ticker}, "use_yes_price": false}}
+kalshi/feed.go:232:		f.logger.Info("kalshi feed: websocket orderbook connected", zap.String("ticker", ticker))
+kalshi/market.go.pre-kalshi-resolution:15:// ConditionID maps to the Kalshi market ticker.
+kalshi/market.go.pre-kalshi-resolution:16:// QuestionID maps to the Kalshi event ticker.
+kalshi/market.go.pre-kalshi-resolution:28:	MinTickSize  float64
+kalshi/market.go.pre-kalshi-resolution:32:	KalshiTicker string
+kalshi/market.go.pre-kalshi-resolution:33:	EventTicker  string
+kalshi/market.go.pre-kalshi-resolution:64:	Ticker                   string  `json:"ticker"`
+kalshi/market.go.pre-kalshi-resolution:65:	EventTicker              string  `json:"event_ticker"`
+kalshi/market.go.pre-kalshi-resolution:105:func logicalTokenID(ticker, outcome string) string {
+kalshi/market.go.pre-kalshi-resolution:106:	return ticker + ":" + strings.ToUpper(outcome)
+kalshi/market.go.pre-kalshi-resolution:109:func parseLogicalTokenID(tokenID string) (ticker, outcome string, err error) {
+kalshi/market.go.pre-kalshi-resolution:115:	ticker = tokenID[:i]
+kalshi/market.go.pre-kalshi-resolution:122:	return ticker, outcome, nil
+kalshi/market.go.pre-kalshi-resolution:126:	minTick := 0.01
+kalshi/market.go.pre-kalshi-resolution:130:			minTick = v
+kalshi/market.go.pre-kalshi-resolution:145:		ConditionID: m.Ticker,
+kalshi/market.go.pre-kalshi-resolution:146:		QuestionID:  m.EventTicker,
+kalshi/market.go.pre-kalshi-resolution:148:		Slug:        m.Ticker,
+kalshi/market.go.pre-kalshi-resolution:156:				TokenID: logicalTokenID(m.Ticker, "YES"),
+kalshi/market.go.pre-kalshi-resolution:160:				TokenID: logicalTokenID(m.Ticker, "NO"),
+kalshi/market.go.pre-kalshi-resolution:164:		MinTickSize:  minTick,
+kalshi/market.go.pre-kalshi-resolution:168:		KalshiTicker: m.Ticker,
+kalshi/market.go.pre-kalshi-resolution:169:		EventTicker:  m.EventTicker,
+kalshi/market.go.pre-kalshi-resolution:181:	seriesTicker string,
+kalshi/market.go.pre-kalshi-resolution:196:	if seriesTicker != "" {
+kalshi/market.go.pre-kalshi-resolution:197:		q.Set("series_ticker", seriesTicker)
+kalshi/market.go.pre-kalshi-resolution:215:func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
+kalshi/market.go.pre-kalshi-resolution:216:	path := "/markets/" + url.PathEscape(ticker)
+kalshi/market.go.pre-kalshi-resolution:237:	ticker, outcome, err := parseLogicalTokenID(tokenID)
+kalshi/market.go.pre-kalshi-resolution:242:	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+kalshi/market.go.pre-kalshi-resolution:261:		Market:  ticker,
+kalshi/market.go.pre-kalshi-resolution:316:	seriesTicker string,
+kalshi/market.go.pre-kalshi-resolution:319:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go.pre-kalshi-resolution:327:			seriesTicker,
+kalshi/market.go.pre-kalshi-resolution:365:	seriesTicker string,
+kalshi/market.go.pre-kalshi-resolution:369:	markets, err := c.ListMarkets(ctx, "", seriesTicker, 100)
+kalshi/market.go.pre-kalshi-resolution:398:			seriesTicker,
+strategy/brain.go:13://  2. On every incoming BTC tick (OnBitstampTrade) MaybeLabel is called.
+strategy/brain.go:32://   - TickRate5s     Bitstamp BTC ticks per second over last 5 s
+strategy/brain.go:51:	TickRate5s     float64 // Bitstamp ticks per second (last 5 s)
+strategy/brain.go:58:		f.BookImbalance, f.TickRate5s, f.WindowFraction,
+strategy/brain.go:275:// old enough (>= labelHorizonSec).  Call this on every new BTC price tick.
+strategy/trader.go:373:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go:399:	PairArbMinTokenPrice         float64
+strategy/trader.go:400:	PairArbMaxTokenPrice         float64
+strategy/trader.go:413:	PairArbLeadBuySlipTicks                            int
+strategy/trader.go:424:	PairArbContinuousImbalanceMinPriceImprovementCents float64
+strategy/trader.go:441:	DCAHedgeOppLegSlipTicks int     // slip ticks for the opp (non-moved) leg; -1 = use PairArbLeadBuySlipTicks
+strategy/trader.go:544:	PairHedgeMaxPrice      float64
+strategy/trader.go:585:type tickSizeSnapshot struct {
+strategy/trader.go:586:	TickSize  string
+strategy/trader.go:660:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+strategy/trader.go:676:	return math.Round(rawShares*limitPrice*10000) / 10000
+strategy/trader.go:942:// depth rather than assuming every signal price fills.
+strategy/trader.go:1054:// pairKalshiMaxHedgePrice solves the original PolyArb lock equation after
+strategy/trader.go:1057:func pairKalshiMaxHedgePrice(anchorEffective, qty, targetPerShare float64) float64 {
+strategy/trader.go:1107:	fillPrice = math.Round(signalPrice*100) / 100
+strategy/trader.go:1504:		fillPrice = math.Round(correctedFill*100) / 100
+strategy/trader.go:1584:					fillPrice = math.Round(limitPrice*100) / 100
+strategy/trader.go:1614:					fillPrice = math.Round(limitPrice*100) / 100
+strategy/trader.go:1753:	currentHedgePrice, maxHedgePrice float64,
+strategy/trader.go:1759:		hedgeLimitPrice = math.Round((currentHedgePrice-off/100.0)*100) / 100
+strategy/trader.go:1764:	if hedgeLimitPrice > maxHedgePrice {
+strategy/trader.go:1765:		hedgeLimitPrice = math.Round(maxHedgePrice*100) / 100
+strategy/trader.go:1779:			zap.Float64("max_hedge_price", maxHedgePrice),
+strategy/trader.go:1962:		// Floor to the exchange cent tick. Never round upward: doing so could
+strategy/trader.go:1964:		maxProfitableLeadPrice :=
+strategy/trader.go:1967:		if maxProfitableLeadPrice <= 0 || maxProfitableLeadPrice >= 1.0 {
+strategy/trader.go:1973:				zap.Float64("max_profitable_lead_price", maxProfitableLeadPrice),
+strategy/trader.go:1996:			math.Round(math.Min(0.99, leadLimitPrice+0.03)*100) / 100
+strategy/trader.go:2000:			maxProfitableLeadPrice,
+strategy/trader.go:2014:			zap.Float64("max_profitable_lead_price", maxProfitableLeadPrice),
+strategy/trader.go:2262:// average of both prices) so the position is balanced from the first tick.  Ongoing
+strategy/trader.go:2263:// dip-adds are handled by maybeStartContinuousImbalance on every subsequent price tick.
+strategy/trader.go:2268:		noPrice = math.Round((1.0-yesPrice)*100) / 100
+strategy/trader.go:2299:	slipTicks := t.cfg.PairArbLeadBuySlipTicks
+strategy/trader.go:2300:	if slipTicks < 0 {
+strategy/trader.go:2301:		slipTicks = int(pairArbLimitBuySlip * 100)
+strategy/trader.go:2303:	yesLimit := math.Round((yesPrice+float64(slipTicks)*0.01)*100) / 100
+strategy/trader.go:2304:	noLimit := math.Round((noPrice+float64(slipTicks)*0.01)*100) / 100
+strategy/trader.go:2534:	hedgeLimitPrice := pairKalshiMaxHedgePrice(anchorAvgPrice, deficitShares, t.pairArbMinLockedProfit())
+strategy/trader.go:2657:// makePairArbLeadGapGuard returns a function that is checked on each GTC poll tick.
+strategy/trader.go:2706:			leadNow = math.Round((1.0-currentYesPrice)*100) / 100
+strategy/trader.go:2851:	ticker := time.NewTicker(ambiguousSubmitRecoverPoll)
+strategy/trader.go:2852:	defer ticker.Stop()
+strategy/trader.go:2868:		case <-ticker.C:
+strategy/trader.go:3176:	return math.Round(cfg.ResolutionBuyLimitPrice*1000) / 1000
+
+=== MARKET STATE / TRADABILITY ===
+kalshi/client.go.pre-live-orders:143:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go.pre-live-orders:148:			resp.StatusCode,
+kalshi/client.go.pre-live-orders:184:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go.pre-live-orders:189:			resp.StatusCode,
+kalshi/orders.go:34:	Status      string `json:"status"`
+kalshi/orders.go:48:	ExpirationTime string `json:"expiration_time"`
+kalshi/orders.go:149:	ExpirationTime     int64 `json:"expiration_time,omitempty"`
+kalshi/orders.go:316:func MapTimeInForce(orderType string, expiration int64) (string, int64, error) {
+kalshi/orders.go:322:		if expiration <= 0 {
+kalshi/orders.go:323:			return "", 0, fmt.Errorf("kalshi: GTD requires expiration")
+kalshi/orders.go:325:		return "good_till_canceled", expiration, nil
+kalshi/orders.go:347:	Expiration    int64
+kalshi/orders.go:365:	tif, expiration, err := MapTimeInForce(
+kalshi/orders.go:367:		req.Expiration,
+kalshi/orders.go:394:	if expiration > 0 {
+kalshi/orders.go:395:		out.ExpirationTime = expiration
+kalshi/orders.go:405:	Status           string
+kalshi/orders.go:434:		Status:           o.Status,
+kalshi/orders.go.pre-v2-price-fix:34:	Status      string `json:"status"`
+kalshi/orders.go.pre-v2-price-fix:48:	ExpirationTime string `json:"expiration_time"`
+kalshi/orders.go.pre-v2-price-fix:149:	ExpirationTime     int64 `json:"expiration_time,omitempty"`
+kalshi/orders.go.pre-v2-price-fix:305:func MapTimeInForce(orderType string, expiration int64) (string, int64, error) {
+kalshi/orders.go.pre-v2-price-fix:311:		if expiration <= 0 {
+kalshi/orders.go.pre-v2-price-fix:312:			return "", 0, fmt.Errorf("kalshi: GTD requires expiration")
+kalshi/orders.go.pre-v2-price-fix:314:		return "good_till_canceled", expiration, nil
+kalshi/orders.go.pre-v2-price-fix:336:	Expiration    int64
+kalshi/orders.go.pre-v2-price-fix:354:	tif, expiration, err := MapTimeInForce(
+kalshi/orders.go.pre-v2-price-fix:356:		req.Expiration,
+kalshi/orders.go.pre-v2-price-fix:383:	if expiration > 0 {
+kalshi/orders.go.pre-v2-price-fix:384:		out.ExpirationTime = expiration
+kalshi/orders.go.pre-v2-price-fix:392:	Status           string
+kalshi/orders.go.pre-v2-price-fix:421:		Status:           o.Status,
+kalshi/market.go.orig:22:	Active       bool
+kalshi/market.go.orig:23:	Closed       bool
+kalshi/market.go.orig:25:	OpenDateISO  string
+kalshi/market.go.orig:34:	Status       string
+kalshi/market.go.orig:72:	Status                   string  `json:"status"`
+kalshi/market.go.orig:74:	CloseTime                string  `json:"close_time"`
+kalshi/market.go.orig:75:	OpenTime                 string  `json:"open_time"`
+kalshi/market.go.orig:76:	ExpirationTime           string  `json:"expiration_time"`
+kalshi/market.go.orig:136:	endDate := m.ExpirationTime
+kalshi/market.go.orig:151:		Active:      m.Status == "open",
+kalshi/market.go.orig:152:		Closed:      m.Status == "closed" || m.Status == "settled" || m.Status == "finalized",
+kalshi/market.go.orig:154:		OpenDateISO: m.OpenTime,
+kalshi/market.go.orig:172:		Status:       m.Status,
+kalshi/market.go.orig:183:	status string,
+kalshi/market.go.orig:195:	if status != "" {
+kalshi/market.go.orig:196:		q.Set("status", status)
+kalshi/market.go.orig:314:// GetCurrentSeriesMarket returns the currently open market from a recurring
+kalshi/market.go.orig:322:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go.orig:329:			"kalshi: no open markets for series %s",
+kalshi/execution_adapter.go:71:		Expiration: req.Expiration,
+kalshi/execution_adapter.go:87:	status := "LIVE"
+kalshi/execution_adapter.go:93:		status = "MATCHED"
+kalshi/execution_adapter.go:99:		Status:   status,
+kalshi/execution_adapter.go:381:	status := strings.ToUpper(strings.TrimSpace(o.Status))
+kalshi/execution_adapter.go:382:	switch status {
+kalshi/execution_adapter.go:383:	case "RESTING", "OPEN", "LIVE":
+kalshi/execution_adapter.go:384:		status = "LIVE"
+kalshi/execution_adapter.go:386:		status = "MATCHED"
+kalshi/execution_adapter.go:388:		status = "CANCELED"
+kalshi/execution_adapter.go:400:		Status:        status,
+kalshi/market.go:22:	Active       bool
+kalshi/market.go:23:	Closed       bool
+kalshi/market.go:25:	OpenDateISO  string
+kalshi/market.go:34:	Status       string
+kalshi/market.go:72:	Status                   string  `json:"status"`
+kalshi/market.go:74:	CloseTime                string  `json:"close_time"`
+kalshi/market.go:75:	OpenTime                 string  `json:"open_time"`
+kalshi/market.go:76:	ExpectedExpirationTime   string  `json:"expected_expiration_time"`
+kalshi/market.go:77:	ExpirationTime           string  `json:"expiration_time"`
+kalshi/market.go:137:	endDate := m.ExpectedExpirationTime
+kalshi/market.go:138:	// KXBTC15M's API expiration metadata can point beyond the actual 15-minute
+kalshi/market.go:140:	// from Kalshi close_time minus one 15-minute interval.
+kalshi/market.go:150:		endDate = m.ExpirationTime
+kalshi/market.go:163:		Active:      m.Status == "open",
+kalshi/market.go:164:		Closed:      m.Status == "closed" || m.Status == "settled" || m.Status == "finalized",
+kalshi/market.go:166:		OpenDateISO: m.OpenTime,
+kalshi/market.go:184:		Status:       m.Status,
+kalshi/market.go:195:	status string,
+kalshi/market.go:207:	if status != "" {
+kalshi/market.go:208:		q.Set("status", status)
+kalshi/market.go:326:// GetCurrentSeriesMarket returns the currently open market from a recurring
+kalshi/market.go:334:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go:341:			"kalshi: no open markets for series %s",
+kalshi/client.go:143:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go:148:			resp.StatusCode,
+kalshi/client.go:184:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go:189:			resp.StatusCode,
+kalshi/client.go.orig:143:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go.orig:148:			resp.StatusCode,
+kalshi/client.go.orig:184:	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+kalshi/client.go.orig:189:			resp.StatusCode,
+kalshi/market.go.pre-kalshi-resolution:22:	Active       bool
+kalshi/market.go.pre-kalshi-resolution:23:	Closed       bool
+kalshi/market.go.pre-kalshi-resolution:25:	OpenDateISO  string
+kalshi/market.go.pre-kalshi-resolution:34:	Status       string
+kalshi/market.go.pre-kalshi-resolution:71:	Status                   string  `json:"status"`
+kalshi/market.go.pre-kalshi-resolution:72:	CloseTime                string  `json:"close_time"`
+kalshi/market.go.pre-kalshi-resolution:73:	OpenTime                 string  `json:"open_time"`
+kalshi/market.go.pre-kalshi-resolution:74:	ExpirationTime           string  `json:"expiration_time"`
+kalshi/market.go.pre-kalshi-resolution:136:		endDate = m.ExpirationTime
+kalshi/market.go.pre-kalshi-resolution:149:		Active:      m.Status == "open",
+kalshi/market.go.pre-kalshi-resolution:150:		Closed:      m.Status == "closed" || m.Status == "settled",
+kalshi/market.go.pre-kalshi-resolution:152:		OpenDateISO: m.OpenTime,
+kalshi/market.go.pre-kalshi-resolution:170:		Status:       m.Status,
+kalshi/market.go.pre-kalshi-resolution:180:	status string,
+kalshi/market.go.pre-kalshi-resolution:192:	if status != "" {
+kalshi/market.go.pre-kalshi-resolution:193:		q.Set("status", status)
+kalshi/market.go.pre-kalshi-resolution:311:// GetCurrentSeriesMarket returns the currently open market from a recurring
+kalshi/market.go.pre-kalshi-resolution:319:	markets, err := c.ListMarkets(ctx, "open", seriesTicker, 100)
+kalshi/market.go.pre-kalshi-resolution:326:			"kalshi: no open markets for series %s",
+strategy/brain.go:14://     Pending entries that are >= labelHorizonSec old are retroactively labeled:
+strategy/brain.go:15://     if the absolute BTC-vs-open gap grew by >= labelThresholdUSD the sample
+strategy/brain.go:29://   - AbsGap         |btc − open| in USD
+strategy/brain.go:48:	AbsGap         float64 // |btc − open| in USD
+strategy/brain.go:101:	openPrice float64
+strategy/brain.go:166:	// Pending retroactive labels
+strategy/brain.go:217:// Enabled returns whether the brain gate is active.
+strategy/brain.go:250:// AddObservation stores a feature snapshot for future retroactive labeling.
+strategy/brain.go:252:// btcPrice and openPrice are the BTC and window-open prices at capture time.
+strategy/brain.go:253:func (b *RegimeBrain) AddObservation(f BrainFeatures, btcPrice, openPrice float64, at time.Time) {
+strategy/brain.go:269:		openPrice: openPrice,
+strategy/brain.go:274:// MaybeLabel scans the pending buffer and retroactively labels entries that are
+strategy/brain.go:295:		gapAtCapture := math.Abs(p.btcPrice - p.openPrice)
+strategy/brain.go:296:		gapNow := math.Abs(currentBTCPrice - p.openPrice)
+strategy/trader.go:181:// Position tracks an open trade.
+strategy/trader.go:193:	OpenPrice         float64
+strategy/trader.go:195:	OpenedAt          time.Time
+strategy/trader.go:199:	ActiveSellOrderID string
+strategy/trader.go:229:	OpenPrice   float64   `json:"open_price"`
+strategy/trader.go:231:	OpenedAt    time.Time `json:"opened_at"`
+strategy/trader.go:449:// as an open position. Written to disk immediately after PlaceOrder succeeds so a crash
+strategy/trader.go:450:// between PlaceOrder and position-open can be recovered on restart.
+strategy/trader.go:487:	OpenedAt time.Time `json:"opened_at"`
+strategy/trader.go:488:	ClosedAt time.Time `json:"closed_at"`
+strategy/trader.go:494:	EntryEdgeUSD      float64 `json:"entry_edge_usd"`   // |BTC Ãƒâ€¹Ã¢â‚¬Â  open| at entry
+strategy/trader.go:498:	EntryOpenPrice    float64 `json:"entry_open_price"`
+strategy/trader.go:507:	Reason    string  `json:"reason"` // why the position was closed
+strategy/trader.go:525:	PairActive             bool
+strategy/trader.go:556:	LastStatus      string
+strategy/trader.go:576:	Status        string    `json:"status,omitempty"`
+strategy/trader.go:580:type pairExitOrderStatusSnapshot struct {
+strategy/trader.go:929:		t.logger.Warn("trader: async lead credit not confirmed within grace; pending reconciliation remains active",
+strategy/trader.go:1202:	submitStatus := strings.ToLower(strings.TrimSpace(resp.Status))
+strategy/trader.go:1204:	case submitStatus == "matched" || submitStatus == "duplicated":
+strategy/trader.go:1289:				// KALSHI SAFETY: MATCHED status without authoritative price AND
+strategy/trader.go:1305:	case submitStatus == "live" || submitStatus == "delayed":
+strategy/trader.go:1306:		if submitStatus == "live" && orderType != polymarket.OrderTypeGTC {
+strategy/trader.go:1355:			pollStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:1356:			if pollStatus == "matched" || pollStatus == "filled" {
+strategy/trader.go:1365:				// The order-status SizeMatched field reflects CLOB-matched size, not actual
+strategy/trader.go:1378:			if pollStatus == "unmatched" || pollStatus == "canceled" || pollStatus == "cancelled" || pollStatus == "expired" {
+strategy/trader.go:1387:				logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: order became %s order=%s", orderType, activityRequestLabel(requestName), strings.ToUpper(pollStatus), orderID))
+strategy/trader.go:1391:			if !hedgeAbortTriggered && !gapGuardCancelled && pollStatus == "live" && isPairArbLeadBuyRequestName(requestName) {
+strategy/trader.go:1395:					// Gap guard: cancel lead if the BTC-vs-open gap has reverted below entry threshold.
+strategy/trader.go:1399:							t.logger.Warn("trader: pair arb lead GTC cancelled: signal gap closed",
+strategy/trader.go:1404:							_ = t.cancelOrderTimed(ctx, requestName+"_cancel_gap_closed", orderID)
+strategy/trader.go:1427:			// request is in-flight or while status propagation lags. Reconcile once more
+strategy/trader.go:1430:				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:1431:				if pcStatus == "matched" || pcStatus == "filled" {
+strategy/trader.go:1461:							zap.String("status", gr.Status),
+strategy/trader.go:1484:					logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: cancelled because gap closed while order was LIVE order=%s", orderType, activityRequestLabel(requestName), orderID))
+strategy/trader.go:1493:	case submitStatus == "unmatched":
+strategy/trader.go:1495:		logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: submit status UNMATCHED order=%s", orderType, activityRequestLabel(requestName), orderID))
+strategy/trader.go:1499:		// Any non-matched status on immediate orders is a deterministic no-fill.
+strategy/trader.go:1500:		logTimedActivityWarn(fmt.Sprintf("BUY %s %s not filled: submit status %s order=%s", orderType, activityRequestLabel(requestName), strings.ToUpper(submitStatus), orderID))
+strategy/trader.go:1534:		// Doc-backed execution model: insert status/trade rows can appear before the
+strategy/trader.go:1593:				// Credit can lag the MATCHED status by a few seconds. Continue using
+strategy/trader.go:1602:					// Never open/hedge a lead until wallet credit is visible. Keep the
+strategy/trader.go:1673:		status := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:1683:			if (status == "matched" || status == "filled") && matched > pairArbShareDust {
+strategy/trader.go:1694:		if status == "matched" || status == "filled" {
+strategy/trader.go:1739://   - Both fill:        open balanced position immediately, HedgeBy cleared.
+strategy/trader.go:1799:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1821:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1848:		status := strings.ToLower(strings.TrimSpace(hedgeResp.Status))
+strategy/trader.go:1849:		switch status {
+strategy/trader.go:1855:			t.logger.Warn("trader: dual pre-place hedge unexpected submit status",
+strategy/trader.go:1856:				zap.String("status", hedgeResp.Status),
+strategy/trader.go:1862:			zap.String("hedge_status", hedgeResp.Status),
+strategy/trader.go:2047:			// alive and let reconciliation recover/open safely instead of canceling as no-fill.
+strategy/trader.go:2095:				pollStatus := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:2096:				switch pollStatus {
+strategy/trader.go:2122:						zap.String("hedge_status", gr.Status),
+strategy/trader.go:2150:			return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2184:			OpenPrice:   sig.OpenPrice,
+strategy/trader.go:2186:			OpenedAt:    now,
+strategy/trader.go:2249:		display.TradeOpen(leadSide+" [PAIR LEAD]", leadFill, leadActual, leadFeeShares, leadUSD, 1.0-leadFill-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2250:		display.TradeOpen(hedgeSide+" [PAIR HEDGE]", hedgeFilledPrice, hedgeFilledActual, hedgeFilledFeeShares, hedgeFilledUSD, 0, t.cfg.PaperTrade)
+strategy/trader.go:2256:	// openLeadOnlyPosition → managePairArbPosition → maybeRebalancePairArb will poll it.
+strategy/trader.go:2257:	return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2289:	if sig.BitstampPrice > 0 && sig.OpenPrice > 0 {
+strategy/trader.go:2290:		gapAbs := math.Abs(sig.BitstampPrice - sig.OpenPrice)
+strategy/trader.go:2386:		OpenPrice:   sig.OpenPrice,
+strategy/trader.go:2388:		OpenedAt:    now,
+strategy/trader.go:2400:	t.logger.Info("trader: pair arb dual: YES leg opened",
+strategy/trader.go:2406:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+strategy/trader.go:2414:		// YES is open; the normal hedge-retry path in managePairArbPosition will recover NO.
+strategy/trader.go:2428:	t.logger.Info("trader: pair arb dual: NO leg opened; fully hedged from entry",
+strategy/trader.go:2435:	display.TradeOpen("NO [PAIR DUAL]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+strategy/trader.go:2445:// openLeadOnlyPosition is called after the lead buy fills (in sequential or dual-pre mode)
+strategy/trader.go:2447:func (t *Trader) openLeadOnlyPosition(ctx context.Context, sig Signal, yesTokenID, noTokenID, leadSide string, isNoLead bool, orderID string, fillPrice, actualShares, feeShares, usdSpent float64) error {
+strategy/trader.go:2462:		OpenPrice:   sig.OpenPrice,
+strategy/trader.go:2464:		OpenedAt:    now,
+strategy/trader.go:2481:	t.logger.Info("trader: pair arb lead leg opened",
+strategy/trader.go:2489:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2601:			display.TradeOpen(buySide+" [PAIR HEDGE]", hFill, hActual, hFeeShares, hUSD, lockedPerShare, t.cfg.PaperTrade)
+strategy/trader.go:2658:// It returns (true, reason) when the BTC-vs-open gap has reverted below the configured
+strategy/trader.go:2670:			// NO lead: signal required gap < -minGap (BTC below open).
+strategy/trader.go:2676:			// YES lead: signal required gap > +minGap (BTC above open).
+strategy/trader.go:2687:// should be force-closed before HedgeBy because the lead is already losing and the
+strategy/trader.go:2696:		if now.Sub(pair.OpenedAt) < time.Duration(grace)*time.Second {
+strategy/trader.go:2719:	if snap.BTCPrice <= 0 || snap.OpenPrice <= 0 {
+strategy/trader.go:2745:		// require a minimum adverse BTC/open move.
+strategy/trader.go:2856:			status := strings.TrimSpace(recovered.Status)
+strategy/trader.go:2857:			if status == "" {
+strategy/trader.go:2858:				status = "LIVE"
+strategy/trader.go:2860:			return &polymarket.OrderResponse{Success: true, Status: status, OrderID: recovered.ID}, nil
+strategy/trader.go:2863:			return &polymarket.OrderResponse{Success: true, Status: "MATCHED", OrderID: recoveredTrade.ID}, nil
+strategy/trader.go:2933:						zap.String("recovered_status", recoveredResp.Status),
+strategy/trader.go:2944:				Status:   "UNMATCHED",
+strategy/trader.go:2959:		zap.String("status", resp.Status),
+strategy/trader.go:2987:		logTimedActivityWarn(fmt.Sprintf("%s %s %s rejected in %d ms: status=%s error=%s", strings.ToUpper(string(req.Side)), req.OrderType, activityLabel, duration.Milliseconds(), resp.Status, resp.ErrorMsg))
+strategy/trader.go:3031:		zap.String("status", resp.Status),
+strategy/trader.go:3036:	if requestName == "conviction_sell_lookup" && strings.EqualFold(resp.Status, "LIVE") {
+strategy/trader.go:3118:			status := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:3125:			if status == "matched" || status == "filled" {
+strategy/trader.go:3256:	btc, _, _, openPrice, _, _ := t.detector.Snapshot()
+strategy/trader.go:3257:	if btc < openPrice {
+strategy/trader.go:3270:func (t *Trader) openResolutionPositionAfterFill(resp *polymarket.OrderResponse, tokenID string, isNoSide bool, fillPrice, actualShares, feeShares, usdSpent float64, windowEnd time.Time) {
+strategy/trader.go:3283:		OpenPrice:         t.detector.OpenPrice(),
+strategy/trader.go:3285:		OpenedAt:          now,
+strategy/trader.go:3364:	t.openResolutionPositionAfterFill(resp, tokenID, isNoSide, fillPrice, actualShares, feeShares, usdSpent, windowEnd)
+strategy/trader.go:3384:		display.Warn(fmt.Sprintf("resolution post-close entry skipped for %s: position already open", label))
+strategy/trader.go:3431:		OpenPrice:         t.detector.OpenPrice(),
+strategy/trader.go:3433:		OpenedAt:          now,
+strategy/trader.go:3545:	if !strings.EqualFold(resp.Status, "matched") {
+strategy/trader.go:3639:	lastStatus := resp.Status
+strategy/trader.go:3661:		var statusMatched bool
+strategy/trader.go:3667:			lastStatus = gr.Status
+strategy/trader.go:3675:			if strings.EqualFold(gr.Status, "MATCHED") || strings.EqualFold(gr.Status, "FILLED") {
+strategy/trader.go:3676:				statusMatched = true
+strategy/trader.go:3683:				statusMatched = true
+strategy/trader.go:3684:				lastStatus = "MATCHED"
+strategy/trader.go:3688:		if statusMatched && actualShares > 0 {
+strategy/trader.go:3717:			return nil, 0, 0, 0, fmt.Errorf("resolution: GTC buy not filled before %s (status=%s)", deadlineLabel, lastStatus)
+strategy/trader.go:3793:	if extra.ClosedAt.After(merged.ClosedAt) {
+strategy/trader.go:3794:		merged.ClosedAt = extra.ClosedAt
+strategy/trader.go:3837:	if merged.EntryOpenPrice == 0 {
+strategy/trader.go:3838:		merged.EntryOpenPrice = extra.EntryOpenPrice
+strategy/trader.go:3846:	if merged.Reason == "" || (isCleanupTradeReason(extra.Reason) && extra.ClosedAt.After(base.ClosedAt) && isCleanupTradeReason(merged.Reason)) {
+strategy/trader.go:3859:		openedAt int64
+strategy/trader.go:3866:		// all with the same OpenedAt. Key only on openedAt so all legs are merged
+strategy/trader.go:3872:		key := tradeKey{openedAt: rec.OpenedAt.UnixNano(), side: side}
+strategy/trader.go:3911:// Trader executes trades and monitors open positions.
+strategy/trader.go:3921:	pendingBuy     *pendingBuyState // non-nil between PlaceOrder and position-open
+strategy/trader.go:3949:	consecutiveLosses int     // how many trades in a row closed at a loss
+strategy/trader.go:3956:	// allowanceInFlight tracks token IDs that have an active WaitForConditionalAllowance
+strategy/trader.go:3963:	claimLastStatus             string
+strategy/trader.go:3972:	pairExitStatusMu            sync.Mutex
+strategy/trader.go:3973:	pairExitStatusRefreshActive bool
+strategy/trader.go:3974:	pairExitOrderStatus         map[string]pairExitOrderStatusSnapshot
+strategy/trader.go:3984:	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
+strategy/trader.go:4054:		pairExitOrderStatus:           make(map[string]pairExitOrderStatusSnapshot),
+strategy/trader.go:4064:func (t *Trader) isTokenTrackedByOpenPosition(tokenID string) bool {
+strategy/trader.go:4189:			if t.isTokenTrackedByOpenPosition(tokenID) {
+strategy/trader.go:4190:				t.logger.Info("trader: isolated pending-order watch stopping; token is now tracked by open position",
+strategy/trader.go:4393:// open positions that the bot previously traded.
+strategy/trader.go:4426:			Status:       "queued_external_positions",
+strategy/trader.go:4463:	pairArbExitStatusTTL          = 10 * time.Second
+strategy/trader.go:4464:	pairArbExitStatusProbeTimeout = 1200 * time.Millisecond
+strategy/trader.go:4632:func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
+strategy/trader.go:4661:	status := ""
+strategy/trader.go:4663:		status = strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:4665:	if status == "unmatched" || status == "canceled" || status == "cancelled" || status == "expired" {
+strategy/trader.go:4668:			zap.String("status", gr.Status),
+strategy/trader.go:4700:	if status == "live" && gross <= pairArbShareDust {
+strategy/trader.go:4704:		if status == "matched" || status == "filled" {
+strategy/trader.go:4706:			// MATCHED/FILLED status alone is not sufficient accounting evidence.
+strategy/trader.go:4712:				status,
+strategy/trader.go:5049:		if gr, grErr := t.getOrderTimed(ctx, requestName+"_status", orderID); grErr == nil && gr != nil {
+strategy/trader.go:5050:			status := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:5051:			if status == "matched" || status == "filled" {
+strategy/trader.go:5087:				status := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:5088:				if status == "unmatched" || status == "canceled" || status == "cancelled" || status == "expired" {
+strategy/trader.go:5138:			status := strings.ToLower(strings.TrimSpace(gr.Status))
+strategy/trader.go:5139:			if status == "matched" || status == "filled" {
+strategy/trader.go:5141:					// No token ID to recover from — cannot open position safely, just clear.
+strategy/trader.go:5152:						return fmt.Errorf("pair arb: pending order %s is %s but wallet credit not visible yet (age=%s); waiting", po.OrderID, gr.Status, age.Round(time.Second))
+strategy/trader.go:5157:							t.logger.Error("trader: fail-closed: matched pending order has fills but wallet credit still missing; keeping entry blocked",
+strategy/trader.go:5165:						return fmt.Errorf("pair arb: pending order %s is %s with fills %.2f @ %.4f but wallet still empty; waiting", po.OrderID, gr.Status, gross, avg)
+strategy/trader.go:5167:					// Fail-closed: never auto-clear matched pending ownership when wallet credit is absent.
+strategy/trader.go:5168:					t.logger.Error("trader: fail-closed: pending pair arb order remained MATCHED without wallet credit; keeping pending blocked",
+strategy/trader.go:5173:					return fmt.Errorf("pair arb: pending order %s is %s but wallet credit absent after grace (age=%s); fail-closed block remains", po.OrderID, gr.Status, age.Round(time.Second))
+strategy/trader.go:5176:					// Shares are confirmed in wallet but position was never opened (wallet-credit
+strategy/trader.go:5177:					// timeout on the original submitPath). Recover: open a lead-only position now.
+strategy/trader.go:5231:					// Clear pending BEFORE opening position so openLeadOnlyPosition can proceed.
+strategy/trader.go:5239:						OpenedAt:    po.PlacedAt,
+strategy/trader.go:5257:					display.TradeOpen(leadSide+" [PAIR LEAD RECOVERED]", fillPrice, walletBal, feeShares, usdSpent, 0, t.cfg.PaperTrade)
+
+=== SETTLEMENT / PAYOUT ===
+kalshi/market.go.orig:152:		Closed:      m.Status == "closed" || m.Status == "settled" || m.Status == "finalized",
+kalshi/market.go.orig:413:// FetchResolution returns the authoritative Kalshi settlement result
+kalshi/market.go.orig:415:// resolvedYes is true when Kalshi officially resolves the market YES.
+kalshi/market.go.orig:417:func (c *Client) FetchResolution(
+kalshi/market.go.orig:420:) (resolvedYes bool, known bool, err error) {
+kalshi/execution_adapter.go:510:func (a *ExecutionAdapter) WaitForSettledBalance(
+kalshi/execution_adapter.go:516:	return errors.New("kalshi execution: Polygon settlement balance is not applicable")
+kalshi/execution_adapter.go:547:) (resolvedYes bool, known bool, err error) {
+kalshi/execution_adapter.go:552:	return a.Client.FetchResolution(ctx, conditionID)
+kalshi/execution_adapter.go:571:	WaitForSettledBalance(context.Context, string, float64, time.Duration) error
+kalshi/market.go:164:		Closed:      m.Status == "closed" || m.Status == "settled" || m.Status == "finalized",
+kalshi/market.go:425:// FetchResolution returns the authoritative Kalshi settlement result
+kalshi/market.go:427:// resolvedYes is true when Kalshi officially resolves the market YES.
+kalshi/market.go:429:func (c *Client) FetchResolution(
+kalshi/market.go:432:) (resolvedYes bool, known bool, err error) {
+kalshi/market.go.pre-kalshi-resolution:150:		Closed:      m.Status == "closed" || m.Status == "settled",
+strategy/trader.go:201:	IsResolutionSnipe bool      `json:"is_resolution_snipe,omitempty"`
+strategy/trader.go:202:	IsEarlyResolution bool      `json:"is_early_resolution,omitempty"`
+strategy/trader.go:234:	// LockedProfitCents overrides the default hedge locked-profit target for this position.
+strategy/trader.go:236:	LockedProfitCents  float64 `json:"locked_profit_cents,omitempty"`
+strategy/trader.go:285:func (p *PairArbPosition) lockedProfit() float64 {
+strategy/trader.go:292:func (p *PairArbPosition) meetsLockedProfitTarget(targetPerShare float64) (bool, float64, float64) {
+strategy/trader.go:300:	lockedProfit := p.lockedProfit()
+strategy/trader.go:304:	return lockedProfit+1e-9 >= requiredProfit, lockedProfit, requiredProfit
+strategy/trader.go:403:	PairArbMinLockedProfitCents  float64
+strategy/trader.go:404:	// PairArbCVDMomentumLockedProfitCents is the looser hedge target (in cents) used for
+strategy/trader.go:406:	PairArbCVDMomentumLockedProfitCents                float64
+strategy/trader.go:433:	ResolutionTradeSizeUSD                             float64
+strategy/trader.go:434:	ResolutionOrderType                                polymarket.OrderType
+strategy/trader.go:435:	ResolutionBuyLimitPrice                            float64
+strategy/trader.go:490:	Strategy string    `json:"strategy"` // "lag", "resolution", "early_resolution", "flash"
+strategy/trader.go:904:			t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go:936:		t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go:1294:					zap.Float64("resolved_price", correctedFill),
+strategy/trader.go:1295:					zap.Float64("resolved_shares", grossFillShares),
+strategy/trader.go:1535:		// settled token balance is visible, so ownership is only finalized after wallet credit.
+strategy/trader.go:1542:		// settled on-chain. Use a short check so we can place the hedge immediately.
+strategy/trader.go:1960:		requiredLockedProfit := t.pairArbMinLockedProfit()
+strategy/trader.go:1965:			math.Floor((1.0-preLeadHedgeFillPrice-requiredLockedProfit)*100) / 100
+strategy/trader.go:1972:				zap.Float64("required_locked_profit", requiredLockedProfit),
+strategy/trader.go:2011:			zap.Float64("required_locked_profit", requiredLockedProfit),
+strategy/trader.go:2075:			// Hedge execution was already authoritatively resolved before the
+strategy/trader.go:2203:		targetMet, actualLockedProfit, requiredLockedProfit :=
+strategy/trader.go:2204:			pair.meetsLockedProfitTarget(t.pairArbMinLockedProfit())
+strategy/trader.go:2218:					zap.Float64("actual_locked_profit", actualLockedProfit),
+strategy/trader.go:2219:					zap.Float64("required_locked_profit", requiredLockedProfit),
+strategy/trader.go:2221:						actualLockedProfit/pair.lockedShares()),
+strategy/trader.go:2223:						t.pairArbMinLockedProfit()),
+strategy/trader.go:2245:			zap.Float64("locked_profit", actualLockedProfit),
+strategy/trader.go:2246:			zap.Float64("required_locked_profit", requiredLockedProfit),
+strategy/trader.go:2249:		display.TradeOpen(leadSide+" [PAIR LEAD]", leadFill, leadActual, leadFeeShares, leadUSD, 1.0-leadFill-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2275:	// Reject if we are too early (prices not settled) or too late (market outcome likely decided).
+strategy/trader.go:2487:		zap.Float64("target_locked_profit", t.pairArbMinLockedProfit()),
+strategy/trader.go:2489:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+strategy/trader.go:2495:// hedgeLimitPrice (= 1 - leadAvg - minLockedProfit).  On first fill it records
+strategy/trader.go:2534:	hedgeLimitPrice := pairKalshiMaxHedgePrice(anchorAvgPrice, deficitShares, t.pairArbMinLockedProfit())
+strategy/trader.go:2642:func (t *Trader) pairArbMinLockedProfit() float64 {
+strategy/trader.go:2643:	// CVD momentum positions store a per-position override in LockedProfitCents.
+strategy/trader.go:2644:	if t.pairedPosition != nil && t.pairedPosition.LockedProfitCents > 0 {
+strategy/trader.go:2645:		return t.pairedPosition.LockedProfitCents / 100.0
+strategy/trader.go:2647:	if t.cfg.PairArbMinLockedProfitCents <= 0 {
+strategy/trader.go:2650:	return t.cfg.PairArbMinLockedProfitCents / 100.0
+strategy/trader.go:2766:func (t *Trader) pairArbLockedPayoutTarget() float64 {
+strategy/trader.go:3162:func (cfg TraderConfig) normalizedResolutionOrderType() polymarket.OrderType {
+strategy/trader.go:3163:	if strings.EqualFold(string(cfg.ResolutionOrderType), string(polymarket.OrderTypeFAK)) {
+strategy/trader.go:3169:func (cfg TraderConfig) normalizedResolutionBuyLimitPrice() float64 {
+strategy/trader.go:3170:	if cfg.ResolutionBuyLimitPrice <= 0 {
+strategy/trader.go:3173:	if cfg.ResolutionBuyLimitPrice >= 1.0 {
+strategy/trader.go:3176:	return math.Round(cfg.ResolutionBuyLimitPrice*1000) / 1000
+strategy/trader.go:3179:func (cfg TraderConfig) usesManagedResolutionTickFlow() bool {
+strategy/trader.go:3180:	return cfg.normalizedResolutionOrderType() == polymarket.OrderTypeGTC && cfg.ResolutionBuyLimitPrice >= 1.0
+strategy/trader.go:3183:func formatResolutionLimitPrice(limitPrice float64) string {
+strategy/trader.go:3204:func isResolutionClaimWaitLimit(limitPrice float64) bool {
+strategy/trader.go:3230:func (t *Trader) fetchResolutionTickSizeWithCache(ctx context.Context, tokenID string, useCache bool) (string, error) {
+strategy/trader.go:3247:func (t *Trader) fetchResolutionTickSize(ctx context.Context, tokenID string) (string, error) {
+strategy/trader.go:3248:	return t.fetchResolutionTickSizeWithCache(ctx, tokenID, true)
+strategy/trader.go:3251:func (t *Trader) refreshResolutionTickSize(ctx context.Context, tokenID string) (string, error) {
+strategy/trader.go:3252:	return t.fetchResolutionTickSizeWithCache(ctx, tokenID, false)
+strategy/trader.go:3255:func (t *Trader) inferredResolutionWinner() (string, string, bool) {
+strategy/trader.go:3263:func (t *Trader) resolvedResolutionWinner(resolvedYes bool) (string, string, bool) {
+strategy/trader.go:3264:	if resolvedYes {
+strategy/trader.go:3270:func (t *Trader) openResolutionPositionAfterFill(resp *polymarket.OrderResponse, tokenID string, isNoSide bool, fillPrice, actualShares, feeShares, usdSpent float64, windowEnd time.Time) {
+strategy/trader.go:3276:		StrategyName:      "resolution",
+strategy/trader.go:3287:		IsResolutionSnipe: true,
+strategy/trader.go:3295:func (t *Trader) attemptPreCloseResolutionEntry(ctx context.Context, tokenID, label, tickSize string, isNoSide bool, windowEnd time.Time, resolveWinningSide func(context.Context) (bool, error)) bool {
+strategy/trader.go:3296:	if t.cfg.normalizedResolutionOrderType() != polymarket.OrderTypeGTC {
+strategy/trader.go:3300:		display.Warn(fmt.Sprintf("resolution pre-close entry skipped for %s: trader already busy", label))
+strategy/trader.go:3305:	limitPrice := polymarket.NormalizePriceToTick(t.cfg.normalizedResolutionBuyLimitPrice(), tickSize)
+strategy/trader.go:3307:		display.Warn(fmt.Sprintf("resolution pre-close entry skipped for %s: invalid configured limit", label))
+strategy/trader.go:3310:	tradeSize := t.cfg.ResolutionTradeSizeUSD
+strategy/trader.go:3343:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, windowEnd.Add(60*time.Second))
+strategy/trader.go:3347:		display.Warn(fmt.Sprintf("resolution pre-close entry failed for %s at %s: %v", label, polymarket.FormatPriceForTick(limitPrice, tickSize), err))
+strategy/trader.go:3353:		display.Warn(fmt.Sprintf("resolution pre-close entry rejected for %s at %s", label, polymarket.FormatPriceForTick(limitPrice, tickSize)))
+strategy/trader.go:3364:	t.openResolutionPositionAfterFill(resp, tokenID, isNoSide, fillPrice, actualShares, feeShares, usdSpent, windowEnd)
+strategy/trader.go:3365:	display.Info(fmt.Sprintf("resolution pre-close entry filled for %s at %.3f", label, fillPrice))
+strategy/trader.go:3368:		resolvedYes, resolveErr := resolveWinningSide(resolveCtx)
+strategy/trader.go:3371:			display.Warn(fmt.Sprintf("resolution pre-close settlement fallback used for %s: %v", label, resolveErr))
+strategy/trader.go:3373:		t.SettleExpiredPosition(ctx, resolvedYes)
+strategy/trader.go:3378:func (t *Trader) attemptPostCloseResolutionEntry(ctx context.Context, tokenID, label, tickSize string, isNoSide bool, resolvedYes bool, windowEnd time.Time) {
+strategy/trader.go:3380:		display.Info(fmt.Sprintf("resolution post-close entry skipped for %s: tick %s is not 0.001", label, tickSize))
+strategy/trader.go:3384:		display.Warn(fmt.Sprintf("resolution post-close entry skipped for %s: position already open", label))
+strategy/trader.go:3387:	limitPrice := polymarket.NormalizePriceToTick(t.cfg.normalizedResolutionBuyLimitPrice(), tickSize)
+strategy/trader.go:3389:		display.Warn(fmt.Sprintf("resolution post-close entry skipped for %s: invalid configured limit", label))
+strategy/trader.go:3392:	tradeSize := t.cfg.ResolutionTradeSizeUSD
+strategy/trader.go:3410:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, time.Now().Add(15*time.Second))
+strategy/trader.go:3412:		display.Warn(fmt.Sprintf("resolution post-close entry failed for %s at %s: %v", label, polymarket.FormatPriceForTick(limitPrice, tickSize), err))
+strategy/trader.go:3416:		display.Warn(fmt.Sprintf("resolution post-close entry rejected for %s at %s", label, polymarket.FormatPriceForTick(limitPrice, tickSize)))
+strategy/trader.go:3424:		StrategyName:      "resolution",
+strategy/trader.go:3435:		IsResolutionSnipe: true,
+strategy/trader.go:3440:	display.Info(fmt.Sprintf("resolution post-close entry filled for %s at %.3f, queueing claim", label, fillPrice))
+strategy/trader.go:3441:	t.SettleExpiredPosition(ctx, resolvedYes)
+strategy/trader.go:3444:func (t *Trader) runResolutionTickValidation(windowEnd time.Time, resolveWinningSide func(context.Context) (bool, error), shutdownCh <-chan struct{}) {
+strategy/trader.go:3458:	preTokenID, preLabel, _ := t.inferredResolutionWinner()
+strategy/trader.go:3466:	preTick, preErr := t.refreshResolutionTickSize(preCtx, preTokenID)
+strategy/trader.go:3469:		display.Warn(fmt.Sprintf("resolution tick pre-close fetch failed for %s: %v", preLabel, preErr))
+strategy/trader.go:3471:		display.Info(fmt.Sprintf("resolution tick pre-close for %s: %s", preLabel, preTick))
+strategy/trader.go:3473:			if t.attemptPreCloseResolutionEntry(context.Background(), preTokenID, preLabel, preTick, preLabel == "NO", windowEnd, resolveWinningSide) {
+strategy/trader.go:3482:	resolvedYes, resolveErr := resolveWinningSide(resolveCtx)
+strategy/trader.go:3484:	winningTokenID, winningLabel, winningIsNo := t.resolvedResolutionWinner(resolvedYes)
+strategy/trader.go:3489:		display.Warn(fmt.Sprintf("resolution winner confirmation fallback used for %s: %v", winningLabel, resolveErr))
+strategy/trader.go:3492:		display.Warn(fmt.Sprintf("resolution winner changed from %s pre-close to %s post-close", preLabel, winningLabel))
+strategy/trader.go:3501:		currentTick, tickErr := t.refreshResolutionTickSize(postCtx, winningTokenID)
+strategy/trader.go:3504:			display.Warn(fmt.Sprintf("resolution tick post-close fetch failed for %s: %v", winningLabel, tickErr))
+strategy/trader.go:3507:				display.Info(fmt.Sprintf("resolution tick changed for %s: %s -> %s", winningLabel, lastTick, currentTick))
+strategy/trader.go:3510:				display.Info(fmt.Sprintf("resolution tick post-close for %s: %s", winningLabel, currentTick))
+strategy/trader.go:3514:				t.attemptPostCloseResolutionEntry(entryCtx, winningTokenID, winningLabel, currentTick, winningIsNo, resolvedYes, windowEnd)
+strategy/trader.go:3522:				display.Warn(fmt.Sprintf("resolution post-close entry not attempted for %s within 60s", winningLabel))
+strategy/trader.go:3534:func (t *Trader) StartResolutionTickValidation(windowEnd time.Time, resolveWinningSide func(context.Context) (bool, error), shutdownCh <-chan struct{}) {
+strategy/trader.go:3535:	if !t.cfg.usesManagedResolutionTickFlow() {
+strategy/trader.go:3538:	go t.runResolutionTickValidation(windowEnd, resolveWinningSide, shutdownCh)
+strategy/trader.go:3577:func (t *Trader) placeResolutionFAKBuy(ctx context.Context, tokenID, tickSize string, limitPrice, signalPrice, rawShares, estimatedShares, estimatedFeeShares float64) (*polymarket.OrderResponse, float64, float64, float64, error) {
+strategy/trader.go:3580:	resp, err := t.placeOrderTimed(ctx, "resolution_buy_fak", &polymarket.NewOrderRequest{
+strategy/trader.go:3600:		return nil, 0, 0, 0, fmt.Errorf("resolution: %w", err)
+strategy/trader.go:3610:		return nil, 0, 0, 0, fmt.Errorf("resolution: FAK buy filled zero net shares")
+strategy/trader.go:3615:func (t *Trader) placeResolutionGTCBuy(ctx context.Context, tokenID, tickSize string, limitPrice, signalPrice, rawShares, estimatedShares, estimatedFeeShares float64, windowEnd time.Time) (*polymarket.OrderResponse, float64, float64, float64, error) {
+strategy/trader.go:3618:	resp, err := t.placeOrderTimed(ctx, "resolution_buy_gtc", &polymarket.NewOrderRequest{
+strategy/trader.go:3641:	if isResolutionClaimWaitLimit(limitPrice) {
+strategy/trader.go:3665:		gr, grErr := t.getOrderTimed(ctx, "resolution_buy_lookup", resp.OrderID)
+strategy/trader.go:3679:			avgPrice, grossShares, _ = t.getFillsTimed(ctx, "resolution_buy_fills", resp.OrderID, tokenID)
+strategy/trader.go:3694:				if cancelErr := t.cancelOrderTimed(ctx, "resolution_buy_cancel_partial", resp.OrderID); cancelErr != nil && !errors.Is(cancelErr, polymarket.ErrOrderNotCancellable) {
+strategy/trader.go:3695:					t.logger.Warn("trader: resolution GTC buy partial fill cancel failed",
+strategy/trader.go:3700:				t.logger.Info("trader: resolution GTC buy partially filled before market close",
+strategy/trader.go:3707:			if cancelErr := t.cancelOrderTimed(ctx, "resolution_buy_cancel_unfilled", resp.OrderID); cancelErr != nil && !errors.Is(cancelErr, polymarket.ErrOrderNotCancellable) {
+strategy/trader.go:3708:				t.logger.Warn("trader: resolution GTC buy cancel failed",
+strategy/trader.go:3714:			if isResolutionClaimWaitLimit(limitPrice) {
+strategy/trader.go:3717:			return nil, 0, 0, 0, fmt.Errorf("resolution: GTC buy not filled before %s (status=%s)", deadlineLabel, lastStatus)
+strategy/trader.go:3744:	case SignalResolutionEarlyBuyYes, SignalResolutionEarlyBuyNo:
+strategy/trader.go:3745:		return "early_resolution"
+strategy/trader.go:3746:	case SignalResolutionBuyYes, SignalResolutionBuyNo:
+strategy/trader.go:3747:		return "resolution"
+strategy/trader.go:3762:	if pos.IsResolutionSnipe {
+strategy/trader.go:3763:		if pos.IsEarlyResolution {
+strategy/trader.go:3764:			return "early_resolution"
+strategy/trader.go:3766:		return "resolution"
+strategy/trader.go:3781:	return strings.Contains(reason, "stale_abandoned") || reason == "window_resolved" || reason == "window_resolved_claim_pending" || reason == "post_close_grace_sell"
+strategy/trader.go:3900:	// Legacy Polymarket settlement/allowance methods.
+strategy/trader.go:3908:	WaitForSettledBalance(context.Context, string, float64, time.Duration) error
+strategy/trader.go:3986:	// the just-sold shares (settlement / indexing lag).
+strategy/trader.go:4252:func (t *Trader) asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID string) {
+strategy/trader.go:4256:	watchKey := fmt.Sprintf("lead_settle|%s|%s", strings.ToLower(strings.TrimSpace(orderID)), strings.ToLower(strings.TrimSpace(tokenID)))
+strategy/trader.go:4263:		ctx, cancel := context.WithTimeout(context.Background(), pairArbHedgeSettleGrace)
+strategy/trader.go:4278:					t.logger.Warn("trader: async lead settle watch reconcile failed after wallet credit appeared",
+strategy/trader.go:4295:						t.logger.Warn("trader: async lead settle watch timed out; reconcile still unresolved",
+strategy/trader.go:4484:	pairExitStateResolvedCLOB   = "resolved_clob"
+strategy/trader.go:4485:	pairExitStateResolvedClaim  = "resolved_claim"
+strategy/trader.go:4495:	pairArbSettleBalanceDust       = 0.05
+strategy/trader.go:4498:	pairArbHedgeSettleGrace        = 90 * time.Second
+strategy/trader.go:4632:func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
+strategy/trader.go:4634:		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
+strategy/trader.go:4639:		if t.pendingPairArb.PlacedAt.IsZero() || now.Sub(t.pendingPairArb.PlacedAt) < pairArbHedgeSettleGrace {
+strategy/trader.go:4721:		return fmt.Errorf("pair arb: pending hedge order %s matched state unresolved; waiting for fill details", po.OrderID)
+strategy/trader.go:4947:			t.logger.Warn("trader: orphan liquidation: shares below CLOB minimum, will settle via CTF",
+strategy/trader.go:5106:	// settlement lag even after a successful sell, which previously left pendingPairArb set
+strategy/trader.go:5156:						if age >= pairArbHedgeSettleGrace && t.pairedPosition == nil && t.position == nil {
+strategy/trader.go:5297:					if age >= pairArbHedgeSettleGrace {
+strategy/trader.go:5343:				return fmt.Errorf("pair arb: pending order %s unresolved and wallet has %.2f shares; resolve inventory before new lead", po.OrderID, walletBal)
+strategy/trader.go:5352:	return fmt.Errorf("pair arb: pending order %s unresolved; waiting for reconciliation data", po.OrderID)
+strategy/trader.go:5360:		return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", t.pendingHedgePrePlace.OrderID)
+strategy/trader.go:5403:			if age >= pairArbHedgeSettleGrace {
+strategy/trader.go:5408:				return fmt.Errorf("pair arb: pending hedge order %s matched after cancel race with unresolved ownership (age=%s); fail-closed block remains", po.OrderID, age.Round(time.Second))
+strategy/trader.go:5410:			return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", po.OrderID)
+strategy/trader.go:5412:		if age >= pairArbHedgeSettleGrace {
+strategy/trader.go:5417:			return fmt.Errorf("pair arb: pending hedge order %s unresolved after live-cancel with no terminal state (age=%s); fail-closed block remains", po.OrderID, age.Round(time.Second))
+strategy/trader.go:5419:		return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", po.OrderID)
+strategy/trader.go:5433:		if age >= pairArbHedgeSettleGrace {
+strategy/trader.go:5434:			t.logger.Error("trader: fail-closed: matched pre-hedge unresolved after grace; keeping entry blocked",
+strategy/trader.go:5438:			return fmt.Errorf("pair arb: pending hedge order %s matched but ownership unresolved after grace (age=%s); fail-closed block remains", po.OrderID, age.Round(time.Second))
+strategy/trader.go:5440:		return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", po.OrderID)
+strategy/trader.go:5443:	if age >= pairArbHedgeSettleGrace {
+strategy/trader.go:5450:		return fmt.Errorf("pair arb: pending hedge order %s unresolved after reconcile timeout (age=%s); fail-closed block remains", po.OrderID, age.Round(time.Second))
+strategy/trader.go:5454:		return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", po.OrderID)
+strategy/trader.go:5456:	return fmt.Errorf("pair arb: pending hedge order %s unresolved; waiting before new lead", po.OrderID)
+strategy/trader.go:5704:		strings.Contains(s, "not resolved") ||
+strategy/trader.go:5706:		strings.Contains(s, "payout") ||
+strategy/trader.go:5813:	// Kalshi settlement is automatic after market finalization.
+strategy/trader.go:5942:// API variant string used by FetchResolution.
+strategy/trader.go:6027:		// Keep unresolved pair positions across window rollover so exit fill
+strategy/trader.go:6087:// to buy on a BTC-reversal flip, and so SettleExpiredPosition can redeem via CTF if needed.
+strategy/trader.go:6218:	if pos.IsResolutionSnipe {
+strategy/trader.go:6219:		// Resolution snipes must NOT markdown 1: the entire profit margin between
+strategy/trader.go:6281:	// In volatile markets, estimated buy shares can differ from settled shares,
+strategy/trader.go:6303:			// Shares not yet visible in balance API (common if settlement is delayed).
+strategy/trader.go:6319:	// sharesStr uses sellShares (not pos.Shares) so we only sell what's settled.
+strategy/trader.go:6524:// startPrice is used only as a fallback for fill-price resolution.
+strategy/trader.go:6785:	// realize the mathematically guaranteed $1/contract settlement immediately
+strategy/trader.go:6795:			zap.Float64("locked_profit", pair.lockedProfit()))
+strategy/trader.go:6879:func (t *Trader) resolvePairArbResolvedYes(ctx context.Context, pair *PairArbPosition, fallbackResolvedYes bool) bool {
+strategy/trader.go:6881:		return fallbackResolvedYes
+strategy/trader.go:6884:	resolvedYes, known, err := t.orders.ResolveMarket(ctx, pair.ConditionID)
+strategy/trader.go:6887:			"trader: Kalshi pair resolution unavailable; using fallback",
+strategy/trader.go:6891:		return fallbackResolvedYes
+strategy/trader.go:6895:		return fallbackResolvedYes
+strategy/trader.go:6898:	return resolvedYes
+strategy/trader.go:7115:func (t *Trader) pairArbLegSettled(ctx context.Context, side string, tokenID string) (bool, float64, error) {
+strategy/trader.go:7120:		settleProbeAttempts = 6
+strategy/trader.go:7121:		settleProbeInterval = 500 * time.Millisecond
+strategy/trader.go:7125:	for attempt := 1; attempt <= settleProbeAttempts; attempt++ {
+strategy/trader.go:7134:			if bal <= pairArbSettleBalanceDust {
+strategy/trader.go:7138:		if attempt < settleProbeAttempts {
+strategy/trader.go:7142:			case <-time.After(settleProbeInterval):
+strategy/trader.go:7147:		t.logger.Warn("trader: pair arb sell-at-99 settlement probe error",
+strategy/trader.go:7157:func (t *Trader) pairArbFilledLegsSettled(ctx context.Context, pair *PairArbPosition, yesFilled, noFilled bool) (bool, error) {
+strategy/trader.go:7162:		yesSettled, bal, err := t.pairArbLegSettled(ctx, "YES", pair.YesTokenID)
+strategy/trader.go:7166:		if !yesSettled {
+strategy/trader.go:7175:		noSettled, bal, err := t.pairArbLegSettled(ctx, "NO", pair.NoTokenID)
+strategy/trader.go:7179:		if !noSettled {
+strategy/trader.go:7190:func (t *Trader) resetUnsettledPairExitLegs(ctx context.Context, pair *PairArbPosition, yesFilled bool, noFilled bool) {
+strategy/trader.go:7202:		if bal <= pairArbSettleBalanceDust {
+strategy/trader.go:7251:	return yesBal <= pairArbSettleBalanceDust && noBal <= pairArbSettleBalanceDust, yesBal, noBal, nil
+strategy/trader.go:7268:		if tokenID == "" || bal <= pairArbSettleBalanceDust {
+strategy/trader.go:7365:		t.setPairExitState(pair, pairExitStateResolvedCLOB, "paper sell-at-99 touched by "+hitSide)
+strategy/trader.go:7407:			t.setPairExitState(pair, pairExitStatePlacingOrders, "YES leg waiting for settled sellable balance")
+strategy/trader.go:7425:			t.setPairExitState(pair, pairExitStatePlacingOrders, "NO leg waiting for settled sellable balance")
+strategy/trader.go:7475:			settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+strategy/trader.go:7476:			if settleErr != nil {
+strategy/trader.go:7477:				return settleErr
+strategy/trader.go:7479:			if !settled {
+strategy/trader.go:7480:				t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+strategy/trader.go:7481:				t.setPairExitState(pair, pairExitStateOrdersLive, "window complete; fill seen, awaiting settlement confirmation")
+strategy/trader.go:7497:			t.setPairExitState(pair, pairExitStateResolvedCLOB, "window complete; sell-at-99 fill confirmed")
+strategy/trader.go:7537:	settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+strategy/trader.go:7538:	if settleErr != nil {
+strategy/trader.go:7539:		return settleErr
+strategy/trader.go:7541:	if !settled {
+strategy/trader.go:7542:		t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+strategy/trader.go:7543:		t.setPairExitState(pair, pairExitStateOrdersLive, "fill reported; awaiting balance settlement confirmation")
+strategy/trader.go:7573:	t.setPairExitState(pair, pairExitStateResolvedCLOB, winningSide+" leg filled at 0.99; loser order canceled")
+strategy/trader.go:7580:// If we're winning (chainlink > open), we HOLD to maximize payout near $1.00.
+strategy/trader.go:7625:		if pos.IsResolutionSnipe {
+strategy/trader.go:7628:					fmt.Sprintf("resolution_snipe_losing_end (rem=%.0fs)", time.Until(pos.WindowEnd).Seconds()))
+strategy/trader.go:7630:			// Winning resolution snipe: sell at 0.99 now rather than waiting for CTF
+strategy/trader.go:7631:			// settlement (which takes 1-2 minutes after window close).
+strategy/trader.go:7633:				fmt.Sprintf("resolution_snipe_winning_sell99 (btc=%.2f, open=%.2f, rem=%.0fs)",
+strategy/trader.go:7669:	// resolution Ã¢â‚¬â€ they must NOT be force-exited in the final seconds. Those positions
+strategy/trader.go:7671:	// or conviction_stale_abandoned cleans them up at the correct settled price.
+strategy/trader.go:7692:	// Conviction/resolution/snipe-style positions keep their existing hold-to-resolution logic.
+strategy/trader.go:7698:			if pos.IsResolutionSnipe {
+strategy/trader.go:7699:				// Winning resolution positions hold through settlement and claim.
+strategy/trader.go:7703:				// Hold-to-resolution entries exit at 0.99 near expiry once they are winning.
+strategy/trader.go:7830://   - paper mode (settlement is handled by SettleExpiredPosition)
+strategy/trader.go:7833:// resolvedYes should reflect the final BTC vs open-price comparison.
+strategy/trader.go:7834:// Any shares not sold within graceDuration are left for SettleExpiredPosition.
+strategy/trader.go:7835:func (t *Trader) PostCloseGraceSell(ctx context.Context, resolvedYes bool, graceDuration time.Duration) error {
+strategy/trader.go:7846:	if pos.IsResolutionSnipe {
+strategy/trader.go:7847:		t.logger.Info("trader: post-close grace sell skipped for resolution position; waiting for settlement claim",
+strategy/trader.go:7853:	onWinningSide := (!pos.IsNoSide && resolvedYes) || (pos.IsNoSide && !resolvedYes)
+strategy/trader.go:7857:			zap.Bool("resolved_yes", resolvedYes),
+strategy/trader.go:7925:			t.logger.Warn("trader: post-close grace sell: no sellable shares; waiting for on-chain settlement",
+strategy/trader.go:8060:		t.logger.Warn("trader: post-close grace sell window expired; remaining shares passed to SettleExpiredPosition",
+strategy/trader.go:8067:// SettleExpiredPosition force-closes any surviving conviction (or other) position
+strategy/trader.go:8068:// using the correct resolution price ($1.00 for winner, $0.00 for loser).
+strategy/trader.go:8071:// resolvedYes is true when BTC closed above the market's open price (YES wins).
+strategy/trader.go:8074:func (t *Trader) SettleExpiredPosition(ctx context.Context, resolvedYes bool) {
+strategy/trader.go:8079:		t.settlePairArbPosition(ctx, resolvedYes)
+strategy/trader.go:8084:	// Determine the correct settlement value for the token we held:
+strategy/trader.go:8085:	//   Held YES + resolution YES Ã‚Â  $1.00  (win)
+strategy/trader.go:8086:	//   Held YES + resolution NO  Ã‚Â  $0.00  (loss)
+strategy/trader.go:8087:	//   Held NO  + resolution YES Ã‚Â  $0.00  (loss)
+strategy/trader.go:8088:	//   Held NO  + resolution NO  Ã‚Â  $1.00  (win)
+strategy/trader.go:8089:	var resolvedPrice float64
+strategy/trader.go:8091:		if resolvedYes {
+strategy/trader.go:8092:			resolvedPrice = 0.00
+strategy/trader.go:8094:			resolvedPrice = 1.00
+strategy/trader.go:8097:		if resolvedYes {
+strategy/trader.go:8098:			resolvedPrice = 1.00
+strategy/trader.go:8100:			resolvedPrice = 0.00
+strategy/trader.go:8110:	sellFeeUSD := polymarket.ComputeSellFeeUSDC(pos.Shares, resolvedPrice, t.feeRateBps)
+strategy/trader.go:8111:	netPnL := pos.Unrealized(resolvedPrice) - sellFeeUSD
+strategy/trader.go:8114:	t.logger.Warn("trader: settling expired position at resolution price",
+strategy/trader.go:8118:		zap.Float64("resolved_price", resolvedPrice),
+strategy/trader.go:8119:		zap.Bool("resolved_yes", resolvedYes),
+strategy/trader.go:8125:	// Kalshi settlement is automatic after finalization.
+strategy/trader.go:8128:		proceeds := pos.Shares*resolvedPrice - sellFeeUSD
+strategy/trader.go:8135:	cfgScalpCentsResolved := t.cfg.ScalpTargetCents
+strategy/trader.go:8137:		cfgScalpCentsResolved = t.cfg.ConvictionScalpTargetCents
+strategy/trader.go:8153:		SellPrice:         resolvedPrice,
+strategy/trader.go:8158:			if pos.IsResolutionSnipe && resolvedPrice == 1.00 {
+strategy/trader.go:8159:				return "window_resolved_claim_pending"
+strategy/trader.go:8161:			return "window_resolved"
+strategy/trader.go:8164:		CfgScalpTargetCents:       cfgScalpCentsResolved,
+
+=== ALL GO TESTS ===
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/chainlink	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	0.033s
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/exchangefeed	[no test files]
+?   	github.com/polyarb/kalshi	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	0.038s
+ok  	github.com/polyarb/strategy	0.026s
+ok  	github.com/polyarb/web	0.017s
+
+=== BUILD ===
+BUILD_RC=0
+
+=== RECENT PAPER ENGINE ACTIVITY ===
+[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m09s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.6/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-97[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.9/11.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m10s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/10.2[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m10s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m09s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.6/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/10.2[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m10s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m09s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.6/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78428[0m │ open [90m$78524[0m │ edge [91m-96[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m09s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.6/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.6/10.3[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.2/10.0[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m08s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78429[0m │ open [90m$78524[0m │ edge [91m-95[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.7/9.1[0m [91m$47[0m │ [90m-- flat --[0m │ [96m5m07s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78431[0m │ open [90m$78524[0m │ edge [91m-94[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.8/7.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.1/9.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m01s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/8.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m06s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.1/9.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m01s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m14.3/11.3[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.1/9.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m01s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m14.3/11.3[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.5/11.1[0m [91m$43[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/8.9[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m05s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.1/9.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m01s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m14.3/11.3[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.5/11.1[0m [91m$43[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.4/10.7[0m [91m$43[0m │ [90m-- flat --[0m │ [96m4m59s[0m │ [92m$1000.00[0m
+[10A[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.5/9.0[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m04s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.2/9.6[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m9.6/9.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m03s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.1/9.5[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.6/11.4[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m02s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78433[0m │ open [90m$78524[0m │ edge [91m-91[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m11.1/9.7[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m01s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m0s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m14.3/11.3[0m [91m$46[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m12.5/11.1[0m [91m$43[0m │ [90m-- flat --[0m │ [96m5m00s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78432[0m │ open [90m$78524[0m │ edge [91m-92[0m │ CL [37m$78413[0m [90m1s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.4/10.7[0m [91m$43[0m │ [90m-- flat --[0m │ [96m4m59s[0m │ [92m$1000.00[0m
+[2K  BTC [97m$78437[0m │ open [90m$78524[0m │ edge [91m-87[0m │ CL [37m$78413[0m [90m2s ago[0m [91mCLedge -112[0m │ YES [96m0.00[0m │ [92m10.4/10.7[0m [91m$43[0m │ [90m-- flat --[0m │ [96m4m59s[0m │ [92m$1000.00[0m
+     [2m[37mKalshiArb Pro[0m
+     [2m[37mBTC 15m Matched Pair Engine[0m
+     [90mKalshi  |  15-Min BTC/USD[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [2m[36m·[0m  [2m[37mpaper balance: $1000.00[0m
+  [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/KalshiArbo/kalshiarbo config=/home/ubuntu/KalshiArbo/kalshiarbo/config.json env=/home/ubuntu/KalshiArbo/kalshiarbo/all.env[0m
+  [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false[0m
+  [92m✓[0m  [2m[37mDeribit WS (BTC spot index + order book + DVOL)[0m
+  [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDT CVD)[0m
+  [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
+  [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
+     [2m[37mKalshiArb Pro[0m
+     [2m[37mBTC 15m Matched Pair Engine[0m
+     [90mKalshi  |  15-Min BTC/USD[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [2m[36m·[0m  [2m[37mpaper balance: $1000.00[0m
+  [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/KalshiArbo/kalshiarbo config=/home/ubuntu/KalshiArbo/kalshiarbo/config.json env=/home/ubuntu/KalshiArbo/kalshiarbo/all.env[0m
+  [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false[0m
+  [92m✓[0m  [2m[37mDeribit WS (BTC spot index + order book + DVOL)[0m
+  [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDT CVD)[0m
+  [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
+  [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
+     [2m[37mKalshiArb Pro[0m
+     [2m[37mBTC 15m Matched Pair Engine[0m
+     [90mKalshi  |  15-Min BTC/USD[0m
+  [90m│[0m  Mode         [1m[33m  ░░ PAPER TRADE ░░ [0m
+  [2m[36m·[0m  [2m[37mpaper balance: $1000.00[0m
+  [2m[36m·[0m  [2m[37mCONFIG SOURCE cwd=/home/ubuntu/KalshiArbo/kalshiarbo config=/home/ubuntu/KalshiArbo/kalshiarbo/config.json env=/home/ubuntu/KalshiArbo/kalshiarbo/all.env[0m
+  [2m[36m·[0m  [2m[37mACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false[0m
+  [92m✓[0m  [2m[37mDeribit WS (BTC spot index + order book + DVOL)[0m
+  [92m✓[0m  [2m[37mBinance Spot WS (BTCUSDT CVD)[0m
+  [92m✓[0m  [2m[37mCoinbase Advanced Trade WS (BTC-USD spot price + institutional spread)[0m
+  [92m✓[0m  [2m[37mBybit V5 WS (BTCUSDT OI delta)[0m
