@@ -1,66 +1,140 @@
-╔══════════════════════════════════════════════════════════════════════╗
-║              KALSHIARBO INDEPENDENT FORENSIC AUDITOR              ║
-╚══════════════════════════════════════════════════════════════════════╝
- UTC                  2026-08-25T14:25:49+00:00
- Runtime              01:19:53
- Bot                  ALIVE  kalshiarbo pid=103223
- Port                 8085
+KALSHIARBO — CURRENT EC2 STATUS
+===============================
+UPDATED_UTC=2026-08-26T18:21:15+00:00
+MODE=PAPER
+LIVE_ORDERS_ALLOWED=false
+PROCESS=ALIVE
+PID=403064
+PORT_8085=LISTENING
+TRADING_ENGINE=UNKNOWN
 
-──────────────────────── BANKROLL / RISK ───────────────────────────
- Starting bankroll     $   20.0000
- Current bankroll      $   19.8328
- Net realized P&L         -$0.1672
- Return                     -0.84%
- Peak bankroll         $   20.0000
- Maximum drawdown      $    0.1672
+=== PROCESS ===
+403064 /home/ubuntu/KalshiArbo/kalshiarbo/kalshiarbo -port 8085
 
-──────────────────── PAIR-ARB PERFORMANCE ──────────────────────────
- Lead attempts                 33
- Hedge events                   0
- Hedge-event rate            0.00%
- Locked events                  0
- Completed cycles               1
- Profitable cycles              0
- Losing cycles                  1
- Win rate                    0.00%
- Timeout exits                  1
+=== PORT 8085 ===
+LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=403064,fd=7))
 
-──────────────────────── ECONOMICS ─────────────────────────────────
- Recorded fees            -$0.1200
- Net realized P&L         -$0.1672
+=== HTTP / DASHBOARD STATE ===
+/api/status HTTP=401
+unauthorized
+/api/bot/status HTTP=401
+unauthorized
+/api/state HTTP=401
+unauthorized
+/status HTTP=302
+<a href="/login">Found</a>.
 
-──────────────────── CURRENT OPEN ATTEMPT ──────────────────────────
- Attempt               #33
- Lead side             YES
- BTC                    $79025.32
- Window open            $79004.10
- BTC gap                $+21.20
- YES at signal          0.5400
- Quantity               N/A
- Entry                  N/A
- Capital                N/A
- Age                    500.00s
- Hedge seen             NO
- Locked                 NO
+=== SAFE PAPER SETTINGS ===
+MARKET_TYPE=15m
+MAX_SESSION_LOSS_USD=1000
+MAX_SESSION_PROFIT_USD=1000
+MAX_TRADES_PER_SESSION=10000
+PAIR_ARB_BRAIN_ENABLED=false
+PAIR_ARB_BRAIN_LABEL_THRESHOLD_USD=20
+PAIR_ARB_BRAIN_MIN_SAMPLES=30
+PAIR_ARB_BRAIN_STATE_FILE=brain_state.json
+PAIR_ARB_BRAIN_THRESHOLD=0.45
+PAIR_ARB_CARRY_EARLY_SEC=45
+PAIR_ARB_CARRY_ENABLED=false
+PAIR_ARB_CARRY_MIN_BTC_GAP_USD=0.75
+PAIR_ARB_CARRY_MIN_PREV_GAP_USD=8
+PAIR_ARB_CARRY_OPP_DISCOUNT_CENTS=0
+PAIR_ARB_CONTINUOUS_IMBALANCE_ALLOW_MOMENTUM=false
+PAIR_ARB_CONTINUOUS_IMBALANCE_COOLDOWN_SEC=8
+PAIR_ARB_CONTINUOUS_IMBALANCE_ENABLED=false
+PAIR_ARB_CONTINUOUS_IMBALANCE_MAX_ADDS=6
+PAIR_ARB_CONTINUOUS_IMBALANCE_MIN_PRICE_IMPROVEMENT_CENTS=1
+PAIR_ARB_CONTINUOUS_IMBALANCE_MIN_SIGNAL_GAP_USD=25
+PAIR_ARB_CONTINUOUS_IMBALANCE_TRADE_SIZE_USD=0
+PAIR_ARB_CVD_MOMENTUM_ENABLED=false
+PAIR_ARB_CVD_MOMENTUM_LOCKED_PROFIT_CENTS=3
+PAIR_ARB_CVD_MOMENTUM_MAX_ELAPSED_SEC=60
+PAIR_ARB_CVD_MOMENTUM_MAX_GAP_USD=15
+PAIR_ARB_CVD_MOMENTUM_MIN_CVD_BTC=10
+PAIR_ARB_DIRECTION_MODE=BOTH
+PAIR_ARB_DUAL_PRE_PLACE=true
+PAIR_ARB_ENABLED=True
+PAIR_ARB_FLOW_MOVEMENT_MODE=false
+PAIR_ARB_HEDGE_PRE_OFFSET_CENTS=0
+PAIR_ARB_HEDGE_TIMEOUT_SEC=8
+PAIR_ARB_LEAD_BUY_SLIP_TICKS=1
+PAIR_ARB_LEAD_BUY_TIMEOUT_SEC=0
+PAIR_ARB_LEAD_ORDER_TYPE=FAK
+PAIR_ARB_MAX_ADVERSE_YES_DRIFT_CENTS=2
+PAIR_ARB_MAX_BTC_GAP_USD=0
+PAIR_ARB_MAX_CL_AGE_SEC=120
+PAIR_ARB_MAX_COINBASE_SPREAD_USD=0
+PAIR_ARB_MAX_CONTRA_OI_DELTA_USD=0
+PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=1.0
+PAIR_ARB_MAX_SIGNAL_AGE_SEC=2
+PAIR_ARB_MAX_TOKEN_PRICE=0.95
+PAIR_ARB_MAX_WINDOW_SEC=850
+PAIR_ARB_MIN_BOOK_IMBALANCE=0
+PAIR_ARB_MIN_BTC_GAP_USD=1.0
+PAIR_ARB_MIN_BTC_TICK_RUN=0
+PAIR_ARB_MIN_COINBASE_SPREAD_USD=0
+PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE=0
+PAIR_ARB_MIN_CVD_BTC=0
+PAIR_ARB_MIN_GAP_HOLD_SEC=0
+PAIR_ARB_MIN_GAP_VELOCITY_USD=0
+PAIR_ARB_MIN_LOCKED_PROFIT_CENTS=3
+PAIR_ARB_MIN_OI_DELTA_USD=0
+PAIR_ARB_MIN_TOKEN_PRICE=0.05
+PAIR_ARB_MIN_WINDOW_SEC=0
+PAIR_ARB_ML_FILTER_AUTO_TRAIN=false
+PAIR_ARB_ML_FILTER_AUTO_TRAIN_INTERVAL_MIN=60
+PAIR_ARB_ML_FILTER_ENABLED=False
+PAIR_ARB_ML_FILTER_LABEL_THRESHOLD_USD=20
+PAIR_ARB_ML_FILTER_MIN_SAMPLES=30
+PAIR_ARB_ML_FILTER_STATE_FILE=brain_state.json
+PAIR_ARB_ML_FILTER_THRESHOLD=0.45
+PAIR_ARB_PRE_OPEN_ENABLED=false
+PAIR_ARB_PRE_OPEN_ENTRY_WINDOW_SEC=5
+PAIR_ARB_PRE_OPEN_MAX_TOKEN_PRICE=0.54
+PAIR_ARB_PRE_OPEN_MIN_GAP_USD=3
+PAIR_ARB_PRE_OPEN_MIN_TOKEN_PRICE=0.46
+PAIR_ARB_PRE_OPEN_SRC_WINDOW_SEC=15
+PAIR_ARB_REVERSE_SIGNAL_ENABLED=false
+PAIR_ARB_REVERSE_SIGNAL_LOOKBACK_SEC=8
+PAIR_ARB_REVERSE_SIGNAL_MAX_GAP_USD=0
+PAIR_ARB_REVERSE_SIGNAL_MIN_GAP_USD=20
+PAIR_ARB_REVERSE_SIGNAL_MIN_SHRINK_USD=2
+PAIR_ARB_REVERSE_SIGNAL_MIN_VELOCITY_USD=0.25
+PAIR_ARB_SCHEDULE_MODE=CONTINUOUS
+PAIR_ARB_SCHEDULE_WINDOWS_UTC=
+PAIR_ARB_SELL_AT_99=false
+PAIR_ARB_SIGNALS_RETENTION_HOURS=0
+PAIR_ARB_SIGNAL_MIN_GAP_USD=1
+PAIR_ARB_STOP_COOLDOWN_SEC=0
+PAIR_ARB_STOP_LOSS_CENTS=1
+PAIR_ARB_STOP_LOSS_MIN_GAP_AGAINST_USD=0
+PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC=1
+PAIR_ARB_TRADE_SIZE_USD=5
+PAIR_ARB_UNPROFITABLE_ABORT_GRACE_SEC=2
+PAIR_ARB_UNPROFITABLE_ABORT_MIN_GAP_AGAINST_USD=2
+PAIR_ARB_YES_DRIFT_WINDOW_SEC=10
+PAPER_START_BALANCE=1000
+PAPER_TRADE=True
+TRADE_SIZE_USD=5
 
-──────────────────────── RECENT EVENTS ─────────────────────────────
- LEAD #33 YES gap=+21.20 YES=0.5400
- LEAD #32 YES gap=+27.80 YES=0.5800
- LEAD #31 YES gap=+31.50 YES=0.5700
- LEAD #30 YES gap=+28.00 YES=0.5500
- LEAD #29 YES gap=+31.10 YES=0.5600
- LEAD #28 YES gap=+23.20 YES=0.5500
- LEAD #27 YES gap=+20.10 YES=0.5300
- LEAD #26 YES gap=+158.20 YES=0.6500
- LEAD #25 YES gap=+116.60 YES=0.6500
- LEAD #24 YES gap=+108.40 YES=0.6500
-
-──────────────────────── DIAGNOSIS ─────────────────────────────────
- WARNING: HEDGE/TIMEOUT LOSSES DOMINATE
-
- Immediate true arbitrage requires:
- profit(q) = q - YES_cost(q) - NO_cost(q) - YES_fees(q) - NO_fees(q) > 0
-
- A PAIR LEAD is not counted as guaranteed arbitrage.
-
- Screen refresh: 1 second | GitHub publish: 30 seconds
+=== RECENT BOT EVIDENCE ===
+║     NET P&L   +$0.0000   (+0.00%)                                  ║
+║     Balance: $1000.00 / $1000.00                                   ║
+BTC 15m Matched Pair Engine
+│  Mode           ░░ PAPER TRADE ░░
+│  Balance      $1000.00 starting
+│  Started      2026-08-26 18:00:03 UTC
+·  paper balance: $1000.00
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
+BTC 15m Matched Pair Engine
+│  Mode           ░░ PAPER TRADE ░░
+│  Balance      $1000.00 starting
+│  Started      2026-08-26 18:09:16 UTC
+·  paper balance: $1000.00
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
+BTC 15m Matched Pair Engine
+│  Mode           ░░ PAPER TRADE ░░
+│  Balance      $1000.00 starting
+│  Started      2026-08-26 18:10:46 UTC
+·  paper balance: $1000.00
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
