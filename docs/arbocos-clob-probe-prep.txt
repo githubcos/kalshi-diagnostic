@@ -1,0 +1,943 @@
+=== ORDERBOOK FUNCTION ===
+polymarket/orders.go-1386-		if normalized := normalizeTickSize(rawString); normalized != "" {
+polymarket/orders.go-1387-			return normalized, nil
+polymarket/orders.go-1388-		}
+polymarket/orders.go-1389-	}
+polymarket/orders.go-1390-	var rawNumber float64
+polymarket/orders.go-1391-	if err := json.Unmarshal(body, &rawNumber); err == nil {
+polymarket/orders.go-1392-		candidate := strconv.FormatFloat(rawNumber, 'f', -1, 64)
+polymarket/orders.go-1393-		if normalized := normalizeTickSize(candidate); normalized != "" {
+polymarket/orders.go-1394-			return normalized, nil
+polymarket/orders.go-1395-		}
+polymarket/orders.go-1396-	}
+polymarket/orders.go-1397-	return "", fmt.Errorf("parse tick-size: unrecognized response: %s", string(body))
+polymarket/orders.go-1398-}
+polymarket/orders.go-1399-
+polymarket/orders.go-1400-// GetOrderBook fetches the public order book for the given token.
+polymarket/orders.go:1401:func (o *OrdersClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+polymarket/orders.go-1402-	if o == nil || o.rest == nil {
+polymarket/orders.go-1403-		return nil, fmt.Errorf("nil REST client")
+polymarket/orders.go-1404-	}
+polymarket/orders.go-1405-	return o.rest.GetOrderBook(ctx, tokenID)
+polymarket/orders.go-1406-}
+polymarket/orders.go-1407-
+polymarket/orders.go-1408-// FetchFeeRate queries the CLOB for the taker fee on the given token.
+polymarket/orders.go-1409-// Returns the fee_rate_bps string ready to include in order payloads (e.g. "175").
+polymarket/orders.go-1410-// Fee-free markets return "0".
+polymarket/orders.go-1411-func (o *OrdersClient) FetchFeeRate(ctx context.Context, tokenID string) (string, error) {
+polymarket/orders.go-1412-	url := fmt.Sprintf("%s/fee-rate?token_id=%s", o.rest.baseURL, tokenID)
+polymarket/orders.go-1413-	resp, err := o.rest.doGet(ctx, url)
+polymarket/orders.go-1414-	if err != nil {
+polymarket/orders.go-1415-		return "", fmt.Errorf("fetch fee rate: %w", err)
+polymarket/orders.go-1416-	}
+polymarket/orders.go-1417-	defer resp.Body.Close()
+polymarket/orders.go-1418-	body, _ := io.ReadAll(resp.Body)
+polymarket/orders.go-1419-	if resp.StatusCode != http.StatusOK {
+polymarket/orders.go-1420-		return "", fmt.Errorf("fee-rate api error %d: %s", resp.StatusCode, string(body))
+polymarket/orders.go-1421-	}
+polymarket/orders.go-1422-	// Common JSON shape.
+polymarket/orders.go-1423-	var fr feeRateResponse
+polymarket/orders.go-1424-	if err := json.Unmarshal(body, &fr); err == nil {
+polymarket/orders.go-1425-		for _, v := range []string{fr.FeeRateBps, fr.FeeRateBpsAlt, fr.TakerFeeBps, fr.TakerFeeBpsAlt, fr.BaseFee, fr.BaseFeeAlt} {
+polymarket/orders.go-1426-			if v != "" {
+polymarket/orders.go-1427-				return v, nil
+polymarket/orders.go-1428-			}
+polymarket/orders.go-1429-		}
+polymarket/orders.go-1430-	}
+polymarket/orders.go-1431-
+polymarket/orders.go-1432-	// Fallback: try generic map with string/number values.
+polymarket/orders.go-1433-	var m map[string]any
+polymarket/orders.go-1434-	if err := json.Unmarshal(body, &m); err == nil {
+polymarket/orders.go-1435-		for _, k := range []string{"fee_rate_bps", "feeRateBps", "taker_fee_bps", "takerFeeBps", "base_fee", "baseFee"} {
+polymarket/orders.go-1436-			if raw, ok := m[k]; ok {
+polymarket/orders.go-1437-				switch t := raw.(type) {
+polymarket/orders.go-1438-				case string:
+polymarket/orders.go-1439-					if t != "" {
+polymarket/orders.go-1440-						return t, nil
+polymarket/orders.go-1441-					}
+polymarket/orders.go-1442-				case float64:
+polymarket/orders.go-1443-					return strconv.FormatInt(int64(t), 10), nil
+polymarket/orders.go-1444-				case int64:
+polymarket/orders.go-1445-					return strconv.FormatInt(t, 10), nil
+polymarket/orders.go-1446-				case json.Number:
+polymarket/orders.go-1447-					return t.String(), nil
+polymarket/orders.go-1448-				}
+polymarket/orders.go-1449-			}
+polymarket/orders.go-1450-		}
+polymarket/orders.go-1451-	}
+polymarket/orders.go-1452-
+polymarket/orders.go-1453-	// Last resort: body may be a raw JSON string/number.
+polymarket/orders.go-1454-	var s string
+polymarket/orders.go-1455-	if err := json.Unmarshal(body, &s); err == nil && s != "" {
+polymarket/orders.go-1456-		return s, nil
+polymarket/orders.go-1457-	}
+polymarket/orders.go-1458-	var n json.Number
+polymarket/orders.go-1459-	if err := json.Unmarshal(body, &n); err == nil && n.String() != "" {
+polymarket/orders.go-1460-		return n.String(), nil
+polymarket/orders.go-1461-	}
+polymarket/orders.go-1462-
+polymarket/orders.go-1463-	return "", fmt.Errorf("parse fee-rate: unrecognized response: %s", string(body))
+polymarket/orders.go-1464-}
+polymarket/orders.go-1465-
+polymarket/orders.go-1466-// computeRoundedFeeUSDC applies the fee precision used by Polymarket docs:
+polymarket/orders.go-1467-// rounded to 5 decimal places in USDC, with anything below 0.00001 rounding to 0.
+polymarket/orders.go-1468-func computeRoundedFeeUSDC(feeUSDC float64) float64 {
+polymarket/orders.go-1469-	if feeUSDC <= 0 {
+polymarket/orders.go-1470-		return 0
+polymarket/orders.go-1471-	}
+polymarket/orders.go-1472-	rounded := math.Round(feeUSDC*100000) / 100000
+polymarket/orders.go-1473-	if rounded < 0.00001 {
+polymarket/orders.go-1474-		return 0
+polymarket/orders.go-1475-	}
+polymarket/orders.go-1476-	return rounded
+polymarket/orders.go-1477-}
+polymarket/orders.go-1478-
+polymarket/orders.go-1479-// ComputeBuyFeeShares computes how many shares are deducted as taker fee on a BUY order.
+polymarket/orders.go-1480-//
+polymarket/orders.go-1481-// Updated Polymarket fee model:
+--
+polymarket/market.go-290-		return nil, err
+polymarket/market.go-291-	}
+polymarket/market.go-292-	defer resp.Body.Close()
+polymarket/market.go-293-	body, _ := io.ReadAll(resp.Body)
+polymarket/market.go-294-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-295-		return nil, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-296-	}
+polymarket/market.go-297-	var m Market
+polymarket/market.go-298-	if err := json.Unmarshal(body, &m); err != nil {
+polymarket/market.go-299-		return nil, fmt.Errorf("parse market: %w", err)
+polymarket/market.go-300-	}
+polymarket/market.go-301-	return &m, nil
+polymarket/market.go-302-}
+polymarket/market.go-303-
+polymarket/market.go-304-// GetOrderBook fetches the current order book for the given token ID.
+polymarket/market.go:305:func (c *RESTClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+polymarket/market.go-306-	url := fmt.Sprintf("%s/book?token_id=%s", c.baseURL, tokenID)
+polymarket/market.go-307-	resp, err := c.doGet(ctx, url)
+polymarket/market.go-308-	if err != nil {
+polymarket/market.go-309-		return nil, err
+polymarket/market.go-310-	}
+polymarket/market.go-311-	defer resp.Body.Close()
+polymarket/market.go-312-	body, _ := io.ReadAll(resp.Body)
+polymarket/market.go-313-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-314-		return nil, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-315-	}
+polymarket/market.go-316-	var ob OrderBook
+polymarket/market.go-317-	if err := json.Unmarshal(body, &ob); err != nil {
+polymarket/market.go-318-		return nil, fmt.Errorf("parse orderbook: %w", err)
+polymarket/market.go-319-	}
+polymarket/market.go-320-	return &ob, nil
+polymarket/market.go-321-}
+polymarket/market.go-322-
+polymarket/market.go-323-// GetMidPrice returns the mid-price for a token (average of best bid and best ask).
+polymarket/market.go-324-func (c *RESTClient) GetMidPrice(ctx context.Context, tokenID string) (float64, error) {
+polymarket/market.go-325-	url := fmt.Sprintf("%s/midpoint?token_id=%s", c.baseURL, tokenID)
+polymarket/market.go-326-	resp, err := c.doGet(ctx, url)
+polymarket/market.go-327-	if err != nil {
+polymarket/market.go-328-		return 0, err
+polymarket/market.go-329-	}
+polymarket/market.go-330-	defer resp.Body.Close()
+polymarket/market.go-331-	body, _ := io.ReadAll(resp.Body)
+polymarket/market.go-332-	if resp.StatusCode != http.StatusOK {
+polymarket/market.go-333-		return 0, fmt.Errorf("api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go-334-	}
+polymarket/market.go-335-	type midResp struct {
+polymarket/market.go-336-		Mid string `json:"mid"`
+polymarket/market.go-337-	}
+polymarket/market.go-338-	var mr midResp
+polymarket/market.go-339-	if err := json.Unmarshal(body, &mr); err != nil {
+polymarket/market.go-340-		return 0, fmt.Errorf("parse mid: %w", err)
+polymarket/market.go-341-	}
+polymarket/market.go-342-	var mid float64
+polymarket/market.go-343-	_, err = fmt.Sscanf(mr.Mid, "%f", &mid)
+polymarket/market.go-344-	return mid, err
+polymarket/market.go-345-}
+polymarket/market.go-346-
+polymarket/market.go-347-// doGet performs an authenticated GET request to the given absolute URL.
+polymarket/market.go-348-func (c *RESTClient) doGet(ctx context.Context, url string) (*http.Response, error) {
+polymarket/market.go-349-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+polymarket/market.go-350-	if err != nil {
+polymarket/market.go-351-		return nil, err
+polymarket/market.go-352-	}
+polymarket/market.go-353-	if c.creds != nil {
+polymarket/market.go-354-		if err := c.creds.SignRequest(req, ""); err != nil {
+polymarket/market.go-355-			return nil, err
+polymarket/market.go-356-		}
+polymarket/market.go-357-	}
+polymarket/market.go-358-	return c.httpClient.Do(req)
+polymarket/market.go-359-}
+
+=== ORDERBOOK STRUCTS ===
+polymarket/market.go-27-	Description  string  `json:"description"`
+polymarket/market.go-28-}
+polymarket/market.go-29-
+polymarket/market.go-30-// Token represents one side (YES / NO) of a binary market.
+polymarket/market.go-31-type Token struct {
+polymarket/market.go-32-	TokenID string `json:"token_id"`
+polymarket/market.go-33-	Outcome string `json:"outcome"` // "Yes" or "No"
+polymarket/market.go-34-}
+polymarket/market.go-35-
+polymarket/market.go-36-// OrderBook holds the current orderbook for a token.
+polymarket/market.go:37:type OrderBook struct {
+polymarket/market.go-38-	Market    string      `json:"market"`
+polymarket/market.go-39-	AssetID   string      `json:"asset_id"`
+polymarket/market.go-40-	Bids      []PriceSize `json:"bids"`
+polymarket/market.go-41-	Asks      []PriceSize `json:"asks"`
+polymarket/market.go-42-	Timestamp string      `json:"timestamp"`
+polymarket/market.go-43-	Hash      string      `json:"hash"`
+polymarket/market.go-44-}
+polymarket/market.go-45-
+polymarket/market.go-46-type PriceSize struct {
+polymarket/market.go-47-	Price string `json:"price"`
+polymarket/market.go-48-	Size  string `json:"size"`
+polymarket/market.go-49-}
+polymarket/market.go-50-
+polymarket/market.go-51-// RESTClient is a thin client wrapping the Polymarket CLOB REST API.
+polymarket/market.go-52-type RESTClient struct {
+polymarket/market.go-53-	baseURL          string
+polymarket/market.go-54-	creds            *L2Credentials
+polymarket/market.go-55-	httpClient       *http.Client
+polymarket/market.go-56-	submitHTTPClient *http.Client
+polymarket/market.go-57-	logger           *zap.Logger
+polymarket/market.go-58-}
+polymarket/market.go-59-
+polymarket/market.go-60-// timedRoundTripper wraps an inner RoundTripper and logs the method, URL path,
+polymarket/market.go-61-// and wall-clock duration in milliseconds for every HTTP request.
+polymarket/market.go-62-type timedRoundTripper struct {
+polymarket/market.go-63-	inner  http.RoundTripper
+polymarket/market.go-64-	logger *zap.Logger
+polymarket/market.go-65-	name   string
+polymarket/market.go-66-}
+polymarket/market.go-67-
+polymarket/market.go-68-func (t *timedRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+polymarket/market.go-69-	start := time.Now()
+polymarket/market.go-70-	resp, err := t.inner.RoundTrip(req)
+polymarket/market.go-71-	ms := time.Since(start).Milliseconds()
+polymarket/market.go-72-	if err != nil {
+polymarket/market.go-73-		t.logger.Debug("http request",
+polymarket/market.go-74-			zap.String("client", t.name),
+polymarket/market.go-75-			zap.String("method", req.Method),
+polymarket/market.go-76-			zap.String("path", req.URL.Path),
+polymarket/market.go-77-			zap.Int64("ms", ms),
+polymarket/market.go-78-			zap.Error(err),
+polymarket/market.go-79-		)
+polymarket/market.go-80-	} else {
+polymarket/market.go-81-		t.logger.Debug("http request",
+polymarket/market.go-82-			zap.String("client", t.name),
+polymarket/market.go-83-			zap.String("method", req.Method),
+polymarket/market.go-84-			zap.String("path", req.URL.Path),
+polymarket/market.go-85-			zap.Int("status", resp.StatusCode),
+polymarket/market.go-86-			zap.Int64("ms", ms),
+polymarket/market.go-87-		)
+polymarket/market.go-88-	}
+polymarket/market.go-89-	return resp, err
+polymarket/market.go-90-}
+polymarket/market.go-91-
+polymarket/market.go-92-// NewRESTClient creates a new REST client.
+polymarket/market.go-93-func NewRESTClient(baseURL string, creds *L2Credentials, logger *zap.Logger) *RESTClient {
+polymarket/market.go-94-	inner := newTunedHTTPTransport(transportConfig{
+polymarket/market.go-95-		dialTimeout:          3 * time.Second,
+polymarket/market.go-96-		keepAlive:            30 * time.Second,
+polymarket/market.go-97-		forceHTTP2:           true,
+
+=== MARKET TOKEN STRUCTS ===
+polymarket/orders.go-56-	SigTypeEOA        = 0 // direct EOA signature
+polymarket/orders.go-57-	SigTypePolyProxy  = 1 // Polymarket proxy wallet (recommended)
+polymarket/orders.go-58-	SigTypeGnosisSafe = 2 // Gnosis Safe multisig
+polymarket/orders.go-59-)
+polymarket/orders.go-60-
+polymarket/orders.go-61-// NewOrderRequest is the payload sent to POST /order.
+polymarket/orders.go-62-type NewOrderRequest struct {
+polymarket/orders.go-63-	// These fields are expressed in human units. OrdersClient will convert them
+polymarket/orders.go-64-	// into fixed-math amounts and attach an EIP-712 signature.
+polymarket/orders.go-65-	OrderType  OrderType `json:"-"`
+polymarket/orders.go:66:	TokenID    string    `json:"-"`
+polymarket/orders.go-67-	Side       Side      `json:"-"`
+polymarket/orders.go-68-	Price      string    `json:"-"` // decimal string e.g. "0.65"
+polymarket/orders.go-69-	Size       string    `json:"-"` // shares (not USD) e.g. "7.69"
+polymarket/orders.go-70-	TickSize   string    `json:"-"` // minimum tick size e.g. "0.01" or "0.001"
+polymarket/orders.go-71-	Expiration int64     `json:"-"` // unix seconds for GTD (stays in POST body; not in V2 EIP-712)
+polymarket/orders.go-72-	// Nonce is retained for API compatibility but ignored in V2 order signing.
+polymarket/orders.go-73-	// V2 uses timestamp (ms) instead of nonce for per-address order uniqueness.
+polymarket/orders.go-74-	Nonce int64 `json:"-"`
+polymarket/orders.go-75-	// FeeRateBps is retained for fee-size calculations but NOT included in V2 signed orders.
+polymarket/orders.go-76-	// V2 fees are set by the operator at match time.
+polymarket/orders.go-77-	FeeRateBps string `json:"-"`
+polymarket/orders.go-78-	// NegRisk selects the Neg Risk exchange verifyingContract for EIP-712 signing.
+polymarket/orders.go-79-	// Set to true only for multi-outcome (neg-risk) market tokens.
+polymarket/orders.go-80-	NegRisk bool `json:"-"`
+polymarket/orders.go-81-	// AttemptTimeout overrides the default per-attempt POST /order timeout.
+polymarket/orders.go-82-	// Zero keeps the client default.
+polymarket/orders.go-83-	AttemptTimeout time.Duration `json:"-"`
+polymarket/orders.go-84-	// MaxAttempts overrides the default number of submit attempts.
+polymarket/orders.go-85-	// Zero keeps the client default.
+polymarket/orders.go-86-	MaxAttempts int `json:"-"`
+polymarket/orders.go-87-}
+polymarket/orders.go-88-
+polymarket/orders.go-89-type RoundConfig struct {
+polymarket/orders.go-90-	Price  int
+polymarket/orders.go-91-	Size   int
+polymarket/orders.go-92-	Amount int
+polymarket/orders.go-93-}
+polymarket/orders.go-94-
+polymarket/orders.go-95-var roundConfigByTickSize = map[string]RoundConfig{
+polymarket/orders.go-96-	"0.1":    {Price: 1, Size: 2, Amount: 3},
+polymarket/orders.go-97-	"0.01":   {Price: 2, Size: 2, Amount: 4},
+polymarket/orders.go-98-	"0.001":  {Price: 3, Size: 2, Amount: 5},
+polymarket/orders.go-99-	"0.0001": {Price: 4, Size: 2, Amount: 6},
+polymarket/orders.go-100-}
+polymarket/orders.go-101-
+polymarket/orders.go-102-const marketBuyMakerAmountDecimals = 2
+polymarket/orders.go-103-const settledBalancePollInterval = 1 * time.Second
+polymarket/orders.go-104-
+polymarket/orders.go-105-const placeOrderAttemptTimeout = 10 * time.Second
+polymarket/orders.go-106-const placeOrderMaxAttempts = 2
+polymarket/orders.go-107-
+polymarket/orders.go-108-var placeOrderHTTPTraceEnabled = parseBoolEnvDefault("PAIR_ARB_HTTPTRACE_ENABLED", true)
+polymarket/orders.go-109-
+polymarket/orders.go-110-var duplicateOrderIDPattern = regexp.MustCompile(`0x[0-9a-fA-F]{64}`)
+polymarket/orders.go-111-
+polymarket/orders.go-112-func extractDuplicateOrderID(raw string) string {
+polymarket/orders.go-113-	if !strings.Contains(strings.ToLower(raw), "duplicated") {
+polymarket/orders.go-114-		return ""
+polymarket/orders.go-115-	}
+polymarket/orders.go-116-	match := duplicateOrderIDPattern.FindString(raw)
+polymarket/orders.go-117-	if match == "" {
+polymarket/orders.go-118-		return ""
+polymarket/orders.go-119-	}
+polymarket/orders.go-120-	return match
+polymarket/orders.go-121-}
+polymarket/orders.go-122-
+polymarket/orders.go-123-func normalizeTickSize(raw string) string {
+polymarket/orders.go-124-	raw = strings.TrimSpace(raw)
+polymarket/orders.go-125-	if raw == "" {
+polymarket/orders.go-126-		return ""
+polymarket/orders.go-127-	}
+polymarket/orders.go-128-	r, ok := new(big.Rat).SetString(raw)
+polymarket/orders.go-129-	if !ok || r.Sign() <= 0 {
+polymarket/orders.go-130-		return ""
+polymarket/orders.go-131-	}
+polymarket/orders.go-132-	for _, candidate := range []string{"0.1", "0.01", "0.001", "0.0001"} {
+polymarket/orders.go-133-		cand, _ := new(big.Rat).SetString(candidate)
+polymarket/orders.go-134-		if cand.Cmp(r) == 0 {
+polymarket/orders.go-135-			return candidate
+polymarket/orders.go-136-		}
+polymarket/orders.go-137-	}
+polymarket/orders.go-138-	return raw
+polymarket/orders.go-139-}
+polymarket/orders.go-140-
+polymarket/orders.go-141-func isInvalidSignatureBody(raw string) bool {
+polymarket/orders.go-142-	s := strings.ToLower(strings.TrimSpace(raw))
+polymarket/orders.go-143-	return strings.Contains(s, "invalid signature")
+polymarket/orders.go-144-}
+polymarket/orders.go-145-
+polymarket/orders.go-146-func parseBoolEnv(key string) bool {
+--
+polymarket/orders.go-459-	return fmt.Errorf("stringOrNumber: unsupported JSON value %s", string(data))
+polymarket/orders.go-460-}
+polymarket/orders.go-461-
+polymarket/orders.go-462-// GetOrderResponse is returned by GET /order/{id}.
+polymarket/orders.go-463-type GetOrderResponse struct {
+polymarket/orders.go-464-	ID              string         `json:"id"`
+polymarket/orders.go-465-	Status          string         `json:"status"` // LIVE, MATCHED, CANCELED, FILLED
+polymarket/orders.go-466-	Owner           string         `json:"owner,omitempty"`
+polymarket/orders.go-467-	MakerAddress    string         `json:"maker_address"`
+polymarket/orders.go-468-	Market          string         `json:"market,omitempty"`
+polymarket/orders.go:469:	TokenID         string         `json:"asset_id"`
+polymarket/orders.go-470-	Side            string         `json:"side"`
+polymarket/orders.go-471-	Price           string         `json:"price"`
+polymarket/orders.go-472-	OriginalSize    string         `json:"original_size"`
+polymarket/orders.go-473-	SizeMatched     string         `json:"size_matched"`
+polymarket/orders.go-474-	SizeRemaining   string         `json:"size_remaining"`
+polymarket/orders.go-475-	Expiration      string         `json:"expiration,omitempty"`
+polymarket/orders.go-476-	OrderType       string         `json:"order_type,omitempty"`
+polymarket/orders.go-477-	AssociateTrades []string       `json:"associate_trades,omitempty"`
+polymarket/orders.go-478-	CreatedAt       stringOrNumber `json:"created_at"`
+polymarket/orders.go-479-	OutcomeName     string         `json:"outcome"`
+polymarket/orders.go-480-}
+polymarket/orders.go-481-
+polymarket/orders.go-482-func normalizeOrderStatus(raw string) string {
+polymarket/orders.go-483-	status := strings.TrimSpace(strings.ToUpper(raw))
+polymarket/orders.go-484-	status = strings.TrimPrefix(status, "ORDER_STATUS_")
+polymarket/orders.go-485-	return status
+polymarket/orders.go-486-}
+polymarket/orders.go-487-
+polymarket/orders.go-488-func normalizeGetOrderResponse(gr *GetOrderResponse) *GetOrderResponse {
+polymarket/orders.go-489-	if gr == nil {
+polymarket/orders.go-490-		return nil
+polymarket/orders.go-491-	}
+polymarket/orders.go-492-	gr.Status = normalizeOrderStatus(gr.Status)
+polymarket/orders.go-493-	return gr
+polymarket/orders.go-494-}
+polymarket/orders.go-495-
+polymarket/orders.go-496-// OrdersClient manages order lifecycle against the CLOB.
+polymarket/orders.go-497-type OrdersClient struct {
+polymarket/orders.go-498-	rest               *RESTClient
+polymarket/orders.go-499-	proxyWalletAddress string // proxy/Safe address used as order maker (where funds live)
+polymarket/orders.go-500-	funderAddress      string // currently unused by REST order placement, kept for future use
+polymarket/orders.go-501-	sigType            int    // SigTypeEOA(0), SigTypePolyProxy(1), SigTypeGnosisSafe(2)
+polymarket/orders.go-502-	apiKeyUUID         string // API key UUID — used as POST /order `owner` field
+polymarket/orders.go-503-	rpcURL             string // Polygon JSON-RPC endpoint; used for on-chain CTF ops
+polymarket/orders.go-504-	claimRPCURL        string // Polygon JSON-RPC endpoint used for claim/redemption txs
+polymarket/orders.go-505-	claimPriorityGwei  float64
+polymarket/orders.go-506-	builderRelayerURL  string // Gasless builder relayer base URL for sig_type=1 CTF claims
+polymarket/orders.go-507-	builderClaimScript string // Node.js helper path for builder relayer claims
+polymarket/orders.go-508-	builderAPIKey      string // Optional: dedicated builder relayer API key (overrides CLOB creds)
+polymarket/orders.go-509-	builderAPISecret   string
+polymarket/orders.go-510-	builderAPIPass     string
+polymarket/orders.go-511-	privateKey         *ecdsa.PrivateKey
+polymarket/orders.go-512-	signerAddr         string // 0x-prefixed EOA derived from private key
+polymarket/orders.go-513-	chainID            *big.Int
+polymarket/orders.go-514-}
+polymarket/orders.go-515-
+polymarket/orders.go-516-// FetchConditionalBalanceAllowance returns balance+allowance for a conditional token (ERC1155 outcome token).
+polymarket/orders.go:517:func (o *OrdersClient) FetchConditionalBalanceAllowance(ctx context.Context, tokenID string) (*BalanceAllowanceResponse, error) {
+polymarket/orders.go-518-	if o.rest == nil {
+polymarket/orders.go-519-		return nil, fmt.Errorf("nil REST client")
+polymarket/orders.go-520-	}
+polymarket/orders.go:521:	return o.rest.GetBalanceAllowance(ctx, AssetTypeConditional, tokenID, o.sigType)
+polymarket/orders.go-522-}
+polymarket/orders.go-523-
+polymarket/orders.go-524-// FetchUSDCBalance returns the current on-chain pUSD balance for the proxy wallet.
+polymarket/orders.go-525-func (o *OrdersClient) FetchUSDCBalance(ctx context.Context) (float64, error) {
+polymarket/orders.go-526-	if o.rest == nil {
+polymarket/orders.go-527-		return 0, fmt.Errorf("nil REST client")
+polymarket/orders.go-528-	}
+polymarket/orders.go-529-	info, err := o.rest.GetBalance(ctx, o.proxyWalletAddress)
+polymarket/orders.go-530-	if err != nil {
+polymarket/orders.go-531-		return 0, err
+polymarket/orders.go-532-	}
+polymarket/orders.go-533-	return info.Balance, nil
+polymarket/orders.go-534-}
+polymarket/orders.go-535-
+polymarket/orders.go-536-// FetchCurrentPositions returns current Data API positions for this client's proxy wallet.
+polymarket/orders.go-537-func (o *OrdersClient) FetchCurrentPositions(ctx context.Context, limit int, offset int) ([]UserPosition, error) {
+polymarket/orders.go-538-	if o.rest == nil {
+polymarket/orders.go-539-		return nil, fmt.Errorf("nil REST client")
+polymarket/orders.go-540-	}
+polymarket/orders.go-541-	user := strings.TrimSpace(o.proxyWalletAddress)
+polymarket/orders.go-542-	if user == "" {
+polymarket/orders.go-543-		return nil, fmt.Errorf("empty proxy wallet address")
+polymarket/orders.go-544-	}
+polymarket/orders.go-545-	return o.rest.GetCurrentPositionsForUser(ctx, user, limit, offset)
+polymarket/orders.go-546-}
+polymarket/orders.go-547-
+polymarket/orders.go-548-// TriggerConditionalApproval uses Polymarket's gasless relayer to set
+polymarket/orders.go-549-// setApprovalForAll for the given outcome-token ID.  This is required before
+polymarket/orders.go-550-// the first SELL after a fresh account setup.
+polymarket/orders.go-551-// retryDelay is how long to wait after the API call for the relayer to broadcast.
+polymarket/orders.go:552:func (o *OrdersClient) TriggerConditionalApproval(ctx context.Context, tokenID string, retryDelay time.Duration) error {
+polymarket/orders.go-553-	if o.rest == nil {
+polymarket/orders.go-554-		return fmt.Errorf("nil REST client")
+polymarket/orders.go-555-	}
+polymarket/orders.go:556:	return o.rest.UpdateConditionalAllowance(ctx, tokenID, o.sigType, retryDelay)
+polymarket/orders.go-557-}
+polymarket/orders.go-558-
+polymarket/orders.go-559-// WaitForConditionalAllowance triggers a gasless conditional-token approval and
+polymarket/orders.go-560-// polls until the CLOB confirms the allowance is non-zero (on-chain tx mined).
+polymarket/orders.go-561-// Use this before placing the first SELL for a given token to guarantee the
+polymarket/orders.go-562-// CLOB will accept the order. Returns nil when confirmed, error on timeout.
+polymarket/orders.go:563:func (o *OrdersClient) WaitForConditionalAllowance(ctx context.Context, tokenID string, timeout time.Duration) error {
+polymarket/orders.go-564-	if o.rest == nil {
+polymarket/orders.go-565-		return fmt.Errorf("nil REST client")
+polymarket/orders.go-566-	}
+polymarket/orders.go:567:	return o.rest.WaitForConditionalAllowance(ctx, tokenID, o.sigType, timeout)
+polymarket/orders.go-568-}
+polymarket/orders.go-569-
+polymarket/orders.go-570-// WaitForSettledBalance polls the CLOB balance API until conditional tokens from a
+polymarket/orders.go-571-// recent buy appear on-chain. After a buy fill, Polygon needs ~2–4 blocks (~4–8 s)
+polymarket/orders.go-572-// before the balance API reflects the credit.
+polymarket/orders.go-573-//
+polymarket/orders.go-574-// minShares is the expected shares after fee deduction. A 90% threshold is used
+polymarket/orders.go-575-// to absorb small fee-formula rounding vs. actual fill-price differences.
+polymarket/orders.go-576-//
+polymarket/orders.go-577-// Returns nil when settled, error on timeout or context cancellation.
+polymarket/orders.go:578:func (o *OrdersClient) WaitForSettledBalance(ctx context.Context, tokenID string, minShares float64, timeout time.Duration) error {
+polymarket/orders.go-579-	if o.rest == nil {
+polymarket/orders.go-580-		return fmt.Errorf("nil REST client")
+polymarket/orders.go-581-	}
+polymarket/orders.go-582-	// Accept 90% of expected shares to compensate for fill-price vs. estimate variance.
+polymarket/orders.go-583-	minRaw := new(big.Int).SetInt64(int64(math.Floor(minShares * 0.90 * 1_000_000)))
+polymarket/orders.go-584-	deadline := time.Now().Add(timeout)
+polymarket/orders.go-585-	for {
+polymarket/orders.go-586-		select {
+polymarket/orders.go-587-		case <-ctx.Done():
+polymarket/orders.go-588-			return ctx.Err()
+polymarket/orders.go-589-		default:
+polymarket/orders.go-590-		}
+polymarket/orders.go:591:		ba, err := o.rest.GetBalanceAllowance(ctx, AssetTypeConditional, tokenID, o.sigType)
+polymarket/orders.go-592-		if err == nil && ba != nil {
+polymarket/orders.go-593-			if bal, ok := new(big.Int).SetString(ba.Balance, 10); ok && bal.Cmp(minRaw) >= 0 {
+polymarket/orders.go-594-				return nil // settled
+polymarket/orders.go-595-			}
+polymarket/orders.go-596-		}
+polymarket/orders.go-597-		if time.Now().After(deadline) {
+polymarket/orders.go-598-			return fmt.Errorf("token balance not settled after %s (expected ≥%.2f shares)", timeout, minShares)
+polymarket/orders.go-599-		}
+polymarket/orders.go-600-		select {
+polymarket/orders.go-601-		case <-ctx.Done():
+polymarket/orders.go-602-			return ctx.Err()
+polymarket/orders.go-603-		case <-time.After(settledBalancePollInterval):
+polymarket/orders.go-604-		}
+polymarket/orders.go-605-	}
+polymarket/orders.go-606-}
+polymarket/orders.go-607-
+polymarket/orders.go-608-// NewOrdersClient creates an OrdersClient backed by the given RESTClient.
+polymarket/orders.go-609-// proxyWalletAddress is the 0x-prefixed proxy/Safe wallet used as the EIP-712 order maker.
+polymarket/orders.go-610-// funderAddress is the wallet whose on-chain USDC balance backs the trades.
+polymarket/orders.go-611-// sigType is SigTypeEOA(0), SigTypePolyProxy(1), or SigTypeGnosisSafe(2).
+polymarket/orders.go-612-// rpcURL is the Polygon JSON-RPC endpoint used for on-chain CTF redemption calls.
+polymarket/orders.go-613-// The POST /order `owner` field is populated from the API key UUID in rest.creds,
+polymarket/orders.go-614-// matching the behaviour of the official Python and TypeScript CLOB SDKs.
+polymarket/orders.go-615-func NewOrdersClient(rest *RESTClient, proxyWalletAddress, funderAddress, privateKeyHex string, sigType int, rpcURL, claimRPCURL string, claimPriorityGwei float64, builderRelayerURL, builderClaimScript, builderAPIKey, builderAPISecret, builderAPIPass string) (*OrdersClient, error) {
+polymarket/orders.go-616-	pk, err := crypto.HexToECDSA(privateKeyHex)
+polymarket/orders.go-617-	if err != nil {
+polymarket/orders.go-618-		return nil, fmt.Errorf("parse private key: %w", err)
+polymarket/orders.go-619-	}
+polymarket/orders.go-620-	signerAddr := crypto.PubkeyToAddress(pk.PublicKey).Hex()
+polymarket/orders.go-621-
+polymarket/orders.go-622-	// owner = API key UUID, matching what both official SDKs send as the `owner` field.
+polymarket/orders.go-623-	apiKeyUUID := ""
+polymarket/orders.go-624-	if rest != nil && rest.creds != nil {
+polymarket/orders.go-625-		apiKeyUUID = rest.creds.APIKey
+polymarket/orders.go-626-	}
+polymarket/orders.go-627-
+polymarket/orders.go-628-	return &OrdersClient{
+polymarket/orders.go-629-		rest:               rest,
+polymarket/orders.go-630-		proxyWalletAddress: proxyWalletAddress,
+polymarket/orders.go-631-		funderAddress:      funderAddress,
+polymarket/orders.go-632-		sigType:            sigType,
+polymarket/orders.go-633-		apiKeyUUID:         apiKeyUUID,
+polymarket/orders.go-634-		rpcURL:             rpcURL,
+polymarket/orders.go-635-		claimRPCURL:        claimRPCURL,
+polymarket/orders.go-636-		claimPriorityGwei:  claimPriorityGwei,
+polymarket/orders.go-637-		builderRelayerURL:  builderRelayerURL,
+polymarket/orders.go-638-		builderClaimScript: builderClaimScript,
+polymarket/orders.go-639-		builderAPIKey:      builderAPIKey,
+polymarket/orders.go-640-		builderAPISecret:   builderAPISecret,
+polymarket/orders.go-641-		builderAPIPass:     builderAPIPass,
+polymarket/orders.go-642-		privateKey:         pk,
+polymarket/orders.go-643-		signerAddr:         signerAddr,
+polymarket/orders.go-644-		chainID:            big.NewInt(137), // Polygon mainnet
+polymarket/orders.go-645-	}, nil
+polymarket/orders.go-646-}
+polymarket/orders.go-647-
+polymarket/orders.go-648-type postOrderRequest struct {
+polymarket/orders.go-649-	Order     signedOrderJSON `json:"order"`
+polymarket/orders.go-650-	Owner     string          `json:"owner"`
+polymarket/orders.go-651-	OrderType OrderType       `json:"orderType"`
+polymarket/orders.go-652-	PostOnly  bool            `json:"postOnly"`
+polymarket/orders.go-653-	DeferExec bool            `json:"deferExec"`
+polymarket/orders.go-654-}
+polymarket/orders.go-655-
+polymarket/orders.go-656-type signedOrderJSON struct {
+polymarket/orders.go-657-	Maker         string `json:"maker"`
+polymarket/orders.go-658-	Signer        string `json:"signer"`
+polymarket/orders.go:659:	TokenID       string `json:"tokenId"`
+polymarket/orders.go-660-	MakerAmount   string `json:"makerAmount"`
+polymarket/orders.go-661-	TakerAmount   string `json:"takerAmount"`
+polymarket/orders.go-662-	Side          Side   `json:"side"`
+polymarket/orders.go-663-	Expiration    string `json:"expiration"`
+polymarket/orders.go-664-	Timestamp     string `json:"timestamp"`
+polymarket/orders.go-665-	Metadata      string `json:"metadata"`
+polymarket/orders.go-666-	Builder       string `json:"builder"`
+polymarket/orders.go-667-	Signature     string `json:"signature"`
+polymarket/orders.go-668-	Salt          int64  `json:"salt"`
+polymarket/orders.go-669-	SignatureType int    `json:"signatureType"`
+polymarket/orders.go-670-}
+polymarket/orders.go-671-
+polymarket/orders.go-672-// PlaceOrder submits a new signed order to the CLOB (POST /order).
+polymarket/orders.go-673-// Note: L2 credentials authenticate the HTTP request, but the order itself must
+polymarket/orders.go-674-// be signed with the user's private key (EIP-712).
+polymarket/orders.go-675-func (o *OrdersClient) PlaceOrder(ctx context.Context, req *NewOrderRequest) (*OrderResponse, error) {
+polymarket/orders.go-676-	if o.proxyWalletAddress == "" {
+polymarket/orders.go-677-		return nil, fmt.Errorf("missing proxy wallet address (required as POST /order owner)")
+polymarket/orders.go-678-	}
+polymarket/orders.go-679-
+polymarket/orders.go-680-	if req == nil {
+polymarket/orders.go-681-		return nil, fmt.Errorf("nil order request")
+polymarket/orders.go-682-	}
+polymarket/orders.go:683:	if req.TokenID == "" || req.Price == "" || req.Size == "" {
+polymarket/orders.go-684-		return nil, fmt.Errorf("invalid order request (missing token_id/price/size)")
+polymarket/orders.go-685-	}
+polymarket/orders.go-686-	if req.FeeRateBps == "" {
+polymarket/orders.go-687-		req.FeeRateBps = "0"
+polymarket/orders.go-688-	}
+polymarket/orders.go-689-
+polymarket/orders.go-690-	priceRat, err := parseDecimal(req.Price)
+polymarket/orders.go-691-	if err != nil {
+polymarket/orders.go-692-		return nil, fmt.Errorf("parse price: %w", err)
+polymarket/orders.go-693-	}
+polymarket/orders.go-694-	sizeRat, err := parseDecimal(req.Size)
+polymarket/orders.go-695-	if err != nil {
+polymarket/orders.go-696-		return nil, fmt.Errorf("parse size: %w", err)
+polymarket/orders.go-697-	}
+polymarket/orders.go-698-	if priceRat.Sign() <= 0 || sizeRat.Sign() <= 0 {
+polymarket/orders.go-699-		return nil, fmt.Errorf("price/size must be > 0")
+polymarket/orders.go-700-	}
+polymarket/orders.go-701-	roundCfg := roundConfigForOrder(req.TickSize, req.Price)
+polymarket/orders.go-702-
+polymarket/orders.go-703-	costRat := new(big.Rat).Mul(priceRat, sizeRat)
+polymarket/orders.go-704-	buyCostRat := quantizeBuyCostRat(req.Side, req.OrderType, costRat, roundCfg)
+polymarket/orders.go-705-
+polymarket/orders.go-706-	// Convert to 6-decimal fixed-math strings expected by Polymarket REST.
+polymarket/orders.go-707-	sharesFixed, err := ratToFixed6(sizeRat)
+polymarket/orders.go-708-	if err != nil {
+polymarket/orders.go-709-		return nil, fmt.Errorf("fixed shares: %w", err)
+polymarket/orders.go-710-	}
+polymarket/orders.go-711-	buyCostFixed, err := ratToFixed6(buyCostRat)
+polymarket/orders.go-712-	if err != nil {
+polymarket/orders.go-713-		return nil, fmt.Errorf("fixed buy cost: %w", err)
+polymarket/orders.go-714-	}
+polymarket/orders.go-715-	costFixed, err := ratToFixed6(costRat)
+polymarket/orders.go-716-	if err != nil {
+polymarket/orders.go-717-		return nil, fmt.Errorf("fixed cost: %w", err)
+polymarket/orders.go-718-	}
+polymarket/orders.go-719-
+polymarket/orders.go-720-	var makerAmount, takerAmount string
+polymarket/orders.go-721-	var sideInt int
+polymarket/orders.go-722-	switch req.Side {
+polymarket/orders.go-723-	case SideBuy:
+polymarket/orders.go-724-		// BUY: maker pays pUSD, taker gives shares.
+polymarket/orders.go-725-		// Market-style BUYs keep the legacy 2dp amount; resting BUYs use the
+polymarket/orders.go-726-		// exact product so sub-cent prices remain valid.
+polymarket/orders.go-727-		makerAmount = buyCostFixed
+polymarket/orders.go-728-		takerAmount = sharesFixed
+polymarket/orders.go-729-		sideInt = 0
+polymarket/orders.go-730-	case SideSell:
+polymarket/orders.go-731-		// SELL: maker gives shares, taker pays pUSD.
+polymarket/orders.go-732-		makerAmount = sharesFixed
+polymarket/orders.go-733-		takerAmount = costFixed
+polymarket/orders.go-734-		sideInt = 1
+polymarket/orders.go-735-	default:
+polymarket/orders.go-736-		return nil, fmt.Errorf("invalid side %q", req.Side)
+polymarket/orders.go-737-	}
+polymarket/orders.go-738-
+polymarket/orders.go-739-	expStr := "0"
+polymarket/orders.go-740-	if req.Expiration > 0 {
+polymarket/orders.go-741-		expStr = strconv.FormatInt(req.Expiration, 10)
+polymarket/orders.go-742-	}
+polymarket/orders.go-743-
+polymarket/orders.go-744-	signStart := time.Now()
+polymarket/orders.go-745-	signed, err := signV2Order(
+polymarket/orders.go-746-		o.privateKey,
+polymarket/orders.go-747-		o.chainID,
+polymarket/orders.go-748-		req.NegRisk,
+polymarket/orders.go-749-		o.proxyWalletAddress, // maker = proxy/Safe address (where funds live)
+polymarket/orders.go-750-		o.signerAddr,         // signer = EOA derived from private key
+polymarket/orders.go:751:		req.TokenID,
+polymarket/orders.go-752-		makerAmount,
+polymarket/orders.go-753-		takerAmount,
+polymarket/orders.go-754-		sideInt,
+polymarket/orders.go-755-		o.sigType,
+polymarket/orders.go-756-	)
+polymarket/orders.go-757-	if err != nil {
+polymarket/orders.go-758-		return nil, fmt.Errorf("build signed order: %w", err)
+polymarket/orders.go-759-	}
+polymarket/orders.go-760-	signMS := time.Since(signStart).Milliseconds()
+polymarket/orders.go-761-
+polymarket/orders.go-762-	sigHex := "0x" + hex.EncodeToString(signed.Signature)
+polymarket/orders.go-763-	tsStr := strconv.FormatInt(signed.Timestamp, 10)
+polymarket/orders.go-764-	const zeroBytes32Hex = "0x0000000000000000000000000000000000000000000000000000000000000000"
+polymarket/orders.go-765-
+polymarket/orders.go-766-	postReq := postOrderRequest{
+polymarket/orders.go-767-		Order: signedOrderJSON{
+polymarket/orders.go-768-			Maker:         o.proxyWalletAddress,
+polymarket/orders.go-769-			Signer:        o.signerAddr,
+polymarket/orders.go:770:			TokenID:       req.TokenID,
+polymarket/orders.go-771-			MakerAmount:   makerAmount,
+polymarket/orders.go-772-			TakerAmount:   takerAmount,
+polymarket/orders.go-773-			Side:          req.Side,
+polymarket/orders.go-774-			Expiration:    expStr,
+polymarket/orders.go-775-			Timestamp:     tsStr,
+polymarket/orders.go-776-			Metadata:      zeroBytes32Hex,
+polymarket/orders.go-777-			Builder:       zeroBytes32Hex,
+polymarket/orders.go-778-			Signature:     sigHex,
+polymarket/orders.go-779-			Salt:          signed.Salt.Int64(),
+polymarket/orders.go-780-			SignatureType: o.sigType,
+polymarket/orders.go-781-		},
+polymarket/orders.go-782-		// owner = API key UUID — this is what both the Python and TypeScript SDKs send.
+polymarket/orders.go-783-		Owner:     o.apiKeyUUID,
+polymarket/orders.go-784-		OrderType: req.OrderType,
+polymarket/orders.go-785-		PostOnly:  false,
+polymarket/orders.go-786-		DeferExec: false,
+polymarket/orders.go-787-	}
+polymarket/orders.go-788-
+polymarket/orders.go-789-	body, err := json.Marshal(&postReq)
+polymarket/orders.go-790-	if err != nil {
+polymarket/orders.go-791-		return nil, fmt.Errorf("marshal post order: %w", err)
+polymarket/orders.go-792-	}
+polymarket/orders.go-793-
+polymarket/orders.go-794-	url := fmt.Sprintf("%s/order", o.rest.baseURL)
+polymarket/orders.go-795-	var resp *http.Response
+polymarket/orders.go-796-	var httpMS int64
+polymarket/orders.go-797-	var finalTrace *placeOrderHTTPTrace
+polymarket/orders.go-798-	attemptTimeout := placeOrderAttemptTimeout
+polymarket/orders.go-799-	if req.AttemptTimeout > 0 {
+polymarket/orders.go-800-		attemptTimeout = req.AttemptTimeout
+polymarket/orders.go-801-	}
+polymarket/orders.go-802-	maxAttempts := placeOrderMaxAttempts
+polymarket/orders.go-803-	if req.MaxAttempts > 0 {
+polymarket/orders.go-804-		maxAttempts = req.MaxAttempts
+polymarket/orders.go-805-	}
+polymarket/orders.go-806-	attempts := 0
+polymarket/orders.go-807-	for attempt := 1; attempt <= maxAttempts; attempt++ {
+polymarket/orders.go-808-		attempts = attempt
+polymarket/orders.go-809-		attemptCtx, cancel := context.WithTimeout(ctx, attemptTimeout)
+polymarket/orders.go-810-		var attemptTrace *placeOrderHTTPTrace
+polymarket/orders.go-811-		if placeOrderHTTPTraceEnabled {
+polymarket/orders.go-812-			var traceHooks *httptrace.ClientTrace
+polymarket/orders.go-813-			attemptTrace, traceHooks = newPlaceOrderHTTPTrace()
+polymarket/orders.go-814-			attemptCtx = httptrace.WithClientTrace(attemptCtx, traceHooks)
+polymarket/orders.go-815-		}
+polymarket/orders.go-816-		attemptReq, reqErr := http.NewRequestWithContext(attemptCtx, http.MethodPost, url, bytes.NewReader(body))
+polymarket/orders.go-817-		if reqErr != nil {
+polymarket/orders.go-818-			cancel()
+polymarket/orders.go-819-			return nil, reqErr
+polymarket/orders.go-820-		}
+polymarket/orders.go-821-		if signErr := o.rest.creds.SignRequest(attemptReq, string(body)); signErr != nil {
+polymarket/orders.go-822-			cancel()
+polymarket/orders.go-823-			return nil, signErr
+polymarket/orders.go-824-		}
+polymarket/orders.go-825-		httpStart := time.Now()
+polymarket/orders.go-826-		resp, err = o.rest.orderHTTPClient().Do(attemptReq)
+polymarket/orders.go-827-		attemptElapsed := time.Since(httpStart)
+polymarket/orders.go-828-		httpMS += attemptElapsed.Milliseconds()
+polymarket/orders.go-829-		if o.rest != nil {
+polymarket/orders.go-830-			placeOrderLatencyWindow.record(o.rest.logger, attemptElapsed, err)
+polymarket/orders.go-831-		}
+polymarket/orders.go-832-		if placeOrderHTTPTraceEnabled && o.rest != nil {
+polymarket/orders.go-833-			logPlaceOrderHTTPTrace(o.rest.logger, attempt, attemptTrace, err)
+polymarket/orders.go-834-		}
+polymarket/orders.go-835-		if attemptTrace != nil {
+polymarket/orders.go-836-			finalTrace = attemptTrace
+polymarket/orders.go-837-		}
+polymarket/orders.go-838-		cancel()
+polymarket/orders.go-839-		if err == nil {
+polymarket/orders.go-840-			break
+polymarket/orders.go-841-		}
+polymarket/orders.go-842-		if attempt == maxAttempts || !isRetryablePlaceOrderErr(err) {
+polymarket/orders.go-843-			return nil, err
+polymarket/orders.go-844-		}
+polymarket/orders.go-845-	}
+polymarket/orders.go-846-	defer resp.Body.Close()
+polymarket/orders.go-847-	respBody, _ := io.ReadAll(resp.Body)
+polymarket/orders.go-848-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+polymarket/orders.go-849-		// Log conn_reuse at Warn level so slow/cold-connection 400s are diagnosable
+polymarket/orders.go-850-		// without requiring debug logging.
+--
+polymarket/orders.go-940-	var or_ OrderResponse
+polymarket/orders.go-941-	if err := json.Unmarshal(respBody, &or_); err != nil {
+polymarket/orders.go-942-		// HTTP request succeeded — the order may have landed despite the malformed body.
+polymarket/orders.go-943-		// Two-stage recovery:
+polymarket/orders.go-944-		//   1. Check open orders (catches LIVE/DELAYED orders still on the book).
+polymarket/orders.go-945-		//   2. Check trade history (catches GTC orders that crossed the spread and
+polymarket/orders.go-946-		//      matched instantly — they disappear from the open-orders list immediately
+polymarket/orders.go-947-		//      and only appear in /trades).
+polymarket/orders.go-948-		rcCtx, rcCancel := context.WithTimeout(context.Background(), 10*time.Second)
+polymarket/orders.go-949-		defer rcCancel()
+polymarket/orders.go:950:		if recovered, rcErr := o.FindRecentOrder(rcCtx, req.TokenID); rcErr == nil && recovered != nil && recovered.ID != "" {
+polymarket/orders.go-951-			return &OrderResponse{
+polymarket/orders.go-952-				Success:  true,
+polymarket/orders.go-953-				Status:   recovered.Status,
+polymarket/orders.go-954-				OrderID:  recovered.ID,
+polymarket/orders.go-955-				SignMs:   signMS,
+polymarket/orders.go-956-				HTTPMs:   httpMS,
+polymarket/orders.go-957-				Attempts: attempts,
+polymarket/orders.go-958-			}, nil
+polymarket/orders.go-959-		}
+polymarket/orders.go:960:		if recovered, rcErr := o.FindRecentTrade(rcCtx, req.TokenID); rcErr == nil && recovered != nil && recovered.ID != "" {
+polymarket/orders.go-961-			return &OrderResponse{
+polymarket/orders.go-962-				Success:  true,
+polymarket/orders.go-963-				Status:   recovered.Status,
+polymarket/orders.go-964-				OrderID:  recovered.ID,
+polymarket/orders.go-965-				SignMs:   signMS,
+polymarket/orders.go-966-				HTTPMs:   httpMS,
+polymarket/orders.go-967-				Attempts: attempts,
+polymarket/orders.go-968-			}, nil
+polymarket/orders.go-969-		}
+polymarket/orders.go-970-		return nil, fmt.Errorf("parse order response: %w", err)
+polymarket/orders.go-971-	}
+polymarket/orders.go-972-	or_.SignMs = signMS
+polymarket/orders.go-973-	or_.HTTPMs = httpMS
+polymarket/orders.go-974-	if finalTrace != nil {
+polymarket/orders.go-975-		or_.HTTPDNSMs = finalTrace.dnsMS
+polymarket/orders.go-976-		or_.HTTPConnectMs = finalTrace.connectMS
+polymarket/orders.go-977-		or_.HTTPTLSMs = finalTrace.tlsMS
+polymarket/orders.go-978-		or_.HTTPTTFBMs = finalTrace.ttfbMS
+polymarket/orders.go-979-	}
+polymarket/orders.go-980-	or_.Attempts = attempts
+polymarket/orders.go-981-	return &or_, nil
+polymarket/orders.go-982-}
+polymarket/orders.go-983-
+polymarket/orders.go-984-func parseDecimal(s string) (*big.Rat, error) {
+polymarket/orders.go-985-	r, ok := new(big.Rat).SetString(s)
+polymarket/orders.go-986-	if !ok {
+polymarket/orders.go-987-		return nil, fmt.Errorf("invalid decimal %q", s)
+polymarket/orders.go-988-	}
+polymarket/orders.go-989-	return r, nil
+polymarket/orders.go-990-}
+polymarket/orders.go-991-
+polymarket/orders.go-992-// roundRatToDP rounds a rational number to the given decimal places using round-half-up.
+polymarket/orders.go-993-func roundRatToDP(r *big.Rat, decimals int64) *big.Rat {
+polymarket/orders.go-994-	if r == nil || decimals < 0 {
+polymarket/orders.go-995-		return new(big.Rat)
+polymarket/orders.go-996-	}
+polymarket/orders.go-997-	scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(decimals), nil)
+polymarket/orders.go-998-	scaled := new(big.Rat).Mul(r, new(big.Rat).SetInt(scale))
+polymarket/orders.go-999-	num := scaled.Num()
+polymarket/orders.go-1000-	den := scaled.Denom()
+polymarket/orders.go-1001-	q, rem := new(big.Int).QuoRem(num, den, new(big.Int))
+polymarket/orders.go-1002-	if rem.Sign() != 0 {
+polymarket/orders.go-1003-		twoRem := new(big.Int).Mul(rem, big.NewInt(2))
+polymarket/orders.go-1004-		if twoRem.Cmp(den) >= 0 {
+polymarket/orders.go-1005-			q.Add(q, big.NewInt(1))
+polymarket/orders.go-1006-		}
+polymarket/orders.go-1007-	}
+polymarket/orders.go-1008-	return new(big.Rat).SetFrac(q, scale)
+polymarket/orders.go-1009-}
+polymarket/orders.go-1010-
+polymarket/orders.go-1011-// truncateRatToDP truncates a positive rational number toward zero at the given
+polymarket/orders.go-1012-// number of decimal places. Resting BUY maker amounts require this behaviour.
+polymarket/orders.go-1013-func truncateRatToDP(r *big.Rat, decimals int64) *big.Rat {
+polymarket/orders.go-1014-	if r == nil || decimals < 0 {
+polymarket/orders.go-1015-		return new(big.Rat)
+polymarket/orders.go-1016-	}
+polymarket/orders.go-1017-	scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(decimals), nil)
+polymarket/orders.go-1018-	scaled := new(big.Rat).Mul(r, new(big.Rat).SetInt(scale))
+polymarket/orders.go-1019-	q := new(big.Int).Quo(scaled.Num(), scaled.Denom())
+polymarket/orders.go-1020-	return new(big.Rat).SetFrac(q, scale)
+polymarket/orders.go-1021-}
+polymarket/orders.go-1022-
+polymarket/orders.go-1023-// ratToFixed6 converts a positive decimal rational into a base-10 integer string
+polymarket/orders.go-1024-// representing fixed-math with 6 decimals (i.e. multiply by 1e6).
+polymarket/orders.go-1025-// Uses round-half-up when not exactly representable.
+polymarket/orders.go-1026-func ratToFixed6(r *big.Rat) (string, error) {
+polymarket/orders.go-1027-	if r == nil {
+polymarket/orders.go-1028-		return "", fmt.Errorf("nil rat")
+polymarket/orders.go-1029-	}
+polymarket/orders.go-1030-	if r.Sign() < 0 {
+polymarket/orders.go-1031-		return "", fmt.Errorf("negative value")
+polymarket/orders.go-1032-	}
+polymarket/orders.go-1033-	scale := new(big.Int).Exp(big.NewInt(10), big.NewInt(6), nil)
+polymarket/orders.go-1034-	scaled := new(big.Rat).Mul(r, new(big.Rat).SetInt(scale))
+polymarket/orders.go-1035-	num := scaled.Num()
+polymarket/orders.go-1036-	den := scaled.Denom()
+polymarket/orders.go-1037-	q, rem := new(big.Int).QuoRem(num, den, new(big.Int))
+polymarket/orders.go-1038-	if rem.Sign() != 0 {
+polymarket/orders.go-1039-		// round-half-up
+polymarket/orders.go-1040-		twoRem := new(big.Int).Mul(rem, big.NewInt(2))
+--
+polymarket/orders.go-1156-	Size         string `json:"size"`  // shares filled in this leg
+polymarket/orders.go-1157-	Price        string `json:"price"` // fill price for this leg
+polymarket/orders.go-1158-}
+polymarket/orders.go-1159-
+polymarket/orders.go-1160-type clobTradesPage struct {
+polymarket/orders.go-1161-	Data       []clobTrade `json:"data"`
+polymarket/orders.go-1162-	NextCursor string      `json:"next_cursor"`
+polymarket/orders.go-1163-}
+polymarket/orders.go-1164-
+polymarket/orders.go-1165-// GetFillsByTakerOrderID returns the weighted-average fill price and total gross
+polymarket/orders.go:1166:// shares for a taker order by querying GET /data/trades?taker_order_id={id}&asset_id={tokenID}.
+polymarket/orders.go-1167-// This is the fallback for FAK buy orders that return 404 from GET /order/{id}
+polymarket/orders.go-1168-// (they are removed from active orders immediately upon full fill).
+polymarket/orders.go-1169-// Returns 0, 0, nil when the CLOB returns no matching trades (not yet settled).
+polymarket/orders.go-1170-// grossShares is the total shares across all fill legs BEFORE fee deduction.
+polymarket/orders.go-1171-// All pages are fetched via next_cursor pagination to ensure partial fills from
+polymarket/orders.go-1172-// large GTC orders that cross in multiple legs are fully accounted for.
+polymarket/orders.go:1173:func (o *OrdersClient) GetFillsByTakerOrderID(ctx context.Context, orderID, tokenID string) (avgPrice float64, grossShares float64, err error) {
+polymarket/orders.go-1174-	var totalCost, totalShares float64
+polymarket/orders.go-1175-	cursor := ""
+polymarket/orders.go-1176-	for page := 0; page < 20; page++ {
+polymarket/orders.go:1177:		reqURL := fmt.Sprintf("%s/data/trades?taker_order_id=%s&asset_id=%s", o.rest.baseURL, orderID, tokenID)
+polymarket/orders.go-1178-		if cursor != "" && cursor != "LTE=" {
+polymarket/orders.go-1179-			reqURL += "&next_cursor=" + cursor
+polymarket/orders.go-1180-		}
+polymarket/orders.go-1181-		resp, err := o.rest.doGet(ctx, reqURL)
+polymarket/orders.go-1182-		if err != nil {
+polymarket/orders.go-1183-			return 0, 0, err
+polymarket/orders.go-1184-		}
+polymarket/orders.go-1185-		b, _ := io.ReadAll(resp.Body)
+polymarket/orders.go-1186-		resp.Body.Close()
+polymarket/orders.go-1187-		if resp.StatusCode != http.StatusOK {
+polymarket/orders.go-1188-			return 0, 0, fmt.Errorf("data/trades api error %d: %s", resp.StatusCode, string(b))
+polymarket/orders.go-1189-		}
+polymarket/orders.go-1190-		var pg clobTradesPage
+polymarket/orders.go-1191-		if err := json.Unmarshal(b, &pg); err != nil {
+polymarket/orders.go-1192-			return 0, 0, fmt.Errorf("parse trades: %w", err)
+polymarket/orders.go-1193-		}
+polymarket/orders.go-1194-		for _, trade := range pg.Data {
+polymarket/orders.go-1195-			// Guard: only count legs that actually belong to this order.
+polymarket/orders.go-1196-			// The API filter is a best-effort hint; the endpoint may return
+polymarket/orders.go-1197-			// additional rows for the same asset_id (e.g. older trades), so
+polymarket/orders.go-1198-			// we enforce the match client-side to avoid blending wrong prices.
+polymarket/orders.go-1199-			if trade.TakerOrderID != orderID {
+polymarket/orders.go-1200-				continue
+polymarket/orders.go-1201-			}
+polymarket/orders.go-1202-			size, sErr := strconv.ParseFloat(trade.Size, 64)
+polymarket/orders.go-1203-			price, pErr := strconv.ParseFloat(trade.Price, 64)
+polymarket/orders.go-1204-			if sErr != nil || pErr != nil || size <= 0 || price <= 0 {
+polymarket/orders.go-1205-				continue
+polymarket/orders.go-1206-			}
+polymarket/orders.go-1207-			totalCost += size * price
+polymarket/orders.go-1208-			totalShares += size
+polymarket/orders.go-1209-		}
+polymarket/orders.go-1210-		// "LTE=" is the sentinel Polymarket uses to signal no more pages.
+polymarket/orders.go-1211-		if pg.NextCursor == "" || pg.NextCursor == "LTE=" {
+polymarket/orders.go-1212-			break
+polymarket/orders.go-1213-		}
+polymarket/orders.go-1214-		cursor = pg.NextCursor
+polymarket/orders.go-1215-	}
+polymarket/orders.go-1216-	if totalShares == 0 {
+polymarket/orders.go-1217-		return 0, 0, nil
+polymarket/orders.go-1218-	}
+polymarket/orders.go-1219-	return totalCost / totalShares, totalShares, nil
+polymarket/orders.go-1220-}
+polymarket/orders.go-1221-
+polymarket/orders.go-1222-// FindRecentOrder searches the CLOB for a LIVE or recently-matched order for the
+polymarket/orders.go:1223:// given tokenID placed by this client's wallet. Returns the most recently created
+polymarket/orders.go-1224-// matching order, or an error if none found.
+polymarket/orders.go-1225-// Used to recover an orphaned order after a PlaceOrder network timeout: the POST
+polymarket/orders.go-1226-// reached the server and the order was accepted, but the response never arrived.
+polymarket/orders.go:1227:func (o *OrdersClient) FindRecentOrder(ctx context.Context, tokenID string) (*GetOrderResponse, error) {
+polymarket/orders.go-1228-	// Query the authenticated user's open orders for this token.
+polymarket/orders.go:1229:	resp, path, err := o.rest.doGetAuthenticatedOrders(ctx, fmt.Sprintf("?asset_id=%s", tokenID))
+polymarket/orders.go-1230-	if err != nil {
+polymarket/orders.go-1231-		return nil, fmt.Errorf("find recent order: %w", err)
+polymarket/orders.go-1232-	}
+polymarket/orders.go-1233-	defer resp.Body.Close()
+polymarket/orders.go-1234-	b, _ := io.ReadAll(resp.Body)
+polymarket/orders.go-1235-	if resp.StatusCode != http.StatusOK {
+polymarket/orders.go-1236-		return nil, fmt.Errorf("find recent order via %s %d: %s", path, resp.StatusCode, string(b))
+polymarket/orders.go-1237-	}
+polymarket/orders.go-1238-	var orders []GetOrderResponse
+polymarket/orders.go-1239-	if err := json.Unmarshal(b, &orders); err != nil {
+polymarket/orders.go-1240-		// Some CLOB deployments wrap the list; try unwrapping.
+polymarket/orders.go-1241-		var wrapped struct {
+polymarket/orders.go-1242-			Data []GetOrderResponse `json:"data"`
+polymarket/orders.go-1243-		}
+polymarket/orders.go-1244-		if err2 := json.Unmarshal(b, &wrapped); err2 == nil && len(wrapped.Data) > 0 {
+polymarket/orders.go-1245-			orders = wrapped.Data
+polymarket/orders.go-1246-		} else {
+polymarket/orders.go-1247-			return nil, fmt.Errorf("parse open orders: %w", err)
+polymarket/orders.go-1248-		}
+polymarket/orders.go-1249-	}
+polymarket/orders.go-1250-	for i := range orders {
+polymarket/orders.go:1251:		if orders[i].TokenID == tokenID {
+polymarket/orders.go-1252-			return normalizeGetOrderResponse(&orders[i]), nil
+polymarket/orders.go-1253-		}
+polymarket/orders.go-1254-	}
+polymarket/orders.go:1255:	return nil, fmt.Errorf("no live order found for token %s", tokenID)
+polymarket/orders.go-1256-}
+polymarket/orders.go-1257-
+polymarket/orders.go-1258-// tradeRecord is the wire type returned by GET /trades.
+polymarket/orders.go-1259-// Only the fields needed for order recovery are mapped.
+polymarket/orders.go-1260-type tradeRecord struct {
+polymarket/orders.go-1261-	ID           string         `json:"id"`
+polymarket/orders.go-1262-	TakerOrderID string         `json:"taker_order_id"`
+polymarket/orders.go-1263-	AssetID      string         `json:"asset_id"`
+polymarket/orders.go-1264-	Side         string         `json:"side"`
+polymarket/orders.go-1265-	Size         string         `json:"size"`
+polymarket/orders.go-1266-	Price        string         `json:"price"`
+polymarket/orders.go-1267-	Status       string         `json:"status"`
+polymarket/orders.go-1268-	CreatedAt    stringOrNumber `json:"created_at"`
