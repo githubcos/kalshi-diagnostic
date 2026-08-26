@@ -1,11 +1,11 @@
 {
-  "id": "kalshi-explicit-no-mark-to-market-v1-20260825-2355",
+  "id": "kalshi-explicit-no-mark-to-market-v1-retry1-20260826-0012",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
     {"name": "APPLY_PATCH", "path": "control/patches/kalshi_explicit_no_mark_to_market_v1.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["main.go", "strategy/trader.go", "strategy/kalshi_pair_parity_test.go"]},
+    {"name": "GOFMT", "files": ["main.go", "strategy/trader.go"]},
     {"name": "GO_TEST"},
     {"name": "GO_BUILD"},
     {"name": "START_PAPER"},
