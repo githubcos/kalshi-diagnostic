@@ -1,15 +1,10 @@
 {
-  "id": "kalshi-explicit-no-callers-v2-20260826-0015",
+  "id": "kalshi-explicit-no-caller-probe-v1-20260826-0017",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_explicit_no_callers_v2.patch", "strip": 1},
-    {"name": "GOFMT", "files": ["main.go"]},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
-    {"name": "START_PAPER"},
-    {"name": "COLLECT_PARITY_EVIDENCE"},
-    {"name": "STATUS"}
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_no_caller_probe_test_v1.patch", "strip": 1},
+    {"name": "GO_TEST"}
   ]
 }
