@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:43:19+00:00
+UPDATED_UTC=2026-08-26T21:43:27+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -10,6 +10,7 @@ TRADING_ENGINE=UNKNOWN
 
 === PROCESS ===
 561625 ./kalshiarbo -port 8085
+566053 /home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/pkg/tool/linux_amd64/compile -o /tmp/go-build3663428370/b199/_pkg_.a -trimpath /tmp/go-build3663428370/b199=> -p github.com/polyarb/strategy -lang=go1.24 -complete -buildid i6u1t2ASrpNFOSflJEUj/i6u1t2ASrpNFOSflJEUj -goversion go1.24.0 -c=2 -nolocalimports -importcfg /tmp/go-build3663428370/b199/importcfg -pack /home/ubuntu/KalshiArbo/kalshiarbo/strategy/brain.go /home/ubuntu/KalshiArbo/kalshiarbo/strategy/helpers.go /home/ubuntu/KalshiArbo/kalshiarbo/strategy/metrics.go /home/ubuntu/KalshiArbo/kalshiarbo/strategy/signal.go /home/ubuntu/KalshiArbo/kalshiarbo/strategy/trader.go
 
 === PORT 8085 ===
 LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=561625,fd=6))
