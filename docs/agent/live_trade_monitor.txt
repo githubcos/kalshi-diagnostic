@@ -1,6 +1,6 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T00:48:05+00:00
+UPDATED_UTC=2026-08-26T00:48:12+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_SAMPLE
 PAPER_8085=UP
@@ -116,10 +116,6 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.8576  (--17.80%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78393.66 open=78381.60 gap=$12.1 yes=0.5700 prob=0.53 rem=747s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.2177  (--4.50%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
@@ -140,4 +136,8 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.4700  (--9.74%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78394.74 open=78381.60 gap=$13.1 yes=0.5500 prob=0.53 rem=718s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.0450  (--0.92%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78417.05 open=78381.60 gap=$35.4 yes=0.6000 prob=0.59 rem=712s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
