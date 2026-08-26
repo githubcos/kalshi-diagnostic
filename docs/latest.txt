@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:10:55+00:00
+UPDATED_UTC=2026-08-26T22:11:02+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -175,3 +175,4 @@ BTC $78781 │ open $78748 │ edge +33 │ CL $78783 1s ago CLedge +35 │ YES 
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  │ PAPER   6.46 shares  │  buy $0.7639 → sell $0.7300  │  fee $0.0900
 ◂  ▼ P&L  -$-0.3092  (--6.27%)  │  Reason: pair_stop_loss  │  Held: 1s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78780.87 open=78747.81 gap=$33.1 yes=0.7500 prob=0.60 rem=538s]
