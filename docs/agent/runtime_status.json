@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T00:28:39+00:00",
+  "utc": "2026-08-26T00:28:46+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:28:37+00:00",
-    "epoch": 1787704117.5884793,
+    "utc": "2026-08-26T00:28:41+00:00",
+    "epoch": 1787704121.3970447,
     "pid": 3900720,
-    "status": "working",
-    "job_id": "kalshi-paper-highfreq-profile-v1-20260826-0030"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-explicit-no-finalize-v1-20260826-0020",
+    "last_job_id": "kalshi-paper-highfreq-profile-v1-20260826-0030",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_001744.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T00:18:02+00:00"
+    "last_run_utc": "2026-08-26T00:28:40+00:00"
   },
   "autopilot": {
     "gate_index": 1,
