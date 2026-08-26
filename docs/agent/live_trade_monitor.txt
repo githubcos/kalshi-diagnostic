@@ -1,6 +1,6 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T02:27:55+00:00
+UPDATED_UTC=2026-08-26T02:28:03+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
@@ -118,3 +118,5 @@ OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
+║     NET P&L   +$0.0000   (+0.00%)                                  ║
+║     Balance: $100.00 / $100.00                                     ║
