@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T08:20:47+00:00",
+  "utc": "2026-08-26T08:20:54+00:00",
   "publisher_pid": 1011091,
   "heartbeat": {
-    "utc": "2026-08-26T08:20:46+00:00",
-    "epoch": 1787732446.8222215,
+    "utc": "2026-08-26T08:20:52+00:00",
+    "epoch": 1787732452.373337,
     "pid": 4075083,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-market-feed-auth-fallback-v1b-20260826-0822"
   },
   "state": {
     "last_job_id": "kalshi-market-feed-auth-fallback-v1-20260826-0820",
