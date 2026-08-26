@@ -1,10 +1,13 @@
 {
-  "id": "kalshi-adaptive-paper-optimizer-v5-20260826-0205",
+  "id": "kalshi-window-rollover-expiration-v1-20260826-0218",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "BACKUP"},
-    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "APPLY_PATCH", "path": "control/patches/kalshi_window_rollover_expiration_v1.patch", "strip": 1},
+    {"name": "GOFMT", "files": ["kalshi/market.go", "kalshi/market_test.go"]},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
     {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
