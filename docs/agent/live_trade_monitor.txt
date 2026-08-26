@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T01:47:05+00:00
+UPDATED_UTC=2026-08-26T01:47:13+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=10 hedge=0 closed=9
-CLOSE_REASONS={"pair_fill_leg_timeout": 9}
+EVENTS lead=11 hedge=0 closed=10
+CLOSE_REASONS={"pair_fill_leg_timeout": 10}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -119,10 +119,6 @@ OK-CHECK PAPER guard prevents any live order request
 RECENT MEANINGFUL EXECUTION / MATH LINES
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.5792  (--11.95%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78824.14 open=78848.84 gap=$-24.7 no=0.5900 prob=0.56 rem=825s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.4392  (--9.08%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78826.40 open=78848.84 gap=$-22.4 no=0.5800 prob=0.55 rem=815s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
@@ -141,4 +137,8 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.2890  (--6.02%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78792.81 open=78848.84 gap=$-56.0 no=0.6800 prob=0.63 rem=780s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.6488  (--13.55%)  │  Reason: pair_fill_leg_timeout  │  Held: 8s
+⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=78809.43 open=78848.84 gap=$-39.4 no=0.6200 prob=0.59 rem=768s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
