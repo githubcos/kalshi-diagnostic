@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T02:06:43+00:00",
-  "cycle": 1787710003,
-  "phase": "PAPER_HEDGEABILITY_STRESS",
+  "utc": "2026-08-26T02:08:26+00:00",
+  "cycle": 1787710106,
+  "phase": "ADAPTIVE_PAPER_OPTIMIZER",
   "percent": 50,
   "result": "RUNNING",
-  "detail": "Hedgeability PAPER v4 running; current=$100.00. Logs preserved.",
-  "next": "COMPARE_HEDGE_RATE_TIMEOUT_RATE_EV"
+  "detail": "FLOW: closes=0 wr=NA pnl=$0.000 flow=0.00/min hedge=NA timeout=0.0%",
+  "next": "AUTO_TUNE_WITHIN_BOUNDS"
 }
