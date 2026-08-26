@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T02:17:13+00:00",
-  "cycle": 1787710633,
+  "utc": "2026-08-26T02:17:21+00:00",
+  "cycle": 1787710641,
   "phase": "ADAPTIVE_PAPER_OPTIMIZER",
   "percent": 50,
   "result": "RUNNING",
-  "detail": "FLOW: closes=3 wr=100.0% pnl=$0.687 flow=0.65/min hedge=100.0% timeout=0.0%",
+  "detail": "FLOW: closes=3 wr=100.0% pnl=$0.687 flow=0.63/min hedge=100.0% timeout=0.0%",
   "next": "AUTO_TUNE_WITHIN_BOUNDS"
 }
