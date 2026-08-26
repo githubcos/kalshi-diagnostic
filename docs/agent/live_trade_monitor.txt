@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T06:11:26+00:00
+UPDATED_UTC=2026-08-26T06:11:34+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=16 hedge=3 closed=16
-CLOSE_REASONS={"pair_fill_leg_timeout": 1, "pair_paper_locked_recycle": 3, "pair_stop_loss": 12}
+EVENTS lead=17 hedge=3 closed=17
+CLOSE_REASONS={"pair_fill_leg_timeout": 1, "pair_paper_locked_recycle": 3, "pair_stop_loss": 13}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -117,10 +117,6 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-◂  ▲ P&L  +$0.0771  (+0.25%)  │  Reason: pair_paper_locked_recycle  │  Held: 3s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=79149.24 open=79051.03 gap=$98.2 yes=0.8900 prob=0.75 rem=611s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.3080  (--6.23%)  │  Reason: pair_stop_loss  │  Held: 13s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=79139.87 open=79051.03 gap=$88.8 yes=0.8900 prob=0.73 rem=594s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
@@ -142,3 +138,7 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
 ◂  ▼ P&L  -$-0.4886  (--10.01%)  │  Reason: pair_stop_loss  │  Held: 14s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=79074.01 open=79051.03 gap=$23.0 yes=0.6800 prob=0.57 rem=510s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.7186  (--15.01%)  │  Reason: pair_stop_loss  │  Held: 1s
