@@ -11,3 +11,8 @@ LIVE_ALLOWED=false
 [2026-08-26T17:56:03+00:00] ACTION 2/9 BACKUP PASS
 [2026-08-26T17:56:03+00:00] ACTION 3/9 APPLY_PATCH START
 [2026-08-26T17:56:03+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175603.tar.gz
+[2026-08-26T17:56:13+00:00] BACKUP PASS files=115
+[2026-08-26T17:56:13+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-7c69tmyy.patch
+    patch: **** Only garbage was found in the patch input.
+[2026-08-26T17:56:13+00:00] PATCH_DRY_RUN END rc=2 duration=0.00s
+[2026-08-26T17:56:13+00:00] JOB RESULT=FAIL ERROR=RuntimeError: patch dry-run failed
