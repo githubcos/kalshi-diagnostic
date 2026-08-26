@@ -30,7 +30,7 @@ diff --git a/kalshi/client.go b/kalshi/client.go
 diff --git a/kalshi/market.go b/kalshi/market.go
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -170,7 +170,7 @@ func (c *Client) ListMarkets(
+@@ -170,6 +170,6 @@ func (c *Client) ListMarkets(
  	path := "/markets?" + q.Encode()
  
  	var response marketsResponse
@@ -38,7 +38,7 @@ diff --git a/kalshi/market.go b/kalshi/market.go
 +	if err := c.DoMarketData(ctx, http.MethodGet, path, &response); err != nil {
  		return nil, err
  	}
-@@ -185,7 +185,7 @@ func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
+@@ -185,6 +185,6 @@ func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
  	path := "/markets/" + url.PathEscape(ticker)
  
  	var response marketResponse
@@ -46,7 +46,7 @@ diff --git a/kalshi/market.go b/kalshi/market.go
 +	if err := c.DoMarketData(ctx, http.MethodGet, path, &response); err != nil {
  		return nil, err
  	}
-@@ -218,7 +218,7 @@ func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, e
+@@ -218,6 +218,6 @@ func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, e
  	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
  
  	var response orderbookResponse
@@ -57,14 +57,14 @@ diff --git a/kalshi/market.go b/kalshi/market.go
 diff --git a/kalshi/feed.go b/kalshi/feed.go
 --- a/kalshi/feed.go
 +++ b/kalshi/feed.go
-@@ -23,6 +23,8 @@ type FeedClient struct {
+@@ -23,4 +23,6 @@ type FeedClient struct {
  	mu          sync.RWMutex
  	latestPrice map[string]float64
  	PriceC      chan exchangefeed.PriceEvent
 +	restWarnOnce sync.Once
 +	restPrimeOnce sync.Once
  }
-@@ -54,10 +56,24 @@ func (f *FeedClient) pollOnce(ctx context.Context) {
+@@ -54,11 +56,25 @@ func (f *FeedClient) pollOnce(ctx context.Context) {
  	for _, id := range f.tokenIDs {
  		b, e := f.client.GetOrderBook(ctx, id)
  		if e != nil {
