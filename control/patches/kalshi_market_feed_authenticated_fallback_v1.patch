@@ -1,0 +1,88 @@
+diff --git a/kalshi/client.go b/kalshi/client.go
+--- a/kalshi/client.go
++++ b/kalshi/client.go
+@@ -149,3 +149,24 @@ func (c *Client) DoPublic(ctx context.Context, method, path string, out any) erro
+ 
+ 	return nil
+ }
++
++// DoMarketData preserves the public-first market-data path but retries the
++// same read with Kalshi authentication when credentials are already available.
++// Kalshi has changed authentication requirements on market-data endpoints over
++// time; this keeps PAPER/LIVE market reads compatible without changing trading
++// semantics or credential configuration.
++func (c *Client) DoMarketData(ctx context.Context, method, path string, out any) error {
++	publicErr := c.DoPublic(ctx, method, path, out)
++	if publicErr == nil {
++		return nil
++	}
++
++	if c.PrivateKey == nil || strings.TrimSpace(c.APIKeyID) == "" {
++		return publicErr
++	}
++
++	if authErr := c.Do(ctx, method, path, nil, out); authErr != nil {
++		return fmt.Errorf("kalshi market data public request failed: %v; authenticated retry failed: %w", publicErr, authErr)
++	}
++
++	return nil
++}
+diff --git a/kalshi/market.go b/kalshi/market.go
+--- a/kalshi/market.go
++++ b/kalshi/market.go
+@@ -170,7 +170,7 @@ func (c *Client) ListMarkets(
+ 	path := "/markets?" + q.Encode()
+ 
+ 	var response marketsResponse
+-	if err := c.DoPublic(ctx, http.MethodGet, path, &response); err != nil {
++	if err := c.DoMarketData(ctx, http.MethodGet, path, &response); err != nil {
+ 		return nil, err
+ 	}
+@@ -185,7 +185,7 @@ func (c *Client) GetMarket(ctx context.Context, ticker string) (*Market, error) {
+ 	path := "/markets/" + url.PathEscape(ticker)
+ 
+ 	var response marketResponse
+-	if err := c.DoPublic(ctx, http.MethodGet, path, &response); err != nil {
++	if err := c.DoMarketData(ctx, http.MethodGet, path, &response); err != nil {
+ 		return nil, err
+ 	}
+@@ -218,7 +218,7 @@ func (c *Client) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, e
+ 	path := "/markets/" + url.PathEscape(ticker) + "/orderbook"
+ 
+ 	var response orderbookResponse
+-	if err := c.DoPublic(ctx, http.MethodGet, path, &response); err != nil {
++	if err := c.DoMarketData(ctx, http.MethodGet, path, &response); err != nil {
+ 		return nil, err
+ 	}
+diff --git a/kalshi/feed.go b/kalshi/feed.go
+--- a/kalshi/feed.go
++++ b/kalshi/feed.go
+@@ -23,6 +23,8 @@ type FeedClient struct {
+ 	mu          sync.RWMutex
+ 	latestPrice map[string]float64
+ 	PriceC      chan exchangefeed.PriceEvent
++	restWarnOnce sync.Once
++	restPrimeOnce sync.Once
+ }
+@@ -54,10 +56,24 @@ func (f *FeedClient) pollOnce(ctx context.Context) {
+ 	for _, id := range f.tokenIDs {
+ 		b, e := f.client.GetOrderBook(ctx, id)
+ 		if e != nil {
++			if f.logger != nil {
++				f.restWarnOnce.Do(func() {
++					f.logger.Warn("kalshi feed: REST quote fallback failed", zap.String("token_id", id), zap.Error(e))
++				})
++			}
+ 			continue
+ 		}
+ 		p, q := bestAsk(b)
+ 		if p > 0 {
+ 			f.update(id, p, q, "SELL")
++			if f.logger != nil {
++				f.restPrimeOnce.Do(func() {
++					f.logger.Info("kalshi feed: REST quote fallback primed", zap.String("token_id", id), zap.Float64("ask", p))
++				})
++			}
+ 		}
+ 	}
+ }
