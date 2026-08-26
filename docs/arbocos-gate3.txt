@@ -1,0 +1,604 @@
+=== SIGNAL WRITER ===
+./web/handlers.go:430:		SignalFile:        "signals.jsonl",
+./web/handlers.go:431:		ArchiveGlob:       filepath.Join("archive_signals", "signals_*.jsonl"),
+./web/handlers.go:471:	paths, err := filepath.Glob(filepath.Join("archive_signals", "signals_*.jsonl"))
+./web/handlers.go:473:		writeJSONError(w, http.StatusInternalServerError, "could not scan archive signals")
+./web/ml_go_trainer.go:228:		signalFile = "signals.jsonl"
+./web/ml_go_trainer.go:231:		archiveGlob = filepath.Join("archive_signals", "signals_*.jsonl")
+./web/strategy_backtest_sweep_test.go:872:		t.Fatal("no input files found (signals.jsonl or signals-*.jsonl)")
+./web/strategy_backtest_sweep_test.go:1005:		t.Fatal("no input files found (signals.jsonl or signals-*.jsonl)")
+./web/strategy_tools.go:88:	EntrySignal  backtestSignal `json:"entry_signal"`
+./web/strategy_tools.go:89:	FillSignal   backtestSignal `json:"fill_signal,omitempty"`
+./web/strategy_tools.go:278:	paths = append(paths, filepath.Join(workspace, "signals.jsonl"))
+./web/state.go:103:	LastSignal        string            `json:"last_signal"`
+./web/state.go:104:	LastSignalAt      time.Time         `json:"last_signal_at"`
+./web/state.go:105:	SignalStatus      string            `json:"signal_status"`
+./web/state.go:108:	PairArbSignalAt   time.Time         `json:"pair_arb_signal_at"`
+./web/manual_backtest_probe_test.go:24:		t.Fatal("no input files found (signals.jsonl or archive_signals/*.jsonl)")
+./strategy/signal.go:1945:// signals.jsonl for offline parameter-sweep analysis (--signals flag).
+./strategy/signal.go:2133:// logged to signals.jsonl on every YES/NO/Chainlink tick.
+./config/config.go:531:		SignalEventsFile:                                   envOr("SIGNAL_EVENTS_FILE", "signals.jsonl"),
+./config/config.go:735:		"SIGNAL_EVENTS_FILE":             "signals.jsonl",
+./main.go:228:		ArchiveGlob:       filepath.Join("archive_signals", "signals_*.jsonl"),
+./main.go:253:	paths, err := filepath.Glob(filepath.Join("archive_signals", "signals_*.jsonl"))
+./main.go:2995:// appendSignalLine serialises v as a JSON line and appends it to path.
+
+=== PAIR ARB DECISION / ENTRY ===
+strategy/brain.go:9://  1. At every EvaluatePairArb call (even when no signal fires) a feature
+strategy/brain.go:22://  4. When brain.Score(features) < scoreThreshold the pair-arb entry is blocked
+strategy/brain.go:139:	// ScoreThreshold: minimum brain score required to allow a pair-arb entry
+strategy/trader.go:67:type pairArbUTCMinuteWindow struct {
+strategy/trader.go:72:func normalizePairArbScheduleMode(raw string) string {
+strategy/trader.go:84:func parsePairArbScheduleMinute(raw string, allow24 bool) (int, error) {
+strategy/trader.go:113:func parsePairArbScheduleWindowsUTC(raw string) ([]pairArbUTCMinuteWindow, error) {
+strategy/trader.go:121:	windows := make([]pairArbUTCMinuteWindow, 0, len(tokens))
+strategy/trader.go:131:		start, err := parsePairArbScheduleMinute(parts[0], false)
+strategy/trader.go:135:		end, err := parsePairArbScheduleMinute(parts[1], true)
+strategy/trader.go:140:			return []pairArbUTCMinuteWindow{{start: 0, end: 24 * 60}}, nil
+strategy/trader.go:143:			windows = append(windows, pairArbUTCMinuteWindow{start: start, end: end})
+strategy/trader.go:147:			pairArbUTCMinuteWindow{start: start, end: 24 * 60},
+strategy/trader.go:148:			pairArbUTCMinuteWindow{start: 0, end: end},
+strategy/trader.go:157:func pairArbScheduleAllowsEntry(modeRaw, windowsRaw string, at time.Time) (bool, string) {
+strategy/trader.go:158:	mode := normalizePairArbScheduleMode(modeRaw)
+strategy/trader.go:162:	windows, err := parsePairArbScheduleWindowsUTC(windowsRaw)
+strategy/trader.go:223:type PairArbPosition struct {
+strategy/trader.go:231:	HedgeBy     time.Time `json:"hedge_by,omitempty"`
+strategy/trader.go:233:	// LockedProfitCents overrides the default hedge locked-profit target for this position.
+strategy/trader.go:235:	LockedProfitCents  float64 `json:"locked_profit_cents,omitempty"`
+strategy/trader.go:255:	// DCA+Hedge state: set by OnDCAHedgeSignal; checked in managePairArbPosition.
+strategy/trader.go:256:	DCAHedgeMovedSide    string  `json:"dca_hedge_moved_side,omitempty"`    // "YES" or "NO"
+strategy/trader.go:257:	DCAHedgeTriggerPrice float64 `json:"dca_hedge_trigger_price,omitempty"` // moved-side price at trigger
+strategy/trader.go:258:	DCAHedgeDCAFired     bool    `json:"dca_hedge_dca_fired,omitempty"`     // true after the DCA add executes
+strategy/trader.go:261:func (p *PairArbPosition) hasBothLegs() bool { return p != nil && p.YesShares > 0 && p.NoShares > 0 }
+strategy/trader.go:263:func (p *PairArbPosition) isBalanced() bool {
+strategy/trader.go:270:func (p *PairArbPosition) totalSpent() float64 {
+strategy/trader.go:277:func (p *PairArbPosition) lockedShares() float64 {
+strategy/trader.go:284:func (p *PairArbPosition) matchedCost() float64 {
+strategy/trader.go:295:func (p *PairArbPosition) residualPosition() (side string, shares float64, avgPrice float64) {
+strategy/trader.go:308:func (p *PairArbPosition) sideAveragePrice(side string) float64 {
+strategy/trader.go:324:func (p *PairArbPosition) rebalanceState() (buySide string, deficit float64, anchorAvgPrice float64) {
+strategy/trader.go:337:func (p *PairArbPosition) markToMarket(yesPrice float64) float64 {
+strategy/trader.go:364:	PairArbTradeSizeUSD          float64
+strategy/trader.go:365:	PairArbMinTokenPrice         float64
+strategy/trader.go:366:	PairArbMaxTokenPrice         float64
+strategy/trader.go:367:	PairArbCarryEarlySec         int
+strategy/trader.go:368:	PairArbCarryOppDiscountCents float64
+strategy/trader.go:369:	PairArbMinLockedProfitCents  float64
+strategy/trader.go:370:	// PairArbCVDMomentumLockedProfitCents is the looser hedge target (in cents) used for
+strategy/trader.go:372:	PairArbCVDMomentumLockedProfitCents                float64
+strategy/trader.go:373:	PairArbHedgeTimeoutSec                             int
+strategy/trader.go:374:	PairArbStopLossCents                               float64
+strategy/trader.go:375:	PairArbStopLossMinHoldSec                          int
+strategy/trader.go:376:	PairArbStopLossMinGapAgainstUSD                    float64
+strategy/trader.go:377:	PairArbUnprofitableAbortGraceSec                   int
+strategy/trader.go:378:	PairArbUnprofitableAbortMinGapAgainstUSD           float64
+strategy/trader.go:379:	PairArbLeadBuySlipTicks                            int
+strategy/trader.go:380:	PairArbLeadBuyTimeoutSec                           int
+strategy/trader.go:381:	PairArbLeadOrderType                               polymarket.OrderType
+strategy/trader.go:382:	PairArbDualPrePlace                                bool
+strategy/trader.go:383:	PairArbHedgePreOffsetCents                         float64
+strategy/trader.go:384:	PairArbMaxSignalAgeSec                             int
+strategy/trader.go:385:	PairArbMaxCLAgeSec                                 int
+strategy/trader.go:386:	PairArbSellAt99                                    bool
+strategy/trader.go:387:	PairArbContinuousImbalanceEnabled                  bool
+strategy/trader.go:388:	PairArbContinuousImbalanceTradeSizeUSD             float64
+strategy/trader.go:389:	PairArbContinuousImbalanceMinSignalGapUSD          float64
+strategy/trader.go:390:	PairArbContinuousImbalanceMinPriceImprovementCents float64
+strategy/trader.go:391:	PairArbContinuousImbalanceAllowMomentum            bool
+strategy/trader.go:392:	PairArbContinuousImbalanceCooldownSec              int
+strategy/trader.go:393:	PairArbContinuousImbalanceMaxAdds                  int
+strategy/trader.go:394:	PairArbContinuousImbalanceMaxUSDPerSide            float64
+strategy/trader.go:395:	PairArbContinuousImbalanceMaxGapUSD                float64
+strategy/trader.go:396:	PairArbStopCooldownSec                             int
+strategy/trader.go:397:	PairArbScheduleMode                                string
+strategy/trader.go:398:	PairArbScheduleWindowsUTC                          string
+strategy/trader.go:403:	// DCA+Hedge strategy config.
+strategy/trader.go:404:	DCAHedgeTradeSizeUSD    float64 // per-leg USD limit (informational; actual size driven by signal shares)
+strategy/trader.go:405:	DCAHedgeDCAReversal     float64 // price drop from trigger that fires the DCA add (default 0.20)
+strategy/trader.go:406:	DCAHedgeDCAAddShares    float64 // shares to buy on DCA add (default 5)
+strategy/trader.go:407:	DCAHedgeOppLegSlipTicks int     // slip ticks for the opp (non-moved) leg; -1 = use PairArbLeadBuySlipTicks
+strategy/trader.go:432:// pairArbPendingOrderState tracks an ambiguous pair-arb buy submit where the
+strategy/trader.go:434:// While present, new pair-arb entries are blocked until reconciliation succeeds.
+strategy/trader.go:435:type pairArbPendingOrderState struct {
+strategy/trader.go:457:	Side     string    `json:"side"`     // "YES", "NO", or pair labels like "PAIR_MATCHED"
+strategy/trader.go:509:	PairHedgeSide          string
+strategy/trader.go:510:	PairHedgeMaxPrice      float64
+strategy/trader.go:702:func pairArbExactHedgeSizing(targetActualShares, hedgePrice float64, feeRateBps string) (rawShares, notional float64, ok bool) {
+strategy/trader.go:703:	rawShares = solveRawSharesForTargetActual(targetActualShares, hedgePrice, feeRateBps)
+strategy/trader.go:707:	notional = marketBuyOrderNotional(rawShares, hedgePrice)
+strategy/trader.go:736:func isRetryablePairArbHedgeError(err error) bool {
+strategy/trader.go:748:	return strings.Contains(message, "pair arb: fak not filled") ||
+strategy/trader.go:749:		strings.Contains(message, "pair arb: lead buy not filled")
+strategy/trader.go:753:	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
+strategy/trader.go:754:	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
+strategy/trader.go:755:	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
+strategy/trader.go:758:	pairArbLeadMaxAttempts  = 1
+strategy/trader.go:759:	pairArbHedgeMaxAttempts = 1
+strategy/trader.go:760:	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+strategy/trader.go:763:	pairArbLimitBuySlip = 0.02
+strategy/trader.go:764:	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
+strategy/trader.go:765:	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
+strategy/trader.go:766:	pairArbGTCPollDefaultTimeout = 3 * time.Second
+strategy/trader.go:767:	pairArbGTCPollInterval       = 250 * time.Millisecond
+strategy/trader.go:770:func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+strategy/trader.go:772:		return pairArbLeadSubmitTimeout
+strategy/trader.go:774:	if strings.Contains(requestName, "hedge") {
+strategy/trader.go:775:		return pairArbHedgeSubmitTimeout
+strategy/trader.go:777:	return pairArbHedgeSubmitTimeout
+strategy/trader.go:780:func pairArbSubmitMaxAttemptsForRequest(requestName string) int {
+strategy/trader.go:782:		return pairArbLeadMaxAttempts
+strategy/trader.go:784:	if strings.Contains(requestName, "hedge") {
+strategy/trader.go:785:		return pairArbHedgeMaxAttempts
+strategy/trader.go:787:	return pairArbHedgeMaxAttempts
+strategy/trader.go:790:type pairArbBuyOutcome string
+strategy/trader.go:793:	pairArbBuyOutcomeFilled    pairArbBuyOutcome = "filled"
+strategy/trader.go:794:	pairArbBuyOutcomeNotFilled pairArbBuyOutcome = "not_filled"
+strategy/trader.go:795:	pairArbBuyOutcomeHardError pairArbBuyOutcome = "hard_error"
+strategy/trader.go:798:func isPairArbLeadBuyRequestName(requestName string) bool {
+strategy/trader.go:800:	return strings.Contains(req, "pair_arb_lead_buy")
+strategy/trader.go:803:func (t *Trader) asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID string) {
+strategy/trader.go:832:			t.logger.Debug("trader: pair arb buy async reconciliation",
+strategy/trader.go:843:// asyncPairArbLeadCreditConfirm keeps lead-credit validation off the hot entry path.
+strategy/trader.go:845:// run pending-order reconciliation so the lead can be recovered and hedged.
+strategy/trader.go:846:func (t *Trader) asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID string, minExpected float64) {
+strategy/trader.go:850:	if minExpected < pairArbShareDust {
+strategy/trader.go:851:		minExpected = pairArbShareDust
+strategy/trader.go:854:		ctx, cancel := context.WithTimeout(context.Background(), pairArbLeadCreditGrace)
+strategy/trader.go:857:		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
+strategy/trader.go:865:			t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go:876:			if t.pendingPairArb != nil && t.pendingPairArb.OrderID == orderID {
+strategy/trader.go:879:				if recErr := t.reconcilePendingPairArbOrder(reconcileCtx); recErr != nil {
+strategy/trader.go:897:		t.asyncPairArbLeadSettleWatch(orderID, tokenID, requestName, requestID)
+strategy/trader.go:903:func (t *Trader) executePairLimitBuy(ctx context.Context, requestName, tokenID string, signalPrice, limitPrice, rawShares float64) (outcome pairArbBuyOutcome, orderID string, fillPrice, actualShares, feeShares, usdSpent float64, err error) {
+strategy/trader.go:907:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: missing token id")
+strategy/trader.go:910:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: invalid buy inputs")
+strategy/trader.go:914:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: limit buy notional $%.4f below $%.2f minimum", usdSpent, polymarket.MinMarketOrderNotionalUSD)
+strategy/trader.go:920:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
+strategy/trader.go:930:			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: insufficient paper balance ($%.2f) for trade ($%.2f)", t.paperBalance, paperCost)
+strategy/trader.go:941:		return pairArbBuyOutcomeFilled, fmt.Sprintf("PAPER-%s-%d", strings.ToUpper(requestName), time.Now().UnixMilli()), fillPrice, actualShares, feeShares, paperCost, nil
+strategy/trader.go:944:	submitTimeout := pairArbSubmitTimeoutForRequest(requestName)
+strategy/trader.go:945:	maxAttempts := pairArbSubmitMaxAttemptsForRequest(requestName)
+strategy/trader.go:947:	if strings.Contains(requestName, "lead") || strings.Contains(requestName, "hedge_buy") {
+strategy/trader.go:948:		// Respect configured pair-arb entry execution mode (FAK/FOK/GTC).
+strategy/trader.go:949:		orderType = t.pairArbLeadOrderType()
+strategy/trader.go:967:		allowAdaptiveResize := !strings.Contains(strings.ToLower(requestName), "hedge")
+strategy/trader.go:970:				t.logger.Warn("trader: pair arb buy collateral shortfall; retrying with reduced size",
+strategy/trader.go:982:					return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: collateral-resized buy has non-positive shares")
+strategy/trader.go:989:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, placeErr
+strategy/trader.go:992:		return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: order rejected: %s", resp.ErrorMsg)
+strategy/trader.go:1006:		t.setPendingPairArbOrder(orderID, tokenID, requestName)
+strategy/trader.go:1025:			lookupCtx, cancelLookup := context.WithTimeout(ctx, pairArbPostSubmitLookupTimeout)
+strategy/trader.go:1092:				t.logger.Warn("trader: pair arb buy fill data unavailable after lookup; using preflight estimate",
+strategy/trader.go:1099:				t.asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID)
+strategy/trader.go:1108:			t.logger.Warn("trader: pair arb immediate order returned LIVE; entering reconcile poll",
+strategy/trader.go:1115:		t.setPendingPairArbOrder(orderID, tokenID, requestName)
+strategy/trader.go:1116:		pollTimeout := pairArbGTCPollDefaultTimeout
+strategy/trader.go:1117:		if s := t.cfg.PairArbLeadBuyTimeoutSec; s > 0 {
+strategy/trader.go:1121:			// Hedge leg already matched and we are trying to rescue the opposite lead.
+strategy/trader.go:1127:		hedgeAbortTriggered := false
+strategy/trader.go:1128:		hedgeAbortOrderID := ""
+strategy/trader.go:1130:		lastHedgeGuardProbe := time.Time{}
+strategy/trader.go:1135:				t.clearPendingPairArbOrder()
+strategy/trader.go:1136:				return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, ctx.Err()
+strategy/trader.go:1137:			case <-time.After(pairArbGTCPollInterval):
+strategy/trader.go:1186:				t.clearPendingPairArbOrder()
+strategy/trader.go:1187:				return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go:1189:			if !hedgeAbortTriggered && !gapGuardCancelled && pollStatus == "live" && isPairArbLeadBuyRequestName(requestName) {
+strategy/trader.go:1191:				if lastHedgeGuardProbe.IsZero() || now.Sub(lastHedgeGuardProbe) >= 750*time.Millisecond {
+strategy/trader.go:1192:					lastHedgeGuardProbe = now
+strategy/trader.go:1194:					if guardFn := t.pairArbLeadGapGuardFn; guardFn != nil {
+strategy/trader.go:1197:							t.logger.Warn("trader: pair arb lead GTC cancelled: signal gap closed",
+strategy/trader.go:1206:					hedgeFilled, hedgeOrderID := t.shouldAbortLeadWaitForFilledPreHedge(ctx, requestName)
+strategy/trader.go:1207:					if hedgeFilled {
+strategy/trader.go:1208:						hedgeAbortTriggered = true
+strategy/trader.go:1209:						hedgeAbortOrderID = hedgeOrderID
+strategy/trader.go:1210:						t.logger.Error("trader: pair arb lead wait aborted: pre-placed hedge filled while lead was still LIVE",
+strategy/trader.go:1213:							zap.String("hedge_order_id", hedgeOrderID),
+strategy/trader.go:1215:						_ = t.cancelOrderTimed(ctx, requestName+"_cancel_hedge_filled", orderID)
+strategy/trader.go:1226:			// before declaring timeout so we can continue hedge flow immediately.
+strategy/trader.go:1234:					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+strategy/trader.go:1250:					if sm, smErr := strconv.ParseFloat(gr.SizeMatched, 64); smErr == nil && sm > pairArbShareDust {
+strategy/trader.go:1256:						t.logger.Warn("trader: pair arb buy recovered partial fill from post-cancel size_matched",
+strategy/trader.go:1275:				if hedgeAbortTriggered {
+strategy/trader.go:1276:					abortReason := "pre-placed hedge filled first"
+strategy/trader.go:1277:					if hedgeAbortOrderID != "" {
+strategy/trader.go:1278:						abortReason = fmt.Sprintf("pre-placed hedge %s filled first", hedgeAbortOrderID)
+strategy/trader.go:1286:				t.clearPendingPairArbOrder()
+strategy/trader.go:1287:				return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go:1294:		return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go:1299:		return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go:1311:		t.logger.Warn("trader: pair arb buy resolved shares was 0; using preflight estimate",
+strategy/trader.go:1323:			t.clearPendingPairArbOrder()
+strategy/trader.go:1324:			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, fmt.Errorf("pair arb: fee eats all shares")
+strategy/trader.go:1339:		if minExpected < pairArbShareDust {
+strategy/trader.go:1340:			minExpected = pairArbShareDust
+strategy/trader.go:1344:		// settled on-chain. Use a short check so we can place the hedge immediately.
+strategy/trader.go:1358:		credited, bal, cErr := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, creditAttempts, creditInterval)
+strategy/trader.go:1360:			// Keep pendingPairArb set so entry remains blocked until reconcilePendingPairArbOrder
+strategy/trader.go:1362:			t.logger.Warn("trader: pair arb buy wallet-credit probe error; keeping pending order for reconciliation",
+strategy/trader.go:1366:			if requestName == "pair_arb_lead_buy" {
+strategy/trader.go:1367:				t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+strategy/trader.go:1369:			return pairArbBuyOutcomeHardError, "", 0, 0, 0, 0, cErr
+strategy/trader.go:1374:			// actual balance as shares rather than erroring and leaving pendingPairArb set.
+strategy/trader.go:1375:			if bal >= pairArbShareDust {
+strategy/trader.go:1376:				t.logger.Warn("trader: pair arb buy wallet credit short; using actual wallet balance as shares",
+strategy/trader.go:1382:				if effectiveGrossShares <= pairArbShareDust {
+strategy/trader.go:1396:				// estimated shares so hedge logic runs immediately, while leaving pending
+strategy/trader.go:1398:				t.logger.Warn("trader: pair arb buy matched but wallet has no credited shares yet; proceeding with estimated shares and keeping pending order",
+strategy/trader.go:1403:				if requestName == "pair_arb_lead_buy" {
+strategy/trader.go:1404:					// Never open/hedge a lead until wallet credit is visible. Keep the
+strategy/trader.go:1405:					// pending order for reconcilePendingPairArbOrder() recovery instead.
+strategy/trader.go:1407:					t.asyncPairArbLeadCreditConfirm(orderID, tokenID, requestName, requestID, minExpected)
+strategy/trader.go:1409:					return pairArbBuyOutcomeNotFilled, orderID, 0, 0, 0, 0, nil
+strategy/trader.go:1412:				if effectiveGrossShares <= pairArbShareDust {
+strategy/trader.go:1420:				if actualShares <= pairArbShareDust {
+strategy/trader.go:1423:				if actualShares <= pairArbShareDust {
+strategy/trader.go:1424:					actualShares = pairArbShareDust
+strategy/trader.go:1436:		t.clearPendingPairArbOrder()
+strategy/trader.go:1439:	t.logger.Info("trader: pair arb buy latency",
+strategy/trader.go:1454:	return pairArbBuyOutcomeFilled, orderID, fillPrice, actualShares, feeShares, usdSpent, nil
+strategy/trader.go:1457:func (t *Trader) shouldAbortLeadWaitForFilledPreHedge(ctx context.Context, requestName string) (bool, string) {
+strategy/trader.go:1458:	if t.cfg.PaperTrade || !isPairArbLeadBuyRequestName(requestName) {
+strategy/trader.go:1461:	pending := t.pendingHedgePrePlace
+strategy/trader.go:1465:	hedgeOrderID := strings.TrimSpace(pending.OrderID)
+strategy/trader.go:1466:	hedgeTokenID := strings.TrimSpace(pending.TokenID)
+strategy/trader.go:1467:	if hedgeOrderID == "" || hedgeTokenID == "" {
+strategy/trader.go:1468:		return false, hedgeOrderID
+strategy/trader.go:1470:	minExpected := pending.RequestedSize - pairArbWalletReconcileDelta
+strategy/trader.go:1471:	if minExpected < pairArbShareDust {
+strategy/trader.go:1472:		minExpected = pairArbShareDust
+strategy/trader.go:1474:	if gr, grErr := t.getOrderTimed(ctx, requestName+"_hedge_guard", hedgeOrderID); grErr == nil && gr != nil {
+strategy/trader.go:1480:				return true, hedgeOrderID
+strategy/trader.go:1482:			if matched > pairArbShareDust && remaining <= pairArbShareDust {
+strategy/trader.go:1483:				return true, hedgeOrderID
+strategy/trader.go:1485:			if (status == "matched" || status == "filled") && matched > pairArbShareDust {
+strategy/trader.go:1486:				t.logger.Warn("trader: pair arb hedge guard saw partial pre-hedge fill; continuing lead wait",
+strategy/trader.go:1488:					zap.String("hedge_order_id", hedgeOrderID),
+strategy/trader.go:1494:			return false, hedgeOrderID
+strategy/trader.go:1497:			return true, hedgeOrderID
+strategy/trader.go:1499:		if matched > pairArbShareDust {
+strategy/trader.go:1500:			return true, hedgeOrderID
+strategy/trader.go:1502:		return false, hedgeOrderID
+strategy/trader.go:1504:	if _, gross, fillsErr := t.getFillsTimed(ctx, requestName+"_hedge_guard_fills", hedgeOrderID, hedgeTokenID); fillsErr == nil {
+strategy/trader.go:1506:			return gross >= minExpected, hedgeOrderID
+strategy/trader.go:1508:		if gross > pairArbShareDust {
+strategy/trader.go:1509:			return true, hedgeOrderID
+strategy/trader.go:1512:	return false, hedgeOrderID
+strategy/trader.go:1515:// setPrePlacedHedgeOrder tracks a GTC hedge order that was placed before the lead filled.
+strategy/trader.go:1516:func (t *Trader) setPrePlacedHedgeOrder(orderID, tokenID, requestName string, requestedSize float64) {
+strategy/trader.go:1520:	t.pendingHedgePrePlace = &pairArbPendingOrderState{
+strategy/trader.go:1530:func (t *Trader) clearPrePlacedHedgeOrder() {
+strategy/trader.go:1531:	if t.pendingHedgePrePlace == nil {
+strategy/trader.go:1534:	t.pendingHedgePrePlace = nil
+strategy/trader.go:1538:// executeDualPrePlacePairArb places the lead buy AND the hedge buy simultaneously as
+strategy/trader.go:1539:// resting GTC maker orders. The hedge rests at a passive price so when the market moves
+strategy/trader.go:1541://   - Both fill:        open balanced position immediately, HedgeBy cleared.
+strategy/trader.go:1542://   - Lead fills only:  hedge order stays resting as pendingHedgePrePlace; normal hedge
+strategy/trader.go:1543://     management (maybeRebalancePairArb) will absorb it when polled.
+strategy/trader.go:1544://   - Neither fills:    cancel pre-placed hedge, return error (no position).
+strategy/trader.go:1545://   - Hedge only:       unexpected (NO collapsed without YES rising); cancel hedge, return error.
+strategy/trader.go:1546:func (t *Trader) executeDualPrePlacePairArb(
+strategy/trader.go:1553:	hedgeSide string,
+strategy/trader.go:1555:	currentHedgePrice, maxHedgePrice float64,
+strategy/trader.go:1557:	// ── Compute hedge pre-place limit price ────────────────────────────────
+strategy/trader.go:1558:	// Passive offset: place the hedge bid BELOW the current price so it rests as a maker.
+strategy/trader.go:1559:	hedgeLimitPrice := currentHedgePrice
+strategy/trader.go:1560:	if off := t.cfg.PairArbHedgePreOffsetCents; off > 0 {
+strategy/trader.go:1561:		hedgeLimitPrice = math.Round((currentHedgePrice-off/100.0)*100) / 100
+strategy/trader.go:1563:	if hedgeLimitPrice <= 0 || hedgeLimitPrice >= 1.0 {
+strategy/trader.go:1564:		return fmt.Errorf("pair arb: dual pre-place hedge limit price %.4f out of range", hedgeLimitPrice)
+strategy/trader.go:1566:	if hedgeLimitPrice > maxHedgePrice {
+strategy/trader.go:1567:		hedgeLimitPrice = math.Round(maxHedgePrice*100) / 100
+strategy/trader.go:1569:	hedgeTokenID := yesTokenID
+strategy/trader.go:1571:		hedgeTokenID = noTokenID // hedge is NO when lead is YES
+strategy/trader.go:1574:	// ── Size the hedge leg based on estimated lead actual shares ───────────
+strategy/trader.go:1576:	hedgeRawShares, _, hedgeAllowed := pairArbExactHedgeSizing(estimatedLeadActual, hedgeLimitPrice, t.feeRateBps)
+strategy/trader.go:1577:	if !hedgeAllowed || hedgeRawShares <= 0 {
+strategy/trader.go:1578:		// Hedge sizing fails (e.g. price too close to max); fall back to sequential.
+strategy/trader.go:1579:		t.logger.Warn("trader: dual pre-place hedge sizing failed, falling back to sequential",
+strategy/trader.go:1580:			zap.Float64("hedge_limit", hedgeLimitPrice),
+strategy/trader.go:1581:			zap.Float64("max_hedge_price", maxHedgePrice),
+strategy/trader.go:1584:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+strategy/trader.go:1586:			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:1589:		if outcome != pairArbBuyOutcomeFilled {
+strategy/trader.go:1598:			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1599:			return fmt.Errorf("pair arb: lead buy not filled")
+strategy/trader.go:1604:		// In paper mode we never place a live pre-hedge order.
+strategy/trader.go:1605:		// Reuse the sequential path so lead/hedge are both simulated.
+strategy/trader.go:1606:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+strategy/trader.go:1608:			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:1611:		if outcome != pairArbBuyOutcomeFilled {
+strategy/trader.go:1620:			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1621:			return fmt.Errorf("pair arb: lead buy not filled")
+strategy/trader.go:1626:	// ── Submit hedge GTC order immediately (non-blocking — rests in book) ──
+strategy/trader.go:1628:	// and auto-cancel on a fill-wait timeout.  The hedge stays in the book until
+strategy/trader.go:1629:	// the market moves to its price, or forceClosePairArb cancels it.
+strategy/trader.go:1630:	hedgeOrderID := ""
+strategy/trader.go:1631:	hedgeSubmittedLive := false
+strategy/trader.go:1632:	hedgeAlreadyFilled := false
+strategy/trader.go:1633:	submitPreHedge := func(rawShares float64) (*polymarket.OrderResponse, error) {
+strategy/trader.go:1634:		return t.placeOrderTimed(ctx, "pair_arb_hedge_pre", &polymarket.NewOrderRequest{
+strategy/trader.go:1636:			TokenID:        hedgeTokenID,
+strategy/trader.go:1638:			Price:          fmt.Sprintf("%.2f", hedgeLimitPrice),
+strategy/trader.go:1642:			AttemptTimeout: pairArbHedgeSubmitTimeout,
+strategy/trader.go:1643:			MaxAttempts:    pairArbHedgeMaxAttempts,
+strategy/trader.go:1647:	hedgeResp, hedgePlaceErr := submitPreHedge(hedgeRawShares)
+strategy/trader.go:1648:	if hedgePlaceErr == nil && hedgeResp != nil && hedgeResp.Success {
+strategy/trader.go:1649:		hedgeOrderID = hedgeResp.OrderID
+strategy/trader.go:1650:		status := strings.ToLower(strings.TrimSpace(hedgeResp.Status))
+strategy/trader.go:1653:			hedgeAlreadyFilled = true
+strategy/trader.go:1655:			hedgeSubmittedLive = true
+strategy/trader.go:1657:			t.logger.Warn("trader: dual pre-place hedge unexpected submit status",
+strategy/trader.go:1658:				zap.String("status", hedgeResp.Status),
+strategy/trader.go:1659:				zap.String("order_id", hedgeOrderID),
+strategy/trader.go:1662:		t.logger.Info("trader: dual pre-place: hedge GTC order submitted",
+strategy/trader.go:1663:			zap.String("hedge_order_id", hedgeOrderID),
+strategy/trader.go:1664:			zap.String("hedge_status", hedgeResp.Status),
+strategy/trader.go:1665:			zap.Float64("hedge_limit", hedgeLimitPrice),
+strategy/trader.go:1666:			zap.String("hedge_token", hedgeTokenID),
+strategy/trader.go:1668:		// Persist hedge order ID immediately for crash recovery.
+strategy/trader.go:1670:		if hedgeSubmittedLive {
+strategy/trader.go:1671:			t.setPrePlacedHedgeOrder(hedgeOrderID, hedgeTokenID, "pair_arb_hedge_pre", hedgeRawShares)
+strategy/trader.go:1674:		t.logger.Warn("trader: dual pre-place: hedge submit failed; will proceed sequentially after lead fills",
+strategy/trader.go:1675:			zap.NamedError("hedge_err", hedgePlaceErr),
+strategy/trader.go:1679:	// ── Execute lead buy (blocks until fill or PairArbLeadBuyTimeoutSec) ───
+strategy/trader.go:1680:	leadRequestName := "pair_arb_lead_buy"
+strategy/trader.go:1682:	if hedgeAlreadyFilled {
+strategy/trader.go:1683:		// If hedge filled first, do not wait a full lead timeout on the opposite side.
+strategy/trader.go:1686:		leadRequestName = "pair_arb_lead_buy_urgent_rescue"
+strategy/trader.go:1688:		t.logger.Warn("trader: dual pre-place hedge filled before lead; switching lead to urgent rescue",
+strategy/trader.go:1689:			zap.String("hedge_order_id", hedgeOrderID),
+strategy/trader.go:1692:			zap.String("lead_order_type", string(t.pairArbLeadOrderType())),
+strategy/trader.go:1697:		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, leadErr)
+strategy/trader.go:1698:		// Lead didn't fill — cancel any hedge order still in the book.
+strategy/trader.go:1699:		orphanExposureLikely := hedgeAlreadyFilled
+strategy/trader.go:1700:		if hedgeOrderID != "" && (hedgeSubmittedLive || hedgeAlreadyFilled) {
+strategy/trader.go:1701:			if cancelErr := t.cancelOrderTimed(ctx, "pair_arb_dual_cancel_orphan_hedge", hedgeOrderID); cancelErr != nil {
+strategy/trader.go:1707:		t.clearPrePlacedHedgeOrder()
+strategy/trader.go:1708:		t.recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID, sig.PolyYesPrice, orphanExposureLikely)
+strategy/trader.go:1711:	if leadOutcome != pairArbBuyOutcomeFilled {
+strategy/trader.go:1720:		t.setPendingPairArbContext(leadOrderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1721:		if leadOrderID != "" && t.pendingPairArb != nil && strings.EqualFold(strings.TrimSpace(t.pendingPairArb.OrderID), strings.TrimSpace(leadOrderID)) {
+strategy/trader.go:1722:			// Lead reported MATCHED but wallet credit is still pending. Keep hedge tracking
+strategy/trader.go:1724:			if hedgeOrderID != "" {
+strategy/trader.go:1725:				t.setPrePlacedHedgeOrder(hedgeOrderID, hedgeTokenID, "pair_arb_hedge_pre", hedgeRawShares)
+strategy/trader.go:1727:			return fmt.Errorf("pair arb: lead matched but wallet credit pending; waiting for reconciliation")
+strategy/trader.go:1729:		if hedgeOrderID != "" && (hedgeSubmittedLive || hedgeAlreadyFilled) {
+strategy/trader.go:1730:			if cancelErr := t.cancelOrderTimed(ctx, "pair_arb_dual_cancel_orphan_hedge", hedgeOrderID); cancelErr != nil {
+strategy/trader.go:1732:					hedgeAlreadyFilled = true
+strategy/trader.go:1736:		t.clearPrePlacedHedgeOrder()
+strategy/trader.go:1737:		// Lead did not fill, but the pre-placed hedge may have matched during cancel races.
+strategy/trader.go:1739:		t.recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID, sig.PolyYesPrice, hedgeAlreadyFilled)
+strategy/trader.go:1740:		return fmt.Errorf("pair arb: lead buy not filled")
+strategy/trader.go:1743:	// ── Lead filled — check if hedge also filled ────────────────────────────
+strategy/trader.go:1744:	hedgeFilledActual := 0.0
+strategy/trader.go:1745:	hedgeFilledFeeShares := 0.0
+strategy/trader.go:1746:	hedgeFilledUSD := 0.0
+
+=== PAPER EXECUTION ===
+./polymarket/orders.go:575:// to absorb small fee-formula rounding vs. actual fill-price differences.
+./polymarket/orders.go:582:	// Accept 90% of expected shares to compensate for fill-price vs. estimate variance.
+./polymarket/orders.go:1157:	Price        string `json:"price"` // fill price for this leg
+./polymarket/orders.go:1165:// GetFillsByTakerOrderID returns the weighted-average fill price and total gross
+./polymarket/orders.go:1173:func (o *OrdersClient) GetFillsByTakerOrderID(ctx context.Context, orderID, tokenID string) (avgPrice float64, grossShares float64, err error) {
+./polymarket/orders.go:1400:// GetOrderBook fetches the public order book for the given token.
+./polymarket/orders.go:1401:func (o *OrdersClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+./polymarket/orders.go:1405:	return o.rest.GetOrderBook(ctx, tokenID)
+./polymarket/market.go:36:// OrderBook holds the current orderbook for a token.
+./polymarket/market.go:37:type OrderBook struct {
+./polymarket/market.go:304:// GetOrderBook fetches the current order book for the given token ID.
+./polymarket/market.go:305:func (c *RESTClient) GetOrderBook(ctx context.Context, tokenID string) (*OrderBook, error) {
+./polymarket/market.go:316:	var ob OrderBook
+./polymarket/market.go:318:		return nil, fmt.Errorf("parse orderbook: %w", err)
+./polymarket/rtds.go:235:		// Silently ignored; orderbook depth monitoring is done via Bitstamp.
+./web/handlers.go:634:			"MARKET_TYPE", "BTC_SERIES_ID", "MARKET_SLUG", "PAPER_TRADE",
+./web/strategy_backtest.go:692:func simulateGTCLeadFill(window []backtestSignal, times []time.Time, startIndex int, leadSide string, limitPrice float64, leadSubmitLatencySec float64, minLeadLatencySec float64, leadTimeoutSec float64, leadTouchPersistenceTicks int, leadGapGuardMinGap float64) (int, float64, float64, bool) {
+./web/strategy_backtest.go:789:			fillIndex, fillPrice, _, filled := simulateGTCLeadFill(window, cache.times, index, side, leadLimitPrice, leadSubmitLatencySec, minLeadLatencySec, leadTimeoutSec, leadTouchTicks, leadGapGuardMinGap)
+./web/strategy_backtest.go:799:			rawShares, shares, usdSpent, ok := backtestPairLeadSizing(tradeSize, fillPrice, feeRateBps)
+./web/strategy_backtest.go:807:				leadPrice:     fillPrice,
+./web/strategy_backtest.go:866:						FillPrice:    position.leadPrice,
+./web/strategy_backtest.go:940:			FillPrice:    position.leadPrice,
+./web/strategy_backtest.go:973:		FillPrice:    position.leadPrice,
+./web/strategy_backtest.go:1359:		FillPrice:    position.entryPrice,
+./web/strategy_tools.go:76:	FillPrice    float64        `json:"fill_price,omitempty"`
+./web/state.go:20:	PaperTrade bool      `json:"paper_trade"`
+./strategy/trader.go:421:	FillPrice    float64   `json:"fill_price"`
+./strategy/trader.go:610:func computeFAKBuySizing(tradeSizeUSD, limitPrice, fillPrice float64, feeRateBps string, enforceMinOrder bool) (rawShares, feeShares, actualShares float64, err error) {
+./strategy/trader.go:611:	if tradeSizeUSD <= 0 || limitPrice <= 0 || fillPrice <= 0 {
+./strategy/trader.go:616:	feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, feeRateBps)
+./strategy/trader.go:626:		minRaw := polymarket.MinOrderShares / (1.0 - feeRate*(1.0-fillPrice))
+./strategy/trader.go:628:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, feeRateBps)
+./strategy/trader.go:903:func (t *Trader) executePairLimitBuy(ctx context.Context, requestName, tokenID string, signalPrice, limitPrice, rawShares float64) (outcome pairArbBuyOutcome, orderID string, fillPrice, actualShares, feeShares, usdSpent float64, err error) {
+./strategy/trader.go:916:	fillPrice = math.Round(signalPrice*100) / 100
+./strategy/trader.go:917:	feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:926:		// GTC limit orders fill exactly rawShares at the actual market price (fillPrice),
+./strategy/trader.go:928:		paperCost := marketBuyOrderNotional(rawShares, fillPrice)
+./strategy/trader.go:932:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:941:		return pairArbBuyOutcomeFilled, fmt.Sprintf("PAPER-%s-%d", strings.ToUpper(requestName), time.Now().UnixMilli()), fillPrice, actualShares, feeShares, paperCost, nil
+./strategy/trader.go:979:				feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:1017:				if actualFillPrice, _ := priceRat.Float64(); actualFillPrice > 0 && actualFillPrice < 1.0 {
+./strategy/trader.go:1018:					correctedFill = actualFillPrice
+./strategy/trader.go:1095:					zap.Float64("preflight_price", fillPrice),
+./strategy/trader.go:1302:		fillPrice = math.Round(correctedFill*100) / 100
+./strategy/trader.go:1305:		feeShares = polymarket.ComputeBuyFeeShares(grossFillShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:1316:		feeShares = polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:1327:	// Recalculate usdSpent using the actual fill price (GTC orders fill at market price,
+./strategy/trader.go:1334:	usdSpent = marketBuyOrderNotional(effectiveShares, fillPrice)
+./strategy/trader.go:1352:		if fillSource == "submit_response" && grossFillShares > 0 && fillPrice > 0 {
+./strategy/trader.go:1354:		} else if fillSource != "preflight_fallback" && grossFillShares > 0 && fillPrice > 0 {
+./strategy/trader.go:1385:				if fillPrice <= 0 {
+./strategy/trader.go:1386:					fillPrice = math.Round(limitPrice*100) / 100
+./strategy/trader.go:1388:				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:1390:				usdSpent = marketBuyOrderNotional(effectiveGrossShares, fillPrice)
+./strategy/trader.go:1392:					usdSpent = marketBuyOrderNotional(actualShares, fillPrice)
+./strategy/trader.go:1415:				if fillPrice <= 0 {
+./strategy/trader.go:1416:					fillPrice = math.Round(limitPrice*100) / 100
+./strategy/trader.go:1418:				feeShares = polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:1421:					actualShares = math.Floor((rawShares-polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps))*100) / 100
+./strategy/trader.go:1426:				usdSpent = marketBuyOrderNotional(effectiveGrossShares, fillPrice)
+./strategy/trader.go:1428:					usdSpent = marketBuyOrderNotional(rawShares, fillPrice)
+./strategy/trader.go:1454:	return pairArbBuyOutcomeFilled, orderID, fillPrice, actualShares, feeShares, usdSpent, nil
+./strategy/trader.go:1458:	if t.cfg.PaperTrade || !isPairArbLeadBuyRequestName(requestName) {
+./strategy/trader.go:1584:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+./strategy/trader.go:1601:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+./strategy/trader.go:1606:		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+./strategy/trader.go:1623:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+./strategy/trader.go:1695:	leadOutcome, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD, leadErr := t.executePairLimitBuy(ctx, leadRequestName, leadTokenID, leadPrice, leadExecLimitPrice, rawLeadShares)
+./strategy/trader.go:1747:	hedgeFilledPrice := 0.0
+./strategy/trader.go:1753:				hedgeFilledPrice = avg
+./strategy/trader.go:1765:					// Fallback: fills endpoint may lag; use order limit price as approximation.
+./strategy/trader.go:1775:						hedgeFilledPrice = avg
+./strategy/trader.go:1889:			zap.Float64("hedge_fill", hedgeFilledPrice),
+./strategy/trader.go:1896:		display.TradeOpen(hedgeSide+" [PAIR HEDGE]", hedgeFilledPrice, hedgeFilledActual, hedgeFilledFeeShares, hedgeFilledUSD, 0, t.cfg.PaperTrade)
+./strategy/trader.go:2007:	outcomeYes, orderIDYes, fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, errYes := t.executePairLimitBuy(ctx, "pair_arb_dual_yes_buy", yesTokenID, yesPrice, yesLimit, rawShares)
+./strategy/trader.go:2048:		zap.Float64("fill_price", fillPriceYes),
+./strategy/trader.go:2052:	display.TradeOpen("YES [PAIR DUAL]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+./strategy/trader.go:2055:	outcomeNo, orderIDNo, fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, errNo := t.executePairLimitBuy(ctx, "pair_arb_dual_no_buy", noTokenID, noPrice, noLimit, rawShares)
+./strategy/trader.go:2076:		zap.Float64("fill_price", fillPriceNo),
+./strategy/trader.go:2079:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+./strategy/trader.go:2081:	display.TradeOpen("NO [PAIR DUAL]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+./strategy/trader.go:2093:func (t *Trader) openLeadOnlyPosition(ctx context.Context, sig Signal, yesTokenID, noTokenID, leadSide string, isNoLead bool, orderID string, fillPrice, actualShares, feeShares, usdSpent float64) error {
+./strategy/trader.go:2130:		zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:2135:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+./strategy/trader.go:2836:func normalizeFilledBuyPrice(price float64) float64 {
+./strategy/trader.go:2912:func (t *Trader) openResolutionPositionAfterFill(resp *polymarket.OrderResponse, tokenID string, isNoSide bool, fillPrice, actualShares, feeShares, usdSpent float64, windowEnd time.Time) {
+./strategy/trader.go:2920:		BuyPrice:          fillPrice,
+./strategy/trader.go:2956:	fillEstimate := limitPrice
+./strategy/trader.go:2974:		FillPrice:    fillEstimate,
+./strategy/trader.go:2985:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, windowEnd.Add(60*time.Second))
+./strategy/trader.go:3000:		t.pendingBuy.FillPrice = fillPrice
+./strategy/trader.go:3006:	t.openResolutionPositionAfterFill(resp, tokenID, isNoSide, fillPrice, actualShares, feeShares, usdSpent, windowEnd)
+./strategy/trader.go:3007:	display.Info(fmt.Sprintf("resolution pre-close entry filled for %s at %.3f", label, fillPrice))
+./strategy/trader.go:3038:	fillEstimate := limitPrice
+./strategy/trader.go:3052:	resp, fillPrice, actualShares, feeShares, err := t.placeResolutionGTCBuy(ctx, tokenID, tickSize, limitPrice, fillEstimate, rawShares, actualShares, feeShares, time.Now().Add(15*time.Second))
+./strategy/trader.go:3068:		BuyPrice:          fillPrice,
+./strategy/trader.go:3082:	display.Info(fmt.Sprintf("resolution post-close entry filled for %s at %.3f, queueing claim", label, fillPrice))
+./strategy/trader.go:3183:func applyFAKBuyFill(resp *polymarket.OrderResponse, fillPrice, grossShares float64) (float64, float64, error) {
+./strategy/trader.go:3190:	updatedFillPrice := fillPrice
+./strategy/trader.go:3202:				updatedFillPrice = normalizeFilledBuyPrice(actualPrice)
+./strategy/trader.go:3216:	return updatedFillPrice, updatedGrossShares, nil
+./strategy/trader.go:3239:	fillPrice := signalPrice
+./strategy/trader.go:3240:	fillPrice, grossShares, err = applyFAKBuyFill(resp, signalPrice, grossShares)
+./strategy/trader.go:3246:		if computedFee := polymarket.ComputeBuyFeeShares(grossShares, fillPrice, t.feeRateBps); computedFee >= 0 {
+./strategy/trader.go:3254:	return resp, fillPrice, netShares, feeShares, nil
+./strategy/trader.go:3277:	fillPrice := normalizeFilledBuyPrice(signalPrice)
+./strategy/trader.go:3291:	applyFill := func(avgPrice, grossShares float64) {
+./strategy/trader.go:3293:			fillPrice = normalizeFilledBuyPrice(avgPrice)
+./strategy/trader.go:3297:			feeShares = polymarket.ComputeBuyFeeShares(grossShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:3315:				applyFill(avgPrice, grossShares)
+./strategy/trader.go:3323:				applyFill(avgPrice, grossShares)
+./strategy/trader.go:3331:			return resp, fillPrice, actualShares, feeShares, nil
+./strategy/trader.go:3344:					zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:3347:				return resp, fillPrice, actualShares, feeShares, nil
+./strategy/trader.go:3821:					fillPrice, filledShares, filled, sellErr := t.attemptSellWithFallback(ctx, tokenID, fallbackPrice, fmt.Sprintf("%.2f", sellable))
+./strategy/trader.go:3830:						logTimedActivityWarn(fmt.Sprintf("ORPHAN RECOVERY sold %.2f shares from isolated pending order %s @ %.4f", filledShares, orderID, fillPrice))
+./strategy/trader.go:3837:							zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:4362:					zap.Float64("fill_price", avg),
+./strategy/trader.go:4414:		zap.Float64("fill_price", avg),
+./strategy/trader.go:4550:		fillPrice, filledShares, filled, sellErr := t.attemptSellWithFallback(ctx, tokenID, approxPrice, sharesStr)
+./strategy/trader.go:4561:		logTimedActivityInfo(fmt.Sprintf("ORPHAN LIQUIDATION %s %.2f shares @ %.4f", side, filledShares, fillPrice))
+./strategy/trader.go:4565:			zap.Float64("sell_price", fillPrice),
+./strategy/trader.go:4776:					fillPrice, _ := strconv.ParseFloat(gr.Price, 64)
+./strategy/trader.go:4779:						fillPrice = fillsAvg
+./strategy/trader.go:4781:					if fillPrice <= 0 {
+./strategy/trader.go:4782:						fillPrice = 0.50
+./strategy/trader.go:4788:					feeShares := polymarket.ComputeBuyFeeShares(effectiveGrossShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:4789:					usdSpent := marketBuyOrderNotional(effectiveGrossShares, fillPrice)
+./strategy/trader.go:4794:						zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:4855:					display.TradeOpen(leadSide+" [PAIR LEAD RECOVERED]", fillPrice, walletBal, feeShares, usdSpent, 0, t.cfg.PaperTrade)
+./strategy/trader.go:4860:							liveNo = fillPrice
+./strategy/trader.go:4863:							liveYes = fillPrice
+./strategy/trader.go:6054:		// Credit proceeds back to paper balance: shares  sellPrice - sellFee
+./strategy/trader.go:6116:	actualFillPrice, filledShares, filled, sellErr := t.attemptSellWithFallback(ctx, pos.TokenID, worstPrice, sharesStr)
+./strategy/trader.go:6144:	// Recalculate PnL and fee using the actual fill price (not the trigger price).
+./strategy/trader.go:6148:	actualSellFeeUSD := polymarket.ComputeSellFeeUSDC(filledShares, actualFillPrice, t.feeRateBps)
+./strategy/trader.go:6149:	actualGrossPnL := filledShares*actualFillPrice - proRataUSDSpent
+./strategy/trader.go:6154:		zap.Float64("fill_price", actualFillPrice),
+./strategy/trader.go:6179:		SellPrice:                 actualFillPrice,
+./strategy/trader.go:6190:	display.TradeClose(side, pos.BuyPrice, actualFillPrice, filledShares, actualNetPnL, actualSellFeeUSD, reason, time.Since(pos.OpenedAt).Round(time.Second), false)
+./strategy/trader.go:6366:// startPrice is used only as a fallback for fill-price resolution.
+./strategy/trader.go:6369:// Returns (actualFillPrice, true, nil) once the order is accepted, (0, false, nil) on persistent
+./strategy/trader.go:7106:			t.setPairExitState(pair, pairExitStateOrdersLive, fmt.Sprintf("paper sell-at-99 waiting for touch (YES=%.2f NO=%.2f)", liveYes, liveNo))
+./strategy/trader.go:7117:		t.setPairExitState(pair, pairExitStateResolvedCLOB, "paper sell-at-99 touched by "+hitSide)
+./strategy/trader.go:7696:		actualFillPrice, filledShares, filled, sellErr := t.attemptSellWithFallback(ctx, pos.TokenID, graceSellPrice, sharesStr)
+./strategy/trader.go:7741:		actualSellFeeUSD := polymarket.ComputeSellFeeUSDC(filledShares, actualFillPrice, t.feeRateBps)
+./strategy/trader.go:7742:		actualGrossPnL := filledShares*actualFillPrice - proRataUSDSpent
+./strategy/trader.go:7747:			zap.Float64("fill_price", actualFillPrice),
+./strategy/trader.go:7771:			SellPrice:                 actualFillPrice,
+./strategy/trader.go:7782:		display.TradeClose(side, pos.BuyPrice, actualFillPrice, filledShares, actualNetPnL, actualSellFeeUSD,
+./strategy/trader.go:8203:	outcomeYes, orderIDYes, fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, errYes := t.executePairLimitBuy(ctx, "dca_hedge_yes_buy", yesTokenID, yesPrice, yesLimit, rawShares)
+./strategy/trader.go:8240:		zap.Float64("fill_price", fillPriceYes),
+./strategy/trader.go:8246:	display.TradeOpen("YES [DCA HEDGE]", fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, 1.0-fillPriceYes-noPrice, t.cfg.PaperTrade)
+./strategy/trader.go:8249:	outcomeNo, orderIDNo, fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, errNo := t.executePairLimitBuy(ctx, "dca_hedge_no_buy", noTokenID, noPrice, noLimit, rawShares)
+./strategy/trader.go:8272:		zap.Float64("fill_price", fillPriceNo),
+./strategy/trader.go:8275:		zap.Float64("edge_per_share", 1.0-fillPriceYes-fillPriceNo),
+./strategy/trader.go:8277:	display.TradeOpen("NO [DCA HEDGE]", fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, 1.0-fillPriceYes-fillPriceNo, t.cfg.PaperTrade)
+./strategy/trader.go:8575:	outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", tokenID, leadPrice, limitPrice, rawShares)
+./strategy/trader.go:8640:		zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:8645:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+./strategy/trader.go:8731:			_, _, fillPrice, actualShares, feeShares, usdSpent, errDCA := t.executePairLimitBuy(ctx, reqName, dcaTokenID, movedNow, limitPrice, addShares)
+./strategy/trader.go:8744:					zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:8748:				display.TradeOpen(pair.DCAHedgeMovedSide+" [DCA ADD]", fillPrice, actualShares, feeShares, usdSpent, 0, t.cfg.PaperTrade)
+./strategy/trader.go:9070:	outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, requestName, buyTokenID, buyPrice, limitPrice, rawShares)
+./strategy/trader.go:9100:		zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:9105:	display.TradeOpen(buySide+" [PAIR IMBALANCE]", fillPrice, actualShares, feeShares, usdSpent, edgePerShare, t.cfg.PaperTrade)
+./strategy/trader.go:9161:		// Paper mode never submits live hedge orders. We model a fill only when
+./strategy/trader.go:9166:		fillPrice := math.Round(hedgePrice*100) / 100
+./strategy/trader.go:9167:		if fillPrice <= 0 || fillPrice >= 1.0 {
+./strategy/trader.go:9170:		feeShares := polymarket.ComputeBuyFeeShares(rawShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:9175:		usdSpent := marketBuyOrderNotional(rawShares, fillPrice)
+./strategy/trader.go:9201:			zap.Float64("fill_price", fillPrice),
+./strategy/trader.go:9206:		display.TradeOpen(buySide+" [PAIR HEDGE]", fillPrice, actualShares, feeShares, usdSpent, 1.0-pair.sideAveragePrice("YES")-pair.sideAveragePrice("NO"), true)
+./strategy/trader.go:9225:				// Probe fills directly so we can absorb the hedge at actual price.
+./strategy/trader.go:9264:					zap.Float64("fill_price", avg),
+./strategy/trader.go:9330:					zap.Float64("fill_price", avg),
+./strategy/trader.go:9415:						zap.Float64("fill_price", avg),
+./strategy/trader.go:9626:			fillPrice float64
+./strategy/trader.go:9630:		fillPrice, filledShares, filled, err = t.attemptSellWithFallback(ctx, residualTokenID, residualExitPrice, fmt.Sprintf("%.2f", sellableShares))
+./strategy/trader.go:9643:		actualExitPrice = fillPrice
+./strategy/trader.go:9644:		sellFeeUSD = polymarket.ComputeSellFeeUSDC(filledShares, actualExitPrice, t.feeRateBps)
+./strategy/trader.go:9645:		proceeds = filledShares*actualExitPrice - sellFeeUSD
+./strategy/trader.go:9716:		fillPrice, filledShares, filled, err := t.attemptSellWithFallback(ctx, tokenID, startPrice, fmt.Sprintf("%.2f", sellable))
+./strategy/trader.go:9732:		sellFee := polymarket.ComputeSellFeeUSDC(filledShares, fillPrice, t.feeRateBps)
+./strategy/trader.go:9733:		grossProceeds := filledShares * fillPrice
+./strategy/trader.go:9735:		costBasis := filledShares * avgEntryPrice
+./strategy/trader.go:9737:		t.appendPairArbTrade(pair, closedAt, side, filledShares, costBasis, fillPrice, grossProceeds, sellFee, reason)
+./strategy/trader.go:9738:		display.TradeClose(side+" [PAIR EXIT]", avgEntryPrice, fillPrice, filledShares, netPnL, sellFee, reason, held, false)
+./strategy/trader.go:9809:						zap.Float64("fill_price", avg),
+./strategy/trader.go:10485:				BuyPrice:    pb.FillPrice,
+./strategy/trader.go:10487:				USDSpent:    pb.RawShares * pb.FillPrice,
+./strategy/helpers.go:8:// BookLevel is a single price level in an orderbook snapshot.
+./strategy/helpers.go:14:// BookSnapshot is an orderbook snapshot (Deribit BTC-PERPETUAL feed).
+./strategy/helpers.go:284:// ── Orderbook depth (Deribit/Bitstamp book snapshot) ─────────────────────────
+./strategy/helpers.go:286:// OnBitstampBook ingests a Deribit or Bitstamp orderbook snapshot and updates
+./strategy/signal.go:212:	FlashBookConfirmed bool    // orderbook collapse detected (wall pull confirmed)
+./strategy/signal.go:355:	// MinBookDepthBTC is the minimum near-mid BTC orderbook depth on the
+./strategy/signal.go:395:	// e.g. 0.50 = fire when 50% of peak spread wiped out AND orderbook support was pulled.
+./strategy/signal.go:415:	// ── Bitstamp orderbook spoof detection ─────────────────────
+./strategy/signal.go:698:	// near-mid order book required to contradict entry. Ratio = (bids-asks)/(bids+asks)
+./strategy/signal.go:751:	// flow (CVD) and Deribit near-mid order book imbalance directly.
+./strategy/signal.go:987:		// Orderbook
+./strategy/signal.go:1161:	// Bitstamp orderbook depth state (spoof detection – near-mid)
+./strategy/signal.go:1174:	// Orderbook depth in the spread zone (between BTC price and open price)
+./strategy/signal.go:1916:// BookDepthSnapshot returns the current near-mid orderbook depth + recent BTC
+./discord/notifier_test.go:80:	if got := received.Embeds[0].Title; got != "PAPER SELL YES" {
+./config/config.go:200:	// order book when the lead fills. Combines with PairArbHedgePreOffsetCents.
+./config/config.go:528:		PaperTrade:                                         boolEnv("PAPER_TRADE", true),
+./config/config.go:732:		"PAPER_TRADE":                    boolS(true),
+./main.go:194:		zap.Bool("paper_trade", cfg.PaperTrade),
+./main.go:846:	// what PAPER_TRADE is set to in the env file.
+./main.go:1005:	// Deribit WS stream  primary BTC price source, order book, and DVOL.
+./main.go:1093:	display.Connected("Deribit WS (BTC spot index + order book + DVOL)")
+./main.go:2361:		//  Deribit BTC-PERPETUAL order book (spoof / depth detection)
+./main.go:2604:					// which fills immediately on the opening orderbook.
+./deribit/stream.go:26:// BookLevel is a single price/size level from the BTC-PERPETUAL order book.
+./deribit/stream.go:33:// BookSnap is a point-in-time snapshot of the BTC-PERPETUAL order book with incremental updates applied.
+./deribit/stream.go:64:	// BookC receives BTC-PERPETUAL order book snapshots (book.BTC-PERPETUAL.100ms).
+./deribit/stream.go:71:	// incremental order book state
+./deribit/stream.go:275:		// Incremental order book — spoof / depth detection.
+./deribit/stream.go:293:// applyBook applies an incremental (or snapshot) order book update and emits a BookSnap.
+
+=== CURRENT TRADE COUNT ===
+0 trades
+
+=== CURRENT TRADE RECORDS ===
