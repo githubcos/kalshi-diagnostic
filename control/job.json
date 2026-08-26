@@ -1,10 +1,8 @@
 {
-  "id": "kalshi-paper-highflow-token-range-v1-20260826-0245",
+  "id": "kalshi-paper-session-archive-v1-20260826-0604",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_AUTOPILOT"},
-    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
