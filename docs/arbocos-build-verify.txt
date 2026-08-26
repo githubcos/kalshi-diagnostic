@@ -1,0 +1,16 @@
+=== SOURCE FINGERPRINT FILE ===
+ebbbdcc6cea6f332a344b73fcd3a70163ee3df79436aa5861398bd858b8477a9  /home/ubuntu/arbocos-source-sha256.txt
+
+=== GO VERSION ===
+go version go1.24.0 linux/amd64
+
+=== BINARY ===
+-rwxrwxr-x 1 ubuntu ubuntu 15M Aug 26 22:18 ./arbocos
+cacddf10e147999a7155ecb1d09aad453ffdb6cefd0e2c8a7fb1d7097267caa6  ./arbocos
+
+=== FLAGS ===
+Usage of ./arbocos:
+  -live
+    	disable paper-trade mode and submit real orders
+  -port string
+    	HTTP port for the web dashboard (default 8080) (default "8080")
