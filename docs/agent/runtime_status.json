@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T00:15:15+00:00",
+  "utc": "2026-08-26T00:15:23+00:00",
   "publisher_pid": 2913109,
   "heartbeat": {
-    "utc": "2026-08-26T00:15:12+00:00",
-    "epoch": 1787703312.3545947,
+    "utc": "2026-08-26T00:15:20+00:00",
+    "epoch": 1787703320.4297264,
     "pid": 2004638,
     "status": "working",
     "job_id": "kalshi-explicit-no-caller-probe-v1-20260826-0017"
   },
   "state": {
     "last_job_id": "kalshi-explicit-no-callers-v2-20260826-0015",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_001418.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_001512.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T00:14:26+00:00"
   },
