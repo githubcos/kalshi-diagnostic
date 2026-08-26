@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T17:53:21+00:00",
-  "publisher_pid": 387171,
+  "utc": "2026-08-26T17:53:32+00:00",
+  "publisher_pid": 389330,
   "heartbeat": {
-    "utc": "2026-08-26T17:53:20+00:00",
-    "epoch": 1787766800.4232984,
+    "utc": "2026-08-26T17:53:32+00:00",
+    "epoch": 1787766812.6061826,
     "pid": 544,
     "status": "idle",
     "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-live-inspect-20260826-1748",
+    "last_job_id": "kalshi-throughput-gate-confirm-20260826-1754",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_100317.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T17:50:42+00:00"
+    "last_run_utc": "2026-08-26T17:53:32+00:00"
   },
   "autopilot": null
 }
