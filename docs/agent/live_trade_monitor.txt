@@ -1,6 +1,6 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T00:45:27+00:00
+UPDATED_UTC=2026-08-26T00:45:34+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_SAMPLE
 PAPER_8085=UP
@@ -133,3 +133,9 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂  ▼ P&L  -$-0.5188  (--10.73%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78394.47 open=78381.60 gap=$12.9 yes=0.5700 prob=0.53 rem=876s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▲ P&L  +$0.2861  (+5.91%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
+⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78433.38 open=78381.60 gap=$51.8 yes=0.6500 prob=0.61 rem=871s]
+▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.0216  (--0.45%)  │  Reason: pair_fill_leg_timeout  │  Held: 5s
