@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T02:14:54+00:00",
+  "utc": "2026-08-26T02:15:02+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -151,6 +151,20 @@
     "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78806.77 open=78804.30 gap=$2.5 yes=0.6400 prob=0.52 rem=52s]",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR HEDGE] EXECUTED",
-    "\u25c2  \u25b2 P&L  +$0.4351  (+0.85%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 1s"
+    "\u25c2  \u25b2 P&L  +$0.4351  (+0.85%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 1s",
+    "\u2551  #1  pair_arb  buy 0.7353 \u2192 sell 0.6900  6sh  -$0.3564  pair_stop_loss  \u2551",
+    "\u2551  #2  pair_arb  buy 0.8032 \u2192 sell 0.7100  6sh  -$0.6564  pair_stop_loss  \u2551",
+    "\u2551  #3  pair_arb  buy 0.7351 \u2192 sell 0.7000  7sh  -$0.3326  pair_stop_loss  \u2551",
+    "\u2551  #4  pair_arb  buy 0.9161 \u2192 sell 1.0000  7sh  +$0.5790  pair_paper_locked_recycle  \u2551",
+    "\u2551  #5  pair_arb  buy 0.7539 \u2192 sell 0.7001  6sh  -$0.4478  pair_stop_loss  \u2551",
+    "\u2551  #6  pair_arb  buy 0.9891 \u2192 sell 1.0000  7sh  +$0.0716  pair_paper_locked_recycle  \u2551",
+    "\u2551  #7  pair_arb  buy 0.9866 \u2192 sell 1.0000  6sh  +$0.0852  pair_paper_locked_recycle  \u2551",
+    "\u2551  #8  pair_arb  buy 0.8606 \u2192 sell 0.8400  6sh  -$0.1768  pair_stop_loss  \u2551",
+    "\u2551  #9  pair_arb  buy 0.9860 \u2192 sell 1.0000  6sh  +$0.0786  pair_paper_locked_recycle  \u2551",
+    "\u2551  #10  pair_arb  buy 0.9810 \u2192 sell 1.0000  5sh  +$0.1028  pair_paper_locked_recycle  \u2551",
+    "\u2551  #11  pair_arb  buy 0.9716 \u2192 sell 1.0000  6sh  +$0.1706  pair_paper_locked_recycle  \u2551",
+    "\u2551  #12  pair_arb  buy 0.9850 \u2192 sell 1.0000  5sh  +$0.0812  pair_paper_locked_recycle  \u2551",
+    "\u2551  #13  pair_arb  buy 0.9411 \u2192 sell 1.0000  7sh  +$0.4351  pair_paper_locked_recycle  \u2551",
+    "\u2551  TOTAL P&L   -$0.3659   (-0.51%)                              \u2551"
   ]
 }
