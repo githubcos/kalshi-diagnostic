@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T02:45:38+00:00",
-  "publisher_pid": 75602,
+  "utc": "2026-08-26T02:45:47+00:00",
+  "publisher_pid": 83828,
   "heartbeat": {
-    "utc": "2026-08-26T02:45:35+00:00",
-    "epoch": 1787712335.259932,
+    "utc": "2026-08-26T02:45:47+00:00",
+    "epoch": 1787712347.9175608,
     "pid": 4075083,
     "status": "idle",
     "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-no-trades-gate-audit-20260826-0243",
+    "last_job_id": "kalshi-paper-highflow-token-range-v1-20260826-0245",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_023819.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T02:42:46+00:00"
+    "last_run_utc": "2026-08-26T02:45:47+00:00"
   },
   "autopilot": null
 }
