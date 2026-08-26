@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T08:21:49+00:00",
+  "utc": "2026-08-26T08:21:58+00:00",
   "publisher_pid": 1011091,
   "heartbeat": {
-    "utc": "2026-08-26T08:21:47+00:00",
-    "epoch": 1787732507.2794363,
+    "utc": "2026-08-26T08:21:56+00:00",
+    "epoch": 1787732516.854748,
     "pid": 4075083,
     "status": "working",
     "job_id": "kalshi-market-feed-auth-fallback-v1c-20260826-0824"
   },
   "state": {
     "last_job_id": "kalshi-market-feed-auth-fallback-v1b-20260826-0822",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082102.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_082147.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T08:21:12+00:00"
   },
