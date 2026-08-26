@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T18:08:51+00:00",
+  "utc": "2026-08-26T18:08:59+00:00",
   "publisher_pid": 395485,
   "heartbeat": {
-    "utc": "2026-08-26T18:08:46+00:00",
-    "epoch": 1787767726.3557107,
+    "utc": "2026-08-26T18:08:57+00:00",
+    "epoch": 1787767737.482827,
     "pid": 544,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-professional-paper-phase1-20260826"
   },
   "state": {
     "last_job_id": "kalshi-postpatch-paper-status-20260826-1801",
