@@ -56,6 +56,10 @@ def percentile(vals,p):
 def extract_monitor():
     log=read_tail(BOT/'polyarb.log')
     lines=[x.strip() for x in log.splitlines() if x.strip()]
+    # polyarb.log is append-only across restarts. Only audit the newest runtime
+    # so old blockers/trades never contaminate the current live monitor.
+    starts=[i for i,x in enumerate(lines) if 'ACTIVE FLAGS paper=' in x]
+    if starts: lines=lines[starts[-1]:]
     ms=[]; lead_ms=[]; hedge_ms=[]; lookup_ms=[]
     ms_re=re.compile(r'completed in (\d+) ms',re.I)
     for line in lines:
@@ -82,8 +86,7 @@ def extract_monitor():
     closed=sum(1 for x in lines if ('locked pair closed' in x.lower() or 'trade_close' in x.lower() or 'pair arb' in x.lower() and 'closed' in x.lower()))
     lead_events=sum(1 for x in lines if 'pair arb lead buy' in x.lower() or 'pair_arb_lead_buy' in x.lower())
     hedge_events=sum(1 for x in lines if 'hedge' in x.lower() and ('completed' in x.lower() or 'filled' in x.lower() or 'buy' in x.lower()))
-    status='PASS'
-    reasons=[]
+    status='PASS'; reasons=[]
     if not port: status='FAIL'; reasons.append('paper process is not listening on 8085')
     if feed_bad and not feed_good: status='WARN'; reasons.append('Kalshi feed disconnect warning observed')
     if blocker:
@@ -92,30 +95,7 @@ def extract_monitor():
     speed='NO_EXECUTION_SAMPLE'
     if lead_ms or hedge_ms:
         worst=max((lead_ms+hedge_ms) or [0]); speed='FAST' if worst<=1000 else ('ACCEPTABLE' if worst<=3000 else 'SLOW')
-    return {
-      'utc':utc(),'mode':'PAPER','live_orders_allowed':False,'status':status,'status_reasons':reasons,
-      'paper_port_8085':bool(port),'kalshi_feed_recent_connected_event':feed_good,'kalshi_feed_recent_disconnect_event':feed_bad,
-      'runtime_blocker':blocker,'safe_config':cfg,
-      'counts_in_log_tail':{'lead_events':lead_events,'hedge_events':hedge_events,'closed_events':closed},
-      'execution_latency_ms':{
-        'all_count':len(ms),'all_avg':round(statistics.mean(ms),1) if ms else None,'all_p95':percentile(ms,.95),'all_max':max(ms) if ms else None,
-        'lead_count':len(lead_ms),'lead_avg':round(statistics.mean(lead_ms),1) if lead_ms else None,'lead_p95':percentile(lead_ms,.95),'lead_max':max(lead_ms) if lead_ms else None,
-        'hedge_count':len(hedge_ms),'hedge_avg':round(statistics.mean(hedge_ms),1) if hedge_ms else None,'hedge_p95':percentile(hedge_ms,.95),'hedge_max':max(hedge_ms) if hedge_ms else None,
-        'lookup_count':len(lookup_ms),'lookup_avg':round(statistics.mean(lookup_ms),1) if lookup_ms else None
-      },
-      'speed_verdict':speed,
-      'algorithm_invariants':[
-        'lead admission uses configured window/gap/token/filter gates',
-        'Kalshi inventory uses authoritative filled contract quantity; cash fees do not reduce shares',
-        'hedge limit is bounded by opposite-side locked-profit math',
-        'matched_contracts=min(YES_shares,NO_shares)',
-        'locked_profit=matched_contracts-(YES_cash_spent+NO_cash_spent)',
-        'residual_contracts=abs(YES_shares-NO_shares)',
-        'mark-to-market uses explicit Kalshi YES and NO prices when available',
-        'PAPER guard prevents any live order request'
-      ],
-      'recent_math_execution_lines':interesting
-    }
+    return {'utc':utc(),'mode':'PAPER','live_orders_allowed':False,'status':status,'status_reasons':reasons,'paper_port_8085':bool(port),'kalshi_feed_recent_connected_event':feed_good,'kalshi_feed_recent_disconnect_event':feed_bad,'runtime_blocker':blocker,'safe_config':cfg,'counts_in_log_tail':{'lead_events':lead_events,'hedge_events':hedge_events,'closed_events':closed},'execution_latency_ms':{'all_count':len(ms),'all_avg':round(statistics.mean(ms),1) if ms else None,'all_p95':percentile(ms,.95),'all_max':max(ms) if ms else None,'lead_count':len(lead_ms),'lead_avg':round(statistics.mean(lead_ms),1) if lead_ms else None,'lead_p95':percentile(lead_ms,.95),'lead_max':max(lead_ms) if lead_ms else None,'hedge_count':len(hedge_ms),'hedge_avg':round(statistics.mean(hedge_ms),1) if hedge_ms else None,'hedge_p95':percentile(hedge_ms,.95),'hedge_max':max(hedge_ms) if hedge_ms else None,'lookup_count':len(lookup_ms),'lookup_avg':round(statistics.mean(lookup_ms),1) if lookup_ms else None},'speed_verdict':speed,'algorithm_invariants':['lead admission uses configured window/gap/token/filter gates','Kalshi inventory uses authoritative filled contract quantity; cash fees do not reduce shares','hedge limit is bounded by opposite-side locked-profit math','matched_contracts=min(YES_shares,NO_shares)','locked_profit=matched_contracts-(YES_cash_spent+NO_cash_spent)','residual_contracts=abs(YES_shares-NO_shares)','mark-to-market uses explicit Kalshi YES and NO prices when available','PAPER guard prevents any live order request'],'recent_math_execution_lines':interesting}
 
 def monitor_text(m):
     lat=m['execution_latency_ms']; c=m['counts_in_log_tail']; cfg=m['safe_config']
