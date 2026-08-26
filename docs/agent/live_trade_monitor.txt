@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T09:57:13+00:00
+UPDATED_UTC=2026-08-26T09:57:20+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=10 hedge=5 closed=9
-CLOSE_REASONS={"pair_paper_locked_recycle": 5, "pair_stop_loss": 4}
+EVENTS lead=0 hedge=0 closed=0
+CLOSE_REASONS={}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -54,7 +54,7 @@ PAIR_ARB_MAX_BTC_GAP_USD=0
 PAIR_ARB_MAX_CL_AGE_SEC=120
 PAIR_ARB_MAX_COINBASE_SPREAD_USD=0
 PAIR_ARB_MAX_CONTRA_OI_DELTA_USD=0
-PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=3.0
+PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=2.0
 PAIR_ARB_MAX_SIGNAL_AGE_SEC=3
 PAIR_ARB_MAX_TOKEN_PRICE=0.99
 PAIR_ARB_MAX_WINDOW_SEC=850
@@ -117,28 +117,4 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.2124  (+0.51%)  │  Reason: pair_paper_locked_recycle  │  Held: 2s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78403.72 open=78372.69 gap=$31.0 yes=0.7600 prob=0.59 rem=517s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.0820  (+0.21%)  │  Reason: pair_paper_locked_recycle  │  Held: 14s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78410.24 open=78372.69 gap=$37.6 yes=0.8200 prob=0.61 rem=502s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.4440  (--9.08%)  │  Reason: pair_stop_loss  │  Held: 5s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78416.25 open=78372.69 gap=$43.6 yes=0.7800 prob=0.63 rem=497s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL YES [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.2832  (--5.80%)  │  Reason: pair_stop_loss  │  Held: 3s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78411.83 open=78372.69 gap=$39.1 yes=0.7900 prob=0.62 rem=487s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.0932  (+0.26%)  │  Reason: pair_paper_locked_recycle  │  Held: 9s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78414.76 open=78372.69 gap=$42.1 yes=0.8400 prob=0.63 rem=477s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.1200  (+0.37%)  │  Reason: pair_paper_locked_recycle  │  Held: 6s
-⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78420.11 open=78372.69 gap=$47.4 yes=0.8900 prob=0.65 rem=471s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
