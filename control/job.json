@@ -1,10 +1,8 @@
 {
-  "id": "kalshi-paper-highfreq-profile-v1-20260826-0030",
+  "id": "kalshi-paper-feed-audit-v1-20260826-0032",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "UPDATE_AUTOPILOT"},
-    {"name": "START_PAPER"},
     {"name": "STATUS"}
   ]
 }
