@@ -1,0 +1,524 @@
+=== DUAL PREPLACE CALLERS ===
+1603-}
+1604-
+1605-
+1606-// REALPAPER v2: two-book preflight. In PAPER mode, prove that both legs have
+1607-// enough currently displayed Polymarket ask depth for the intended gross share
+1608-// quantities before allowing the first simulated leg to open. This does not make
+1609-// two exchange orders atomic; it is a conservative diagnostic guard against
+1610-// predictable lead-only exposure.
+1611-func (t *Trader) realpaperPairPreflight(
+1612-	ctx context.Context,
+1613-	leadTokenID, hedgeTokenID string,
+1614-	leadLimitPrice, hedgeLimitPrice float64,
+1615-	leadRawShares, hedgeRawShares float64,
+1616-	maxCombinedCost float64,
+1617-) (bool, string, float64, float64, float64, error) {
+1618-	if !t.cfg.PaperTrade {
+1619-		return true, "live mode bypass", 0, 0, 0, nil
+1620-	}
+1621-	if t.orders == nil {
+1622-		return false, "nil orders client", 0, 0, 0, fmt.Errorf("realpaper v2: nil orders client")
+1623-	}
+1624-	if leadTokenID == "" || hedgeTokenID == "" {
+1625-		return false, "missing token id", 0, 0, 0, nil
+1626-	}
+1627-	if leadRawShares <= pairArbShareDust || hedgeRawShares <= pairArbShareDust {
+1628-		return false, "invalid share sizing", 0, 0, 0, nil
+1629-	}
+1630-	if leadLimitPrice <= 0 || leadLimitPrice >= 1 || hedgeLimitPrice <= 0 || hedgeLimitPrice >= 1 {
+1631-		return false, "invalid limit price", 0, 0, 0, nil
+1632-	}
+1633-	if maxCombinedCost <= 0 || maxCombinedCost >= 1 {
+1634-		return false, "invalid combined-cost cap", 0, 0, 0, nil
+1635-	}
+1636-
+1637-	bookCtx, cancel := context.WithTimeout(ctx, 2500*time.Millisecond)
+1638-	defer cancel()
+1639-
+1640-	type bookResult struct {
+1641-		book *polymarket.OrderBook
+1642-		err  error
+1643-	}
+1644-	leadCh := make(chan bookResult, 1)
+1645-	hedgeCh := make(chan bookResult, 1)
+1646-	go func() {
+1647-		b, err := t.orders.GetOrderBook(bookCtx, leadTokenID)
+1648-		leadCh <- bookResult{book: b, err: err}
+1649-	}()
+1650-	go func() {
+1651-		b, err := t.orders.GetOrderBook(bookCtx, hedgeTokenID)
+1652-		hedgeCh <- bookResult{book: b, err: err}
+1653-	}()
+1654-
+1655-	leadRes := <-leadCh
+1656-	hedgeRes := <-hedgeCh
+1657-	if leadRes.err != nil {
+1658-		return false, "lead book fetch failed", 0, 0, 0, fmt.Errorf("realpaper v2: lead orderbook: %w", leadRes.err)
+1659-	}
+1660-	if hedgeRes.err != nil {
+1661-		return false, "hedge book fetch failed", 0, 0, 0, fmt.Errorf("realpaper v2: hedge orderbook: %w", hedgeRes.err)
+1662-	}
+1663-
+1664-	walk := func(book *polymarket.OrderBook, limitPrice, rawShares float64) (vwap, netShares, cost float64, ok bool) {
+1665-		if book == nil || len(book.Asks) == 0 {
+1666-			return 0, 0, 0, false
+1667-		}
+1668-		type level struct{ price, size float64 }
+1669-		levels := make([]level, 0, len(book.Asks))
+1670-		for _, a := range book.Asks {
+1671-			price, errP := strconv.ParseFloat(strings.TrimSpace(a.Price), 64)
+1672-			size, errS := strconv.ParseFloat(strings.TrimSpace(a.Size), 64)
+1673-			if errP != nil || errS != nil || price <= 0 || size <= 0 || price > limitPrice+1e-9 {
+1674-				continue
+1675-			}
+1676-			levels = append(levels, level{price: price, size: size})
+1677-		}
+1678-		// Small manual sort avoids adding another import to the purchased source.
+1679-		for i := 0; i < len(levels); i++ {
+1680-			for j := i + 1; j < len(levels); j++ {
+1681-				if levels[j].price < levels[i].price {
+1682-					levels[i], levels[j] = levels[j], levels[i]
+1683-				}
+1684-			}
+1685-		}
+1686-		remaining := rawShares
+1687-		for _, lv := range levels {
+1688-			if remaining <= pairArbShareDust {
+1689-				break
+1690-			}
+1691-			take := math.Min(remaining, lv.size)
+1692-			cost += take * lv.price
+1693-			remaining -= take
+1694-		}
+1695-		if remaining > pairArbShareDust || cost <= 0 {
+1696-			return 0, 0, 0, false
+1697-		}
+1698-		vwap = cost / rawShares
+1699-		feeShares := polymarket.ComputeBuyFeeShares(rawShares, vwap, t.feeRateBps)
+1700-		netShares = math.Floor((rawShares-feeShares)*100) / 100
+1701-		if netShares <= pairArbShareDust {
+1702-			return 0, 0, 0, false
+1703-		}
+1704-		return vwap, netShares, cost, true
+1705-	}
+1706-
+1707-	leadVWAP, leadNet, leadCost, leadOK := walk(leadRes.book, leadLimitPrice, leadRawShares)
+1708-	if !leadOK {
+1709-		return false, "lead depth insufficient at limit", 0, 0, 0, nil
+1710-	}
+1711-	hedgeVWAP, hedgeNet, hedgeCost, hedgeOK := walk(hedgeRes.book, hedgeLimitPrice, hedgeRawShares)
+1712-	if !hedgeOK {
+1713-		return false, "hedge depth insufficient at limit", leadVWAP, 0, 0, nil
+1714-	}
+1715-
+1716-	matched := math.Min(leadNet, hedgeNet)
+1717-	if matched <= pairArbShareDust {
+1718-		return false, "no matched net shares", leadVWAP, hedgeVWAP, 0, nil
+1719-	}
+1720-	// More than two hundredths of a share mismatch means the preflight would
+1721-	// knowingly create a residual even if both simulated orders filled.
+1722-	if math.Abs(leadNet-hedgeNet) > 0.02+1e-9 {
+1723-		combined := (leadCost + hedgeCost) / matched
+1724-		return false, fmt.Sprintf("net share mismatch lead=%.2f hedge=%.2f", leadNet, hedgeNet), leadVWAP, hedgeVWAP, combined, nil
+1725-	}
+1726-
+1727-	// Conservative: charge all gross spend against the matched net shares.
+1728-	combined := (leadCost + hedgeCost) / matched
+1729-	if combined > maxCombinedCost+1e-9 {
+1730-		return false, fmt.Sprintf("combined executable cost %.4f exceeds cap %.4f", combined, maxCombinedCost), leadVWAP, hedgeVWAP, combined, nil
+1731-	}
+1732-	return true, "approved", leadVWAP, hedgeVWAP, combined, nil
+1733-}
+1734-
+1735-// executeDualPrePlacePairArb places the lead buy AND the hedge buy simultaneously as
+1736-// resting GTC maker orders. The hedge rests at a passive price so when the market moves
+1737-// both legs can fill in the same second. Execution cases:
+1738-//   - Both fill:        open balanced position immediately, HedgeBy cleared.
+1739-//   - Lead fills only:  hedge order stays resting as pendingHedgePrePlace; normal hedge
+1740-//     management (maybeRebalancePairArb) will absorb it when polled.
+1741-//   - Neither fills:    cancel pre-placed hedge, return error (no position).
+1742-//   - Hedge only:       unexpected (NO collapsed without YES rising); cancel hedge, return error.
+1743:func (t *Trader) executeDualPrePlacePairArb(
+1744-	ctx context.Context,
+1745-	sig Signal,
+1746-	yesTokenID, noTokenID string,
+1747-	leadSide string,
+1748-	isNoLead bool,
+1749-	leadTokenID string,
+1750-	hedgeSide string,
+1751-	leadPrice, leadLimitPrice, rawLeadShares float64,
+1752-	currentHedgePrice, maxHedgePrice float64,
+1753-) error {
+1754-	// ── Compute hedge pre-place limit price ────────────────────────────────
+1755-	// Passive offset: place the hedge bid BELOW the current price so it rests as a maker.
+1756-	hedgeLimitPrice := currentHedgePrice
+1757-	if off := t.cfg.PairArbHedgePreOffsetCents; off > 0 {
+1758-		hedgeLimitPrice = math.Round((currentHedgePrice-off/100.0)*100) / 100
+1759-	}
+1760-	if hedgeLimitPrice <= 0 || hedgeLimitPrice >= 1.0 {
+1761-		return fmt.Errorf("pair arb: dual pre-place hedge limit price %.4f out of range", hedgeLimitPrice)
+1762-	}
+1763-	if hedgeLimitPrice > maxHedgePrice {
+1764-		hedgeLimitPrice = math.Round(maxHedgePrice*100) / 100
+1765-	}
+1766-	hedgeTokenID := yesTokenID
+1767-	if !isNoLead {
+1768-		hedgeTokenID = noTokenID // hedge is NO when lead is YES
+1769-	}
+1770-
+1771-	// ── Size the hedge leg based on estimated lead actual shares ───────────
+1772-	estimatedLeadActual := math.Floor((rawLeadShares-polymarket.ComputeBuyFeeShares(rawLeadShares, leadPrice, t.feeRateBps))*100) / 100
+1773-	hedgeRawShares, _, hedgeAllowed := pairArbExactHedgeSizing(estimatedLeadActual, hedgeLimitPrice, t.feeRateBps)
+1774-
+1775-	// REALPAPER v2: two-book preflight happens before any lead exposure exists.
+1776-	if t.cfg.PaperTrade {
+1777-		if !hedgeAllowed || hedgeRawShares <= 0 {
+1778-			t.logger.Info("realpaper v2: pair preflight rejected",
+1779-				zap.String("reason", "hedge sizing unavailable"),
+1780-				zap.String("lead_side", leadSide),
+1781-				zap.Float64("lead_price", leadPrice),
+1782-				zap.Float64("hedge_limit", hedgeLimitPrice),
+1783-			)
+1784-			return fmt.Errorf("pair arb: realpaper v2 preflight rejected: hedge sizing unavailable")
+1785-		}
+1786-		hedgeTokenIDForPreflight := yesTokenID
+1787-		if !isNoLead {
+1788-			hedgeTokenIDForPreflight = noTokenID
+1789-		}
+1790-		maxCombinedCost := leadPrice + maxHedgePrice
+1791-		ok, reason, leadVWAP, hedgeVWAP, combined, preErr := t.realpaperPairPreflight(
+1792-			ctx,
+1793-			leadTokenID,
+1794-			hedgeTokenIDForPreflight,
+1795-			leadLimitPrice,
+1796-			hedgeLimitPrice,
+1797-			rawLeadShares,
+1798-			hedgeRawShares,
+1799-			maxCombinedCost,
+1800-		)
+1801-		if preErr != nil {
+1802-			t.logger.Warn("realpaper v2: pair preflight error", zap.Error(preErr))
+1803-			return preErr
+1804-		}
+1805-		if !ok {
+1806-			t.logger.Info("realpaper v2: pair preflight rejected",
+1807-				zap.String("reason", reason),
+1808-				zap.String("lead_side", leadSide),
+1809-				zap.Float64("lead_vwap", leadVWAP),
+1810-				zap.Float64("hedge_vwap", hedgeVWAP),
+1811-				zap.Float64("combined_cost", combined),
+1812-				zap.Float64("combined_cap", maxCombinedCost),
+1813-			)
+1814-			return fmt.Errorf("pair arb: realpaper v2 preflight rejected: %s", reason)
+1815-		}
+1816-		t.logger.Info("realpaper v2: pair preflight approved",
+1817-			zap.String("lead_side", leadSide),
+1818-			zap.Float64("lead_vwap", leadVWAP),
+1819-			zap.Float64("hedge_vwap", hedgeVWAP),
+1820-			zap.Float64("combined_cost", combined),
+1821-			zap.Float64("combined_cap", maxCombinedCost),
+1822-			zap.Float64("locked_edge_cents", (1.0-combined)*100.0),
+1823-		)
+1824-	}
+1825-
+1826-	if !hedgeAllowed || hedgeRawShares <= 0 {
+1827-		// Hedge sizing fails (e.g. price too close to max); fall back to sequential.
+1828-		t.logger.Warn("trader: dual pre-place hedge sizing failed, falling back to sequential",
+1829-			zap.Float64("hedge_limit", hedgeLimitPrice),
+1830-			zap.Float64("max_hedge_price", maxHedgePrice),
+1831-			zap.Float64("est_lead_actual", estimatedLeadActual),
+1832-		)
+1833-		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+1834-		if err != nil {
+1835-			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+1836-			return err
+1837-		}
+1838-		if outcome != pairArbBuyOutcomeFilled {
+1839-			pairConditionID := t.convConditionID
+1840-			if sig.OverrideConditionID != "" {
+1841-				pairConditionID = sig.OverrideConditionID
+1842-			}
+1843-			pairWindowEnd := t.detector.WindowEnd()
+1844-			if !sig.OverrideWindowEnd.IsZero() {
+1845-				pairWindowEnd = sig.OverrideWindowEnd
+1846-			}
+1847-			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+1848-			return fmt.Errorf("pair arb: lead buy not filled")
+1849-		}
+1850-		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+1851-	}
+1852-	if t.cfg.PaperTrade {
+1853-		// In paper mode we never place a live pre-hedge order.
+1854-		// Reuse the sequential path so lead/hedge are both simulated.
+1855-		outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", leadTokenID, leadPrice, leadLimitPrice, rawLeadShares)
+1856-		if err != nil {
+1857-			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+1858-			return err
+1859-		}
+1860-		if outcome != pairArbBuyOutcomeFilled {
+1861-			pairConditionID := t.convConditionID
+1862-			if sig.OverrideConditionID != "" {
+1863-				pairConditionID = sig.OverrideConditionID
+--
+8660-	// post-close hold (designed to guard against re-entering the same market before
+8661-	// inventory clears) does not apply here.
+8662-	if !isTruePreOpen && !t.lastPairArbCloseAt.IsZero() {
+8663-		if elapsed := time.Since(t.lastPairArbCloseAt); elapsed < 5*time.Second {
+8664-			// Apply this hold only when re-entering the SAME market/condition.
+8665-			currentCond := normalizeConditionID(t.convConditionID)
+8666-			lastCond := normalizeConditionID(t.lastPairArbCloseConditionID)
+8667-			if currentCond != "" && currentCond == lastCond {
+8668-				remaining := 5*time.Second - elapsed
+8669-				t.logger.Warn("pair arb: post-close validation hold active, skipping entry",
+8670-					zap.Duration("elapsed", elapsed.Round(time.Millisecond)),
+8671-					zap.Duration("remaining", remaining.Round(time.Second)),
+8672-					zap.String("condition_id", currentCond))
+8673-				return fmt.Errorf("pair arb: post-close validation hold active for %.0fs more", remaining.Seconds())
+8674-			}
+8675-		}
+8676-	}
+8677-	if cooldown := t.cfg.PairArbStopCooldownSec; cooldown > 0 && !t.lastPairArbStopLossAt.IsZero() {
+8678-		if elapsed := time.Since(t.lastPairArbStopLossAt); elapsed < time.Duration(cooldown)*time.Second {
+8679-			remaining := time.Duration(cooldown)*time.Second - elapsed
+8680-			t.logger.Warn("pair arb: stop-loss cooldown active, skipping entry",
+8681-				zap.Duration("elapsed", elapsed.Round(time.Millisecond)),
+8682-				zap.Duration("remaining", remaining.Round(time.Second)),
+8683-				zap.Int("cooldown_sec", cooldown))
+8684-			return fmt.Errorf("pair arb: stop-loss cooldown active for %.0fs more", remaining.Seconds())
+8685-		}
+8686-	}
+8687-	if blocked, reason := t.riskBlocked(); blocked {
+8688-		t.logger.Warn("pair arb entry blocked by risk controls", zap.String("reason", reason))
+8689-		return fmt.Errorf("risk controls: %s", reason)
+8690-	}
+8691-	tradeSize := t.pairArbTradeSizeUSD()
+8692-	if tradeSize <= 0 {
+8693-		return fmt.Errorf("pair arb: trade size not configured")
+8694-	}
+8695-
+8696-	// Dual-entry mode: when continuous imbalance is enabled, buy both sides simultaneously
+8697-	// instead of the normal lead→hedge flow.
+8698-	if t.cfg.PairArbContinuousImbalanceEnabled {
+8699-		return t.enterDualPairArb(ctx, sig, yesTokenID, noTokenID)
+8700-	}
+8701-
+8702-	isNoLead := sig.Type == SignalPairArbLeadNo || sig.Type == SignalPairArbReverseLeadNo || sig.Type == SignalPairArbPreOpenNo || sig.Type == SignalPairArbTruePreOpenNo || sig.Type == SignalPairArbCVDMomentumNo
+8703-	leadSide := "YES"
+8704-	tokenID := yesTokenID
+8705-	leadPrice := sig.PolyYesPrice
+8706-	if isNoLead {
+8707-		leadSide = "NO"
+8708-		tokenID = noTokenID
+8709-		leadPrice = sig.PolyNoPrice
+8710-	}
+8711-	if tokenID == "" {
+8712-		return fmt.Errorf("pair arb: no %s token ID available", leadSide)
+8713-	}
+8714-	if leadPrice <= 0 || leadPrice >= 1.0 {
+8715-		return fmt.Errorf("pair arb: refusing lead buy at extreme price %.4f", leadPrice)
+8716-	}
+8717-	minLeadPrice := t.cfg.PairArbMinTokenPrice
+8718-	if minLeadPrice <= 0 {
+8719-		minLeadPrice = 0.01
+8720-	}
+8721-	maxLeadPrice := t.cfg.PairArbMaxTokenPrice
+8722-	if maxLeadPrice <= 0 || maxLeadPrice >= 1.0 {
+8723-		maxLeadPrice = 0.99
+8724-	}
+8725-	if minLeadPrice > maxLeadPrice {
+8726-		minLeadPrice, maxLeadPrice = maxLeadPrice, minLeadPrice
+8727-	}
+8728-	if leadPrice < minLeadPrice || leadPrice > maxLeadPrice {
+8729-		return fmt.Errorf("pair arb: lead price %.4f outside configured range [%.2f, %.2f]", leadPrice, minLeadPrice, maxLeadPrice)
+8730-	}
+8731-
+8732-	// Default to +0.02 above signal price (crosses the spread, nearly instant fill).
+8733-	// Set PairArbLeadBuySlipTicks=0 for a passive/maker resting order at signal price.
+8734-	// Pair with PairArbLeadBuyTimeoutSec to give the resting order time to fill.
+8735-	slipTicks := t.cfg.PairArbLeadBuySlipTicks
+8736-	if slipTicks < 0 {
+8737-		slipTicks = int(pairArbLimitBuySlip * 100)
+8738-	}
+8739-	limitPrice := math.Round((leadPrice+float64(slipTicks)*0.01)*100) / 100
+8740-	if limitPrice >= 1.0 {
+8741-		limitPrice = 0.99
+8742-	}
+8743-	rawShares := math.Round((tradeSize/limitPrice)*100) / 100
+8744-	if rawShares <= 0 {
+8745-		return fmt.Errorf("pair arb: invalid raw shares sizing")
+8746-	}
+8747-	estimatedActualShares := math.Floor((rawShares-polymarket.ComputeBuyFeeShares(rawShares, leadPrice, t.feeRateBps))*100) / 100
+8748-	if estimatedActualShares <= 0 {
+8749-		return fmt.Errorf("pair arb: fee eats all lead shares")
+8750-	}
+8751-	hedgeSide := "NO"
+8752-	hedgePrice := sig.PolyNoPrice
+8753-	if isNoLead {
+8754-		hedgeSide = "YES"
+8755-		hedgePrice = sig.PolyYesPrice
+8756-	}
+8757-	_, hedgeNotional, hedgeAllowed := pairArbExactHedgeSizing(estimatedActualShares, hedgePrice, t.feeRateBps)
+8758-	if !hedgeAllowed {
+8759-		return fmt.Errorf("pair arb: exact %s hedge would be $%.4f at %.4f, below $%.2f FAK minimum", hedgeSide, hedgeNotional, hedgePrice, polymarket.MinMarketOrderNotionalUSD)
+8760-	}
+8761-
+8762-	// Pre-flight balance check: ensure we can afford both legs before committing to the lead.
+8763-	// Use the cached balance (pre-fetched at window start, refreshed every 5 s) so this
+8764-	// path is non-blocking Ã¢â‚¬â€ every millisecond matters for FAK fill probability.
+8765-	leadCost := marketBuyOrderNotional(rawShares, limitPrice)
+8766-	totalRequired := leadCost + hedgeNotional
+8767-	if t.cfg.PaperTrade {
+8768-		if t.paperBalance < totalRequired {
+8769-			return fmt.Errorf("pair arb: insufficient paper balance ($%.2f) for both legs ($%.2f lead + $%.2f hedge = $%.2f)",
+8770-				t.paperBalance, leadCost, hedgeNotional, totalRequired)
+8771-		}
+8772-	} else {
+8773-		available := math.Float64frombits(atomic.LoadUint64(&t.cachedLiveBalance))
+8774-		if available <= 0 {
+8775-			// Balance has not been fetched yet or last fetch failed Ã¢â‚¬â€ allow entry.
+8776-			t.logger.Warn("pair arb: cached balance unavailable, skipping pre-flight check")
+8777-		} else if available < totalRequired {
+8778-			return fmt.Errorf("pair arb: insufficient balance ($%.2f) for both legs ($%.2f lead + $%.2f hedge = $%.2f)",
+8779-				available, leadCost, hedgeNotional, totalRequired)
+8780-		}
+8781-	}
+8782-
+8783-	// Gap guard: cancel the resting lead GTC order if the BTC-vs-open gap closes while
+8784-	// the order is waiting to fill. This prevents fills on stale signals (e.g. BTC spike
+8785-	// reversed before the order matched, so there is no longer any arbitrage edge).
+8786-	t.pairArbLeadGapGuardFn = t.makePairArbLeadGapGuard(isNoLead)
+8787-	defer func() { t.pairArbLeadGapGuardFn = nil }()
+8788-
+8789-	if t.cfg.PairArbDualPrePlace {
+8790-		if t.pairArbLeadOrderType() != polymarket.OrderTypeGTC {
+8791-			t.logger.Warn("pair arb: dual pre-place enabled but lead order type is not GTC; falling back to sequential flow",
+8792-				zap.String("lead_order_type", string(t.pairArbLeadOrderType())),
+8793-			)
+8794-		} else {
+8795-			maxHedgePrice := math.Round((1.0-leadPrice-t.pairArbMinLockedProfit())*100) / 100
+8796-			if maxHedgePrice <= 0 || maxHedgePrice >= 1.0 {
+8797-				return fmt.Errorf("pair arb: dual pre-place max hedge price %.4f out of range", maxHedgePrice)
+8798-			}
+8799-			t.buyInProgress = true
+8800:			err := t.executeDualPrePlacePairArb(
+8801-				ctx,
+8802-				sig,
+8803-				yesTokenID,
+8804-				noTokenID,
+8805-				leadSide,
+8806-				isNoLead,
+8807-				tokenID,
+8808-				hedgeSide,
+8809-				leadPrice,
+8810-				limitPrice,
+8811-				rawShares,
+8812-				hedgePrice,
+8813-				maxHedgePrice,
+8814-			)
+8815-			t.buyInProgress = false
+8816-			if err != nil {
+8817-				t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+8818-			}
+8819-			return err
+8820-		}
+8821-	}
+8822-
+8823-	t.buyInProgress = true
+8824-	outcome, orderID, fillPrice, actualShares, feeShares, usdSpent, err := t.executePairLimitBuy(ctx, "pair_arb_lead_buy", tokenID, leadPrice, limitPrice, rawShares)
+8825-	t.buyInProgress = false
+8826-	if err != nil {
+8827-		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+8828-		return err
+8829-	}
+8830-	if outcome != pairArbBuyOutcomeFilled {
+8831-		pairConditionID := t.convConditionID
+8832-		if sig.OverrideConditionID != "" {
+8833-			pairConditionID = sig.OverrideConditionID
+8834-		}
+8835-		pairWindowEnd := t.detector.WindowEnd()
+8836-		if !sig.OverrideWindowEnd.IsZero() {
+8837-			pairWindowEnd = sig.OverrideWindowEnd
+8838-		}
+8839-		t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+8840-		t.logger.Debug("pair arb: lead buy not filled; skipping signal",
+8841-			zap.String("lead_side", leadSide),
+8842-			zap.String("order_id", orderID),
+8843-		)
+8844-		return nil
+8845-	}
+8846-
+8847-	now := time.Now()
+8848-	pairConditionID := t.convConditionID
+8849-	if sig.OverrideConditionID != "" {
+8850-		pairConditionID = sig.OverrideConditionID
+8851-	}
+8852-	pairWindowEnd := t.detector.WindowEnd()
+8853-	if !sig.OverrideWindowEnd.IsZero() {
+8854-		pairWindowEnd = sig.OverrideWindowEnd
+8855-	}
+8856-	pair := &PairArbPosition{
+8857-		ConditionID: pairConditionID,
+8858-		YesTokenID:  yesTokenID,
+8859-		NoTokenID:   noTokenID,
+8860-		LeadSide:    leadSide,
+8861-		OpenPrice:   sig.OpenPrice,
+8862-		WindowEnd:   pairWindowEnd,
+8863-		OpenedAt:    now,
+8864-		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+8865-	}
+8866-	if sig.Type == SignalPairArbCVDMomentumYes || sig.Type == SignalPairArbCVDMomentumNo {
+8867-		if t.cfg.PairArbCVDMomentumLockedProfitCents > 0 {
+8868-			pair.LockedProfitCents = t.cfg.PairArbCVDMomentumLockedProfitCents
+8869-		} else {
+8870-			pair.LockedProfitCents = 3.0 // default 3¢ for CVD momentum
+8871-		}
+8872-	}
+8873-	if !pair.WindowEnd.IsZero() && pair.HedgeBy.After(pair.WindowEnd) {
+8874-		pair.HedgeBy = pair.WindowEnd
+8875-	}
+8876-	if isNoLead {
+8877-		pair.NoShares = actualShares
+8878-		pair.NoUSDSpent = usdSpent
+8879-	} else {
+8880-		pair.YesShares = actualShares
+8881-		pair.YesUSDSpent = usdSpent
+8882-	}
+8883-	t.pairedPosition = pair
+8884-	t.detector.SetInPosition(true)
+8885-	t.savePositionState()
+8886-	t.logger.Info("trader: pair arb lead leg opened",
+8887-		zap.String("order_id", orderID),
+8888-		zap.String("lead_side", leadSide),
+8889-		zap.Float64("fill_price", fillPrice),
+8890-		zap.Float64("shares", actualShares),
+8891-		zap.Float64("usd_spent", usdSpent),
+8892-		zap.Float64("target_locked_profit", t.pairArbMinLockedProfit()),
+8893-	)
+8894-	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+8895-	// FOK mode: place an immediate FOK hedge; unwind lead if all attempts miss. No
+8896-	// resting orders, no timeout loop — either both legs fill atomically or lead is sold.
+8897-	if t.pairArbLeadOrderType() == polymarket.OrderTypeFOK {
+8898-		return t.executeFOKHedgeAfterLeadFill(ctx, sig, isNoLead, leadSide)
+8899-	}
+8900-	// GTC / FAK mode: place a resting GTC hedge and poll until HedgeBy.
+8901-	// Bounded fill-leg routine: try to complete the hedge for up to 20 seconds.
+8902-	for time.Now().Before(pair.HedgeBy) {
+8903-		if t.pairedPosition == nil || t.pairedPosition.isBalanced() {
+8904-			break
+8905-		}
+8906-		_, _, liveYes, _, _, _ := t.detector.Snapshot()
+8907-		liveNo := math.Round((1.0-liveYes)*100) / 100
+8908-		if liveYes <= 0 || liveYes >= 1.0 {
+8909-			liveYes = sig.PolyYesPrice
+8910-			liveNo = sig.PolyNoPrice
+8911-		}
+8912-		if err := t.maybeRebalancePairArb(ctx, liveYes, liveNo); err != nil {
+8913-			return err
+8914-		}
+8915-		if t.pairedPosition != nil && t.pairedPosition.isBalanced() {
+8916-			break
+8917-		}
+8918-		select {
+8919-		case <-ctx.Done():
+8920-			return ctx.Err()
