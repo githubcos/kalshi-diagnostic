@@ -1,14 +1,10 @@
 {
-  "id": "kalshi-explicit-no-finalize-v1-20260826-0020",
+  "id": "kalshi-paper-highfreq-profile-v1-20260826-0030",
   "enabled": true,
   "live": false,
   "actions": [
-    {"name": "BACKUP"},
-    {"name": "APPLY_PATCH", "path": "control/patches/remove_kalshi_no_caller_probe_test_v1.patch", "strip": 1},
-    {"name": "GO_TEST"},
-    {"name": "GO_BUILD"},
+    {"name": "UPDATE_AUTOPILOT"},
     {"name": "START_PAPER"},
-    {"name": "COLLECT_PARITY_EVIDENCE"},
     {"name": "STATUS"}
   ]
 }
