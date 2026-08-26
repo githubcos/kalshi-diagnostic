@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T01:29:07+00:00",
+  "utc": "2026-08-26T01:29:15+00:00",
   "publisher_pid": 4029128,
   "heartbeat": {
-    "utc": "2026-08-26T01:29:06+00:00",
-    "epoch": 1787707746.5201008,
+    "utc": "2026-08-26T01:29:12+00:00",
+    "epoch": 1787707752.0777304,
     "pid": 3900720,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-paper-locked-recycle-v1-retry2-20260826-0127"
   },
   "state": {
     "last_job_id": "kalshi-paper-locked-recycle-v1-retry1-20260826-0124",
