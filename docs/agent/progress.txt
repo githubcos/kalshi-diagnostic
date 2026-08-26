@@ -1,16 +1,6 @@
 KALSHI AUTONOMOUS AGENT — LIVE PROGRESS
-JOB_ID=kalshi-feed-source-probe-v1-20260826-0912
-JOB_START_UTC=2026-08-26T09:12:14+00:00
+JOB_ID=kalshi-feed-rest-diagnostics-v1-20260826-0915
+JOB_START_UTC=2026-08-26T09:14:34+00:00
 LIVE_ALLOWED=false
-[2026-08-26T09:12:14+00:00] ACTION 1/4 BACKUP START
-[2026-08-26T09:12:14+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_091214.tar.gz
-[2026-08-26T09:12:39+00:00] BACKUP PASS files=113
-[2026-08-26T09:12:39+00:00] ACTION 1/4 BACKUP PASS
-[2026-08-26T09:12:39+00:00] ACTION 2/4 APPLY_PATCH START
-[2026-08-26T09:12:39+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_091239.tar.gz
-[2026-08-26T09:12:57+00:00] BACKUP PASS files=113
-[2026-08-26T09:12:57+00:00] PATCH_DRY_RUN START: patch --dry-run --batch -p1 -i /tmp/kalshi-agent-9hsb9zxi.patch
-    checking file kalshi/feed_source_probe_test.go
-    patch: **** unexpected end of file in patch
-[2026-08-26T09:12:57+00:00] PATCH_DRY_RUN END rc=2 duration=0.01s
-[2026-08-26T09:12:57+00:00] JOB RESULT=FAIL ERROR=RuntimeError: patch dry-run failed
+[2026-08-26T09:14:34+00:00] ACTION 1/9 BACKUP START
+[2026-08-26T09:14:34+00:00] BACKUP START -> /home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_091434.tar.gz
