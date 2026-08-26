@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T01:19:46+00:00",
+  "utc": "2026-08-26T01:19:53+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -104,10 +104,11 @@
   "counts_in_current_session": {
     "lead_events": 3,
     "hedge_events": 1,
-    "closed_events": 2
+    "closed_events": 3
   },
   "close_reason_counts": {
-    "pair_fill_leg_timeout": 2
+    "pair_fill_leg_timeout": 2,
+    "force_close:user_stop": 1
   },
   "execution_latency_ms": {
     "all_count": 0,
@@ -148,6 +149,9 @@
     "\u25c2  \u25bc P&L  -$-1.0650  (--21.69%)  \u2502  Reason: pair_fill_leg_timeout  \u2502  Held: 8s",
     "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78730.10 open=78724.25 gap=$5.9 yes=0.5300 prob=0.51 rem=860s]",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED",
-    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR HEDGE] EXECUTED"
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR HEDGE] EXECUTED",
+    "\u25c2  \u25b2 P&L  +$0.3940  (+0.53%)  \u2502  Reason: force_close:user_stop  \u2502  Held: 4m12s",
+    "\u2551     NET P&L   -$1.4769   (-8.10%)                                  \u2551",
+    "\u2551     Balance: $98.52 / $100.00                                      \u2551"
   ]
 }

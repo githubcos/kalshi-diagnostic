@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T01:19:46+00:00
+UPDATED_UTC=2026-08-26T01:19:53+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=3 hedge=1 closed=2
-CLOSE_REASONS={"pair_fill_leg_timeout": 2}
+EVENTS lead=3 hedge=1 closed=3
+CLOSE_REASONS={"force_close:user_stop": 1, "pair_fill_leg_timeout": 2}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -129,3 +129,6 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ⚡ SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78730.10 open=78724.25 gap=$5.9 yes=0.5300 prob=0.51 rem=860s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR LEAD] EXECUTED
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR HEDGE] EXECUTED
+◂  ▲ P&L  +$0.3940  (+0.53%)  │  Reason: force_close:user_stop  │  Held: 4m12s
+║     NET P&L   -$1.4769   (-8.10%)                                  ║
+║     Balance: $98.52 / $100.00                                      ║
