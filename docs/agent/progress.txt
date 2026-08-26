@@ -41,3 +41,9 @@ LIVE_ALLOWED=false
     ?   	github.com/polyarb/exchangefeed	[no test files]
     ?   	github.com/polyarb/kalshi	[no test files]
     ?   	github.com/polyarb/market	[no test files]
+    ok  	github.com/polyarb/polymarket	(cached)
+    FAIL	github.com/polyarb/strategy [build failed]
+    FAIL	github.com/polyarb/web [build failed]
+    FAIL
+[2026-08-26T17:58:31+00:00] GO_TEST END rc=1 duration=1.60s
+[2026-08-26T17:58:31+00:00] JOB RESULT=FAIL ERROR=RuntimeError: tests failed
