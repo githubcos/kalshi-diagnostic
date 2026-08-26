@@ -1,10 +1,14 @@
 {
-  "id": "kalshi-paper-parity-audit-refresh-20260826-2149",
+  "id": "kalshi-paper-restore-approved-parity-profile-20260826-2250",
   "enabled": true,
   "live": false,
   "actions": [
     {"name": "STATUS"},
-    {"name": "COLLECT_AUDIT"},
+    {"name": "BACKUP"},
+    {"name": "APPLY_PATCH", "path": "control/patches/paper_restore_approved_parity_profile_v1.patch", "strip": 1},
+    {"name": "GO_TEST"},
+    {"name": "GO_BUILD"},
+    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
