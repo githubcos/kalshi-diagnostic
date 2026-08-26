@@ -1,8 +1,8 @@
 {
-  "utc": "2026-08-26T22:01:18+00:00",
+  "utc": "2026-08-26T22:01:26+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
-  "kalshiarbo_pid": "573511",
+  "kalshiarbo_pid": "580985",
   "process_present": true,
   "port_8085_listening": true,
   "trading_engine_state": "UNKNOWN",

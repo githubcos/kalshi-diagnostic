@@ -1,18 +1,18 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:01:18+00:00
+UPDATED_UTC=2026-08-26T22:01:26+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
-PID=573511
+PID=580985
 PORT_8085=LISTENING
 TRADING_ENGINE=UNKNOWN
 
 === PROCESS ===
-573511 ./kalshiarbo -port 8085
+580985 ./kalshiarbo -port 8085
 
 === PORT 8085 ===
-LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=573511,fd=6))
+LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=580985,fd=6))
 
 === HTTP / DASHBOARD STATE ===
 /api/status HTTP=401
@@ -118,4 +118,9 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-
+BTC 15m Matched Pair Engine
+│  Mode           ░░ PAPER TRADE ░░
+│  Balance      $1000.00 starting
+│  Started      2026-08-26 22:01:22 UTC
+·  paper balance: $1000.00
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
