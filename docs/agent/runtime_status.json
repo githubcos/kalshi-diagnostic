@@ -1,31 +1,31 @@
 {
-  "utc": "2026-08-26T21:52:05+00:00",
+  "utc": "2026-08-26T21:52:12+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
-  "kalshiarbo_pid": null,
-  "process_present": false,
-  "port_8085_listening": false,
+  "kalshiarbo_pid": "573511",
+  "process_present": true,
+  "port_8085_listening": true,
   "trading_engine_state": "UNKNOWN",
   "http_probes": [
     {
       "path": "/api/status",
-      "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "code": "401",
+      "body": "unauthorized"
     },
     {
       "path": "/api/bot/status",
-      "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "code": "401",
+      "body": "unauthorized"
     },
     {
       "path": "/api/state",
-      "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "code": "401",
+      "body": "unauthorized"
     },
     {
       "path": "/status",
-      "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "code": "302",
+      "body": "<a href=\"/login\">Found</a>."
     }
   ],
   "safe_config": {

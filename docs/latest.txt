@@ -1,28 +1,28 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:52:05+00:00
+UPDATED_UTC=2026-08-26T21:52:12+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
-PROCESS=DOWN
-PID=none
-PORT_8085=DOWN
+PROCESS=ALIVE
+PID=573511
+PORT_8085=LISTENING
 TRADING_ENGINE=UNKNOWN
 
 === PROCESS ===
-NO KALSHIARBO PROCESS
+573511 ./kalshiarbo -port 8085
 
 === PORT 8085 ===
-PORT 8085 NOT LISTENING
+LISTEN 0      4096               *:8085            *:*    users:(("kalshiarbo",pid=573511,fd=6))
 
 === HTTP / DASHBOARD STATE ===
-/api/status HTTP=000
-curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
-/api/bot/status HTTP=000
-curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
-/api/state HTTP=000
-curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
-/status HTTP=000
-curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server
+/api/status HTTP=401
+unauthorized
+/api/bot/status HTTP=401
+unauthorized
+/api/state HTTP=401
+unauthorized
+/status HTTP=302
+<a href="/login">Found</a>.
 
 === SAFE PAPER SETTINGS ===
 MARKET_TYPE=15m
@@ -118,5 +118,9 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-║     NET P&L   +$0.0000   (+0.00%)                                  ║
-║     Balance: $1000.00 / $1000.00                                   ║
+BTC 15m Matched Pair Engine
+│  Mode           ░░ PAPER TRADE ░░
+│  Balance      $1000.00 starting
+│  Started      2026-08-26 21:52:06 UTC
+·  paper balance: $1000.00
+·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
