@@ -1,18 +1,18 @@
 {
-  "utc": "2026-08-26T00:53:09+00:00",
+  "utc": "2026-08-26T00:53:17+00:00",
   "publisher_pid": 3952060,
   "heartbeat": {
-    "utc": "2026-08-26T00:53:05+00:00",
-    "epoch": 1787705585.969395,
+    "utc": "2026-08-26T00:53:15+00:00",
+    "epoch": 1787705595.661341,
     "pid": 3900720,
-    "status": "working",
-    "job_id": "kalshi-paper-profit-stress-v1-20260826-0055"
+    "status": "idle",
+    "job_id": ""
   },
   "state": {
-    "last_job_id": "kalshi-live-trade-monitor-session-scope-v1-20260826-0052",
+    "last_job_id": "kalshi-paper-profit-stress-v1-20260826-0055",
     "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_003420.tar.gz",
     "last_result": "PASS",
-    "last_run_utc": "2026-08-26T00:44:15+00:00"
+    "last_run_utc": "2026-08-26T00:53:09+00:00"
   },
   "autopilot": null
 }

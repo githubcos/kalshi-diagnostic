@@ -1,9 +1,9 @@
 {
-  "utc": "2026-08-26T00:53:05+00:00",
-  "cycle": 1787705585,
-  "phase": "PAPER_STRESS_CONFIG",
-  "percent": 100,
-  "result": "PASS",
-  "detail": "Profit-oriented PAPER profile applied. Start=$100, terminal=$200 or $0. Full logs preserved on EC2.",
-  "next": "START_PAPER"
+  "utc": "2026-08-26T00:49:44+00:00",
+  "cycle": 1787705384,
+  "phase": "FINAL_REGRESSION",
+  "percent": 85,
+  "result": "RUNNING",
+  "detail": "All finite source-context gates captured. Running one final test/build and paper-health verification.",
+  "next": "PAPER_EVIDENCE"
 }
