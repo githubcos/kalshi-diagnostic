@@ -1,16 +1,16 @@
 {
-  "utc": "2026-08-26T17:58:13+00:00",
+  "utc": "2026-08-26T17:58:21+00:00",
   "publisher_pid": 389330,
   "heartbeat": {
-    "utc": "2026-08-26T17:58:10+00:00",
-    "epoch": 1787767090.9652567,
+    "utc": "2026-08-26T17:58:20+00:00",
+    "epoch": 1787767100.5766683,
     "pid": 544,
     "status": "working",
     "job_id": "kalshi-decouple-lead-hedge-paper-v1c-20260826-1800"
   },
   "state": {
     "last_job_id": "kalshi-decouple-lead-hedge-paper-v1b-20260826-1759",
-    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175703.tar.gz",
+    "last_backup": "/home/ubuntu/kalshi-agent-backups/kalshiarbo_20260826_175810.tar.gz",
     "last_result": "FAIL",
     "last_run_utc": "2026-08-26T17:57:13+00:00"
   },
