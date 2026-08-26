@@ -1,0 +1,252 @@
+=== TOKEN ASSIGNMENTS ===
+strategy/trader.go:225:	YesTokenID  string    `json:"yes_token_id"`
+strategy/trader.go:226:	NoTokenID   string    `json:"no_token_id"`
+strategy/trader.go:442:	YesTokenID    string    `json:"yes_token_id,omitempty"`
+strategy/trader.go:443:	NoTokenID     string    `json:"no_token_id,omitempty"`
+strategy/trader.go:1746:	yesTokenID, noTokenID string,
+strategy/trader.go:1766:	hedgeTokenID := yesTokenID
+strategy/trader.go:1768:		hedgeTokenID = noTokenID // hedge is NO when lead is YES
+strategy/trader.go:1786:		hedgeTokenIDForPreflight := yesTokenID
+strategy/trader.go:1788:			hedgeTokenIDForPreflight = noTokenID
+strategy/trader.go:1835:			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:1847:			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1850:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1857:			t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:1869:			t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1872:		return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, orderID, fillPrice, actualShares, feeShares, usdSpent)
+strategy/trader.go:1946:		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, leadErr)
+strategy/trader.go:1957:		t.recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID, sig.PolyYesPrice, orphanExposureLikely)
+strategy/trader.go:1969:		t.setPendingPairArbContext(leadOrderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:1988:		t.recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID, sig.PolyYesPrice, hedgeAlreadyFilled)
+strategy/trader.go:2068:			return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2099:			YesTokenID:  yesTokenID,
+strategy/trader.go:2100:			NoTokenID:   noTokenID,
+strategy/trader.go:2152:	return t.openLeadOnlyPosition(ctx, sig, yesTokenID, noTokenID, leadSide, isNoLead, leadOrderID, leadFill, leadActual, leadFeeShares, leadUSD)
+strategy/trader.go:2159:func (t *Trader) enterDualPairArb(ctx context.Context, sig Signal, yesTokenID, noTokenID string) error {
+strategy/trader.go:2256:	outcomeYes, orderIDYes, fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, errYes := t.executePairLimitBuy(ctx, "pair_arb_dual_yes_buy", yesTokenID, yesPrice, yesLimit, rawShares)
+strategy/trader.go:2259:		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, errYes)
+strategy/trader.go:2278:		YesTokenID:  yesTokenID,
+strategy/trader.go:2279:		NoTokenID:   noTokenID,
+strategy/trader.go:2304:	outcomeNo, orderIDNo, fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, errNo := t.executePairLimitBuy(ctx, "pair_arb_dual_no_buy", noTokenID, noPrice, noLimit, rawShares)
+strategy/trader.go:2342:func (t *Trader) openLeadOnlyPosition(ctx context.Context, sig Signal, yesTokenID, noTokenID, leadSide string, isNoLead bool, orderID string, fillPrice, actualShares, feeShares, usdSpent float64) error {
+strategy/trader.go:2354:		YesTokenID:  yesTokenID,
+strategy/trader.go:2355:		NoTokenID:   noTokenID,
+strategy/trader.go:2414:	hedgeTokenID := pair.YesTokenID // lead=NO → hedge=YES
+strategy/trader.go:2416:		hedgeTokenID = pair.NoTokenID // lead=YES → hedge=NO
+strategy/trader.go:3149:		return t.convNoTokenID, "NO", true
+strategy/trader.go:3151:	return t.convYesTokenID, "YES", false
+strategy/trader.go:3156:		return t.convYesTokenID, "YES", false
+strategy/trader.go:3158:	return t.convNoTokenID, "NO", true
+strategy/trader.go:3798:	// convYesTokenID / convNoTokenID / convConditionID are the market identifiers for the current window.
+strategy/trader.go:3800:	convYesTokenID  string
+strategy/trader.go:3801:	convNoTokenID   string
+strategy/trader.go:3936:		if strings.EqualFold(strings.TrimSpace(t.pairedPosition.YesTokenID), tokenID) ||
+strategy/trader.go:3937:			strings.EqualFold(strings.TrimSpace(t.pairedPosition.NoTokenID), tokenID) {
+strategy/trader.go:4394:func (t *Trader) setPendingPairArbContext(orderID, conditionID, yesTokenID, noTokenID, leadSide string, windowEnd time.Time) {
+strategy/trader.go:4407:	if yesTokenID != "" {
+strategy/trader.go:4408:		t.pendingPairArb.YesTokenID = yesTokenID
+strategy/trader.go:4410:	if noTokenID != "" {
+strategy/trader.go:4411:		t.pendingPairArb.NoTokenID = noTokenID
+strategy/trader.go:4542:		if po.TokenID == pair.YesTokenID {
+strategy/trader.go:4544:		} else if po.TokenID == pair.NoTokenID {
+strategy/trader.go:4681:func (t *Trader) ensureNoPairArbInventory(ctx context.Context, yesTokenID, noTokenID string) error {
+strategy/trader.go:4689:		yesShares, yesErr := t.tokenBalanceShares(ctx, yesTokenID)
+strategy/trader.go:4690:		noShares, noErr := t.tokenBalanceShares(ctx, noTokenID)
+strategy/trader.go:4726:func (t *Trader) recoverPairArbAmbiguousSubmit(ctx context.Context, yesTokenID, noTokenID string, approxYesPrice float64, cause error) {
+strategy/trader.go:4732:		zap.String("yes_token", yesTokenID),
+strategy/trader.go:4733:		zap.String("no_token", noTokenID),
+strategy/trader.go:4735:	invErr := t.ensureNoPairArbInventory(ctx, yesTokenID, noTokenID)
+strategy/trader.go:4745:	t.liquidateOrphanedPairArbInventory(liqCtx, yesTokenID, noTokenID, approxYesPrice)
+strategy/trader.go:4746:	if retryErr := t.ensureNoPairArbInventory(liqCtx, yesTokenID, noTokenID); retryErr != nil {
+strategy/trader.go:4753:func (t *Trader) triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID string, approxYesPrice float64, cause error) {
+strategy/trader.go:4760:		t.recoverPairArbAmbiguousSubmit(bgCtx, yesTokenID, noTokenID, approxYesPrice, cause)
+strategy/trader.go:4768:func (t *Trader) liquidateOrphanedPairArbInventory(ctx context.Context, yesTokenID, noTokenID string, approxYesPrice float64) {
+strategy/trader.go:4818:	liquidateSide("YES", yesTokenID, approxYesPrice)
+strategy/trader.go:4819:	liquidateSide("NO", noTokenID, approxNoPrice)
+strategy/trader.go:4825:func (t *Trader) monitorAndLiquidateOrphanedPairArbInventory(yesTokenID, noTokenID string, approxYesPrice float64) {
+strategy/trader.go:4834:		yesShares, yesErr := t.tokenBalanceShares(ctx, yesTokenID)
+strategy/trader.go:4835:		noShares, noErr := t.tokenBalanceShares(ctx, noTokenID)
+strategy/trader.go:4849:				t.liquidateOrphanedPairArbInventory(ctx, yesTokenID, noTokenID, approxYesPrice)
+strategy/trader.go:4863:			if err := t.ensureNoPairArbInventory(finalCtx, yesTokenID, noTokenID); err == nil {
+strategy/trader.go:4876:func (t *Trader) recoverDualPrePlaceOrphanedExposure(yesTokenID, noTokenID, hedgeTokenID, hedgeOrderID string, approxYesPrice float64, exposureLikely bool) {
+strategy/trader.go:4916:		yesShares, yesErr := t.tokenBalanceShares(ctx, yesTokenID)
+strategy/trader.go:4917:		noShares, noErr := t.tokenBalanceShares(ctx, noTokenID)
+strategy/trader.go:4947:		zap.String("yes_token", yesTokenID),
+strategy/trader.go:4948:		zap.String("no_token", noTokenID),
+strategy/trader.go:4950:	t.liquidateOrphanedPairArbInventory(ctx, yesTokenID, noTokenID, approxYesPrice)
+strategy/trader.go:4956:	go t.monitorAndLiquidateOrphanedPairArbInventory(yesTokenID, noTokenID, approxYesPrice)
+strategy/trader.go:5056:					yesID, noID := t.convYesTokenID, t.convNoTokenID
+strategy/trader.go:5057:					if po.YesTokenID != "" {
+strategy/trader.go:5058:						yesID = po.YesTokenID
+strategy/trader.go:5060:					if po.NoTokenID != "" {
+strategy/trader.go:5061:						noID = po.NoTokenID
+strategy/trader.go:5082:						YesTokenID:  yesID,
+strategy/trader.go:5083:						NoTokenID:   noID,
+strategy/trader.go:5423:	go func() { yesCh <- applyWalletDelta("YES", pair.YesTokenID, pair.YesShares) }()
+strategy/trader.go:5424:	go func() { noCh <- applyWalletDelta("NO", pair.NoTokenID, pair.NoShares) }()
+strategy/trader.go:6063:func (t *Trader) SetMarketTokens(yesTokenID, noTokenID, conditionID string) {
+strategy/trader.go:6085:	t.convYesTokenID = yesTokenID
+strategy/trader.go:6086:	t.convNoTokenID = noTokenID
+strategy/trader.go:7163:		yesSettled, bal, err := t.pairArbLegSettled(ctx, "YES", pair.YesTokenID)
+strategy/trader.go:7176:		noSettled, bal, err := t.pairArbLegSettled(ctx, "NO", pair.NoTokenID)
+strategy/trader.go:7220:	resetIfResidual("YES", pair.YesTokenID, yesFilled, &pair.YesExitOrderID, &pair.YesExitOrderShares, &pair.YesShares)
+strategy/trader.go:7221:	resetIfResidual("NO", pair.NoTokenID, noFilled, &pair.NoExitOrderID, &pair.NoExitOrderShares, &pair.NoShares)
+strategy/trader.go:7229:	if pair.YesTokenID != "" {
+strategy/trader.go:7230:		bal, err := t.tokenBalanceShares(ctx, pair.YesTokenID)
+strategy/trader.go:7237:	if pair.NoTokenID != "" {
+strategy/trader.go:7238:		bal, err := t.tokenBalanceShares(ctx, pair.NoTokenID)
+strategy/trader.go:7311:	repost("YES", pair.YesTokenID, yesBal, &pair.YesExitOrderID, &pair.YesExitOrderShares, &pair.YesShares)
+strategy/trader.go:7312:	repost("NO", pair.NoTokenID, noBal, &pair.NoExitOrderID, &pair.NoExitOrderShares, &pair.NoShares)
+strategy/trader.go:7398:		orderID, sellable, errMsg := t.placePairArbSellAt99WithRetry(ctx, pair.ConditionID, "YES", pair.YesTokenID, pair.YesShares)
+strategy/trader.go:7416:		orderID, sellable, errMsg := t.placePairArbSellAt99WithRetry(ctx, pair.ConditionID, "NO", pair.NoTokenID, pair.NoShares)
+strategy/trader.go:7467:		yesFilled, _, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_window_end")
+strategy/trader.go:7471:		noFilled, _, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_window_end")
+strategy/trader.go:7507:	yesFilled, yesCanceled, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_lookup")
+strategy/trader.go:7511:	noFilled, noCanceled, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_lookup")
+strategy/trader.go:8390:func (t *Trader) OnDCAHedgeSignal(ctx context.Context, sig Signal, yesTokenID, noTokenID string) error {
+strategy/trader.go:8452:	outcomeYes, orderIDYes, fillPriceYes, actualSharesYes, feeSharesYes, usdSpentYes, errYes := t.executePairLimitBuy(ctx, "dca_hedge_yes_buy", yesTokenID, yesPrice, yesLimit, rawShares)
+strategy/trader.go:8455:		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, errYes)
+strategy/trader.go:8468:		YesTokenID:           yesTokenID,
+strategy/trader.go:8469:		NoTokenID:            noTokenID,
+strategy/trader.go:8498:	outcomeNo, orderIDNo, fillPriceNo, actualSharesNo, feeSharesNo, usdSpentNo, errNo := t.executePairLimitBuy(ctx, "dca_hedge_no_buy", noTokenID, noPrice, noLimit, rawShares)
+strategy/trader.go:8536:func (t *Trader) OnPairArbSignal(ctx context.Context, sig Signal, yesTokenID, noTokenID string) error {
+strategy/trader.go:8636:			err := t.ensureNoPairArbInventory(invCtx, yesTokenID, noTokenID)
+strategy/trader.go:8644:					t.liquidateOrphanedPairArbInventory(liqCtx, yesTokenID, noTokenID, sig.PolyYesPrice)
+strategy/trader.go:8645:					retryErr := t.ensureNoPairArbInventory(liqCtx, yesTokenID, noTokenID)
+strategy/trader.go:8699:		return t.enterDualPairArb(ctx, sig, yesTokenID, noTokenID)
+strategy/trader.go:8704:	tokenID := yesTokenID
+strategy/trader.go:8708:		tokenID = noTokenID
+strategy/trader.go:8791:		hedgeTokenID := noTokenID
+strategy/trader.go:8793:			hedgeTokenID = yesTokenID
+strategy/trader.go:8876:				yesTokenID,
+strategy/trader.go:8877:				noTokenID,
+strategy/trader.go:8890:				t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:8900:		t.triggerPairArbAmbiguousRecovery(yesTokenID, noTokenID, sig.PolyYesPrice, err)
+strategy/trader.go:8912:		t.setPendingPairArbContext(orderID, pairConditionID, yesTokenID, noTokenID, leadSide, pairWindowEnd)
+strategy/trader.go:8931:		YesTokenID:  yesTokenID,
+strategy/trader.go:8932:		NoTokenID:   noTokenID,
+strategy/trader.go:9033:			dcaTokenID := pair.YesTokenID
+strategy/trader.go:9035:				dcaTokenID = pair.NoTokenID
+strategy/trader.go:9328:		buyTokenID = pair.YesTokenID
+strategy/trader.go:9331:		buyTokenID = pair.NoTokenID
+strategy/trader.go:9454:	tokenID := pair.YesTokenID
+strategy/trader.go:9456:		tokenID = pair.NoTokenID
+strategy/trader.go:9836:	if pair.YesTokenID == "" && pair.NoTokenID == "" {
+strategy/trader.go:9846:	yesTokenID := pair.YesTokenID
+strategy/trader.go:9847:	noTokenID := pair.NoTokenID
+strategy/trader.go:9879:		winningTokenID := yesTokenID
+strategy/trader.go:9881:			winningTokenID = noTokenID
+strategy/trader.go:9926:	residualTokenID := pair.YesTokenID
+strategy/trader.go:9929:		residualTokenID = pair.NoTokenID
+strategy/trader.go:10064:	if err := sellSide("YES", pair.YesTokenID, pair.YesShares, pair.sideAveragePrice("YES"), currentYesPrice); err != nil {
+strategy/trader.go:10067:	if err := sellSide("NO", pair.NoTokenID, pair.NoShares, pair.sideAveragePrice("NO"), currentNoPrice); err != nil {
+strategy/trader.go:10314:			yesFilled, _, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_window_end_settle")
+strategy/trader.go:10319:			noFilled, _, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_window_end_settle")
+strategy/trader.go:10371:		yesFilled, _, yesErr := t.pairArbExitOrderFilled(ctx, pair.YesExitOrderID, pair.YesTokenID, pair.YesExitOrderShares, "pair_arb_sell_99_yes_settle")
+strategy/trader.go:10375:		noFilled, _, noErr := t.pairArbExitOrderFilled(ctx, pair.NoExitOrderID, pair.NoTokenID, pair.NoExitOrderShares, "pair_arb_sell_99_no_settle")
+strategy/pair_arb_test.go:50:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:51:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:224:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:225:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:259:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:260:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:311:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:312:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:357:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:358:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:384:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:385:			NoTokenID:   "no-token",
+strategy/pair_arb_test.go:476:			YesTokenID:  "yes-token",
+strategy/pair_arb_test.go:477:			NoTokenID:   "no-token",
+polymarket/rtds.go:46:	tokenIDs []string
+polymarket/rtds.go:59:// NewRTDSClient creates a new RTDS WebSocket client subscribing to the given tokenIDs.
+polymarket/rtds.go:60:func NewRTDSClient(wsURL string, tokenIDs []string, logger *zap.Logger) *RTDSClient {
+polymarket/rtds.go:63:		tokenIDs:    tokenIDs,
+polymarket/rtds.go:114:		AssetIDs: r.tokenIDs,
+polymarket/rtds.go:120:	r.logger.Info("rtds: subscribed", zap.Strings("tokens", r.tokenIDs))
+
+=== MARKET DISCOVERY ===
+strategy/trader.go:458:	// BTC & market context at entry
+strategy/trader.go:2172:	// misidentifies 5-minute windows ending exactly on an hour boundary as 1-hour windows.
+strategy/trader.go:2183:	// Gap gate: reject if BTC has already moved so far that the market outcome is decided.
+strategy/trader.go:8071:// while the detector's BTC/open state still reflects the just-ended market.
+strategy/trader.go:8072:// resolvedYes is true when BTC closed above the market's open price (YES wins).
+strategy/trader.go:9258:	// MaxGapUSD: stop adds when BTC has moved too far in one direction (market too directional).
+strategy/signal.go:15://   - Window: fires only in the FINAL 10–40 seconds of a 5-minute BTC market.
+strategy/signal.go:184:	WindowRemaining float64 // seconds remaining in the 5-min market window
+strategy/signal.go:336:	// 0 = no cap. Set to e.g. 150s to restrict entries to the last 2.5 minutes
+strategy/signal.go:408:	// Default 300 = the entire 5-minute window. Set to your window duration.
+strategy/signal.go:490:	// Example for a 5m market: min=45, max=210 allows entries only between
+strategy/signal.go:603:	// PairArbCVDMomentum* enable early-window entries directed by BTC CVD in low-gap markets.
+strategy/signal.go:623:	// PairArbSessionTrendBuckets is the number of past 5m windows to look back when
+strategy/signal.go:780:	// Skew25dMinYesBuy: require the Deribit 25-delta risk-reversal (call IV - put IV)
+strategy/signal.go:783:	Skew25dMinYesBuy float64
+strategy/signal.go:874:	// Eliminates persistent-elevation losses where BTC has been above open for the full 5 minutes.
+strategy/signal.go:985:		FlashBidFloorGoneWindowSec: 300,  // active for entire 5-minute window
+strategy/signal.go:1048:		Skew25dMinYesBuy:                    0,     // off; set +0.01 to require 1 vol pt bullish skew
+strategy/signal.go:1191:	windowEnd           time.Time // end of current 5-min window
+strategy/signal.go:1411:	const defaultCoeff = 9.0 // calibrated empirically for 5-min BTC windows
+strategy/signal.go:1478:// Must be called whenever a new 5-minute window starts.
+strategy/signal.go:1500:	// BTC 5m markets have fixed 300s windows.
+strategy/signal.go:1589:// btcGapSamples and returns the carry direction for the next market window.
+strategy/signal.go:1877:// window-end timestamp heuristic (pairWindowDuration), which can misidentify 5-minute
+polymarket/chainlink.go:68:	// btcSeriesID is the Polymarket series entity ID for BTC 5-min markets (for comment feed).
+polymarket/chainlink.go:83://	eventSlug  – current market slug, e.g. "btc-updown-5m-1771702200"
+polymarket/chainlink.go:84://	btcSeriesID – Polymarket series entity ID (default 10684 for BTC 5-min series)
+polymarket/derive_creds.go:22:	gammaProfileURL  = "https://gamma-api.polymarket.com/public-profile"
+polymarket/derive_creds.go:47:// via the Gamma public-profile API. Returns an error if not found.
+polymarket/derive_creds.go:49:	url := fmt.Sprintf("%s?address=%s", gammaProfileURL, eoaAddress)
+polymarket/derive_creds.go:52:		return "", fmt.Errorf("gamma API request failed: %w", err)
+polymarket/derive_creds.go:57:		return "", fmt.Errorf("gamma API error %d: %s", resp.StatusCode, string(body))
+polymarket/derive_creds.go:63:		return "", fmt.Errorf("invalid gamma API response: %w", err)
+polymarket/market.go:226:const gammaBaseURL = "https://gamma-api.polymarket.com"
+polymarket/market.go:228:// gammaEvent is the minimal shape returned by the Gamma events endpoint.
+polymarket/market.go:229:type gammaEvent struct {
+polymarket/market.go:232:	Markets []gammaMarket `json:"markets"`
+polymarket/market.go:235:type gammaMarket struct {
+polymarket/market.go:242:// GetMarketBySlug resolves a market slug via the Gamma API to get the
+polymarket/market.go:245:	// Step 1: Gamma API – find the event matching the slug.
+polymarket/market.go:246:	gammaURL := fmt.Sprintf("%s/events?slug=%s", gammaBaseURL, slug)
+polymarket/market.go:247:	req, err := http.NewRequestWithContext(ctx, http.MethodGet, gammaURL, nil)
+polymarket/market.go:249:		return nil, fmt.Errorf("gamma request: %w", err)
+polymarket/market.go:253:		return nil, fmt.Errorf("gamma fetch: %w", err)
+polymarket/market.go:259:		return nil, fmt.Errorf("gamma read: %w", err)
+polymarket/market.go:262:		return nil, fmt.Errorf("gamma api error %d: %s", resp.StatusCode, string(body))
+polymarket/market.go:265:	var events []gammaEvent
+polymarket/market.go:267:		return nil, fmt.Errorf("gamma parse: %w", err)
+polymarket/market.go:270:		return nil, fmt.Errorf("no gamma event found for slug %q", slug)
+polymarket/market.go:273:		return nil, fmt.Errorf("gamma event %q has no markets", slug)
+polymarket/market.go:278:		return nil, fmt.Errorf("gamma event %q has empty conditionId", slug)
+polymarket/safe_exec.go:127:	// gammaAPIBaseURL is the Polymarket gamma REST API endpoint used to query
+polymarket/safe_exec.go:129:	gammaAPIBaseURL = "https://gamma-api.polymarket.com"
+polymarket/safe_exec.go:132:// seGammaMarketIsPUSD queries the gamma API for a condition ID and returns true
+polymarket/safe_exec.go:139:func seGammaMarketIsPUSD(ctx context.Context, conditionIDHex string) (bool, error) {
+polymarket/safe_exec.go:140:	url := gammaAPIBaseURL + "/markets?conditionId=" + conditionIDHex
+polymarket/safe_exec.go:143:		return false, fmt.Errorf("seGammaMarketIsPUSD: build request: %w", err)
+polymarket/safe_exec.go:147:		return false, fmt.Errorf("seGammaMarketIsPUSD: http: %w", err)
+polymarket/safe_exec.go:151:		return false, fmt.Errorf("seGammaMarketIsPUSD: gamma API returned HTTP %d", resp.StatusCode)
+polymarket/safe_exec.go:155:	type gammaMarket struct {
+polymarket/safe_exec.go:159:	var markets []gammaMarket
+polymarket/safe_exec.go:161:		return false, fmt.Errorf("seGammaMarketIsPUSD: parse response: %w", err)
+polymarket/safe_exec.go:163:	// Gamma API ignores unknown conditionIds and returns paginated default results.
+polymarket/safe_exec.go:173:	// markets such as BTC 5-minute up/down).  Fall back to /events, which nests full
+polymarket/safe_exec.go:175:	eventsURL := gammaAPIBaseURL + "/events?conditionId=" + conditionIDHex
+polymarket/safe_exec.go:178:		return false, fmt.Errorf("seGammaMarketIsPUSD: events build request: %w", err)
+polymarket/safe_exec.go:182:		return false, fmt.Errorf("seGammaMarketIsPUSD: events http: %w", err)
+polymarket/safe_exec.go:188:			Markets []gammaMarket `json:"markets"`
+polymarket/safe_exec.go:200:	return false, fmt.Errorf("seGammaMarketIsPUSD: no market found for conditionId %s", conditionIDHex)
+polymarket/safe_exec.go:313:// It first queries the Polymarket gamma API to detect the market's collateral:
+polymarket/safe_exec.go:321:// On gamma API failure the function defaults to the USDC.e/adapter path (safe
+polymarket/safe_exec.go:508:	// Detect collateral via the gamma API.  On miss, fall back to on-chain balance check.
+polymarket/safe_exec.go:509:	gammaCtx, gammaCancel := context.WithTimeout(ctx, 10*time.Second)
+polymarket/safe_exec.go:510:	isPUSD, gammaErr := seGammaMarketIsPUSD(gammaCtx, "0x"+condIDHex)
+polymarket/safe_exec.go:511:	gammaCancel()
+polymarket/safe_exec.go:512:	if gammaErr != nil {
+polymarket/safe_exec.go:513:		fmt.Printf("RedeemCTFPosition: gamma API miss (%v); detecting collateral on-chain\n", gammaErr)
+polymarket/safe_exec.go:521:			// genuine-pUSD cases.  USDC.e markets are always indexed in gamma so they will
+polymarket/safe_exec.go:522:			// have been caught by the gamma step above.
+polymarket/safe_exec.go:523:			fmt.Printf("RedeemCTFPosition: gamma miss + no on-chain positions for %s (%v); defaulting to pUSD/CTF-direct\n", conditionID, detectErr)
+polymarket/cryptoprice.go:17:	// OpenPrice is the BTC price recorded at the market-open moment.
+polymarket/cryptoprice.go:28:// GetBTCOpenPrice fetches the reference BTC "price to beat" for a given market window.
+polymarket/cryptoprice.go:34:// Example for a 5-min market opening at 10:00 UTC:
+polymarket/cryptoprice.go:82:// windowDuration should match the active market type (5m, 15m, 1h).
