@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T21:46:16+00:00
+UPDATED_UTC=2026-08-26T21:46:24+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -118,10 +118,4 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-BTC 15m Matched Pair Engine
-│  Mode           ░░ PAPER TRADE ░░
-│  Balance      $1000.00 starting
-│  Started      2026-08-26 21:44:52 UTC
-·  paper balance: $1000.00
-·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
-·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
+
