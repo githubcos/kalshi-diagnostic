@@ -3,7 +3,7 @@ import json, subprocess, time, shutil, os
 from pathlib import Path
 from datetime import datetime, timezone
 HOME=Path('/home/ubuntu'); REPO=HOME/'kalshi-diagnostic'; BOT=HOME/'KalshiArbo'/'kalshiarbo'; STATE=HOME/'.kalshi_autopilot_state.json'; STATUS=REPO/'docs'/'agent'/'autopilot_status.json'; REPORT=REPO/'docs'/'agent'/'parity_gate_report.txt'; POLL=20
-STRESS_MARKER=HOME/'.kalshi_paper_stress_v1_applied'
+STRESS_MARKER=HOME/'.kalshi_paper_stress_v2_applied'
 GATES=[('PARTIAL_FILL','authoritative partial-fill quantity handling',['grossFillShares','SizeMatched','getFillsTimed','ComputeBuyFeeShares']),('HEDGE_TIMING','hedge admission and timing',['HedgeBy','pre-placed hedge','shouldAbortLeadWaitForFilledPreHedge','hedge']),('TIMEOUT_UNWIND','timeout and unwind semantics',['cancel_timeout','timeout','unwind','residualPosition']),('SETTLEMENT','settlement and final mark-to-market semantics',['markToMarket','settlement','BalancedAt','lockedProfit'])]
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 def run(cmd,cwd=None,timeout=900): return subprocess.run(cmd,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
@@ -38,22 +38,24 @@ def apply_paper_stress_once():
       'PairArbMaxCoinbaseSpreadUSD':0,
       'PairArbMinCoinbaseTakerImbalance':0,
       'PairArbMLFilterEnabled':False,
+      'MaxTradesPerSession':100,
+      'PairArbStopCooldownSec':0,
     }
-    required={'PaperTrade','PairArbEnabled','PairArbMinWindowSec','PairArbMaxWindowSec','PairArbMinBTCGapUSD','PairArbMaxBTCGapUSD','PairArbMinGapVelocityUSD','PairArbMinTokenPrice','PairArbMaxTokenPrice'}
+    required={'PaperTrade','PairArbEnabled','PairArbMinWindowSec','PairArbMaxWindowSec','PairArbMinBTCGapUSD','PairArbMaxBTCGapUSD','PairArbMinGapVelocityUSD','PairArbMinTokenPrice','PairArbMaxTokenPrice','MaxTradesPerSession'}
     missing=[name for name in required if norm(name) not in bynorm]
     if missing:
         write_status('PAPER_STRESS_CONFIG',0,'FAIL','Required non-secret config keys not found: '+', '.join(missing)+'. No settings changed.','MANUAL_CHECK'); return
-    backup=HOME/f'kalshiarbo_config_before_paper_stress_{datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")}.json'
+    backup=HOME/f'kalshiarbo_config_before_paper_stress_v2_{datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")}.json'
     shutil.copy2(cfgp,backup); os.chmod(backup,0o600)
     changed=[]
     for name,val in wanted.items():
-        key= bynorm.get(norm(name))
+        key=bynorm.get(norm(name))
         if key is not None:
             data[key]=val; changed.append(f'{key}={val}')
     tmp=cfgp.with_suffix('.json.tmp'); tmp.write_text(json.dumps(data,indent=2)+'\n'); os.chmod(tmp,0o600); tmp.replace(cfgp)
     STRESS_MARKER.write_text(utc()+'\n'); os.chmod(STRESS_MARKER,0o600)
     (REPO/'docs'/'agent'/'paper_stress_config.txt').write_text('UTC='+utc()+'\nLIVE_ALLOWED=false\nBACKUP='+str(backup)+'\n'+'\n'.join(changed)+'\n')
-    write_status('PAPER_STRESS_CONFIG',100,'PASS','High-frequency PAPER settings applied from existing config keys; credentials untouched. Restart PAPER to load them.','START_PAPER')
+    write_status('PAPER_STRESS_CONFIG',100,'PASS','High-frequency PAPER settings applied; session trade cap raised to 100 and PAIR-ARB stop cooldown removed. Credentials untouched. Restart PAPER to load them.','START_PAPER')
 def excerpts(path,needles,context=6):
     text=path.read_text(errors='replace').splitlines(); hits=[]; used=set()
     for needle in needles:
@@ -76,7 +78,7 @@ def write_gate_report(gate,title,hits):
         lines.append('')
     REPORT.write_text('\n'.join(lines)+'\n')
 def main():
-    apply_paper_stress_once(); publish_evidence('Apply high-frequency PAPER stress settings')
+    apply_paper_stress_once(); publish_evidence('Apply high-frequency PAPER stress settings v2')
     st=load_state(); st.setdefault('completed',{})
     while True:
         idx=int(st.get('gate_index',0))
