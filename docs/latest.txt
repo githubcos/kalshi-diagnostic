@@ -1,6 +1,6 @@
 KALSHIARBO — CURRENT EC2 STATUS
 ===============================
-UPDATED_UTC=2026-08-26T22:21:07+00:00
+UPDATED_UTC=2026-08-26T22:21:14+00:00
 MODE=PAPER
 LIVE_ORDERS_ALLOWED=false
 PROCESS=ALIVE
@@ -118,14 +118,4 @@ PAPER_TRADE=True
 TRADE_SIZE_USD=5
 
 === RECENT BOT EVIDENCE ===
-║  #1  pair_arb  buy 0.7639 → sell 0.7300  6sh  -$0.3092  pair_stop_loss  ║
-║  #2  pair_arb  buy 0.7538 → sell 0.7300  7sh  -$0.2554  pair_stop_loss  ║
-║  #3  pair_arb  buy 0.7538 → sell 0.7300  7sh  -$0.2554  pair_stop_loss  ║
-║  #4  pair_arb  buy 0.7539 → sell 0.7100  6sh  -$0.3838  pair_stop_loss  ║
-║  #5  pair_arb  buy 0.7827 → sell 0.7500  6sh  -$0.2960  pair_stop_loss  ║
-║  #6  pair_arb  buy 0.7639 → sell 0.7300  6sh  -$0.3092  pair_stop_loss  ║
-║  #7  pair_arb  buy 0.7827 → sell 0.7600  6sh  -$0.2330  pair_stop_loss  ║
-║  #8  pair_arb  buy 0.8030 → sell 0.7400  6sh  -$0.4780  pair_stop_loss  ║
-║  #9  pair_arb  buy 0.7827 → sell 0.7416  6sh  -$0.3488  pair_stop_loss  ║
-║  #10  pair_arb  buy 0.8115 → sell 0.6466  6sh  -$1.1028  pair_fill_leg_timeout  ║
-║  TOTAL P&L   -$3.9716   (-8.06%)                              ║
+
