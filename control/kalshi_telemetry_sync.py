@@ -3,7 +3,10 @@ import json, os, re, shutil, subprocess, time, sys, statistics
 from pathlib import Path
 from datetime import datetime, timezone
 HOME=Path('/home/ubuntu'); SRC=HOME/'kalshi-diagnostic'; TEL=HOME/'kalshi-agent-telemetry'; BOT=HOME/'KalshiArbo'/'kalshiarbo'; ERROR=HOME/'.kalshi_telemetry_error.txt'; INTERVAL=5
+SESSION_DIR=HOME/'KalshiArbo'/'session_history'; SESSION_MASTER=HOME/'KalshiArbo'/'session_history.txt'; SESSION_STATE=HOME/'.kalshi_session_archive_state.json'; SESSION_CURRENT=SESSION_DIR/'current_session.txt'
 ANSI=re.compile(r'\x1b\[[0-9;?]*[ -/]*[@-~]')
+PNL_RE=re.compile(r'P&L\s+([+-])\$([0-9]+(?:\.[0-9]+)?).*?Reason:\s*([A-Za-z0-9_\-]+)',re.I)
+BAL_RE=re.compile(r'(?:Balance|paper balance)\s*[:=]?\s*\$?(-?[0-9]+(?:\.[0-9]+)?)',re.I)
 
 def utc(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
 def run(cmd,cwd=None,timeout=120,check=False):
@@ -53,11 +56,65 @@ def percentile(vals,p):
     a=sorted(vals); idx=min(len(a)-1,max(0,int(round((len(a)-1)*p))))
     return a[idx]
 
+def current_bot_pid():
+    out=run(['bash','-lc',"ss -ltnp 2>/dev/null | awk '/:8085/ && /kalshiarbo/ {if (match($0,/pid=[0-9]+/)) {x=substr($0,RSTART+4,RLENGTH-4); print x; exit}}'"],timeout=20).stdout.strip()
+    return out or None
+
+def session_stats_from_log():
+    log=read_tail(BOT/'polyarb.log',3000000)
+    lines=[x.strip() for x in log.splitlines() if x.strip()]
+    starts=[i for i,x in enumerate(lines) if 'ACTIVE FLAGS paper=' in x]
+    if starts: lines=lines[starts[-1]:]
+    leads=sum(1 for x in lines if '[PAIR LEAD]' in x and 'EXECUTED' in x)
+    hedges=sum(1 for x in lines if '[PAIR HEDGE]' in x and 'EXECUTED' in x)
+    closes=0; wins=0; losses=0; pnl=0.0; reasons={}
+    for line in lines:
+        m=PNL_RE.search(line)
+        if not m: continue
+        v=float(m.group(2))*(1 if m.group(1)=='+' else -1); r=m.group(3)
+        closes+=1; pnl+=v; wins+=1 if v>0 else 0; losses+=1 if v<=0 else 0; reasons[r]=reasons.get(r,0)+1
+    bals=[]
+    for line in lines:
+        m=BAL_RE.search(line)
+        if m:
+            try: bals.append(float(m.group(1)))
+            except Exception: pass
+    cfg=safe_cfg(); start=float(cfg.get('PAPER_START_BALANCE',cfg.get('PaperStartBalance',0)) or 0)
+    end=bals[-1] if bals else (start+pnl if start else None)
+    return {'leads':leads,'hedges':hedges,'closes':closes,'wins':wins,'losses':losses,'realized_pnl':round(pnl,6),'start_balance':start or None,'end_balance':None if end is None else round(end,6),'close_reasons':reasons,'config':cfg}
+
+def render_session(s,ended_utc=None,termination='running'):
+    st=s.get('stats') or {}; closes=st.get('closes',0) or 0; leads=st.get('leads',0) or 0
+    wr=(st.get('wins',0)/closes) if closes else None; hr=(st.get('hedges',0)/leads) if leads else None
+    out=['KALSHIARBO PAPER SESSION','========================',f"SESSION_ID={s.get('session_id','')}",f"PID={s.get('pid','')}",f"START_UTC={s.get('start_utc','')}",f"END_UTC={ended_utc or 'RUNNING'}",f"TERMINATION={termination}",f"START_BALANCE={st.get('start_balance')}",f"END_BALANCE={st.get('end_balance')}",f"REALIZED_PNL={st.get('realized_pnl',0)}",f"LEADS={leads}",f"HEDGES={st.get('hedges',0)}",f"CLOSES={closes}",f"WINS={st.get('wins',0)}",f"LOSSES={st.get('losses',0)}",f"WIN_RATE={'NA' if wr is None else f'{wr:.6f}'}",f"HEDGE_RATE={'NA' if hr is None else f'{hr:.6f}'}",f"CLOSE_REASONS={json.dumps(st.get('close_reasons',{}),sort_keys=True)}",'LIVE_ORDERS_ALLOWED=false','CONFIG_JSON='+json.dumps(st.get('config',{}),sort_keys=True)]
+    return '\n'.join(out)+'\n'
+
+def archive_session_if_needed():
+    SESSION_DIR.mkdir(parents=True,exist_ok=True)
+    pid=current_bot_pid(); now=utc(); stats=session_stats_from_log()
+    try: prev=json.loads(SESSION_STATE.read_text()) if SESSION_STATE.exists() else None
+    except Exception: prev=None
+    if prev and prev.get('pid') and prev.get('pid') != pid:
+        prev['stats']=prev.get('stats') or {}
+        text=render_session(prev,now,'process_replaced' if pid else 'process_stopped')
+        stamp=re.sub(r'[^0-9]','',prev.get('start_utc',''))[:14] or datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+        sid=prev.get('session_id') or f'session_{stamp}_{prev.get("pid","")}'
+        (SESSION_DIR/f'{sid}.txt').write_text(text)
+        with SESSION_MASTER.open('a') as f: f.write(text+'\n')
+    if pid:
+        if not prev or prev.get('pid') != pid:
+            prev={'session_id':f"paper_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_pid{pid}",'pid':pid,'start_utc':now,'stats':stats}
+        else:
+            prev['stats']=stats
+        SESSION_STATE.write_text(json.dumps(prev,indent=2)+'\n')
+        SESSION_CURRENT.write_text(render_session(prev,None,'running'))
+    elif prev and prev.get('pid'):
+        SESSION_STATE.write_text(json.dumps({'pid':None,'last_archived_utc':now},indent=2)+'\n')
+        SESSION_CURRENT.write_text('NO ACTIVE PAPER SESSION\nUPDATED_UTC='+now+'\n')
+
 def extract_monitor():
     log=read_tail(BOT/'polyarb.log')
     lines=[x.strip() for x in log.splitlines() if x.strip()]
-    # polyarb.log is append-only across restarts. Only audit the newest runtime
-    # so old blockers/trades never contaminate the current live monitor.
     starts=[i for i,x in enumerate(lines) if 'ACTIVE FLAGS paper=' in x]
     if starts: lines=lines[starts[-1]:]
     ms=[]; lead_ms=[]; hedge_ms=[]; lookup_ms=[]
@@ -82,18 +139,15 @@ def extract_monitor():
     feed_bad=any(('kalshi' in x.lower() and ('feed not connected' in x.lower() or 'websocket disconnected' in x.lower())) for x in lines[-400:])
     feed_good=any(('kalshi feed: websocket orderbook connected' in x.lower()) for x in lines[-1000:])
     port=run(['bash','-lc',"ss -ltnp 2>/dev/null | grep ':8085' || true"],timeout=20).stdout.strip()
-    cfg=safe_cfg()
-    lowlines=[x.lower() for x in lines]
+    cfg=safe_cfg(); lowlines=[x.lower() for x in lines]
     lead_events=sum(1 for x in lowlines if ('pair arb lead buy' in x or 'pair_arb_lead_buy' in x or ('[pair lead]' in x and 'executed' in x)))
     hedge_events=sum(1 for x in lowlines if ('pair_arb_hedge' in x or ('[pair hedge]' in x and 'executed' in x) or ('hedge' in x and ('completed' in x or 'filled' in x or 'buy' in x))))
     closed=sum(1 for x in lowlines if ('locked pair closed' in x or 'trade_close' in x or ('p&l' in x and 'reason:' in x)))
-    reason_counts={}
-    reason_re=re.compile(r'reason:\s*([^│]+)',re.I)
+    reason_counts={}; reason_re=re.compile(r'reason:\s*([^│]+)',re.I)
     for line in lines:
         m=reason_re.search(line)
         if m:
-            reason=m.group(1).strip()
-            reason_counts[reason]=reason_counts.get(reason,0)+1
+            reason=m.group(1).strip(); reason_counts[reason]=reason_counts.get(reason,0)+1
     status='PASS'; reasons=[]
     if not port: status='FAIL'; reasons.append('paper process is not listening on 8085')
     if feed_bad and not feed_good: status='WARN'; reasons.append('Kalshi feed disconnect warning observed')
@@ -115,6 +169,7 @@ def monitor_text(m):
     return '\n'.join(out)+'\n'
 
 def sync_once():
+    archive_session_if_needed()
     ensure_clone(); run(['git','fetch','-q','origin','main'],TEL,check=True); run(['git','reset','--hard','origin/main'],TEL,check=True)
     src_agent=SRC/'docs'/'agent'; dst_agent=TEL/'docs'/'agent'; dst_agent.mkdir(parents=True,exist_ok=True)
     for name in ['progress.txt','latest.txt','local_error.txt','self_update_error.txt','autopilot_status.json','autopilot_report.txt','parity_gate_report.txt','parity_live_evidence.txt']:
@@ -124,7 +179,7 @@ def sync_once():
         for p in (src_agent/'history').glob('*.txt'): copy_if_exists(p,dst_agent/'history'/p.name)
     status=local_runtime_status(); (dst_agent/'runtime_status.json').write_text(json.dumps(status,indent=2)+'\n')
     state=status.get('state') or {}; hb=status.get('heartbeat') or {}; ap=status.get('autopilot') or {}
-    tel_text=('KALSHI TELEMETRY ONLINE\n'+f"UPDATED_UTC={status['utc']}\n"+f"PUBLISHER_PID={status['publisher_pid']}\n"+f"AGENT_HEARTBEAT_UTC={hb.get('utc','unknown')}\n"+f"AGENT_STATUS={hb.get('status','unknown')}\n"+f"AGENT_JOB={hb.get('job_id','')}\n"+f"LAST_JOB_ID={state.get('last_job_id','')}\n"+f"LAST_RESULT={state.get('last_result','')}\n"+f"LAST_RUN_UTC={state.get('last_run_utc','')}\n"+f"AUTOPILOT_GATE_INDEX={ap.get('gate_index','')}\n"+f"AUTOPILOT_COMPLETED={','.join((ap.get('completed') or {}).keys())}\n")
+    tel_text=('KALSHI TELEMETRY ONLINE\n'+f"UPDATED_UTC={status['utc']}\n"+f"PUBLISHER_PID={status['publisher_pid']}\n"+f"AGENT_HEARTBEAT_UTC={hb.get('utc','unknown')}\n"+f"AGENT_STATUS={hb.get('status','unknown')}\n"+f"AGENT_JOB={hb.get('job_id','')}\n"+f"LAST_JOB_ID={state.get('last_job_id','')}\n"+f"LAST_RESULT={state.get('last_result','')}\n"+f"LAST_RUN_UTC={state.get('last_run_utc','')}\n"+f"AUTOPILOT_GATE_INDEX={ap.get('gate_index','')}\n"+f"AUTOPILOT_COMPLETED={','.join((ap.get('completed') or {}).keys())}\n"+f"SESSION_MASTER={SESSION_MASTER}\n"+f"SESSION_CURRENT={SESSION_CURRENT}\n")
     (dst_agent/'telemetry_status.txt').write_text(tel_text)
     mon=extract_monitor(); (dst_agent/'live_trade_monitor.json').write_text(json.dumps(mon,indent=2)+'\n'); (dst_agent/'live_trade_monitor.txt').write_text(monitor_text(mon))
     run(['git','add','docs/agent'],TEL,check=True)
