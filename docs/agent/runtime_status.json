@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T10:03:11+00:00",
+  "utc": "2026-08-26T10:03:21+00:00",
   "publisher_pid": 548,
   "heartbeat": {
-    "utc": "2026-08-26T10:03:06+00:00",
-    "epoch": 1787738586.688901,
+    "utc": "2026-08-26T10:03:17+00:00",
+    "epoch": 1787738597.800898,
     "pid": 544,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-paper-positive-edge-profile-v1-20260826-1004"
   },
   "state": {
     "last_job_id": "kalshi-feed-rest-diagnostics-v1b-20260826-0917",
