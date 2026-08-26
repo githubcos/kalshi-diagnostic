@@ -1,307 +1,307 @@
-KALSHI FINITE PARITY GATE: TIMEOUT_UNWIND
-UTC=2026-08-26T00:29:18+00:00
-TITLE=timeout and unwind semantics
+KALSHI FINITE PARITY GATE: SETTLEMENT
+UTC=2026-08-26T00:29:39+00:00
+TITLE=settlement and final mark-to-market semantics
 PAPER_ALIVE=True
 LIVE_ALLOWED=false
 HITS=20
 
---- cancel_timeout at strategy/trader.go:1425 (context 1419-1431) ---
-01419: 					}
-01420: 				}
-01421: 			}
-01422: 		}
-01423: 		postSubmitLookupMS = time.Since(pollStart).Milliseconds()
-01424: 		if correctedFill <= 0 && grossFillShares <= 0 {
-01425: 			_ = t.cancelOrderTimed(ctx, requestName+"_cancel_timeout", orderID)
-01426: 			// Cancel-vs-match race hardening: the order can be MATCHED while the cancel
-01427: 			// request is in-flight or while status propagation lags. Reconcile once more
-01428: 			// before declaring timeout so we can continue hedge flow immediately.
-01429: 			if gr, grErr := t.getOrderTimed(ctx, requestName+"_post_cancel_lookup", orderID); grErr == nil && gr != nil {
-01430: 				pcStatus := strings.ToLower(strings.TrimSpace(gr.Status))
-01431: 				if pcStatus == "matched" || pcStatus == "filled" {
+--- markToMarket at strategy/trader.go:360 (context 354-366) ---
+00354: 	if p.NoShares < p.YesShares {
+00355: 		return "NO", p.YesShares - p.NoShares, p.sideAveragePrice("YES")
+00356: 	}
+00357: 	return "", 0, 0
+00358: }
+00359: 
+00360: func (p *PairArbPosition) markToMarket(yesPrice float64, noPrices ...float64) float64 {
+00361: 	if p == nil || yesPrice <= 0 {
+00362: 		return 0
+00363: 	}
+00364: 
+00365: 	noPrice := 0.0
+00366: 	if len(noPrices) > 0 {
 
---- timeout at strategy/trader.go:27 (context 21-33) ---
-00021: 
-00022: 	"github.com/polyarb/display"
-00023: 	"github.com/polyarb/polymarket"
-00024: )
-00025: 
-00026: // isNetworkError returns true for errors that indicate the HTTP request was sent
-00027: // but the response was never received (timeout, EOF, connection reset). In these
-00028: // cases a PlaceOrder POST may have reached the server and created an order on the
-00029: // CLOB even though our client got an error  requiring orphan recovery.
-00030: func isNetworkError(err error) bool {
-00031: 	if err == nil {
-00032: 		return false
-00033: 	}
+--- markToMarket at strategy/trader.go:545 (context 539-551) ---
+00539: 	PairExpectedProfit     float64
+00540: 	PairExpectedROIPct     float64
+00541: 	PairResidualSide       string
+00542: 	PairResidualShares     float64
+00543: 	PairHedgeSide          string
+00544: 	PairHedgeMaxPrice      float64
+00545: 	PairMarkToMarket       float64
+00546: 	PairExitState          string
+00547: 	PairExitStateNote      string
+00548: 	PairYesExitOrderID     string
+00549: 	PairNoExitOrderID      string
+00550: 	PairExitPlacedAt       time.Time
+00551: }
 
---- timeout at strategy/trader.go:36 (context 30-42) ---
-00030: func isNetworkError(err error) bool {
-00031: 	if err == nil {
-00032: 		return false
-00033: 	}
-00034: 	s := err.Error()
-00035: 	if strings.Contains(s, "context deadline exceeded") ||
-00036: 		strings.Contains(s, "Client.Timeout") ||
-00037: 		strings.Contains(s, "EOF") ||
-00038: 		strings.Contains(s, "connection reset") ||
-00039: 		strings.Contains(s, "i/o timeout") {
-00040: 		return true
-00041: 	}
-00042: 	var netErr net.Error
+--- markToMarket at strategy/trader.go:8184 (context 8178-8190) ---
+08178: 			avgCost = p.totalSpent() / lockedShares
+08179: 		}
+08180: 		currentNoPrice := 0.0
+08181: 		if len(currentNoPrices) > 0 {
+08182: 			currentNoPrice = currentNoPrices[0]
+08183: 		}
+08184: 		pnl := p.markToMarket(currentYesPrice, currentNoPrice)
+08185: 		return fmt.Sprintf(
+08186: 			"POSITION [PAIR locked=%.2f avg_cost=%.4f yes=%.2f no=%.2f pnl=$%.4f held=%s win_rem=%s]",
+08187: 			lockedShares,
+08188: 			avgCost,
+08189: 			p.YesShares,
+08190: 			p.NoShares,
 
---- timeout at strategy/trader.go:39 (context 33-45) ---
-00033: 	}
-00034: 	s := err.Error()
-00035: 	if strings.Contains(s, "context deadline exceeded") ||
-00036: 		strings.Contains(s, "Client.Timeout") ||
-00037: 		strings.Contains(s, "EOF") ||
-00038: 		strings.Contains(s, "connection reset") ||
-00039: 		strings.Contains(s, "i/o timeout") {
-00040: 		return true
-00041: 	}
-00042: 	var netErr net.Error
-00043: 	if errors.As(err, &netErr) && netErr.Timeout() {
-00044: 		return true
-00045: 	}
+--- markToMarket at strategy/trader.go:8232 (context 8226-8238) ---
+08226: 			avgCost = p.totalSpent() / lockedShares
+08227: 		}
+08228: 		currentNoPrice := 0.0
+08229: 		if len(currentNoPrices) > 0 {
+08230: 			currentNoPrice = currentNoPrices[0]
+08231: 		}
+08232: 		return "PAIR", lockedShares, avgCost, p.markToMarket(currentYesPrice, currentNoPrice)
+08233: 	}
+08234: 	p := t.position
+08235: 	tokenPrice := currentYesPrice
+08236: 	side := "YES"
+08237: 	if p.IsNoSide {
+08238: 		tokenPrice = math.Round((1.0-currentYesPrice)*100) / 100
 
---- timeout at strategy/trader.go:43 (context 37-49) ---
-00037: 		strings.Contains(s, "EOF") ||
-00038: 		strings.Contains(s, "connection reset") ||
-00039: 		strings.Contains(s, "i/o timeout") {
-00040: 		return true
-00041: 	}
-00042: 	var netErr net.Error
-00043: 	if errors.As(err, &netErr) && netErr.Timeout() {
-00044: 		return true
-00045: 	}
-00046: 	return false
-00047: }
-00048: 
-00049: func isAmbiguousPlaceOrderParseError(err error) bool {
+--- markToMarket at strategy/trader.go:8284 (context 8278-8290) ---
+08278: 			HasPosition:            true,
+08279: 			Side:                   "PAIR",
+08280: 			Type:                   "pair_arb",
+08281: 			BuyPrice:               avgCost,
+08282: 			Shares:                 lockedShares,
+08283: 			USDSpent:               pair.totalSpent(),
+08284: 			UnrealizedPnL:          pair.markToMarket(currentYesPrice, currentNoPrice),
+08285: 			HeldSec:                time.Since(pair.OpenedAt).Seconds(),
+08286: 			PairActive:             true,
+08287: 			PairLeadSide:           pair.LeadSide,
+08288: 			PairYesFilled:          pair.YesShares > 0,
+08289: 			PairNoFilled:           pair.NoShares > 0,
+08290: 			PairYesAvgPrice:        pair.sideAveragePrice("YES"),
 
---- timeout at strategy/trader.go:407 (context 401-413) ---
-00401: 	PairArbCarryEarlySec         int
-00402: 	PairArbCarryOppDiscountCents float64
-00403: 	PairArbMinLockedProfitCents  float64
-00404: 	// PairArbCVDMomentumLockedProfitCents is the looser hedge target (in cents) used for
-00405: 	// CVD momentum entries where the opposite token starts near 0.50. 0 = use default.
-00406: 	PairArbCVDMomentumLockedProfitCents                float64
-00407: 	PairArbHedgeTimeoutSec                             int
-00408: 	PairArbStopLossCents                               float64
-00409: 	PairArbStopLossMinHoldSec                          int
-00410: 	PairArbStopLossMinGapAgainstUSD                    float64
-00411: 	PairArbUnprofitableAbortGraceSec                   int
-00412: 	PairArbUnprofitableAbortMinGapAgainstUSD           float64
-00413: 	PairArbLeadBuySlipTicks                            int
+--- markToMarket at strategy/trader.go:8306 (context 8300-8312) ---
+08300: 			PairExpectedProfit:     expectedProfit,
+08301: 			PairExpectedROIPct:     expectedROIPct,
+08302: 			PairResidualSide:       residualSide,
+08303: 			PairResidualShares:     residualShares,
+08304: 			PairHedgeSide:          hedgeSide,
+08305: 			PairHedgeMaxPrice:      hedgeMaxPrice,
+08306: 			PairMarkToMarket:       pair.markToMarket(currentYesPrice, currentNoPrice),
+08307: 			PairExitState:          pair.ExitState,
+08308: 			PairExitStateNote:      pair.ExitStateNote,
+08309: 			PairYesExitOrderID:     pair.YesExitOrderID,
+08310: 			PairNoExitOrderID:      pair.NoExitOrderID,
+08311: 			PairExitPlacedAt:       pair.ExitOrdersPlacedAt,
+08312: 		}
 
---- timeout at strategy/trader.go:414 (context 408-420) ---
-00408: 	PairArbStopLossCents                               float64
-00409: 	PairArbStopLossMinHoldSec                          int
-00410: 	PairArbStopLossMinGapAgainstUSD                    float64
-00411: 	PairArbUnprofitableAbortGraceSec                   int
-00412: 	PairArbUnprofitableAbortMinGapAgainstUSD           float64
-00413: 	PairArbLeadBuySlipTicks                            int
-00414: 	PairArbLeadBuyTimeoutSec                           int
-00415: 	PairArbLeadOrderType                               polymarket.OrderType
-00416: 	PairArbDualPrePlace                                bool
-00417: 	PairArbHedgePreOffsetCents                         float64
-00418: 	PairArbMaxSignalAgeSec                             int
-00419: 	PairArbMaxCLAgeSec                                 int
-00420: 	PairArbSellAt99                                    bool
+--- settlement at strategy/trader.go:3371 (context 3365-3377) ---
+03365: 	display.Info(fmt.Sprintf("resolution pre-close entry filled for %s at %.3f", label, fillPrice))
+03366: 	if time.Now().After(windowEnd) {
+03367: 		resolveCtx, resolveCancel := context.WithTimeout(context.Background(), 65*time.Second)
+03368: 		resolvedYes, resolveErr := resolveWinningSide(resolveCtx)
+03369: 		resolveCancel()
+03370: 		if resolveErr != nil {
+03371: 			display.Warn(fmt.Sprintf("resolution pre-close settlement fallback used for %s: %v", label, resolveErr))
+03372: 		}
+03373: 		t.SettleExpiredPosition(ctx, resolvedYes)
+03374: 	}
+03375: 	return true
+03376: }
+03377: 
 
---- timeout at strategy/trader.go:792 (context 786-798) ---
-00786: 	}
-00787: 	return strings.Contains(message, "pair arb: fak not filled") ||
-00788: 		strings.Contains(message, "pair arb: lead buy not filled")
-00789: }
-00790: 
-00791: const (
-00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
-00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
-00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
-00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
-00796: 	// double-placing if the first request reached the server but the response was lost.
-00797: 	pairArbLeadMaxAttempts  = 1
-00798: 	pairArbHedgeMaxAttempts = 1
+--- settlement at strategy/trader.go:3900 (context 3894-3906) ---
+03894: 	FindRecentOrder(context.Context, string) (*polymarket.GetOrderResponse, error)
+03895: 	FindRecentTrade(context.Context, string) (*polymarket.GetOrderResponse, error)
+03896: 	FetchCurrentPositions(context.Context, int, int) ([]polymarket.UserPosition, error)
+03897: 	FetchUSDCBalance(context.Context) (float64, error)
+03898: 	ResolveMarket(context.Context, string) (bool, bool, error)
+03899: 
+03900: 	// Legacy Polymarket settlement/allowance methods.
+03901: 	// Kalshi adapter will explicitly reject these; Kalshi does not use CTF,
+03902: 	// Polygon token allowances, or claim redemption.
+03903: 	FetchConditionalBalanceAllowance(context.Context, string) (*polymarket.BalanceAllowanceResponse, error)
+03904: 	HasCTFBalance(context.Context, string) (bool, error)
+03905: 	RedeemCTFPosition(context.Context, string, bool) error
+03906: 	TriggerConditionalApproval(context.Context, string, time.Duration) error
 
---- timeout at strategy/trader.go:793 (context 787-799) ---
-00787: 	return strings.Contains(message, "pair arb: fak not filled") ||
-00788: 		strings.Contains(message, "pair arb: lead buy not filled")
-00789: }
-00790: 
-00791: const (
-00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
-00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
-00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
-00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
-00796: 	// double-placing if the first request reached the server but the response was lost.
-00797: 	pairArbLeadMaxAttempts  = 1
-00798: 	pairArbHedgeMaxAttempts = 1
-00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
+--- settlement at strategy/trader.go:3986 (context 3980-3992) ---
+03980: 	tickSizeMu                  sync.RWMutex
+03981: 	tickSizeByToken             map[string]tickSizeSnapshot
+03982: 	pairArbRetryAfter           time.Time
+03983: 	pairArbForceCloseRetryAfter time.Time
+03984: 	// lastPairArbCloseAt is stamped whenever a pair arb position is legitimately closed.
+03985: 	// Used to suppress the orphan-liquidation trigger when the wallet API still shows
+03986: 	// the just-sold shares (settlement / indexing lag).
+03987: 	lastPairArbCloseAt time.Time
+03988: 	// lastPairArbCloseConditionID is the condition ID tied to lastPairArbCloseAt.
+03989: 	// Used to scope short post-close re-entry holds to the same market only.
+03990: 	lastPairArbCloseConditionID string
+03991: 	// pairArbHedgeOrphanFlag is set when forceClosePairArb fires while a pre-placed hedge
+03992: 	// order was still tracked (pendingHedgePrePlace != nil). In that case the hedge may
 
---- timeout at strategy/trader.go:794 (context 788-800) ---
-00788: 		strings.Contains(message, "pair arb: lead buy not filled")
-00789: }
-00790: 
-00791: const (
-00792: 	pairArbPostSubmitLookupTimeout = 200 * time.Millisecond
-00793: 	pairArbLeadSubmitTimeout       = 4000 * time.Millisecond
-00794: 	pairArbHedgeSubmitTimeout      = 2500 * time.Millisecond
-00795: 	// GTC limit orders: single submit attempt only Ã¢â‚¬â€ retrying a GTC submit risks
-00796: 	// double-placing if the first request reached the server but the response was lost.
-00797: 	pairArbLeadMaxAttempts  = 1
-00798: 	pairArbHedgeMaxAttempts = 1
-00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
-00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
+--- settlement at strategy/trader.go:4632 (context 4626-4638) ---
+04626: }
+04627: 
+04628: func isPendingHedgeBuy(requestName string) bool {
+04629: 	return strings.HasPrefix(requestName, "pair_arb_hedge_buy")
+04630: }
+04631: 
+04632: func (t *Trader) pendingHedgeSettlementActive(now time.Time) bool {
+04633: 	if t.pendingHedgePrePlace != nil {
+04634: 		if t.pendingHedgePrePlace.PlacedAt.IsZero() || now.Sub(t.pendingHedgePrePlace.PlacedAt) < pairArbHedgeSettleGrace {
+04635: 			return true
+04636: 		}
+04637: 	}
+04638: 	if t.pendingPairArb != nil && (isPendingHedgeCreditProbe(t.pendingPairArb.RequestName) || isPendingHedgeBuy(t.pendingPairArb.RequestName)) {
 
---- timeout at strategy/trader.go:803 (context 797-809) ---
-00797: 	pairArbLeadMaxAttempts  = 1
-00798: 	pairArbHedgeMaxAttempts = 1
-00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
-00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
-00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
-00802: 	pairArbLimitBuySlip = 0.02
-00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
-00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
-00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
-00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
-00807: )
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
+--- settlement at strategy/trader.go:5106 (context 5100-5112) ---
+05100: 		zap.String("yes_token", yesTokenID),
+05101: 		zap.String("no_token", noTokenID),
+05102: 	)
+05103: 	t.liquidateOrphanedPairArbInventory(ctx, yesTokenID, noTokenID, approxYesPrice)
+05104: 	// Always clear the pending order after liquidation: the sell has been submitted so the
+05105: 	// order-ID no longer represents live exposure. ensureNoPairArbInventory may fail due to
+05106: 	// settlement lag even after a successful sell, which previously left pendingPairArb set
+05107: 	// forever and blocked every future entry with "pending order is MATCHED".
+05108: 	t.clearPendingPairArbOrder()
+05109: 	go t.monitorAndLiquidateOrphanedPairArbInventory(yesTokenID, noTokenID, approxYesPrice)
+05110: }
+05111: 
+05112: func (t *Trader) reconcilePendingPairArbOrder(ctx context.Context) error {
 
---- timeout at strategy/trader.go:804 (context 798-810) ---
-00798: 	pairArbHedgeMaxAttempts = 1
-00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
-00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
-00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
-00802: 	pairArbLimitBuySlip = 0.02
-00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
-00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
-00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
-00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
-00807: )
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
-00810: 	if strings.Contains(requestName, "lead") {
+--- settlement at strategy/trader.go:5813 (context 5807-5819) ---
+05807: 		side = "no"
+05808: 	}
+05809: 	return conditionID + ":" + side
+05810: }
+05811: 
+05812: func (t *Trader) enqueueClaimRetry(claim pendingClaim) {
+05813: 	// Kalshi settlement is automatic after market finalization.
+05814: 	return
+05815: }
+05816: 
+05817: func (t *Trader) DashboardClaimSnapshot() DashboardClaimSnapshot {
+05818: 	t.claimMu.Lock()
+05819: 	defer t.claimMu.Unlock()
 
---- timeout at strategy/trader.go:805 (context 799-811) ---
-00799: 	// pairArbLimitBuySlip is the default price offset above the signal price for GTC
-00800: 	// limit buy orders.  Crossing the spread by 2 cents ensures near-instant fill
-00801: 	// while avoiding the all-or-nothing failure mode of FAK orders.
-00802: 	pairArbLimitBuySlip = 0.02
-00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
-00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
-00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
-00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
-00807: )
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
-00810: 	if strings.Contains(requestName, "lead") {
-00811: 		return pairArbLeadSubmitTimeout
+--- settlement at strategy/trader.go:6303 (context 6297-6309) ---
+06297: 				zap.Float64("tracked_shares", pos.Shares),
+06298: 			)
+06299: 			sellShares = pos.Shares
+06300: 		}
+06301: 		if sellShares <= 0 {
+06302: 			pos.SellPending = false
+06303: 			// Shares not yet visible in balance API (common if settlement is delayed).
+06304: 			// Back off for 2s to avoid hammering the API on every 500ms tick.
+06305: 			pos.SellDelayUntil = time.Now().Add(2 * time.Second)
+06306: 			t.savePositionState()
+06307: 			return fmt.Errorf("place sell order: no sellable conditional token balance available (will retry in 2s)")
+06308: 		}
+06309: 		if sellShares < pos.Shares {
 
---- timeout at strategy/trader.go:809 (context 803-815) ---
-00803: 	// pairArbGTCPollDefaultTimeout is the fallback maximum time to wait for a LIVE GTC
-00804: 	// lead buy to fill when PAIR_ARB_LEAD_BUY_TIMEOUT_SEC is not configured.
-00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
-00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
-00807: )
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
-00810: 	if strings.Contains(requestName, "lead") {
-00811: 		return pairArbLeadSubmitTimeout
-00812: 	}
-00813: 	if strings.Contains(requestName, "hedge") {
-00814: 		return pairArbHedgeSubmitTimeout
-00815: 	}
+--- settlement at strategy/trader.go:7132 (context 7126-7138) ---
+07126: 				return false, lastBal, ctx.Err()
+07127: 			case <-time.After(settleProbeInterval):
+07128: 			}
+07129: 		}
+07130: 	}
+07131: 	if lastErr != nil {
+07132: 		t.logger.Warn("trader: pair arb sell-at-99 settlement probe error",
+07133: 			zap.String("side", side),
+07134: 			zap.String("token_id", tokenID),
+07135: 			zap.Float64("last_balance", lastBal),
+07136: 			zap.Error(lastErr),
+07137: 		)
+07138: 	}
 
---- timeout at strategy/trader.go:811 (context 805-817) ---
-00805: 	pairArbGTCPollDefaultTimeout = 3 * time.Second
-00806: 	pairArbGTCPollInterval       = 250 * time.Millisecond
-00807: )
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
-00810: 	if strings.Contains(requestName, "lead") {
-00811: 		return pairArbLeadSubmitTimeout
-00812: 	}
-00813: 	if strings.Contains(requestName, "hedge") {
-00814: 		return pairArbHedgeSubmitTimeout
-00815: 	}
-00816: 	return pairArbHedgeSubmitTimeout
-00817: }
+--- settlement at strategy/trader.go:7466 (context 7460-7472) ---
+07460: 			settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+07461: 			if settleErr != nil {
+07462: 				return settleErr
+07463: 			}
+07464: 			if !settled {
+07465: 				t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+07466: 				t.setPairExitState(pair, pairExitStateOrdersLive, "window complete; fill seen, awaiting settlement confirmation")
+07467: 				t.savePositionState()
+07468: 				return nil
+07469: 			}
+07470: 			walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+07471: 			if balErr != nil {
+07472: 				return balErr
 
---- timeout at strategy/trader.go:814 (context 808-820) ---
-00808: 
-00809: func pairArbSubmitTimeoutForRequest(requestName string) time.Duration {
-00810: 	if strings.Contains(requestName, "lead") {
-00811: 		return pairArbLeadSubmitTimeout
-00812: 	}
-00813: 	if strings.Contains(requestName, "hedge") {
-00814: 		return pairArbHedgeSubmitTimeout
-00815: 	}
-00816: 	return pairArbHedgeSubmitTimeout
-00817: }
-00818: 
-00819: func pairArbSubmitMaxAttemptsForRequest(requestName string) int {
-00820: 	if strings.Contains(requestName, "lead") {
+--- settlement at strategy/trader.go:7528 (context 7522-7534) ---
+07522: 	settled, settleErr := t.pairArbFilledLegsSettled(ctx, pair, yesFilled, noFilled)
+07523: 	if settleErr != nil {
+07524: 		return settleErr
+07525: 	}
+07526: 	if !settled {
+07527: 		t.resetUnsettledPairExitLegs(ctx, pair, yesFilled, noFilled)
+07528: 		t.setPairExitState(pair, pairExitStateOrdersLive, "fill reported; awaiting balance settlement confirmation")
+07529: 		t.savePositionState()
+07530: 		return nil
+07531: 	}
+07532: 	walletFlat, yesBal, noBal, balErr := t.pairArbWalletExitConfirmed(ctx, pair)
+07533: 	if balErr != nil {
+07534: 		return balErr
 
---- timeout at strategy/trader.go:816 (context 810-822) ---
-00810: 	if strings.Contains(requestName, "lead") {
-00811: 		return pairArbLeadSubmitTimeout
-00812: 	}
-00813: 	if strings.Contains(requestName, "hedge") {
-00814: 		return pairArbHedgeSubmitTimeout
-00815: 	}
-00816: 	return pairArbHedgeSubmitTimeout
-00817: }
-00818: 
-00819: func pairArbSubmitMaxAttemptsForRequest(requestName string) int {
-00820: 	if strings.Contains(requestName, "lead") {
-00821: 		return pairArbLeadMaxAttempts
-00822: 	}
+--- settlement at strategy/trader.go:7616 (context 7610-7622) ---
+07610: 		if pos.IsResolutionSnipe {
+07611: 			if !winning {
+07612: 				return t.closePosition(ctx, tokenPrice,
+07613: 					fmt.Sprintf("resolution_snipe_losing_end (rem=%.0fs)", time.Until(pos.WindowEnd).Seconds()))
+07614: 			}
+07615: 			// Winning resolution snipe: sell at 0.99 now rather than waiting for CTF
+07616: 			// settlement (which takes 1-2 minutes after window close).
+07617: 			return t.closePosition(ctx, 0.99,
+07618: 				fmt.Sprintf("resolution_snipe_winning_sell99 (btc=%.2f, open=%.2f, rem=%.0fs)",
+07619: 					btcLatest, openPrice, time.Until(pos.WindowEnd).Seconds()))
+07620: 		}
+07621: 		// Conviction positions manage their own expiry via the 5s gate below;
+07622: 		// do NOT apply the normal safeExitBuffer close here (would fire too early).
 
---- timeout at strategy/trader.go:847 (context 841-853) ---
-00841: 
-00842: func (t *Trader) asyncPairArbBuyReconcile(orderID, tokenID, requestName, requestID string) {
-00843: 	if orderID == "" || tokenID == "" {
-00844: 		return
-00845: 	}
-00846: 	go func() {
-00847: 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-00848: 		defer cancel()
-00849: 
-00850: 		var avgFill float64
-00851: 		var grossShares float64
-00852: 		if gr, err := t.getOrderTimed(ctx, requestName+"_async_lookup", orderID, zap.String("request_id", requestID)); err == nil && gr != nil {
-00853: 			if prc, prcErr := strconv.ParseFloat(gr.Price, 64); prcErr == nil && prc > 0 && prc < 1.0 {
+--- settlement at strategy/trader.go:7684 (context 7678-7690) ---
+07678: 	if now.After(pos.ExpiresAt) {
+07679: 		if pos.IsScalp {
+07680: 			return t.closePosition(ctx, tokenPrice, "max_hold_timeout")
+07681: 		}
+07682: 		if winning {
+07683: 			if pos.IsResolutionSnipe {
+07684: 				// Winning resolution positions hold through settlement and claim.
+07685: 				return nil
+07686: 			}
+07687: 			if pos.IsConviction {
+07688: 				// Hold-to-resolution entries exit at 0.99 near expiry once they are winning.
+07689: 				reason := "conviction_expiry_sell99"
+07690: 				if pos.IsReversalSnipe {
 
---- timeout at strategy/trader.go:893 (context 887-899) ---
-00887: 		return
-00888: 	}
-00889: 	if minExpected < pairArbShareDust {
-00890: 		minExpected = pairArbShareDust
-00891: 	}
-00892: 	go func() {
-00893: 		ctx, cancel := context.WithTimeout(context.Background(), pairArbLeadCreditGrace)
-00894: 		defer cancel()
-00895: 
-00896: 		credited, bal, err := t.pairArbBuyCreditConfirmedWithRetry(ctx, tokenID, minExpected, 20, 500*time.Millisecond)
-00897: 		if err != nil {
-00898: 			t.logger.Warn("trader: async lead credit probe errored; keeping pending order for reconciliation",
-00899: 				zap.String("request", requestName),
+--- settlement at strategy/trader.go:7815 (context 7809-7821) ---
+07809: // PostCloseGraceSell attempts to sell any remaining winning position on the CLOB
+07810: // during the ~30-60 second grace window that remains open after the market closes.
+07811: // The CLOB typically matches orders at 0.99 for the winning side during this period.
+07812: //
+07813: // It is a no-op for:
+07814: //   - flat positions (nothing to sell)
+07815: //   - paper mode (settlement is handled by SettleExpiredPosition)
+07816: //   - the losing side (tokens will be worth $0.00; selling at 0.99 would be a loss)
+07817: //
+07818: // resolvedYes should reflect the final BTC vs open-price comparison.
+07819: // Any shares not sold within graceDuration are left for SettleExpiredPosition.
+07820: func (t *Trader) PostCloseGraceSell(ctx context.Context, resolvedYes bool, graceDuration time.Duration) error {
+07821: 	if t.pairedPosition != nil {
 
---- timeout at strategy/trader.go:916 (context 910-922) ---
-00910: 				zap.String("request_id", requestID),
-00911: 				zap.String("order_id", orderID),
-00912: 				zap.Float64("wallet_balance", bal),
-00913: 				zap.Float64("min_expected", minExpected),
-00914: 			)
-00915: 			if t.pendingPairArb != nil && t.pendingPairArb.OrderID == orderID {
-00916: 				reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 3*time.Second)
-00917: 				defer reconcileCancel()
-00918: 				if recErr := t.reconcilePendingPairArbOrder(reconcileCtx); recErr != nil {
-00919: 					t.logger.Warn("trader: async lead credit reconcile failed",
-00920: 						zap.String("request", requestName),
-00921: 						zap.String("request_id", requestID),
-00922: 						zap.String("order_id", orderID),
+--- settlement at strategy/trader.go:7832 (context 7826-7838) ---
+07826: 	}
+07827: 	if t.cfg.PaperTrade {
+07828: 		return nil
+07829: 	}
+07830: 	pos := t.position
+07831: 	if pos.IsResolutionSnipe {
+07832: 		t.logger.Info("trader: post-close grace sell skipped for resolution position; waiting for settlement claim",
+07833: 			zap.String("condition_id", pos.ConditionID),
+07834: 			zap.Bool("is_no_side", pos.IsNoSide),
+07835: 		)
+07836: 		return nil
+07837: 	}
+07838: 	onWinningSide := (!pos.IsNoSide && resolvedYes) || (pos.IsNoSide && !resolvedYes)
 
