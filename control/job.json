@@ -1,8 +1,10 @@
 {
-  "id": "kalshi-forensic-counter-refresh-v1-20260826-0056",
+  "id": "kalshi-paper-high-volume-data-v2-20260826-0100",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "UPDATE_AUTOPILOT"},
+    {"name": "START_PAPER"},
     {"name": "UPDATE_TELEMETRY"},
     {"name": "STATUS"}
   ]
