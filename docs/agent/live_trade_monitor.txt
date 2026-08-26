@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T02:39:25+00:00
+UPDATED_UTC=2026-08-26T02:39:32+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=2 hedge=1 closed=2
-CLOSE_REASONS={"pair_paper_locked_recycle": 1, "pair_stop_loss": 1}
+EVENTS lead=0 hedge=0 closed=0
+CLOSE_REASONS={}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -54,7 +54,7 @@ PAIR_ARB_MAX_BTC_GAP_USD=0
 PAIR_ARB_MAX_CL_AGE_SEC=120
 PAIR_ARB_MAX_COINBASE_SPREAD_USD=0
 PAIR_ARB_MAX_CONTRA_OI_DELTA_USD=0
-PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=3.0
+PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS=2.0
 PAIR_ARB_MAX_SIGNAL_AGE_SEC=3
 PAIR_ARB_MAX_TOKEN_PRICE=0.9
 PAIR_ARB_MAX_WINDOW_SEC=850
@@ -118,11 +118,3 @@ OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
 ·  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79181.53 open=79216.71 gap=$-35.2 no=0.6800 prob=0.59 rem=645s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY YES [PAIR HEDGE] EXECUTED
-◂  ▲ P&L  +$0.2188  (+0.46%)  │  Reason: pair_paper_locked_recycle  │  Held: 7s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79175.50 open=79216.71 gap=$-41.2 no=0.7700 prob=0.61 rem=638s]
-▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
-◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
-◂  ▼ P&L  -$-0.4188  (--8.60%)  │  Reason: pair_stop_loss  │  Held: 2s
