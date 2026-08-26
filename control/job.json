@@ -1,8 +1,9 @@
 {
-  "id": "kalshi-kxbtc15m-window-end-v3-retry1-20260826-0235",
+  "id": "kalshi-kxbtc15m-window-end-v3-retry2-20260826-0236",
   "enabled": true,
   "live": false,
   "actions": [
+    {"name": "STOP_PAPER"},
     {"name": "BACKUP"},
     {"name": "APPLY_PATCH", "path": "control/patches/kalshi_kxbtc15m_window_end_v3.patch", "strip": 1},
     {"name": "GOFMT", "files": ["kalshi/market.go"]},
