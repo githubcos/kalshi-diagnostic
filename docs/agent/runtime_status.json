@@ -1,12 +1,12 @@
 {
-  "utc": "2026-08-26T00:52:58+00:00",
+  "utc": "2026-08-26T00:53:09+00:00",
   "publisher_pid": 3952060,
   "heartbeat": {
-    "utc": "2026-08-26T00:52:56+00:00",
-    "epoch": 1787705576.9120684,
+    "utc": "2026-08-26T00:53:05+00:00",
+    "epoch": 1787705585.969395,
     "pid": 3900720,
-    "status": "idle",
-    "job_id": ""
+    "status": "working",
+    "job_id": "kalshi-paper-profit-stress-v1-20260826-0055"
   },
   "state": {
     "last_job_id": "kalshi-live-trade-monitor-session-scope-v1-20260826-0052",
@@ -14,29 +14,5 @@
     "last_result": "PASS",
     "last_run_utc": "2026-08-26T00:44:15+00:00"
   },
-  "autopilot": {
-    "gate_index": 4,
-    "completed": {
-      "PARTIAL_FILL": {
-        "utc": "2026-08-26T00:43:13+00:00",
-        "evidence_hits": 20,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "HEDGE_TIMING": {
-        "utc": "2026-08-26T00:43:35+00:00",
-        "evidence_hits": 20,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "TIMEOUT_UNWIND": {
-        "utc": "2026-08-26T00:43:56+00:00",
-        "evidence_hits": 20,
-        "state": "EVIDENCE_CAPTURED"
-      },
-      "SETTLEMENT": {
-        "utc": "2026-08-26T00:44:18+00:00",
-        "evidence_hits": 20,
-        "state": "EVIDENCE_CAPTURED"
-      }
-    }
-  }
+  "autopilot": null
 }
