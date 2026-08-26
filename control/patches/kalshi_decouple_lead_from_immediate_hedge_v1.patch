@@ -1,0 +1,21 @@
+--- a/strategy/signal.go
++++ b/strategy/signal.go
+@@
+ 	if tokenPrice < d.params.PairArbMinTokenPrice || tokenPrice > d.params.PairArbMaxTokenPrice {
+ 		return Signal{Type: SignalNone}
+ 	}
+-	if d.params.PairArbMaxHedgeDistanceCents > 0 {
+-		lockedProfit := d.params.PairArbMinLockedProfitCents / 100.0
+-		maxHedgePrice := 1.0 - lockedProfit - tokenPrice
+-		if oppPrice-maxHedgePrice > d.params.PairArbMaxHedgeDistanceCents/100.0 {
+-			return Signal{Type: SignalNone}
+-		}
+-	}
++	// Do not require the opposite leg to be within the hedge-distance band at
++	// signal-generation time. Pair-arb is intentionally a lead-then-hedge
++	// strategy: the trader owns the hedge timeout and fee-adjusted locked-profit
++	// limit, and must still refuse a hedge that cannot preserve the configured
++	// locked profit. Requiring that hedge to already exist here collapses the
++	// strategy into an instantaneous complete-set scanner and suppresses leads.
+ 
+ 	if d.brain != nil {
