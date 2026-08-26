@@ -1,10 +1,12 @@
 {
-  "utc": "2026-08-26T02:22:10+00:00",
+  "utc": "2026-08-26T02:22:17+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
-  "status": "PASS",
-  "status_reasons": [],
-  "paper_port_8085": true,
+  "status": "FAIL",
+  "status_reasons": [
+    "paper process is not listening on 8085"
+  ],
+  "paper_port_8085": false,
   "kalshi_feed_recent_connected_event": false,
   "kalshi_feed_recent_disconnect_event": false,
   "runtime_blocker": "",
@@ -135,6 +137,8 @@
     "PAPER guard prevents any live order request"
   ],
   "recent_math_execution_lines": [
-    "\u00b7  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false"
+    "\u00b7  ACTIVE FLAGS paper=true market=15m pair_arb=true pair_arb_sell_at_99=false ml_filter=false",
+    "\u2551     NET P&L   -$0.3659   (-0.51%)                                  \u2551",
+    "\u2551     Balance: $99.63 / $100.00                                      \u2551"
   ]
 }
