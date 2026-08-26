@@ -1,5 +1,5 @@
 {
-  "utc": "2026-08-26T09:57:05+00:00",
+  "utc": "2026-08-26T09:57:13+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "status": "PASS",
@@ -102,13 +102,13 @@
     "TRADE_SIZE_USD": "5"
   },
   "counts_in_current_session": {
-    "lead_events": 9,
-    "hedge_events": 4,
-    "closed_events": 8
+    "lead_events": 10,
+    "hedge_events": 5,
+    "closed_events": 9
   },
   "close_reason_counts": {
     "pair_stop_loss": 4,
-    "pair_paper_locked_recycle": 4
+    "pair_paper_locked_recycle": 5
   },
   "execution_latency_ms": {
     "all_count": 0,
@@ -172,6 +172,10 @@
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR HEDGE] EXECUTED",
     "\u25c2  \u25b2 P&L  +$0.0932  (+0.26%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 9s",
     "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78414.76 open=78372.69 gap=$42.1 yes=0.8400 prob=0.63 rem=477s]",
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED",
+    "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY NO [PAIR HEDGE] EXECUTED",
+    "\u25c2  \u25b2 P&L  +$0.1200  (+0.37%)  \u2502  Reason: pair_paper_locked_recycle  \u2502  Held: 6s",
+    "\u26a1 SIGNAL  PAIR ARB LEAD YES PAIR_LEAD_YES [btc=78420.11 open=78372.69 gap=$47.4 yes=0.8900 prob=0.65 rem=471s]",
     "\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8\u25b8  \u26a1 BUY YES [PAIR LEAD] EXECUTED"
   ]
 }
