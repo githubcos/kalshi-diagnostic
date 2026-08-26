@@ -1,6 +1,6 @@
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -137,10 +137,25 @@
+@@ -137,9 +137,18 @@
 -	endDate := m.ExpectedExpirationTime
 -	if endDate == "" {
 -		endDate = m.CloseTime
@@ -9,11 +9,9 @@
 -		endDate = m.ExpirationTime
 -	}
 +	endDate := m.ExpectedExpirationTime
-+	// KXBTC15M's API expiration metadata can point far beyond the 15-minute
-+	// trading window. For this recurring series, the observed Kalshi close_time
-+	// is one 15-minute interval after the strategy window boundary, so derive the
-+	// strategy end from close_time - 15m. This prevents both the old +15m stall
-+	// and the multi-day expiration stall while keeping the venue mapping local.
++	// KXBTC15M's API expiration metadata can point beyond the actual 15-minute
++	// strategy window. For this recurring series, derive the strategy boundary
++	// from Kalshi close_time minus one 15-minute interval.
 +	if strings.EqualFold(m.EventTicker, "KXBTC15M") && m.CloseTime != "" {
 +		if closeAt, err := time.Parse(time.RFC3339, m.CloseTime); err == nil {
 +			endDate = closeAt.Add(-15 * time.Minute).Format(time.RFC3339)
