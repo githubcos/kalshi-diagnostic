@@ -1,14 +1,14 @@
 KALSHIARBO LIVE TRADE / MATH MONITOR
 ===================================
-UPDATED_UTC=2026-08-26T02:32:16+00:00
+UPDATED_UTC=2026-08-26T02:32:24+00:00
 MODE=PAPER LIVE_ORDERS_ALLOWED=false
 VERDICT=PASS SPEED=NO_EXECUTION_LATENCY_SAMPLE
 PAPER_8085=UP
 KALSHI_WS_CONNECTED_EVENT=False DISCONNECT_EVENT=False
 BLOCKER=none
 
-EVENTS lead=11 hedge=0 closed=10
-CLOSE_REASONS={"pair_fill_leg_timeout": 1, "pair_stop_loss": 9}
+EVENTS lead=11 hedge=0 closed=11
+CLOSE_REASONS={"pair_fill_leg_timeout": 2, "pair_stop_loss": 9}
 LATENCY all avg/p95/max=None/None/None ms
 LATENCY lead avg/p95/max=None/None/None ms
 LATENCY hedge avg/p95/max=None/None/None ms
@@ -117,8 +117,6 @@ OK-CHECK mark-to-market uses explicit Kalshi YES and NO prices when available
 OK-CHECK PAPER guard prevents any live order request
 
 RECENT MEANINGFUL EXECUTION / MATH LINES
-◂  ▼ P&L  -$-0.2663  (--5.46%)  │  Reason: pair_stop_loss  │  Held: 6s
-⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79137.14 open=79216.71 gap=$-79.6 no=0.7200 prob=0.65 rem=1130s]
 ✗  [PAIR ARB LEAD NO] pair arb: lead entry already in progress, ignoring
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79136.23 open=79216.71 gap=$-80.5 no=0.7200 prob=0.65 rem=1125s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
@@ -142,3 +140,5 @@ RECENT MEANINGFUL EXECUTION / MATH LINES
 ◂  ▼ P&L  -$-0.3008  (--6.20%)  │  Reason: pair_stop_loss  │  Held: 1s
 ⚡ SIGNAL  PAIR ARB LEAD NO PAIR_LEAD_NO [btc=79143.50 open=79216.71 gap=$-73.2 no=0.7000 prob=0.64 rem=1076s]
 ▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸▸  ⚡ BUY NO [PAIR LEAD] EXECUTED
+◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂◂  ◀ SELL NO [PAIR RESIDUAL] EXECUTED
+◂  ▼ P&L  -$-0.0640  (--1.32%)  │  Reason: pair_fill_leg_timeout  │  Held: 20s
