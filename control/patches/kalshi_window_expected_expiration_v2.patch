@@ -1,6 +1,6 @@
 --- a/kalshi/market.go
 +++ b/kalshi/market.go
-@@ -59,7 +59,8 @@ type apiMarket struct {
+@@ -59,6 +59,7 @@ type apiMarket struct {
  	Result                   string  `json:"result"`
  	CloseTime                string  `json:"close_time"`
  	OpenTime                 string  `json:"open_time"`
@@ -8,7 +8,7 @@
  	ExpirationTime           string  `json:"expiration_time"`
  	FloorStrike              float64 `json:"floor_strike"`
  	YesBidDollars            string  `json:"yes_bid_dollars"`
-@@ -126,9 +127,12 @@ func convertMarket(m apiMarket) Market {
+@@ -126,7 +127,10 @@ func convertMarket(m apiMarket) Market {
 -	endDate := m.ExpirationTime
 +	endDate := m.ExpectedExpirationTime
  	if endDate == "" {
