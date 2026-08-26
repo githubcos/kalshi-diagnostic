@@ -1,0 +1,41 @@
+=== REALPAPER BUILD VERIFY ===
+Wed Aug 26 22:42:33 UTC 2026
+
+=== ORIGINAL CONTROL ===
+-rwxrwxr-x 1 ubuntu ubuntu 15M Aug 26 22:18 ./arbocos
+cacddf10e147999a7155ecb1d09aad453ffdb6cefd0e2c8a7fb1d7097267caa6  ./arbocos
+
+=== REALPAPER ===
+-rwxrwxr-x 1 ubuntu ubuntu 15M Aug 26 22:42 ./arbocos-realpaper
+542fb19180bbc0d586443a140d4c728751b991251622d9a663d41ca44b8d6e7b  ./arbocos-realpaper
+
+=== ORIGINAL SOURCE BACKUP ===
+-rw-rw-r-- 1 ubuntu ubuntu 380K Aug 26 22:41 strategy/trader.go.original-paid
+5f30bf945972d7983e3696e6de1f6e1e3e9606c1e7bc132571b48b2e043aeafd  strategy/trader.go.original-paid
+
+=== REALPAPER MARKERS ===
+794:	pairArbBuyOutcomeNotFilled pairArbBuyOutcome = "not_filled"
+902:// filled, not_filled, or hard_error.
+926:		// REALPAPER v1: validate the simulated buy against the current real
+930:		// the actual displayed-depth VWAP. No live order is submitted.
+935:		book, bookErr := t.orders.GetOrderBook(bookCtx, tokenID)
+977:			t.logger.Info("realpaper: not filled; insufficient displayed ask depth",
+1002:		t.logger.Info("realpaper: filled from displayed Polymarket ask depth",
+1008:		return pairArbBuyOutcomeFilled, fmt.Sprintf("REALPAPER-%s-%d", strings.ToUpper(requestName), time.Now().UnixMilli()), fillPrice, actualShares, feeShares, paperCost, nil
+2341:	return t.forceClosePairArb(ctx, forceLiveYes(), "pair_fok_hedge_not_filled")
+
+=== TEST STATUS ===
+FAIL	github.com/polyarb/web [setup failed]
+?   	github.com/polyarb	[no test files]
+?   	github.com/polyarb/binance	[no test files]
+?   	github.com/polyarb/bybit	[no test files]
+?   	github.com/polyarb/coinbase	[no test files]
+?   	github.com/polyarb/config	[no test files]
+?   	github.com/polyarb/deribit	[no test files]
+ok  	github.com/polyarb/discord	(cached)
+?   	github.com/polyarb/display	[no test files]
+?   	github.com/polyarb/market	[no test files]
+ok  	github.com/polyarb/polymarket	(cached)
+ok  	github.com/polyarb/strategy	(cached)
+FAIL
+GO_TEST_RC=1
