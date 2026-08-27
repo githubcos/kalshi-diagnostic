@@ -1,0 +1,83 @@
+================ V1 BROAD =================
+=== RUN   TestLocalPairArbSweep
+    strategy_backtest_sweep_test.go:79: pair_arb sweep: windows=14, combos=6912
+panic: test timed out after 10m0s
+	running tests:
+		TestLocalPairArbSweep (10m0s)
+
+goroutine 8 [running]:
+testing.(*M).startAlarm.func1()
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:2484 +0x394
+created by time.goFunc
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/time/sleep.go:215 +0x2d
+
+goroutine 1 [chan receive, 10 minutes]:
+testing.(*T).Run(0xc0000ea380, {0x743e3e?, 0xc0001bfb30?}, 0x772e00)
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:1859 +0x431
+testing.runTests.func1(0xc0000ea380)
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:2279 +0x37
+testing.tRunner(0xc0000ea380, 0xc0001bfc70)
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:1792 +0xf4
+testing.runTests(0xc0000105a0, {0x999840, 0xd, 0xd}, {0x9ed900?, 0x7?, 0x9eb3e0?})
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:2277 +0x4b4
+testing.(*M).Run(0xc0000c7360)
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:2142 +0x64a
+main.main()
+	_testmain.go:69 +0x9b
+
+goroutine 7 [runnable]:
+time.Time.Sub({0xee66f5b, 0xee221719a, 0x9eb3e0}, {0x7556dec, 0xee2217193, 0x9eb3e0})
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/time/time.go:1194 +0x199
+github.com/polyarb/web.buildWindowCache({0xc000d4e000, 0xaab, 0xc0003b4000?})
+	/home/ubuntu/ArboCos/realpaper/web/strategy_backtest.go:189 +0x7e5
+github.com/polyarb/web.analyzeBacktestWindow({0xc000d4e000, 0xaab, 0xe38}, {0xc0015b1200, {0x73e730, 0xa}, {0x0, 0x0, 0x0}, {0x0, ...}}, ...)
+	/home/ubuntu/ArboCos/realpaper/web/strategy_backtest.go:672 +0x53
+github.com/polyarb/web.analyzeBacktestWindows({0xc00012a000, 0xe, 0x42771c?}, {0xc0015b1200, {0x73e730, 0xa}, {0x0, 0x0, 0x0}, {0x0, ...}})
+	/home/ubuntu/ArboCos/realpaper/web/strategy_backtest.go:663 +0x107
+github.com/polyarb/web.evaluatePairArbSweepCandidate({0xc00012a000, 0xe, 0xe}, 0xc00002bf10)
+	/home/ubuntu/ArboCos/realpaper/web/strategy_backtest_sweep_test.go:768 +0xf5
+github.com/polyarb/web.TestLocalPairArbSweep(0xc0000ea540)
+	/home/ubuntu/ArboCos/realpaper/web/strategy_backtest_sweep_test.go:120 +0x1a27
+testing.tRunner(0xc0000ea540, 0x772e00)
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:1792 +0xf4
+created by testing.(*T).Run in goroutine 1
+	/home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.linux-amd64/src/testing/testing.go:1851 +0x413
+FAIL	github.com/polyarb/web	600.033s
+FAIL
+
+================ V2 ORDER FLOW ============
+=== RUN   TestLocalPairArbSweepV2OrderFlowFilters
+    strategy_backtest_sweep_test.go:372: pair_arb v2 sweep: windows=16, combos=1024
+    strategy_backtest_sweep_test.go:434: v2 baseline: trades=7 wins=1 losses=6 win_rate=14.29% net=-1.73 dd=2.60 stop=0 safe=0 timeout=6 score=-3.890
+    strategy_backtest_sweep_test.go:463: v2 rank=1 score=-0.212 net=-0.07 dd=0.07 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=0.0 book=0.00 spread=12.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=2 score=-0.212 net=-0.07 dd=0.07 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=0.0 book=0.00 spread=12.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=3 score=-0.344 net=-0.09 dd=0.09 trades=2 win_rate=0.00% losses=2 stop=0 safe=0 timeout=2 cvd=0.0 book=0.00 spread=8.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=4 score=-0.344 net=-0.09 dd=0.09 trades=2 win_rate=0.00% losses=2 stop=0 safe=0 timeout=2 cvd=0.0 book=0.00 spread=8.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=5 score=-0.422 net=0.18 dd=0.67 trades=3 win_rate=33.33% losses=2 stop=0 safe=0 timeout=2 cvd=0.0 book=0.00 spread=5.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=6 score=-0.422 net=0.18 dd=0.67 trades=3 win_rate=33.33% losses=2 stop=0 safe=0 timeout=2 cvd=0.0 book=0.00 spread=5.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=7 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=8 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=9 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=10 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.50 minLock=10.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=11 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.50 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=12 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.50 minLock=12.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=13 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=10.0 maxHedgeDist=10 hedgeTimeout=6 hedgeDwell=0}
+    strategy_backtest_sweep_test.go:463: v2 rank=14 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.80 minLock=12.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=1}
+    strategy_backtest_sweep_test.go:463: v2 rank=15 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cvd=3.0 book=0.00 spread=0.0 cfg={minW=45 maxW=180 minTok=0.35 maxTok=0.60 minGap=10.0 maxGap=180.0 minVel=0.50 minLock=10.0 maxHedgeDist=unset hedgeTimeout=6 hedgeDwell=1}
+--- PASS: TestLocalPairArbSweepV2OrderFlowFilters (222.83s)
+PASS
+ok  	github.com/polyarb/web	222.847s
+
+================ V3 ENTRY QUALITY =========
+=== RUN   TestLocalPairArbSweepV3EntryQualityFilters
+    strategy_backtest_sweep_test.go:535: pair_arb v3 sweep: windows=17, combos=432
+    strategy_backtest_sweep_test.go:584: v3 baseline: trades=7 wins=1 losses=6 win_rate=14.29% net=-1.73 dd=2.60 stop=0 safe=0 timeout=6 score=-3.890
+    strategy_backtest_sweep_test.go:613: v3 rank=1 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.50 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=0}
+    strategy_backtest_sweep_test.go:613: v3 rank=2 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.50 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=250000}
+    strategy_backtest_sweep_test.go:613: v3 rank=3 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.50 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=500000}
+    strategy_backtest_sweep_test.go:613: v3 rank=4 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.80 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=0}
+    strategy_backtest_sweep_test.go:613: v3 rank=5 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.80 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=250000}
+    strategy_backtest_sweep_test.go:613: v3 rank=6 score=-0.468 net=-0.23 dd=0.23 trades=1 win_rate=0.00% losses=1 stop=0 safe=0 timeout=1 cfg={minVel=0.80 minLock=10.0 cvd=3.0 cbSpread=0.0 cbTI=0.00 minOI=0 maxContraOI=500000}
+--- PASS: TestLocalPairArbSweepV3EntryQualityFilters (95.99s)
+PASS
+ok  	github.com/polyarb/web	96.017s
