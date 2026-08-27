@@ -1,0 +1,19 @@
+   620				r.Config["PAIR_ARB_MIN_GAP_VELOCITY_USD"],
+   621				r.Config["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"],
+   622				r.Config["PAIR_ARB_MIN_CVD_BTC"],
+   623				r.Config["PAIR_ARB_MIN_COINBASE_SPREAD_USD"],
+   624				r.Config["PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE"],
+   625				r.Config["PAIR_ARB_MIN_OI_DELTA_USD"],
+   626				r.Config["PAIR_ARB_MAX_CONTRA_OI_DELTA_USD"],
+   627			)
+   628		}
+   629	}
+   630	
+   631	func TestLocalPairArbCompareProfilesV3(t *testing.T) {
+   632		if os.Getenv("RUN_LOCAL_PAIR_ARB_COMPARE_V3") != "1" {
+   633			t.Skip("set RUN_LOCAL_PAIR_ARB_COMPARE_V3=1 to run local pair-arb v3 profile comparison")
+   634		}
+   635	
+   636		cwd, err := os.Getwd()
+   637		if err != nil {
+   638			t.Fatalf("Getwd: %v", err)
