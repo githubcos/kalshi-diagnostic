@@ -1,0 +1,587 @@
+=== SWEEP CORE ===
+				"PAIR_ARB_MIN_COINBASE_SPREAD_USD":      "0.0",
+				"PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE": "0.00",
+				"PAIR_ARB_LIQ_ARMED_SEC":                "20",
+				"PAIR_ARB_MAX_CONTRA_LIQ_CLUSTER_USD":   "250000",
+				"PAIR_ARB_MIN_OI_DELTA_USD":             "0",
+				"PAIR_ARB_MAX_CONTRA_OI_DELTA_USD":      "250000",
+			},
+		},
+	}
+
+	for _, profile := range profiles {
+		cfg := cloneStringMap(baseConfig)
+		for key, value := range profile.Values {
+			cfg[key] = value
+		}
+		result := evaluatePairArbSweepCandidate(windows, cfg)
+		t.Logf("v3 profile=%s trades=%d wins=%d losses=%d win_rate=%.2f%% net=%.2f avg=%.4f dd=%.2f stop=%d safe=%d timeout=%d score=%.3f",
+			profile.Name,
+			result.Trades,
+			result.Wins,
+			result.Losses,
+			result.WinRate,
+			result.Net,
+			result.AvgProfit,
+			result.MaxDrawdown,
+			result.StopLossCount,
+			result.UnhedgedSafeExitCount,
+			result.UnhedgedTimeoutCount,
+			result.ObjectiveScore,
+		)
+	}
+}
+
+func evaluatePairArbSweepCandidate(windows [][]backtestSignal, cfg map[string]string) pairArbSweepResult {
+	results := analyzeBacktestWindows(windows, newBacktestConfig(cfg))
+	trades := results["pair_arb"]
+	summary := summarizeStrategy("pair_arb", trades)
+
+	reasons := map[string]int{}
+	for _, reason := range summarizeExitReasons(trades) {
+		reasons[reason.Reason] = reason.Count
+	}
+
+	curve := buildEquityCurve(trades)
+	maxDrawdown := backtestMaxDrawdown(curve)
+
+	objective := summary.Net - 0.6*maxDrawdown - 0.1*float64(summary.Losses)
+
+	resultCfg := map[string]string{
+		"PAIR_ARB_MIN_WINDOW_SEC":               cfg["PAIR_ARB_MIN_WINDOW_SEC"],
+		"PAIR_ARB_MAX_WINDOW_SEC":               cfg["PAIR_ARB_MAX_WINDOW_SEC"],
+		"PAIR_ARB_MIN_TOKEN_PRICE":              cfg["PAIR_ARB_MIN_TOKEN_PRICE"],
+		"PAIR_ARB_MAX_TOKEN_PRICE":              cfg["PAIR_ARB_MAX_TOKEN_PRICE"],
+		"PAIR_ARB_MIN_BTC_GAP_USD":              cfg["PAIR_ARB_MIN_BTC_GAP_USD"],
+		"PAIR_ARB_MAX_BTC_GAP_USD":              cfg["PAIR_ARB_MAX_BTC_GAP_USD"],
+		"PAIR_ARB_MIN_GAP_VELOCITY_USD":         cfg["PAIR_ARB_MIN_GAP_VELOCITY_USD"],
+		"PAIR_ARB_MIN_LOCKED_PROFIT_CENTS":      cfg["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"],
+		"PAIR_ARB_MIN_CVD_BTC":                  cfg["PAIR_ARB_MIN_CVD_BTC"],
+		"PAIR_ARB_MIN_BOOK_IMBALANCE":           cfg["PAIR_ARB_MIN_BOOK_IMBALANCE"],
+		"PAIR_ARB_MIN_COINBASE_SPREAD_USD":      cfg["PAIR_ARB_MIN_COINBASE_SPREAD_USD"],
+		"PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE": cfg["PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE"],
+		"PAIR_ARB_LIQ_ARMED_SEC":                cfg["PAIR_ARB_LIQ_ARMED_SEC"],
+		"PAIR_ARB_MAX_CONTRA_LIQ_CLUSTER_USD":   cfg["PAIR_ARB_MAX_CONTRA_LIQ_CLUSTER_USD"],
+		"PAIR_ARB_MIN_OI_DELTA_USD":             cfg["PAIR_ARB_MIN_OI_DELTA_USD"],
+		"PAIR_ARB_MAX_CONTRA_OI_DELTA_USD":      cfg["PAIR_ARB_MAX_CONTRA_OI_DELTA_USD"],
+		"PAIR_ARB_HEDGE_TIMEOUT_SEC":            cfg["PAIR_ARB_HEDGE_TIMEOUT_SEC"],
+		"PAIR_ARB_HEDGE_DWELL_SEC":              cfg["PAIR_ARB_HEDGE_DWELL_SEC"],
+	}
+	if value, ok := cfg["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"]; ok {
+		resultCfg["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"] = value
+	} else {
+		resultCfg["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"] = "unset"
+	}
+
+	return pairArbSweepResult{
+		Config:                resultCfg,
+		Trades:                summary.Trades,
+		Wins:                  summary.Wins,
+		Losses:                summary.Losses,
+		WinRate:               summary.WinRate,
+		Net:                   summary.Net,
+		AvgProfit:             summary.AvgProfit,
+		MaxDrawdown:           maxDrawdown,
+		StopLossCount:         reasons["pair_stop_loss"],
+		UnhedgedSafeExitCount: reasons["pair_unhedged_safe_exit"],
+		UnhedgedTimeoutCount:  reasons["pair_unhedged_timeout"],
+		WindowResolvedCount:   reasons["pair_window_resolved"],
+		UnhedgedResolvedCount: reasons["pair_unhedged_resolved"],
+		ObjectiveScore:        objective,
+	}
+}
+
+func backtestMaxDrawdown(curve []backtestEquityPoint) float64 {
+	if len(curve) == 0 {
+		return 0
+	}
+	peak := curve[0].Equity
+	maxDrawdown := 0.0
+	for _, point := range curve {
+		if point.Equity > peak {
+			peak = point.Equity
+		}
+		drawdown := peak - point.Equity
+		if drawdown > maxDrawdown {
+			maxDrawdown = drawdown
+		}
+	}
+	return math.Round(maxDrawdown*100) / 100
+}
+
+func cloneStringMap(src map[string]string) map[string]string {
+	copyMap := make(map[string]string, len(src))
+	for key, value := range src {
+		copyMap[key] = value
+	}
+	return copyMap
+}
+
+// TestLocalPairArbSweepStopLoss runs a focused 2-D grid over PAIR_ARB_STOP_LOSS_CENTS
+// and PAIR_ARB_HEDGE_TIMEOUT_SEC while keeping all other parameters locked to whatever
+// is in config.json (the live settings). This lets you see whether changing the stop or
+// timing alone would have improved the recent session.
+//
+// Usage:
+//
+//	RUN_LOCAL_PAIR_ARB_SWEEP_STOPLOSS=1 go test ./web/... -run TestLocalPairArbSweepStopLoss -v
+func TestLocalPairArbSweepStopLoss(t *testing.T) {
+	if os.Getenv("RUN_LOCAL_PAIR_ARB_SWEEP_STOPLOSS") != "1" {
+		t.Skip("set RUN_LOCAL_PAIR_ARB_SWEEP_STOPLOSS=1 to run stop-loss / hedge-timeout grid sweep")
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
+	if chdirErr := os.Chdir(".."); chdirErr != nil {
+		t.Fatalf("Chdir(..): %v", chdirErr)
+	}
+	defer func() { _ = os.Chdir(cwd) }()
+
+	inputFiles := resolveBacktestInputFiles(".")
+	if len(inputFiles) == 0 {
+		t.Fatal("no input files found (signals.jsonl or signals-*.jsonl)")
+	}
+	windows, err := loadBacktestWindows(inputFiles, 0)
+	if err != nil {
+		t.Fatalf("loadBacktestWindows: %v", err)
+	}
+	if len(windows) == 0 {
+		t.Fatal("no windows loaded")
+	}
+
+	// Start from the live config so everything else (token price, gap, etc.) is as-is.
+	baseCfg, err := mergedRuntimeConfig(nil)
+	if err != nil {
+		t.Fatalf("mergedRuntimeConfig: %v", err)
+	}
+	baseCfg["PAIR_ARB_ENABLED"] = "true"
+
+	// Allow any PAIR_ARB_* environment variable to override the config.json baseline,
+	// so callers can tweak individual knobs without editing config.json.
+	// e.g. PAIR_ARB_MIN_LOCKED_PROFIT_CENTS=12 RUN_LOCAL_PAIR_ARB_SWEEP_STOPLOSS=1
+	for _, envKey := range []string{
+		"PAIR_ARB_MIN_LOCKED_PROFIT_CENTS",
+		"PAIR_ARB_MIN_BTC_GAP_USD",
+		"PAIR_ARB_MAX_BTC_GAP_USD",
+		"PAIR_ARB_MIN_TOKEN_PRICE",
+		"PAIR_ARB_MAX_TOKEN_PRICE",
+		"PAIR_ARB_MIN_WINDOW_SEC",
+		"PAIR_ARB_MAX_WINDOW_SEC",
+		"PAIR_ARB_MIN_GAP_VELOCITY_USD",
+		"PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS",
+		"PAIR_ARB_MIN_CVD_BTC",
+		"PAIR_ARB_MIN_BOOK_IMBALANCE",
+		"PAIR_ARB_MIN_COINBASE_SPREAD_USD",
+		"PAIR_ARB_SELL_AT_99",
+		"PAIR_ARB_TRADE_SIZE_USD",
+		"PAIR_ARB_LEAD_BUY_SLIP_TICKS",
+		"PAIR_ARB_LEAD_BUY_TIMEOUT_SEC",
+	} {
+		if v := os.Getenv(envKey); v != "" {
+			baseCfg[envKey] = v
+			t.Logf("env override: %s=%s", envKey, v)
+		}
+	}
+
+	// Grid axes
+	stopLossVals := []float64{0, 2, 4, 6, 8, 10, 12, 15, 18, 22, 28}
+	hedgeTimeoutVals := []int{3, 5, 8, 10, 12, 15, 18, 22, 28}
+
+	t.Logf("stop-loss sweep: windows=%d, stop_vals=%d, timeout_vals=%d, combos=%d",
+		len(windows), len(stopLossVals), len(hedgeTimeoutVals),
+		len(stopLossVals)*len(hedgeTimeoutVals))
+
+	type cell struct {
+		stopLoss     float64
+		hedgeTimeout int
+		result       pairArbSweepResult
+	}
+	cells := make([]cell, 0, len(stopLossVals)*len(hedgeTimeoutVals))
+
+	for _, sl := range stopLossVals {
+		for _, ht := range hedgeTimeoutVals {
+			candidate := cloneStringMap(baseCfg)
+			candidate["PAIR_ARB_STOP_LOSS_CENTS"] = fmt.Sprintf("%.1f", sl)
+			candidate["PAIR_ARB_HEDGE_TIMEOUT_SEC"] = strconv.Itoa(ht)
+			result := evaluatePairArbSweepCandidate(windows, candidate)
+			cells = append(cells, cell{sl, ht, result})
+		}
+	}
+
+	// Print results table sorted best-to-worst by objective score.
+	sort.Slice(cells, func(i, j int) bool {
+		if cells[i].result.ObjectiveScore != cells[j].result.ObjectiveScore {
+			return cells[i].result.ObjectiveScore > cells[j].result.ObjectiveScore
+		}
+		return cells[i].result.Net > cells[j].result.Net
+	})
+
+	t.Log("─────────────────────────────────────────────────────────────────────────────────────────────")
+	t.Log("stop_loss  hedge_timeout  trades  wins  losses  win%%  net     avg_pnl  max_dd  stop_ct  score")
+	t.Log("─────────────────────────────────────────────────────────────────────────────────────────────")
+	for _, c := range cells {
+		r := c.result
+		if r.Trades == 0 {
+			continue
+		}
+		t.Logf("  %5.1f¢      %2ds         %4d  %4d    %4d  %5.1f%%  %+6.2f  %+6.4f  %5.2f    %3d     %.3f",
+			c.stopLoss,
+			c.hedgeTimeout,
+			r.Trades,
+			r.Wins,
+			r.Losses,
+			r.WinRate,
+			r.Net,
+			r.AvgProfit,
+			r.MaxDrawdown,
+			r.StopLossCount,
+			r.ObjectiveScore,
+		)
+	}
+	t.Log("─────────────────────────────────────────────────────────────────────────────────────────────")
+
+	// Also print current live settings row explicitly.
+	liveStop := baseCfg["PAIR_ARB_STOP_LOSS_CENTS"]
+	liveTimeout := baseCfg["PAIR_ARB_HEDGE_TIMEOUT_SEC"]
+	t.Logf("(live config: PAIR_ARB_STOP_LOSS_CENTS=%s  PAIR_ARB_HEDGE_TIMEOUT_SEC=%s)", liveStop, liveTimeout)
+}
+
+// TestLocalPairArbSweepCVDFilter runs a focused 2-D grid over PAIR_ARB_MIN_CVD_BTC
+// and PAIR_ARB_MIN_BOOK_IMBALANCE while locking stop-loss and hedge-timeout to their
+// optimal values found by TestLocalPairArbSweepStopLoss (2¢ stop / 8s timeout by default,
+// overridable via env vars).
+//
+// Usage:
+//
+//	RUN_LOCAL_PAIR_ARB_SWEEP_CVD=1 go test ./web/... -run TestLocalPairArbSweepCVDFilter -v
+//	# Override locked axes:
+//	PAIR_ARB_STOP_LOSS_CENTS=2 PAIR_ARB_HEDGE_TIMEOUT_SEC=8 RUN_LOCAL_PAIR_ARB_SWEEP_CVD=1 go test ./web/... -run TestLocalPairArbSweepCVDFilter -v
+func TestLocalPairArbSweepCVDFilter(t *testing.T) {
+	if os.Getenv("RUN_LOCAL_PAIR_ARB_SWEEP_CVD") != "1" {
+		t.Skip("set RUN_LOCAL_PAIR_ARB_SWEEP_CVD=1 to run CVD × book-imbalance filter sweep")
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
+	if chdirErr := os.Chdir(".."); chdirErr != nil {
+		t.Fatalf("Chdir(..): %v", chdirErr)
+	}
+	defer func() { _ = os.Chdir(cwd) }()
+
+	inputFiles := resolveBacktestInputFiles(".")
+	if len(inputFiles) == 0 {
+		t.Fatal("no input files found (signals.jsonl or signals-*.jsonl)")
+	}
+	windows, err := loadBacktestWindows(inputFiles, 0)
+	if err != nil {
+		t.Fatalf("loadBacktestWindows: %v", err)
+	}
+	if len(windows) == 0 {
+		t.Fatal("no windows loaded")
+	}
+
+	// Start from the live config.
+	baseCfg, err := mergedRuntimeConfig(nil)
+	if err != nil {
+		t.Fatalf("mergedRuntimeConfig: %v", err)
+	}
+	baseCfg["PAIR_ARB_ENABLED"] = "true"
+
+	// Allow any PAIR_ARB_* environment variable to override the config.json baseline.
+	for _, envKey := range []string{
+		"PAIR_ARB_MIN_LOCKED_PROFIT_CENTS",
+		"PAIR_ARB_MIN_BTC_GAP_USD",
+		"PAIR_ARB_MAX_BTC_GAP_USD",
+		"PAIR_ARB_MIN_TOKEN_PRICE",
+		"PAIR_ARB_MAX_TOKEN_PRICE",
+		"PAIR_ARB_MIN_WINDOW_SEC",
+		"PAIR_ARB_MAX_WINDOW_SEC",
+		"PAIR_ARB_MIN_GAP_VELOCITY_USD",
+		"PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS",
+		"PAIR_ARB_STOP_LOSS_CENTS",
+		"PAIR_ARB_HEDGE_TIMEOUT_SEC",
+		"PAIR_ARB_SELL_AT_99",
+		"PAIR_ARB_TRADE_SIZE_USD",
+		"PAIR_ARB_LEAD_BUY_SLIP_TICKS",
+		"PAIR_ARB_LEAD_BUY_TIMEOUT_SEC",
+	} {
+		if v := os.Getenv(envKey); v != "" {
+			baseCfg[envKey] = v
+			t.Logf("env override: %s=%s", envKey, v)
+		}
+	}
+
+	// Lock stop/timeout to the best values unless overridden above.
+	if _, ok := baseCfg["PAIR_ARB_STOP_LOSS_CENTS"]; !ok {
+		baseCfg["PAIR_ARB_STOP_LOSS_CENTS"] = "2.0"
+	}
+	if _, ok := baseCfg["PAIR_ARB_HEDGE_TIMEOUT_SEC"]; !ok {
+		baseCfg["PAIR_ARB_HEDGE_TIMEOUT_SEC"] = "8"
+	}
+	// Ensure the locked values came from env or the defaults above.
+	if os.Getenv("PAIR_ARB_STOP_LOSS_CENTS") == "" {
+		baseCfg["PAIR_ARB_STOP_LOSS_CENTS"] = "2.0"
+	}
+	if os.Getenv("PAIR_ARB_HEDGE_TIMEOUT_SEC") == "" {
+		baseCfg["PAIR_ARB_HEDGE_TIMEOUT_SEC"] = "8"
+	}
+
+
+=== SIMULATOR CORE ===
+func simulatePairArb(window []backtestSignal, cfg backtestConfig, cache windowCache) []strategyTradeSummary {
+	if !cfg.bool("PAIR_ARB_ENABLED", false) {
+		return nil
+	}
+	hedgeTimeoutSec := cfg.float("PAIR_ARB_HEDGE_TIMEOUT_SEC", 5)
+	minHedgeDwellSec := cfg.float("PAIR_ARB_HEDGE_DWELL_SEC", 0)
+	minHedgeLatencySec := cfg.float("PAIR_ARB_MIN_HEDGE_LATENCY_SEC", 3.0)
+	hedgeTouchTicks := cfg.int("PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS", 3)
+	if hedgeTouchTicks < 1 {
+		hedgeTouchTicks = 1
+	}
+	leadFillSlipCents := cfg.float("PAIR_ARB_LEAD_BUY_SLIP_TICKS", -1)
+	if leadFillSlipCents < 0 {
+		leadFillSlipCents = cfg.float("PAIR_ARB_LEAD_FILL_SLIP_CENTS", 2.0)
+	}
+	leadSubmitLatencySec := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC", 0.30)
+	minLeadLatencySec := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC", 0.35)
+	leadTimeoutSec := cfg.float("PAIR_ARB_LEAD_BUY_TIMEOUT_SEC", 12)
+	leadGapGuardMinGap := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD", -1)
+	if leadGapGuardMinGap < 0 {
+		leadGapGuardMinGap = cfg.float("PAIR_ARB_MIN_BTC_GAP_USD", 0)
+	}
+	leadTouchTicks := cfg.int("PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS", 1)
+	if leadTouchTicks < 1 {
+		leadTouchTicks = 1
+	}
+	stopLossCents := cfg.float("PAIR_ARB_STOP_LOSS_CENTS", 0)
+	stopLossMinHoldSec := cfg.float("PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC", 0)
+	stopLossMinGapAgainstUSD := cfg.float("PAIR_ARB_STOP_LOSS_MIN_GAP_AGAINST_USD", 0)
+
+	var position *backtestPairPosition
+	var openedAtTime time.Time
+	hedgeTouchCount := 0
+	for index := 0; index < len(window); index++ {
+		signal := window[index]
+		if position == nil {
+			side, ok := detectPairArb(window, index, cfg, cache)
+			if !ok {
+				continue
+			}
+			entryPrice := sidePrice(signal, side)
+			leadLimitPrice := math.Min(0.99, round2(entryPrice+leadFillSlipCents/100.0))
+			fillIndex, fillPrice, _, filled := simulateGTCLeadFill(window, cache.times, index, side, leadLimitPrice, leadSubmitLatencySec, minLeadLatencySec, leadTimeoutSec, leadTouchTicks, leadGapGuardMinGap)
+			if !filled {
+				continue
+			}
+			fillSignal := window[fillIndex]
+			tradeSize := cfg.float("PAIR_ARB_TRADE_SIZE_USD", 0)
+			if tradeSize <= 0 {
+				tradeSize = cfg.float("TRADE_SIZE_USD", 5.0)
+			}
+			feeRateBps := backtestFeeRateBps(fillSignal, cfg)
+			rawShares, shares, usdSpent, ok := backtestPairLeadSizing(tradeSize, fillPrice, feeRateBps)
+			if !ok {
+				continue
+			}
+			opened := backtestPairPosition{
+				leadSide:      side,
+				entrySignal:   signal,
+				fillSignal:    fillSignal,
+				leadPrice:     fillPrice,
+				leadGapUSD:    signal.GapUSD,
+				leadWindowRem: signal.WindowRemSec,
+				entryAt:       signal.At,
+				openedAt:      fillSignal.At,
+				rawShares:     rawShares,
+				shares:        shares,
+				usdSpent:      usdSpent,
+			}
+			position = &opened
+			openedAtTime = cache.times[fillIndex]
+			hedgeTouchCount = 0
+			index = fillIndex
+			continue
+		}
+
+		minLockedProfit := cfg.float("PAIR_ARB_MIN_LOCKED_PROFIT_CENTS", 8.0) / 100.0
+		hedgeSide := "NO"
+		if position.leadSide == "NO" {
+			hedgeSide = "YES"
+		}
+		maxHedgePrice := 1.0 - minLockedProfit - position.leadPrice
+		hedgePrice := signal.NoPrice
+		if hedgeSide == "YES" {
+			hedgePrice = signal.YesPrice
+		}
+		elapsedSec := cache.times[index].Sub(openedAtTime).Seconds()
+		if hedgeTimeoutSec > 0 && elapsedSec > hedgeTimeoutSec {
+			break
+		}
+
+		if stopLossCents > 0 {
+			if !(stopLossMinHoldSec > 0 && elapsedSec < stopLossMinHoldSec) {
+				if stopLossMinGapAgainstUSD > 0 {
+					adverseGap := 0.0
+					if position.leadSide == "YES" {
+						if signal.OpenPrice > signal.BTCPrice {
+							adverseGap = signal.OpenPrice - signal.BTCPrice
+						}
+					} else {
+						if signal.BTCPrice > signal.OpenPrice {
+							adverseGap = signal.BTCPrice - signal.OpenPrice
+						}
+					}
+					if adverseGap < stopLossMinGapAgainstUSD {
+						goto skipStopLoss
+					}
+				}
+				currentLeadPrice := sidePrice(signal, position.leadSide)
+				if currentLeadPrice < position.leadPrice-stopLossCents/100.0 {
+					exitPrice := currentLeadPrice
+					profit := round2(position.shares*exitPrice - polymarket.ComputeSellFeeUSDC(position.shares, exitPrice, backtestFeeRateBps(signal, cfg)) - position.usdSpent)
+					return []strategyTradeSummary{{
+						Strategy:     "pair_arb",
+						Side:         "PAIR_RESIDUAL_" + position.leadSide,
+						EntryAt:      position.entryAt,
+						FillAt:       position.openedAt,
+						ExitAt:       signal.At,
+						EntryPrice:   position.leadPrice,
+						FillPrice:    position.leadPrice,
+						ExitPrice:    exitPrice,
+						TradeSizeUSD: round2(position.usdSpent),
+						Shares:       position.shares,
+						WindowRemSec: position.leadWindowRem,
+						EntryGapUSD:  position.leadGapUSD,
+						Profit:       profit,
+						Outcome:      backtestPairOutcome(profit),
+						ExitReason:   "pair_stop_loss",
+						EntrySignal:  position.entrySignal,
+						FillSignal:   position.fillSignal,
+					}}
+				}
+			}
+		}
+
+	skipStopLoss:
+		if minHedgeLatencySec > 0 && elapsedSec < minHedgeLatencySec {
+			continue
+		}
+		if hedgePrice <= 0 || hedgePrice > maxHedgePrice {
+			hedgeTouchCount = 0
+			continue
+		}
+		_, hedgeNotional, hedgeAllowed := backtestPairExactHedgeSizing(position.shares, hedgePrice, backtestFeeRateBps(signal, cfg))
+		if !hedgeAllowed {
+			hedgeTouchCount = 0
+			continue
+		}
+		if minHedgeDwellSec > 0 {
+			start := cache.times[index]
+			end := start
+			for laterIdx := index + 1; laterIdx < len(window); laterIdx++ {
+				laterTime := cache.times[laterIdx]
+				if hedgeTimeoutSec > 0 && laterTime.Sub(openedAtTime).Seconds() > hedgeTimeoutSec {
+					break
+				}
+				later := window[laterIdx]
+				laterHedgePrice := later.NoPrice
+				if hedgeSide == "YES" {
+					laterHedgePrice = later.YesPrice
+				}
+				_, laterNotional, laterAllowed := backtestPairExactHedgeSizing(position.shares, laterHedgePrice, backtestFeeRateBps(later, cfg))
+				if laterHedgePrice <= 0 || laterHedgePrice > maxHedgePrice || !laterAllowed || laterNotional < polymarket.MinMarketOrderNotionalUSD {
+					break
+				}
+				end = laterTime
+			}
+			if end.Sub(start).Seconds() < minHedgeDwellSec {
+				hedgeTouchCount = 0
+				continue
+			}
+		}
+		hedgeTouchCount++
+		if hedgeTouchCount < hedgeTouchTicks {
+			continue
+		}
+		pairCost := round2((position.usdSpent + hedgeNotional) / position.shares)
+		spent := round2(position.usdSpent + hedgeNotional)
+		settlePrice := 1.00
+		exitReason := "pair_window_resolved_claim"
+		if cfg.bool("PAIR_ARB_SELL_AT_99", false) {
+			settlePrice = 0.99
+			exitReason = "pair_window_resolved_sell99"
+		}
+		profit := round2(position.shares * (settlePrice - pairCost))
+		outcome := backtestPairOutcome(profit)
+		return []strategyTradeSummary{{
+			Strategy:     "pair_arb",
+			Side:         "PAIR",
+			EntryAt:      position.entryAt,
+			FillAt:       position.openedAt,
+			ExitAt:       window[len(window)-1].At,
+			EntryPrice:   pairCost,
+			FillPrice:    position.leadPrice,
+			ExitPrice:    settlePrice,
+			TradeSizeUSD: spent,
+			Shares:       position.shares,
+			WindowRemSec: position.leadWindowRem,
+			EntryGapUSD:  position.leadGapUSD,
+			Profit:       profit,
+			Outcome:      outcome,
+			ExitReason:   exitReason,
+			EntrySignal:  position.entrySignal,
+			FillSignal:   position.fillSignal,
+		}}
+	}
+	if position == nil {
+		return nil
+	}
+	exitSignal := window[len(window)-1]
+	deadline := openedAtTime.Add(time.Duration(hedgeTimeoutSec * float64(time.Second)))
+	for i, sig := range window {
+		if !cache.times[i].Before(deadline) {
+			exitSignal = sig
+			break
+		}
+	}
+	exitPrice := sidePrice(exitSignal, position.leadSide)
+	profit := round2(position.shares*exitPrice - polymarket.ComputeSellFeeUSDC(position.shares, exitPrice, backtestFeeRateBps(exitSignal, cfg)) - position.usdSpent)
+	return []strategyTradeSummary{{
+		Strategy:     "pair_arb",
+		Side:         "PAIR_RESIDUAL_" + position.leadSide,
+		EntryAt:      position.entryAt,
+		FillAt:       position.openedAt,
+		ExitAt:       exitSignal.At,
+		EntryPrice:   position.leadPrice,
+		FillPrice:    position.leadPrice,
+		ExitPrice:    exitPrice,
+		TradeSizeUSD: round2(position.usdSpent),
+		Shares:       position.shares,
+		WindowRemSec: position.leadWindowRem,
+		EntryGapUSD:  position.leadGapUSD,
+		Profit:       profit,
+		Outcome:      backtestPairOutcome(profit),
+		ExitReason:   "pair_unhedged_timeout",
+		EntrySignal:  position.entrySignal,
+		FillSignal:   position.fillSignal,
+	}}
+}
+
+=== HISTORY INVENTORY ONLY ===
+/home/ubuntu/ArboCos/control/signals.jsonl 19288160
+/home/ubuntu/ArboCos/control/trades.jsonl 18710
+/home/ubuntu/ArboCos/patched8088/signals-v1.jsonl 4834337
+/home/ubuntu/ArboCos/patched8088/signals.jsonl 1663519
+/home/ubuntu/ArboCos/patched8088/trades-v1.jsonl 5500
+/home/ubuntu/ArboCos/polyarbpro_2.4/signals.jsonl 1925701
+/home/ubuntu/ArboCos/polyarbpro_2.4/trades.jsonl 6620
+/home/ubuntu/ArboCos/realpaper/signals-v1.jsonl 4834337
+/home/ubuntu/ArboCos/realpaper/signals.jsonl 11464762
+/home/ubuntu/ArboCos/realpaper/trades-v1.jsonl 5500
+/home/ubuntu/ArboCos/wideband/signals.jsonl 305303
+/home/ubuntu/ArboCos/wideband/trades.jsonl 2722
