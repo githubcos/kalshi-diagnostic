@@ -1,0 +1,169 @@
+func TestLocalPairArbSweep(t *testing.T) {
+	if os.Getenv("RUN_LOCAL_PAIR_ARB_SWEEP") != "1" {
+		t.Skip("set RUN_LOCAL_PAIR_ARB_SWEEP=1 to run local pair-arb sweep")
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
+	if chdirErr := os.Chdir(".."); chdirErr != nil {
+		t.Fatalf("Chdir(..): %v", chdirErr)
+	}
+	defer func() { _ = os.Chdir(cwd) }()
+
+	inputFiles := resolveBacktestInputFiles(".")
+	if len(inputFiles) == 0 {
+		t.Fatal("no input files for backtest")
+	}
+
+	windows, err := loadBacktestWindows(inputFiles, 0)
+	if err != nil {
+		t.Fatalf("loadBacktestWindows: %v", err)
+	}
+	if len(windows) == 0 {
+		t.Fatal("no windows loaded from backtest inputs")
+	}
+
+	baseConfig, err := mergedRuntimeConfig(nil)
+	if err != nil {
+		t.Fatalf("mergedRuntimeConfig: %v", err)
+	}
+
+	baseConfig["PAIR_ARB_ENABLED"] = "true"
+	if _, ok := baseConfig["PAIR_ARB_TRADE_SIZE_USD"]; !ok {
+		baseConfig["PAIR_ARB_TRADE_SIZE_USD"] = "4"
+	}
+
+	minWindowVals := []int{45, 60}
+	maxWindowVals := []int{180, 210}
+	minTokenVals := []float64{0.35, 0.40}
+	maxTokenVals := []float64{0.60, 0.65}
+	minGapVals := []float64{10, 20}
+	maxGapVals := []float64{180, 240}
+	minVelocityVals := []float64{0.5, 0.8}
+	minLockedProfitVals := []float64{8, 10, 12}
+	maxHedgeDistanceVals := []int{-1, 5, 10}
+	hedgeTimeoutVals := []int{4, 6, 8}
+	hedgeDwellVals := []int{0, 1}
+
+	totalCombos := len(minWindowVals) * len(maxWindowVals) * len(minTokenVals) * len(maxTokenVals) * len(minGapVals) * len(maxGapVals) * len(minVelocityVals) * len(minLockedProfitVals) * len(maxHedgeDistanceVals) * len(hedgeTimeoutVals) * len(hedgeDwellVals)
+	t.Logf("pair_arb sweep: windows=%d, combos=%d", len(windows), totalCombos)
+
+	results := make([]pairArbSweepResult, 0, totalCombos)
+
+	for _, minWindow := range minWindowVals {
+		for _, maxWindow := range maxWindowVals {
+			if maxWindow <= minWindow {
+				continue
+			}
+			for _, minToken := range minTokenVals {
+				for _, maxToken := range maxTokenVals {
+					if maxToken <= minToken {
+						continue
+					}
+					for _, minGap := range minGapVals {
+						for _, maxGap := range maxGapVals {
+							if maxGap <= minGap {
+								continue
+							}
+							for _, minVelocity := range minVelocityVals {
+								for _, minLocked := range minLockedProfitVals {
+									for _, maxHedgeDistance := range maxHedgeDistanceVals {
+										for _, hedgeTimeout := range hedgeTimeoutVals {
+											for _, hedgeDwell := range hedgeDwellVals {
+												candidate := cloneStringMap(baseConfig)
+												candidate["PAIR_ARB_MIN_WINDOW_SEC"] = strconv.Itoa(minWindow)
+												candidate["PAIR_ARB_MAX_WINDOW_SEC"] = strconv.Itoa(maxWindow)
+												candidate["PAIR_ARB_MIN_TOKEN_PRICE"] = fmt.Sprintf("%.2f", minToken)
+												candidate["PAIR_ARB_MAX_TOKEN_PRICE"] = fmt.Sprintf("%.2f", maxToken)
+												candidate["PAIR_ARB_MIN_BTC_GAP_USD"] = fmt.Sprintf("%.1f", minGap)
+												candidate["PAIR_ARB_MAX_BTC_GAP_USD"] = fmt.Sprintf("%.1f", maxGap)
+												candidate["PAIR_ARB_MIN_GAP_VELOCITY_USD"] = fmt.Sprintf("%.2f", minVelocity)
+												candidate["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"] = fmt.Sprintf("%.1f", minLocked)
+												candidate["PAIR_ARB_HEDGE_TIMEOUT_SEC"] = strconv.Itoa(hedgeTimeout)
+												candidate["PAIR_ARB_HEDGE_DWELL_SEC"] = strconv.Itoa(hedgeDwell)
+												if maxHedgeDistance < 0 {
+													delete(candidate, "PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS")
+												} else {
+													candidate["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"] = strconv.Itoa(maxHedgeDistance)
+												}
+
+												result := evaluatePairArbSweepCandidate(windows, candidate)
+												if result.Trades == 0 {
+													continue
+												}
+												results = append(results, result)
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(results) == 0 {
+		t.Fatal("sweep produced no trades for any candidate")
+	}
+
+	baseline := evaluatePairArbSweepCandidate(windows, baseConfig)
+	t.Logf("baseline: trades=%d wins=%d losses=%d win_rate=%.2f%% net=%.2f avg=%.4f max_dd=%.2f stop_loss=%d safe_exit=%d timeout=%d",
+		baseline.Trades,
+		baseline.Wins,
+		baseline.Losses,
+		baseline.WinRate,
+		baseline.Net,
+		baseline.AvgProfit,
+		baseline.MaxDrawdown,
+		baseline.StopLossCount,
+		baseline.UnhedgedSafeExitCount,
+		baseline.UnhedgedTimeoutCount,
+	)
+
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].ObjectiveScore == results[j].ObjectiveScore {
+			if results[i].Net == results[j].Net {
+				return results[i].MaxDrawdown < results[j].MaxDrawdown
+			}
+			return results[i].Net > results[j].Net
+		}
+		return results[i].ObjectiveScore > results[j].ObjectiveScore
+	})
+
+	topN := 12
+	if len(results) < topN {
+		topN = len(results)
+	}
+	for i := 0; i < topN; i++ {
+		r := results[i]
+		t.Logf("rank=%d score=%.3f net=%.2f dd=%.2f trades=%d win_rate=%.2f%% losses=%d stop=%d safe=%d timeout=%d cfg={minW=%s maxW=%s minTok=%s maxTok=%s minGap=%s maxGap=%s minVel=%s minLock=%s maxHedgeDist=%s hedgeTimeout=%s hedgeDwell=%s}",
+			i+1,
+			r.ObjectiveScore,
+			r.Net,
+			r.MaxDrawdown,
+			r.Trades,
+			r.WinRate,
+			r.Losses,
+			r.StopLossCount,
+			r.UnhedgedSafeExitCount,
+			r.UnhedgedTimeoutCount,
+			r.Config["PAIR_ARB_MIN_WINDOW_SEC"],
+			r.Config["PAIR_ARB_MAX_WINDOW_SEC"],
+			r.Config["PAIR_ARB_MIN_TOKEN_PRICE"],
+			r.Config["PAIR_ARB_MAX_TOKEN_PRICE"],
+			r.Config["PAIR_ARB_MIN_BTC_GAP_USD"],
+			r.Config["PAIR_ARB_MAX_BTC_GAP_USD"],
+			r.Config["PAIR_ARB_MIN_GAP_VELOCITY_USD"],
+			r.Config["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"],
+			r.Config["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"],
+			r.Config["PAIR_ARB_HEDGE_TIMEOUT_SEC"],
+			r.Config["PAIR_ARB_HEDGE_DWELL_SEC"],
+		)
+	}
+}
+
+func TestLocalPairArbCompareProfiles(t *testing.T) {
