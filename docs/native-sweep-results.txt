@@ -1,0 +1,20 @@
+================ STOP/TIMEOUT ================
+# github.com/polyarb/web
+web/strategy_backtest_sweep_test.go:631:6: expected '(', found TestLocalPairArbCompareProfilesV3
+FAIL	github.com/polyarb/web [setup failed]
+FAIL
+
+================ CVD/BOOK ====================
+# github.com/polyarb/web
+web/strategy_backtest_sweep_test.go:631:6: expected '(', found TestLocalPairArbCompareProfilesV3
+FAIL	github.com/polyarb/web [setup failed]
+FAIL
+
+================ OTHER SWEEPS ================
+29:func TestLocalPairArbSweep(t *testing.T) {
+324:func TestLocalPairArbSweepV2OrderFlowFilters(t *testing.T) {
+492:func TestLocalPairArbSweepV3EntryQualityFilters(t *testing.T) {
+848:// TestLocalPairArbSweepStopLoss runs a focused 2-D grid over PAIR_ARB_STOP_LOSS_CENTS
+856:func TestLocalPairArbSweepStopLoss(t *testing.T) {
+979:// TestLocalPairArbSweepCVDFilter runs a focused 2-D grid over PAIR_ARB_MIN_CVD_BTC
+989:func TestLocalPairArbSweepCVDFilter(t *testing.T) {
