@@ -1,0 +1,600 @@
+=== BACKTEST ROUTES / HANDLERS ===
+./polymarket/orders_test.go:66:		t.Run(tt.name, func(t *testing.T) {
+./web/strategy_backtest_alias_test.go:8:func TestNormalizeBacktestSignalAcceptsPairArbSnapshotAliases(t *testing.T) {
+./web/strategy_backtest_alias_test.go:21:	var sig backtestSignal
+./web/strategy_backtest_alias_test.go:25:	normalizeBacktestSignal(&sig)
+./web/server.go:95:	mux.Handle("POST /api/strategies/backtest", requireAuth(s.auth, http.HandlerFunc(h.handleStrategyBacktest)))
+./web/server.go:96:	mux.Handle("POST /api/strategies/backtest/start", requireAuth(s.auth, http.HandlerFunc(h.handleStrategyBacktestStart)))
+./web/server.go:97:	mux.Handle("GET /api/strategies/backtest/status", requireAuth(s.auth, http.HandlerFunc(h.handleStrategyBacktestStatus)))
+./web/server.go:98:	mux.Handle("POST /api/strategies/backtest/cancel", requireAuth(s.auth, http.HandlerFunc(h.handleStrategyBacktestCancel)))
+./web/strategy_backtest_pair_arb_parity_test.go:5:func makePairArbParityCfg(overrides map[string]string) backtestConfig {
+./web/strategy_backtest_pair_arb_parity_test.go:23:	return newBacktestConfig(cfg)
+./web/strategy_backtest_pair_arb_parity_test.go:27:	window := []backtestSignal{{
+./web/strategy_backtest_pair_arb_parity_test.go:55:	window := []backtestSignal{{
+./web/strategy_backtest_pair_arb_parity_test.go:82:	window := []backtestSignal{{
+./web/strategy_backtest_sweep_test.go:43:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:45:		t.Fatal("no input files for backtest")
+./web/strategy_backtest_sweep_test.go:48:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:50:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:53:		t.Fatal("no windows loaded from backtest inputs")
+./web/strategy_backtest_sweep_test.go:211:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:213:		t.Fatal("no input files for backtest")
+./web/strategy_backtest_sweep_test.go:215:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:217:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:338:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:340:		t.Fatal("no input files for backtest")
+./web/strategy_backtest_sweep_test.go:342:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:344:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:347:		t.Fatal("no windows loaded from backtest inputs")
+./web/strategy_backtest_sweep_test.go:506:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:508:		t.Fatal("no input files for backtest")
+./web/strategy_backtest_sweep_test.go:510:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:512:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:515:		t.Fatal("no windows loaded from backtest inputs")
+./web/strategy_backtest_sweep_test.go:645:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:647:		t.Fatal("no input files for backtest")
+./web/strategy_backtest_sweep_test.go:649:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:651:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:763:func evaluatePairArbSweepCandidate(windows [][]backtestSignal, cfg map[string]string) pairArbSweepResult {
+./web/strategy_backtest_sweep_test.go:764:	results := analyzeBacktestWindows(windows, newBacktestConfig(cfg))
+./web/strategy_backtest_sweep_test.go:774:	maxDrawdown := backtestMaxDrawdown(curve)
+./web/strategy_backtest_sweep_test.go:822:func backtestMaxDrawdown(curve []backtestEquityPoint) float64 {
+./web/strategy_backtest_sweep_test.go:855://	RUN_LOCAL_PAIR_ARB_SWEEP_STOPLOSS=1 go test ./web/... -run TestLocalPairArbSweepStopLoss -v
+./web/strategy_backtest_sweep_test.go:870:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:874:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:876:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest_sweep_test.go:986://	RUN_LOCAL_PAIR_ARB_SWEEP_CVD=1 go test ./web/... -run TestLocalPairArbSweepCVDFilter -v
+./web/strategy_backtest_sweep_test.go:988://	PAIR_ARB_STOP_LOSS_CENTS=2 PAIR_ARB_HEDGE_TIMEOUT_SEC=8 RUN_LOCAL_PAIR_ARB_SWEEP_CVD=1 go test ./web/... -run TestLocalPairArbSweepCVDFilter -v
+./web/strategy_backtest_sweep_test.go:1003:	inputFiles := resolveBacktestInputFiles(".")
+./web/strategy_backtest_sweep_test.go:1007:	windows, err := loadBacktestWindows(inputFiles, 0)
+./web/strategy_backtest_sweep_test.go:1009:		t.Fatalf("loadBacktestWindows: %v", err)
+./web/strategy_backtest.go:18:const defaultBacktestFeeRateBps = "1000"
+./web/strategy_backtest.go:20:type backtestSignal struct {
+./web/strategy_backtest.go:47:func normalizeBacktestSignal(signal *backtestSignal) {
+./web/strategy_backtest.go:65:type backtestPosition struct {
+./web/strategy_backtest.go:70:	entrySignal  backtestSignal
+./web/strategy_backtest.go:82:type backtestPairPosition struct {
+./web/strategy_backtest.go:84:	entrySignal   backtestSignal
+./web/strategy_backtest.go:85:	fillSignal    backtestSignal
+./web/strategy_backtest.go:96:func backtestPairLeadSizing(tradeSize, leadPrice float64, feeRateBps string) (rawShares, actualShares, usdSpent float64, ok bool) {
+./web/strategy_backtest.go:107:func backtestSolveRawSharesForTargetActual(targetActualShares, price float64, feeRateBps string) float64 {
+./web/strategy_backtest.go:132:func backtestPairExactHedgeSizing(targetActualShares, hedgePrice float64, feeRateBps string) (rawShares, notional float64, ok bool) {
+./web/strategy_backtest.go:133:	rawShares = backtestSolveRawSharesForTargetActual(targetActualShares, hedgePrice, feeRateBps)
+./web/strategy_backtest.go:141:func backtestPairOutcome(profit float64) string {
+./web/strategy_backtest.go:156:func buildWindowCache(window []backtestSignal) windowCache {
+./web/strategy_backtest.go:241:type backtestRunProgress struct {
+./web/strategy_backtest.go:249:func runStrategyBacktest(ctx context.Context, def strategyDefinition, strategyKey string, mergedConfig map[string]string, hours float64, onProgress func(backtestRunProgress)) (*strategyBacktestResponse, error) {
+./web/strategy_backtest.go:254:	inputFiles := resolveBacktestInputFiles(workspace)
+./web/strategy_backtest.go:256:		return nil, fmt.Errorf("no signal files available for backtesting")
+./web/strategy_backtest.go:259:		onProgress(backtestRunProgress{Stage: "preparing", Percent: 1, TotalFiles: len(inputFiles)})
+./web/strategy_backtest.go:262:	config := newBacktestConfig(mergedConfig)
+./web/strategy_backtest.go:263:	results := newBacktestResultsMap()
+./web/strategy_backtest.go:264:	windowsAnalyzed, err := processBacktestWindowsStream(ctx, inputFiles, hours, func(window []backtestSignal) {
+./web/strategy_backtest.go:265:		analyzeBacktestWindow(window, config, results)
+./web/strategy_backtest.go:278:	response := &strategyBacktestResponse{
+./web/strategy_backtest.go:295:		onProgress(backtestRunProgress{Stage: "completed", Percent: 100, FilesProcessed: len(inputFiles), TotalFiles: len(inputFiles), WindowsAnalyzed: windowsAnalyzed})
+./web/strategy_backtest.go:300:type backtestConfig struct {
+./web/strategy_backtest.go:312:func newBacktestConfig(values map[string]string) backtestConfig {
+./web/strategy_backtest.go:323:	return backtestConfig{values: copyValues, scheduleMode: mode, scheduleWindows: windows, scheduleErr: err}
+./web/strategy_backtest.go:326:func (c backtestConfig) bool(key string, fallback bool) bool {
+./web/strategy_backtest.go:334:func (c backtestConfig) float(key string, fallback float64) float64 {
+./web/strategy_backtest.go:346:func (c backtestConfig) int(key string, fallback int) int {
+./web/strategy_backtest.go:358:func (c backtestConfig) string(key, fallback string) string {
+./web/strategy_backtest.go:451:func pairArbScheduleAllowsSignalAt(cfg backtestConfig, at string) bool {
+./web/strategy_backtest.go:472:func processBacktestWindowsStream(ctx context.Context, inputFiles []string, hours float64, onWindow func([]backtestSignal), onProgress func(backtestRunProgress)) (int, error) {
+./web/strategy_backtest.go:498:		onProgress(backtestRunProgress{Stage: stage, Percent: percent, FilesProcessed: filesProcessed, TotalFiles: totalFiles, WindowsAnalyzed: windowsAnalyzed})
+./web/strategy_backtest.go:502:	flushWindow := func(window []backtestSignal, windowsAnalyzed *int) {
+./web/strategy_backtest.go:515:		currentWindow    = make([]backtestSignal, 0, 512)
+./web/strategy_backtest.go:547:			var signal backtestSignal
+./web/strategy_backtest.go:552:			normalizeBacktestSignal(&signal)
+./web/strategy_backtest.go:582:func loadBacktestWindows(inputFiles []string, hours float64) ([][]backtestSignal, error) {
+./web/strategy_backtest.go:587:	var signals []backtestSignal
+./web/strategy_backtest.go:601:			var signal backtestSignal
+./web/strategy_backtest.go:606:			normalizeBacktestSignal(&signal)
+./web/strategy_backtest.go:621:	buckets := map[time.Time][]backtestSignal{}
+./web/strategy_backtest.go:631:	windows := make([][]backtestSignal, 0, len(ordered))
+./web/strategy_backtest.go:652:func newBacktestResultsMap() map[string][]strategyTradeSummary {
+./web/strategy_backtest.go:660:func analyzeBacktestWindows(windows [][]backtestSignal, cfg backtestConfig) map[string][]strategyTradeSummary {
+./web/strategy_backtest.go:661:	results := newBacktestResultsMap()
+./web/strategy_backtest.go:663:		analyzeBacktestWindow(window, cfg, results)
+./web/strategy_backtest.go:668:func analyzeBacktestWindow(window []backtestSignal, cfg backtestConfig, results map[string][]strategyTradeSummary) {
+./web/strategy_backtest.go:692:func simulateGTCLeadFill(window []backtestSignal, times []time.Time, startIndex int, leadSide string, limitPrice float64, leadSubmitLatencySec float64, minLeadLatencySec float64, leadTimeoutSec float64, leadTouchPersistenceTicks int, leadGapGuardMinGap float64) (int, float64, float64, bool) {
+./web/strategy_backtest.go:747:func simulatePairArb(window []backtestSignal, cfg backtestConfig, cache windowCache) []strategyTradeSummary {
+./web/strategy_backtest.go:754:	hedgeTouchTicks := cfg.int("PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS", 3)
+./web/strategy_backtest.go:762:	leadSubmitLatencySec := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC", 0.30)
+./web/strategy_backtest.go:763:	minLeadLatencySec := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC", 0.35)
+./web/strategy_backtest.go:765:	leadGapGuardMinGap := cfg.float("PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD", -1)
+./web/strategy_backtest.go:769:	leadTouchTicks := cfg.int("PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS", 1)
+./web/strategy_backtest.go:777:	var position *backtestPairPosition
+./web/strategy_backtest.go:798:			feeRateBps := backtestFeeRateBps(fillSignal, cfg)
+./web/strategy_backtest.go:799:			rawShares, shares, usdSpent, ok := backtestPairLeadSizing(tradeSize, fillPrice, feeRateBps)
+./web/strategy_backtest.go:803:			opened := backtestPairPosition{
+./web/strategy_backtest.go:858:					profit := round2(position.shares*exitPrice - polymarket.ComputeSellFeeUSDC(position.shares, exitPrice, backtestFeeRateBps(signal, cfg)) - position.usdSpent)
+./web/strategy_backtest.go:873:						Outcome:      backtestPairOutcome(profit),
+./web/strategy_backtest.go:890:		_, hedgeNotional, hedgeAllowed := backtestPairExactHedgeSizing(position.shares, hedgePrice, backtestFeeRateBps(signal, cfg))
+./web/strategy_backtest.go:908:				_, laterNotional, laterAllowed := backtestPairExactHedgeSizing(position.shares, laterHedgePrice, backtestFeeRateBps(later, cfg))
+./web/strategy_backtest.go:932:		outcome := backtestPairOutcome(profit)
+./web/strategy_backtest.go:965:	profit := round2(position.shares*exitPrice - polymarket.ComputeSellFeeUSDC(position.shares, exitPrice, backtestFeeRateBps(exitSignal, cfg)) - position.usdSpent)
+./web/strategy_backtest.go:980:		Outcome:      backtestPairOutcome(profit),
+./web/strategy_backtest.go:1018:func summarizeExitReasons(trades []strategyTradeSummary) []backtestExitReason {
+./web/strategy_backtest.go:1033:	result := make([]backtestExitReason, 0, len(keys))
+./web/strategy_backtest.go:1035:		result = append(result, backtestExitReason{Reason: key, Count: counts[key]})
+./web/strategy_backtest.go:1051:func buildEquityCurve(trades []strategyTradeSummary) []backtestEquityPoint {
+./web/strategy_backtest.go:1064:	curve := make([]backtestEquityPoint, 0, len(ordered)+1)
+./web/strategy_backtest.go:1065:	curve = append(curve, backtestEquityPoint{At: ordered[0].EntryAt, Equity: 0, TradePnL: 0})
+./web/strategy_backtest.go:1069:		curve = append(curve, backtestEquityPoint{
+./web/strategy_backtest.go:1078:func sidePrice(signal backtestSignal, side string) float64 {
+./web/strategy_backtest.go:1088:func signalWinning(signal backtestSignal, side string) bool {
+./web/strategy_backtest.go:1095:func resolvedSide(window []backtestSignal) string {
+./web/strategy_backtest.go:1114:func gapVelocity(window []backtestSignal, index, lookbackSec int) *float64 {
+./web/strategy_backtest.go:1117:	var best *backtestSignal
+./web/strategy_backtest.go:1139:func yesPriceDriftCents(window []backtestSignal, index, lookbackSec int) *float64 {
+./web/strategy_backtest.go:1148:	var best *backtestSignal
+./web/strategy_backtest.go:1173:func backtestConvictionHighEdgeAllowed(
+./web/strategy_backtest.go:1187:func backtestConvictionEffectiveMaxTokenPrice(
+./web/strategy_backtest.go:1197:	if highEdgeMaxToken > 0 && backtestConvictionHighEdgeAllowed(
+./web/strategy_backtest.go:1210:func backtestFeeRateBps(signal backtestSignal, cfg backtestConfig) string {
+./web/strategy_backtest.go:1214:	if configured := cfg.string("BACKTEST_FEE_RATE_BPS", ""); configured != "" {
+./web/strategy_backtest.go:1217:	return defaultBacktestFeeRateBps
+./web/strategy_backtest.go:1220:func backtestATR(window []backtestSignal, index int) float64 {
+./web/strategy_backtest.go:1245:func openPosition(strategyName, side string, signal backtestSignal, entryIndex int, cfg backtestConfig, flipped bool) backtestPosition {
+./web/strategy_backtest.go:1248:	feeRateBps := backtestFeeRateBps(signal, cfg)
+./web/strategy_backtest.go:1316:	position := backtestPosition{
+./web/strategy_backtest.go:1344:func closeTrade(position backtestPosition, signal backtestSignal, exitPrice float64, exitReason string) strategyTradeSummary {
+./web/strategy_backtest.go:1345:	exitPrice = adjustBacktestExitPrice(position, exitPrice, exitReason)
+./web/strategy_backtest.go:1374:func adjustBacktestExitPrice(position backtestPosition, exitPrice float64, exitReason string) float64 {
+./web/strategy_backtest.go:1384:func detectConviction(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1464:func detectPairArb(window []backtestSignal, index int, cfg backtestConfig, cache windowCache) (string, bool) {
+./web/strategy_backtest.go:1687:func detectScalp(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1720:func detectResolution(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1744:func detectReversalSnipe(window []backtestSignal, index int, signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1753:		if atr := backtestATR(window, index); atr > 0 {
+./web/strategy_backtest.go:1794:func detectCollapse(window []backtestSignal, signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1825:func detectDeepDiscountFade(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1854:func detectMidFlip(window []backtestSignal, index int, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1890:func detectLateFlip(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1923:func detectPennyBuy(signal backtestSignal, cfg backtestConfig) (string, bool) {
+./web/strategy_backtest.go:1940:func simulateConviction(window []backtestSignal, cfg backtestConfig) []strategyTradeSummary {
+./web/strategy_backtest.go:1942:	var position *backtestPosition
+./web/strategy_backtest.go:2013:						flipMaxToken := backtestConvictionEffectiveMaxTokenPrice(
+./web/strategy_backtest.go:2056:func simulateSingleEntry(window []backtestSignal, strategyName string, cfg backtestConfig) []strategyTradeSummary {
+./web/strategy_tools.go:16:	defaultBacktestHours = 0.0
+./web/strategy_tools.go:25:type strategyBacktestRequest struct {
+./web/strategy_tools.go:31:type strategyBacktestCancelRequest struct {
+./web/strategy_tools.go:35:type strategyBacktestResponse struct {
+./web/strategy_tools.go:47:	ExitReasons     []backtestExitReason   `json:"exit_reasons"`
+./web/strategy_tools.go:49:	EquityCurve     []backtestEquityPoint  `json:"equity_curve"`
+./web/strategy_tools.go:64:type backtestExitReason struct {
+./web/strategy_tools.go:88:	EntrySignal  backtestSignal `json:"entry_signal"`
+./web/strategy_tools.go:89:	FillSignal   backtestSignal `json:"fill_signal,omitempty"`
+./web/strategy_tools.go:92:type backtestEquityPoint struct {
+./web/strategy_tools.go:112:func (h *handlers) handleStrategyBacktest(w http.ResponseWriter, r *http.Request) {
+./web/strategy_tools.go:113:	def, req, merged, hours, err := prepareStrategyBacktestRun(r)
+./web/strategy_tools.go:122:	response, err := runStrategyBacktest(r.Context(), def, req.StrategyKey, merged, hours, nil)
+./web/strategy_tools.go:130:func (h *handlers) handleStrategyBacktestStart(w http.ResponseWriter, r *http.Request) {
+./web/strategy_tools.go:131:	def, req, merged, hours, err := prepareStrategyBacktestRun(r)
+./web/strategy_tools.go:140:	jobID := strategyBacktestJobs.start(def, req.StrategyKey, merged, hours)
+./web/strategy_tools.go:144:func (h *handlers) handleStrategyBacktestStatus(w http.ResponseWriter, r *http.Request) {
+./web/strategy_tools.go:153:	snapshot, ok := strategyBacktestJobs.get(jobID)
+./web/strategy_tools.go:155:		writeJSONError(w, http.StatusNotFound, "backtest job not found")
+./web/strategy_tools.go:161:func (h *handlers) handleStrategyBacktestCancel(w http.ResponseWriter, r *http.Request) {
+./web/strategy_tools.go:162:	var req strategyBacktestCancelRequest
+./web/strategy_tools.go:172:	if ok := strategyBacktestJobs.cancel(jobID); !ok {
+./web/strategy_tools.go:173:		writeJSONError(w, http.StatusNotFound, "backtest job not found")
+./web/strategy_tools.go:176:	snapshot, _ := strategyBacktestJobs.get(jobID)
+./web/strategy_tools.go:180:func prepareStrategyBacktestRun(r *http.Request) (strategyDefinition, strategyBacktestRequest, map[string]string, float64, error) {
+./web/strategy_tools.go:181:	var req strategyBacktestRequest
+./web/strategy_tools.go:183:		return strategyDefinition{}, strategyBacktestRequest{}, nil, 0, fmt.Errorf("bad request")
+./web/strategy_tools.go:187:		return strategyDefinition{}, strategyBacktestRequest{}, nil, 0, fmt.Errorf("unknown strategy")
+./web/strategy_tools.go:191:		return strategyDefinition{}, strategyBacktestRequest{}, nil, 0, fmt.Errorf("could not load runtime config: %w", err)
+./web/strategy_tools.go:195:		hours = defaultBacktestHours
+./web/strategy_tools.go:261:func resolveBacktestInputFiles(workspace string) []string {
+./web/static/strategies.html:20:    .backtest-controls { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+./web/static/strategies.html:21:    .backtest-range { min-width: 140px; width: auto; }
+./web/static/strategies.html:22:    .backtest-progress { min-height: 1rem; margin-top: .28rem; font-size: .76rem; color: var(--text-muted); }
+./web/static/strategies.html:23:    .backtest-progress.is-running { color: var(--text-dim); }
+./web/static/strategies.html:24:    .backtest-progress.is-error { color: var(--red); }
+./web/static/strategies.html:25:    .backtest-progress.is-ok { color: var(--green); }
+./web/static/strategies.html:171:      <p>PolyArb Pro runs one strategy only: pair arbitrage. Tune the live thresholds here, backtest the pending values before saving, and keep presets for this one runtime profile.</p>
+./web/static/strategies.html:204:        <h2 id="reportTitle">Backtest Report</h2>
+./web/static/strategies.html:262:const BACKTEST_RANGE_LABELS = {
+./web/static/strategies.html:338:  PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS: '3',
+./web/static/strategies.html:339:  PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC: '0.30',
+./web/static/strategies.html:340:  PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC: '0.35',
+./web/static/strategies.html:341:  PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS: '1',
+./web/static/strategies.html:342:  PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD: '0',
+./web/static/strategies.html:404:    'PAIR_ARB_MIN_HEDGE_LATENCY_SEC', 'PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS',
+./web/static/strategies.html:405:    'PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC', 'PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC',
+./web/static/strategies.html:406:    'PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS', 'PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD',
+./web/static/strategies.html:428:  'PAIR_ARB_MIN_HEDGE_LATENCY_SEC', 'PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS', 'PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC',
+./web/static/strategies.html:429:  'PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC', 'PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS', 'PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD',
+./web/static/strategies.html:537:  PAIR_ARB_MIN_HEDGE_LATENCY_SEC: 'Backtest parity: minimum delay between lead fill and first hedge fill attempt.',
+./web/static/strategies.html:538:  PAIR_ARB_BACKTEST_HEDGE_TOUCH_TICKS: 'Backtest parity: require this many consecutive hedge-price touches before hedge fill is considered complete.',
+./web/static/strategies.html:539:  PAIR_ARB_BACKTEST_GTC_LEAD_SUBMIT_LATENCY_SEC: 'Backtest GTC lead model: submission/trigger latency before the lead order can start resting.',
+./web/static/strategies.html:540:  PAIR_ARB_BACKTEST_GTC_LEAD_MIN_LATENCY_SEC: 'Backtest GTC lead model: additional minimum delay before lead order can fill after submission.',
+./web/static/strategies.html:541:  PAIR_ARB_BACKTEST_GTC_LEAD_TOUCH_TICKS: 'Backtest GTC lead model: consecutive lead price touches required to register a fill.',
+./web/static/strategies.html:542:  PAIR_ARB_BACKTEST_GTC_LEAD_GAP_GUARD_MIN_GAP_USD: 'Backtest parity for live gap-guard cancel: after lead submit, cancel if gap closes below this threshold (YES: gap < +X, NO: gap > -X). 0 uses PAIR_ARB_MIN_BTC_GAP_USD.',
+./web/static/strategies.html:608:let backtestRangeHours = window.localStorage.getItem('pairArbBacktestHours') || '0';
+./web/static/strategies.html:609:let activeBacktestJobId = null;
+./web/static/strategies.html:610:let backtestPollTimer = null;
+./web/static/strategies.html:645:function buildBacktestMarketSlug(iso) {
+./web/static/strategies.html:653:function buildBacktestMarketUrl(iso) {
+./web/static/strategies.html:654:  const slug = buildBacktestMarketSlug(iso);
+./web/static/strategies.html:658:function renderBacktestMarketLink(iso) {
+./web/static/strategies.html:659:  const url = buildBacktestMarketUrl(iso);
+./web/static/strategies.html:980:          <div class="toolbar-meta" id="backtestScopeHint">Backtest replays pair-arb windows from local signal files, including archives.</div>
+./web/static/strategies.html:981:          <div class="backtest-progress" id="backtestProgress"></div>
+./web/static/strategies.html:983:        <div class="backtest-controls">
+./web/static/strategies.html:984:          <select id="backtestRange" class="form-select backtest-range" onchange="onBacktestRangeChanged(this.value)">
+./web/static/strategies.html:985:            <option value="24" ${backtestRangeHours === '24' ? 'selected' : ''}>24h</option>
+./web/static/strategies.html:986:            <option value="48" ${backtestRangeHours === '48' ? 'selected' : ''}>48h</option>
+./web/static/strategies.html:987:            <option value="120" ${backtestRangeHours === '120' ? 'selected' : ''}>5 days</option>
+./web/static/strategies.html:988:            <option value="0" ${backtestRangeHours === '0' ? 'selected' : ''}>All data</option>
+./web/static/strategies.html:990:          <button class="btn btn-ghost" id="backtestCancelBtn" onclick="cancelBacktest()" style="display:none">Cancel</button>
+./web/static/strategies.html:991:          <button class="btn btn-ghost" id="backtestBtn" onclick="runBacktest()">Backtest</button>
+./web/static/strategies.html:1002:  syncBacktestUi();
+./web/static/strategies.html:1003:  updateBacktestScopeHint();
+./web/static/strategies.html:1074:      : 'No pending edits. Backtests run against the values currently shown on this page.';
+./web/static/strategies.html:1237:function onBacktestRangeChanged(value) {
+./web/static/strategies.html:1238:  backtestRangeHours = String(value || '0');
+./web/static/strategies.html:1239:  if (!Object.prototype.hasOwnProperty.call(BACKTEST_RANGE_LABELS, backtestRangeHours)) {
+./web/static/strategies.html:1240:    backtestRangeHours = '0';
+./web/static/strategies.html:1242:  window.localStorage.setItem('pairArbBacktestHours', backtestRangeHours);
+./web/static/strategies.html:1243:  updateBacktestScopeHint();
+./web/static/strategies.html:1246:function selectedBacktestHours() {
+./web/static/strategies.html:1247:  const value = String(backtestRangeHours || '0');
+./web/static/strategies.html:1252:function updateBacktestScopeHint() {
+./web/static/strategies.html:1253:  const hint = document.getElementById('backtestScopeHint');
+./web/static/strategies.html:1255:  const label = BACKTEST_RANGE_LABELS[String(backtestRangeHours || '0')] || BACKTEST_RANGE_LABELS['0'];
+./web/static/strategies.html:1256:  hint.innerHTML = `Backtest scope: <strong>${esc(label)}</strong> across local signal files (including archives).`;
+./web/static/strategies.html:1259:function setBacktestProgress(message, state = '') {
+./web/static/strategies.html:1260:  const el = document.getElementById('backtestProgress');
+./web/static/strategies.html:1262:  el.className = 'backtest-progress';
+./web/static/strategies.html:1269:function syncBacktestUi() {
+./web/static/strategies.html:1270:  const running = !!activeBacktestJobId;
+./web/static/strategies.html:1271:  const button = document.getElementById('backtestBtn');
+./web/static/strategies.html:1272:  const cancelBtn = document.getElementById('backtestCancelBtn');
+./web/static/strategies.html:1273:  const range = document.getElementById('backtestRange');
+./web/static/strategies.html:1276:    button.textContent = running ? 'Running...' : 'Backtest';
+./web/static/strategies.html:1284:    range.value = String(backtestRangeHours || '0');
+./web/static/strategies.html:1288:async function pollBacktestStatus() {
+./web/static/strategies.html:1289:  if (!activeBacktestJobId) return;
+./web/static/strategies.html:1291:    const response = await fetch(`/api/strategies/backtest/status?job_id=${encodeURIComponent(activeBacktestJobId)}`);
+./web/static/strategies.html:1293:      let message = 'Failed to read backtest status.';
+./web/static/strategies.html:1306:      setBacktestProgress(`Backtest ${stage} - ${fmtNumber(percent, 1)}% (${windows} windows)`, 'running');
+./web/static/strategies.html:1307:      backtestPollTimer = window.setTimeout(pollBacktestStatus, 900);
+./web/static/strategies.html:1312:      setBacktestProgress(`Backtest completed: ${windows} windows analyzed.`, 'ok');
+./web/static/strategies.html:1313:      activeBacktestJobId = null;
+./web/static/strategies.html:1314:      syncBacktestUi();
+./web/static/strategies.html:1319:      setBacktestProgress('Backtest canceled.', 'error');
+./web/static/strategies.html:1320:      setAlert('warn', 'Backtest canceled.');
+./web/static/strategies.html:1321:      activeBacktestJobId = null;
+./web/static/strategies.html:1322:      syncBacktestUi();
+./web/static/strategies.html:1325:    const message = payload.error || 'Backtest failed.';
+./web/static/strategies.html:1326:    setBacktestProgress(message, 'error');
+./web/static/strategies.html:1328:    activeBacktestJobId = null;
+./web/static/strategies.html:1329:    syncBacktestUi();
+./web/static/strategies.html:1331:    setBacktestProgress(error.message || 'Backtest status polling failed.', 'error');
+./web/static/strategies.html:1332:    setAlert('err', error.message || 'Backtest status polling failed.');
+./web/static/strategies.html:1333:    activeBacktestJobId = null;
+./web/static/strategies.html:1334:    syncBacktestUi();
+./web/static/strategies.html:1338:async function cancelBacktest() {
+./web/static/strategies.html:1339:  if (!activeBacktestJobId) return;
+./web/static/strategies.html:1340:  const cancelBtn = document.getElementById('backtestCancelBtn');
+./web/static/strategies.html:1343:    await fetch('/api/strategies/backtest/cancel', {
+./web/static/strategies.html:1346:      body: JSON.stringify({ job_id: activeBacktestJobId }),
+./web/static/strategies.html:1348:    setBacktestProgress('Cancel requested...', 'running');
+./web/static/strategies.html:1349:    backtestPollTimer = window.setTimeout(pollBacktestStatus, 300);
+./web/static/strategies.html:1351:    setAlert('err', error.message || 'Failed to cancel backtest.');
+./web/static/strategies.html:1356:async function runBacktest() {
+./web/static/strategies.html:1357:  if (activeBacktestJobId) return;
+./web/static/strategies.html:1358:  if (backtestPollTimer) {
+./web/static/strategies.html:1359:    window.clearTimeout(backtestPollTimer);
+./web/static/strategies.html:1360:    backtestPollTimer = null;
+./web/static/strategies.html:1362:  syncBacktestUi();
+./web/static/strategies.html:1364:  setBacktestProgress('Starting backtest...', 'running');
+./web/static/strategies.html:1366:    const response = await fetch('/api/strategies/backtest/start', {
+./web/static/strategies.html:1369:      body: JSON.stringify({ strategy_key: STRATEGY.enableKey, config: getMergedConfig(), hours: selectedBacktestHours() }),
+./web/static/strategies.html:1372:      let message = 'Backtest failed to start.';
+./web/static/strategies.html:1380:    activeBacktestJobId = String(payload.job_id || '');
+./web/static/strategies.html:1381:    if (!activeBacktestJobId) {
+./web/static/strategies.html:1382:      throw new Error('Backtest start returned no job id.');
+./web/static/strategies.html:1384:    syncBacktestUi();
+./web/static/strategies.html:1385:    await pollBacktestStatus();
+./web/static/strategies.html:1387:    activeBacktestJobId = null;
+./web/static/strategies.html:1388:    syncBacktestUi();
+./web/static/strategies.html:1389:    setBacktestProgress(error.message || 'Backtest failed to start.', 'error');
+./web/static/strategies.html:1390:    setAlert('err', error.message || 'Backtest failed for Pair Arbitrage.');
+./web/static/strategies.html:1396:  document.getElementById('reportTitle').textContent = 'Pair Arbitrage Backtest Report';
+./web/static/strategies.html:1451:        <td>${renderBacktestMarketLink(trade.entry_at)}</td>
+./web/strategy_backtest_jobs.go:12:type strategyBacktestJobProgress struct {
+./web/strategy_backtest_jobs.go:20:type strategyBacktestJobSnapshot struct {
+./web/strategy_backtest_jobs.go:27:	Progress   strategyBacktestJobProgress `json:"progress"`
+./web/strategy_backtest_jobs.go:28:	Result     *strategyBacktestResponse   `json:"result,omitempty"`
+./web/strategy_backtest_jobs.go:31:type strategyBacktestJob struct {
+./web/strategy_backtest_jobs.go:38:	progress   strategyBacktestJobProgress
+./web/strategy_backtest_jobs.go:39:	result     *strategyBacktestResponse
+./web/strategy_backtest_jobs.go:43:type strategyBacktestJobManager struct {
+./web/strategy_backtest_jobs.go:45:	jobs map[string]*strategyBacktestJob
+./web/strategy_backtest_jobs.go:48:var strategyBacktestJobs = newStrategyBacktestJobManager()
+./web/strategy_backtest_jobs.go:49:var strategyBacktestJobSeq uint64
+./web/strategy_backtest_jobs.go:51:func newStrategyBacktestJobManager() *strategyBacktestJobManager {
+./web/strategy_backtest_jobs.go:52:	return &strategyBacktestJobManager{jobs: map[string]*strategyBacktestJob{}}
+./web/strategy_backtest_jobs.go:55:func nextBacktestJobID() string {
+./web/strategy_backtest_jobs.go:56:	seq := atomic.AddUint64(&strategyBacktestJobSeq, 1)
+./web/strategy_backtest_jobs.go:60:func (m *strategyBacktestJobManager) start(def strategyDefinition, strategyKey string, mergedConfig map[string]string, hours float64) string {
+./web/strategy_backtest_jobs.go:61:	jobID := nextBacktestJobID()
+./web/strategy_backtest_jobs.go:63:	job := &strategyBacktestJob{
+./web/strategy_backtest_jobs.go:67:		progress: strategyBacktestJobProgress{
+./web/strategy_backtest_jobs.go:85:		response, err := runStrategyBacktest(ctx, def, strategyKey, mergedConfig, hours, func(progress backtestRunProgress) {
+./web/strategy_backtest_jobs.go:88:				existing.progress = strategyBacktestJobProgress{
+./web/strategy_backtest_jobs.go:128:func (m *strategyBacktestJobManager) get(jobID string) (strategyBacktestJobSnapshot, bool) {
+./web/strategy_backtest_jobs.go:133:		return strategyBacktestJobSnapshot{}, false
+./web/strategy_backtest_jobs.go:135:	return strategyBacktestJobSnapshot{
+./web/strategy_backtest_jobs.go:140:		StartedAt:  formatBacktestJobTime(job.startedAt),
+./web/strategy_backtest_jobs.go:141:		FinishedAt: formatBacktestJobTime(job.finishedAt),
+./web/strategy_backtest_jobs.go:147:func formatBacktestJobTime(ts time.Time) string {
+./web/strategy_backtest_jobs.go:154:func (m *strategyBacktestJobManager) cancel(jobID string) bool {
+./web/manual_backtest_probe_test.go:8:func TestManualBacktestProbe(t *testing.T) {
+./web/manual_backtest_probe_test.go:9:	if os.Getenv("RUN_MANUAL_BACKTEST_PROBE") != "1" {
+./web/manual_backtest_probe_test.go:10:		t.Skip("set RUN_MANUAL_BACKTEST_PROBE=1 to run manual pair-arb probe")
+./web/manual_backtest_probe_test.go:22:	inputFiles := resolveBacktestInputFiles(".")
+./web/manual_backtest_probe_test.go:32:	cfg := newBacktestConfig(cfgMap)
+./web/manual_backtest_probe_test.go:34:	allWindows, err := loadBacktestWindows(inputFiles, 0)
+./web/manual_backtest_probe_test.go:36:		t.Fatalf("loadBacktestWindows all: %v", err)
+./web/manual_backtest_probe_test.go:38:	windows24h, err := loadBacktestWindows(inputFiles, 24)
+./web/manual_backtest_probe_test.go:40:		t.Fatalf("loadBacktestWindows 24h: %v", err)
+./web/manual_backtest_probe_test.go:43:	probe := func(label string, windows [][]backtestSignal, probeCfg backtestConfig) {
+./web/manual_backtest_probe_test.go:44:		results := analyzeBacktestWindows(windows, probeCfg)
+./web/manual_backtest_probe_test.go:64:	probe("all min_cb_spread=0", allWindows, newBacktestConfig(cfgNoSpread))
+./strategy/trader.go:8508:		// In the backtest this trade would have been counted as fill_failed at zero cost.
+./strategy/pair_arb_test.go:432:		t.Run(tc.name, func(t *testing.T) {
+./strategy/pair_arb_test.go:454:		t.Run(tc.name, func(t *testing.T) {
+./strategy/signal.go:879:	// Backtest shows all false signals had |gap| > $50; both confirmed wins had |gap| ≤ $40.
+./strategy/signal.go:1982:// StrategyGateStatus summarizes whether an enabled strategy could enter right now
+./strategy/signal.go:1984:type StrategyGateStatus struct {
+./strategy/signal.go:3173:func (d *Detector) ActiveStrategyGates(inPosition, buyInProgress bool) []StrategyGateStatus {
+./strategy/signal.go:3231:	appendGate := func(out []StrategyGateStatus, key, name, blocker string) []StrategyGateStatus {
+./strategy/signal.go:3238:		return append(out, StrategyGateStatus{Key: key, Name: name, Status: status, Ready: ready, Blocker: blocker})
+./strategy/signal.go:3269:	out := make([]StrategyGateStatus, 0, 9)
+./config/config.go:153:	// 0 = disabled. Recommended: 1 (matches backtest optimum).
+./main.go:306:	webGates := make([]webpkg.StrategyGate, 0, len(gateStatuses))
+
+=== SETTINGS CONFIG STRUCT ===
+./strategy/trader.go:369:	PairArbMinLockedProfitCents  float64
+./strategy/trader.go:370:	// PairArbCVDMomentumLockedProfitCents is the looser hedge target (in cents) used for
+./strategy/trader.go:372:	PairArbCVDMomentumLockedProfitCents                float64
+./strategy/trader.go:373:	PairArbHedgeTimeoutSec                             int
+./strategy/trader.go:374:	PairArbStopLossCents                               float64
+./strategy/trader.go:375:	PairArbStopLossMinHoldSec                          int
+./strategy/trader.go:376:	PairArbStopLossMinGapAgainstUSD                    float64
+./strategy/trader.go:382:	PairArbDualPrePlace                                bool
+./strategy/trader.go:2124:			pair.HedgeBy = now.Add(t.pairArbHedgeTimeout())
+./strategy/trader.go:2144:		display.TradeOpen(leadSide+" [PAIR LEAD]", leadFill, leadActual, leadFeeShares, leadUSD, 1.0-leadFill-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+./strategy/trader.go:2284:		HedgeBy:     now.Add(t.pairArbHedgeTimeout()), // safety net if NO leg fails
+./strategy/trader.go:2360:		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+./strategy/trader.go:2382:		zap.Float64("target_locked_profit", t.pairArbMinLockedProfit()),
+./strategy/trader.go:2384:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+./strategy/trader.go:2427:	hedgeLimitPrice := math.Round((1.0-anchorAvgPrice-t.pairArbMinLockedProfit())*100) / 100
+./strategy/trader.go:2533:func (t *Trader) pairArbMinLockedProfit() float64 {
+./strategy/trader.go:2538:	if t.cfg.PairArbMinLockedProfitCents <= 0 {
+./strategy/trader.go:2541:	return t.cfg.PairArbMinLockedProfitCents / 100.0
+./strategy/trader.go:2675:func (t *Trader) pairArbHedgeTimeout() time.Duration {
+./strategy/trader.go:2676:	if t.cfg.PairArbHedgeTimeoutSec <= 0 {
+./strategy/trader.go:2679:	return time.Duration(t.cfg.PairArbHedgeTimeoutSec) * time.Second
+./strategy/trader.go:2683:	deadline := time.Now().Add(t.pairArbHedgeTimeout())
+./strategy/trader.go:3859:	// lastPairArbStopLossAt is stamped when a stop-loss exit completes. Used to enforce
+./strategy/trader.go:3862:	lastPairArbStopLossAt time.Time
+./strategy/trader.go:5087:						HedgeBy:     time.Now().Add(t.pairArbHedgeTimeout()),
+./strategy/trader.go:8312:			hedgeMaxPrice = t.pairArbLockedPayoutTarget() - t.pairArbMinLockedProfit() - anchorAvg
+./strategy/trader.go:8479:		HedgeBy:              now.Add(t.pairArbHedgeTimeout()),
+./strategy/trader.go:8682:	if cooldown := t.cfg.PairArbStopCooldownSec; cooldown > 0 && !t.lastPairArbStopLossAt.IsZero() {
+./strategy/trader.go:8683:		if elapsed := time.Since(t.lastPairArbStopLossAt); elapsed < time.Duration(cooldown)*time.Second {
+./strategy/trader.go:8707:	isNoLead := sig.Type == SignalPairArbLeadNo || sig.Type == SignalPairArbReverseLeadNo || sig.Type == SignalPairArbPreOpenNo || sig.Type == SignalPairArbTruePreOpenNo || sig.Type == SignalPairArbCVDMomentumNo
+./strategy/trader.go:8772:		maxHedgePrice := math.Round((1.0-leadPrice-t.pairArbMinLockedProfit())*100) / 100
+./strategy/trader.go:8813:			ctx, tokenID, hedgeTokenID, limitPrice, maxHedgePrice, rawShares, shadowHedgeRaw, 1.0-t.pairArbMinLockedProfit(),
+./strategy/trader.go:8834:			zap.Float64("required_edge_cents", t.pairArbMinLockedProfit()*100.0),
+./strategy/trader.go:8867:	if t.cfg.PairArbDualPrePlace {
+./strategy/trader.go:8873:			maxHedgePrice := math.Round((1.0-leadPrice-t.pairArbMinLockedProfit())*100) / 100
+./strategy/trader.go:8942:		HedgeBy:     now.Add(t.pairArbHedgeTimeout()),
+./strategy/trader.go:8944:	if sig.Type == SignalPairArbCVDMomentumYes || sig.Type == SignalPairArbCVDMomentumNo {
+./strategy/trader.go:8945:		if t.cfg.PairArbCVDMomentumLockedProfitCents > 0 {
+./strategy/trader.go:8946:			pair.LockedProfitCents = t.cfg.PairArbCVDMomentumLockedProfitCents
+./strategy/trader.go:8970:		zap.Float64("target_locked_profit", t.pairArbMinLockedProfit()),
+./strategy/trader.go:8972:	display.TradeOpen(leadSide+" [PAIR LEAD]", fillPrice, actualShares, feeShares, usdSpent, 1.0-fillPrice-t.pairArbMinLockedProfit(), t.cfg.PaperTrade)
+./strategy/trader.go:9099:		pair.HedgeBy = pair.OpenedAt.Add(t.pairArbHedgeTimeout())
+./strategy/trader.go:9135:	if t.cfg.PairArbStopLossCents > 0 && pair.DCAHedgeMovedSide == "" {
+./strategy/trader.go:9145:			stopDrop := t.cfg.PairArbStopLossCents / 100.0
+./strategy/trader.go:9148:				if minHold := t.cfg.PairArbStopLossMinHoldSec; minHold > 0 {
+./strategy/trader.go:9154:					if minGapAgainst := t.cfg.PairArbStopLossMinGapAgainstUSD; minGapAgainst > 0 {
+./strategy/trader.go:9454:	hedgeLimitPrice := math.Round((1.0-anchorAvgPrice-t.pairArbMinLockedProfit())*100) / 100
+./strategy/trader.go:9766:		zap.Float64("locked_profit_target", t.pairArbMinLockedProfit()),
+./strategy/trader.go:9798:		CfgStopLossCents:  t.cfg.PairArbStopLossCents,
+./strategy/trader.go:10190:		t.lastPairArbStopLossAt = time.Now()
+./strategy/pair_arb_test.go:43:			PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:168:			PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:217:			PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:251:			PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:252:			PairArbHedgeTimeoutSec:      5,
+./strategy/pair_arb_test.go:301:			PairArbMinLockedProfitCents:              8,
+./strategy/pair_arb_test.go:302:			PairArbHedgeTimeoutSec:                   90,
+./strategy/pair_arb_test.go:347:			PairArbMinLockedProfitCents:              8,
+./strategy/pair_arb_test.go:348:			PairArbHedgeTimeoutSec:                   90,
+./strategy/pair_arb_test.go:519:		PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:545:		PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:570:		PairArbMinLockedProfitCents: 8,
+./strategy/pair_arb_test.go:598:		PairArbMinLockedProfitCents:    8,
+./strategy/pair_arb_test.go:628:		PairArbMinLockedProfitCents:      8,
+./strategy/pair_arb_test.go:658:		PairArbMinLockedProfitCents: 8,
+./strategy/signal.go:71:	SignalPairArbReverseLeadYes            // Paired arb reverse: BTC below open but gap is shrinking/reversing → buy YES lead first
+./strategy/signal.go:72:	SignalPairArbReverseLeadNo             // Paired arb reverse: BTC above open but gap is shrinking/reversing → buy NO lead first
+./strategy/signal.go:77:	SignalPairArbCVDMomentumYes            // CVD momentum: early-window low-gap, CVD>0 → buy YES lead leg
+./strategy/signal.go:78:	SignalPairArbCVDMomentumNo             // CVD momentum: early-window low-gap, CVD<0 → buy NO lead leg
+./strategy/signal.go:123:	case SignalPairArbReverseLeadYes:
+./strategy/signal.go:125:	case SignalPairArbReverseLeadNo:
+./strategy/signal.go:261:	case SignalPairArbReverseLeadYes:
+./strategy/signal.go:267:	case SignalPairArbReverseLeadNo:
+./strategy/signal.go:513:	// PairArbMinLockedProfitCents is the target locked spread used by pair-arb entry gating.
+./strategy/signal.go:514:	PairArbMinLockedProfitCents float64
+./strategy/signal.go:571:	// PairArbReverseSignal* enable a reversal lead mode that buys the opposite
+./strategy/signal.go:573:	PairArbReverseSignalEnabled        bool
+./strategy/signal.go:574:	PairArbReverseSignalMinGapUSD      float64
+./strategy/signal.go:575:	PairArbReverseSignalMaxGapUSD      float64
+./strategy/signal.go:576:	PairArbReverseSignalMinVelocityUSD float64
+./strategy/signal.go:577:	PairArbReverseSignalLookbackSec    int
+./strategy/signal.go:578:	PairArbReverseSignalMinShrinkUSD   float64
+./strategy/signal.go:603:	// PairArbCVDMomentum* enable early-window entries directed by BTC CVD in low-gap markets.
+./strategy/signal.go:606:	PairArbCVDMomentumEnabled           bool
+./strategy/signal.go:607:	PairArbCVDMomentumMaxElapsedSec     int     // default 60
+./strategy/signal.go:608:	PairArbCVDMomentumMaxGapUSD         float64 // default 15
+./strategy/signal.go:609:	PairArbCVDMomentumMinCVDBTC         float64 // default 10
+./strategy/signal.go:610:	PairArbCVDMomentumLockedProfitCents float64 // default 3
+./strategy/signal.go:611:	// PairArbCVDMomentumMaxLeadDriftCents blocks CVD momentum entries when the Polymarket lead
+./strategy/signal.go:614:	PairArbCVDMomentumMaxLeadDriftCents float64 // default 0 (disabled)
+./strategy/signal.go:615:	// PairArbSessionTrendFilterUSD blocks pair-arb entries whose direction opposes a
+./strategy/signal.go:617:	// than this threshold (USD) over the last PairArbSessionTrendBuckets windows, entries
+./strategy/signal.go:622:	PairArbSessionTrendFilterUSD float64
+./strategy/signal.go:623:	// PairArbSessionTrendBuckets is the number of past 5m windows to look back when
+./strategy/signal.go:625:	PairArbSessionTrendBuckets int
+./strategy/signal.go:648:	// PairArbCVDRangeSkipFrom / To: skip when CVD30s is in [From, To) for YES
+./strategy/signal.go:650:	PairArbCVDRangeSkipFrom float64
+./strategy/signal.go:651:	PairArbCVDRangeSkipTo   float64
+./strategy/signal.go:1016:		PairArbReverseSignalEnabled:        false,
+./strategy/signal.go:1017:		PairArbReverseSignalMinGapUSD:      20.0,
+./strategy/signal.go:1018:		PairArbReverseSignalMaxGapUSD:      0,
+./strategy/signal.go:1019:		PairArbReverseSignalMinVelocityUSD: 0.25,
+./strategy/signal.go:1020:		PairArbReverseSignalLookbackSec:    8,
+./strategy/signal.go:1021:		PairArbReverseSignalMinShrinkUSD:   2.0,
+./strategy/signal.go:1204:	// sessionBTCOpens is a rolling buffer of the last PairArbSessionTrendBuckets window
+./strategy/signal.go:1489:	if d.params.PairArbSessionTrendFilterUSD > 0 && openPrice > 0 {
+./strategy/signal.go:1490:		maxBuckets := d.params.PairArbSessionTrendBuckets
+./strategy/signal.go:2302:	if d.params.PairArbCVDMomentumEnabled {
+./strategy/signal.go:2303:		cvdMomMaxEl := float64(d.params.PairArbCVDMomentumMaxElapsedSec)
+./strategy/signal.go:2307:		cvdMomMaxGap := d.params.PairArbCVDMomentumMaxGapUSD
+./strategy/signal.go:2313:			cvdMomMinCVD := d.params.PairArbCVDMomentumMinCVDBTC
+./strategy/signal.go:2329:					if d.params.PairArbCVDMomentumMaxLeadDriftCents > 0 {
+./strategy/signal.go:2331:						cap := d.params.PairArbCVDMomentumMaxLeadDriftCents
+./strategy/signal.go:2341:					sigT := SignalPairArbCVDMomentumYes
+./strategy/signal.go:2345:						sigT = SignalPairArbCVDMomentumNo
+./strategy/signal.go:2349:							lockedP := d.params.PairArbCVDMomentumLockedProfitCents / 100.0
+./strategy/signal.go:2455:	reverseMode := d.params.PairArbReverseSignalEnabled
+./strategy/signal.go:2457:		reverseMinGap := d.params.PairArbReverseSignalMinGapUSD
+./strategy/signal.go:2464:		reverseMaxGap := d.params.PairArbReverseSignalMaxGapUSD
+./strategy/signal.go:2468:		reverseLookbackSec := d.params.PairArbReverseSignalLookbackSec
+./strategy/signal.go:2473:		reverseMinShrink := d.params.PairArbReverseSignalMinShrinkUSD
+./strategy/signal.go:2483:		reverseMinVel := d.params.PairArbReverseSignalMinVelocityUSD
+./strategy/signal.go:2536:	if d.params.PairArbCVDRangeSkipFrom < d.params.PairArbCVDRangeSkipTo {
+./strategy/signal.go:2538:		if isYesLead && cvd >= d.params.PairArbCVDRangeSkipFrom && cvd < d.params.PairArbCVDRangeSkipTo {
+./strategy/signal.go:2541:		if !isYesLead && cvd >= -d.params.PairArbCVDRangeSkipTo && cvd < -d.params.PairArbCVDRangeSkipFrom {
+./strategy/signal.go:2689:			sigType = SignalPairArbReverseLeadYes
+./strategy/signal.go:2694:		sigType = SignalPairArbReverseLeadNo
+./strategy/signal.go:2700:		lockedProfit := d.params.PairArbMinLockedProfitCents / 100.0
+./strategy/signal.go:2728:	if d.params.PairArbSessionTrendFilterUSD > 0 {
+./strategy/signal.go:2729:		maxBuckets := d.params.PairArbSessionTrendBuckets
+./strategy/signal.go:2736:			if drift > d.params.PairArbSessionTrendFilterUSD && !isYesLead {
+./strategy/signal.go:2739:			if drift < -d.params.PairArbSessionTrendFilterUSD && isYesLead {
+./config/config.go:117:	PairArbReverseSignalEnabled        bool
+./config/config.go:118:	PairArbReverseSignalMinGapUSD      float64
+./config/config.go:119:	PairArbReverseSignalMaxGapUSD      float64
+./config/config.go:120:	PairArbReverseSignalMinVelocityUSD float64
+./config/config.go:121:	PairArbReverseSignalLookbackSec    int
+./config/config.go:122:	PairArbReverseSignalMinShrinkUSD   float64
+./config/config.go:141:	// PairArbCVDMomentum* enable early-window entries directed by BTC CVD in low-gap markets.
+./config/config.go:145:	PairArbCVDMomentumEnabled           bool
+./config/config.go:146:	PairArbCVDMomentumMaxElapsedSec     int     // max elapsed seconds since window open (default 60)
+./config/config.go:147:	PairArbCVDMomentumMaxGapUSD         float64 // max |BTC-open| in USD (default 15)
+./config/config.go:148:	PairArbCVDMomentumMinCVDBTC         float64 // min |CVD30s| in BTC (default 10)
+./config/config.go:149:	PairArbCVDMomentumLockedProfitCents float64 // hedge locked-profit target in cents (default 3)
+./config/config.go:150:	// PairArbCVDMomentumMaxLeadDriftCents blocks entries where the Polymarket lead token has
+./config/config.go:154:	PairArbCVDMomentumMaxLeadDriftCents float64
+./config/config.go:155:	PairArbMinLockedProfitCents         float64
+./config/config.go:169:	PairArbHedgeTimeoutSec              int
+./config/config.go:170:	// PairArbStopLossCents: if the lead leg falls X cents below its entry price before
+./config/config.go:172:	PairArbStopLossCents float64
+./config/config.go:173:	// PairArbStopLossMinHoldSec delays pair stop-loss for the first N seconds after
+./config/config.go:175:	PairArbStopLossMinHoldSec int
+./config/config.go:176:	// PairArbStopLossMinGapAgainstUSD requires BTC/open to move this many USD against
+./config/config.go:178:	PairArbStopLossMinGapAgainstUSD float64
+./config/config.go:198:	// PairArbDualPrePlace: when true, place BOTH the lead-buy AND the hedge-buy
+./config/config.go:201:	PairArbDualPrePlace bool
+./config/config.go:202:	// PairArbHedgePreOffsetCents: when PairArbDualPrePlace is true, the pre-placed hedge
+./config/config.go:261:	// PairArbSessionTrendFilterUSD blocks pair-arb entries whose direction opposes a
+./config/config.go:263:	// than this many USD over the last PairArbSessionTrendBuckets windows (~30 min at
+./config/config.go:266:	PairArbSessionTrendFilterUSD float64
+./config/config.go:267:	// PairArbSessionTrendBuckets is the look-back window in 5m market windows for
+./config/config.go:269:	PairArbSessionTrendBuckets int
+./config/config.go:302:	// PairArbCVDRangeSkipFrom / To: skip when CVD30s is in [From, To) for YES
+./config/config.go:304:	PairArbCVDRangeSkipFrom float64
+./config/config.go:305:	PairArbCVDRangeSkipTo   float64
+./config/config.go:556:		PairArbReverseSignalEnabled:                        boolEnv("PAIR_ARB_REVERSE_SIGNAL_ENABLED", false),
+./config/config.go:557:		PairArbReverseSignalMinGapUSD:                      floatEnv("PAIR_ARB_REVERSE_SIGNAL_MIN_GAP_USD", 20.0),
+./config/config.go:558:		PairArbReverseSignalMaxGapUSD:                      floatEnv("PAIR_ARB_REVERSE_SIGNAL_MAX_GAP_USD", 0),
+./config/config.go:559:		PairArbReverseSignalMinVelocityUSD:                 floatEnv("PAIR_ARB_REVERSE_SIGNAL_MIN_VELOCITY_USD", 0.25),
+./config/config.go:560:		PairArbReverseSignalLookbackSec:                    intEnv("PAIR_ARB_REVERSE_SIGNAL_LOOKBACK_SEC", 8),
+./config/config.go:561:		PairArbReverseSignalMinShrinkUSD:                   floatEnv("PAIR_ARB_REVERSE_SIGNAL_MIN_SHRINK_USD", 2.0),
+./config/config.go:574:		PairArbCVDMomentumEnabled:                          boolEnv("PAIR_ARB_CVD_MOMENTUM_ENABLED", false),
+./config/config.go:575:		PairArbCVDMomentumMaxElapsedSec:                    intEnv("PAIR_ARB_CVD_MOMENTUM_MAX_ELAPSED_SEC", 60),
+./config/config.go:576:		PairArbCVDMomentumMaxGapUSD:                        floatEnv("PAIR_ARB_CVD_MOMENTUM_MAX_GAP_USD", 15.0),
+./config/config.go:577:		PairArbCVDMomentumMinCVDBTC:                        floatEnv("PAIR_ARB_CVD_MOMENTUM_MIN_CVD_BTC", 10.0),
+./config/config.go:578:		PairArbCVDMomentumLockedProfitCents:                floatEnv("PAIR_ARB_CVD_MOMENTUM_LOCKED_PROFIT_CENTS", 3.0),
+./config/config.go:579:		PairArbCVDMomentumMaxLeadDriftCents:                floatEnv("PAIR_ARB_CVD_MOMENTUM_MAX_LEAD_DRIFT_CENTS", 0.0),
+./config/config.go:580:		PairArbMinLockedProfitCents:                        floatEnv("PAIR_ARB_MIN_LOCKED_PROFIT_CENTS", 8.0),
+./config/config.go:594:		PairArbHedgeTimeoutSec:                             intEnv("PAIR_ARB_HEDGE_TIMEOUT_SEC", 5),
+./config/config.go:595:		PairArbStopLossCents:                               floatEnv("PAIR_ARB_STOP_LOSS_CENTS", 0),
+./config/config.go:596:		PairArbStopLossMinHoldSec:                          intEnv("PAIR_ARB_STOP_LOSS_MIN_HOLD_SEC", 0),
+./config/config.go:597:		PairArbStopLossMinGapAgainstUSD:                    floatEnv("PAIR_ARB_STOP_LOSS_MIN_GAP_AGAINST_USD", 0),
+./config/config.go:603:		PairArbDualPrePlace:                                boolEnv("PAIR_ARB_DUAL_PRE_PLACE", true),
+./config/config.go:618:		PairArbSessionTrendFilterUSD:                       floatEnv("PAIR_ARB_SESSION_TREND_FILTER_USD", 0.0),
+./config/config.go:619:		PairArbSessionTrendBuckets:                         intEnv("PAIR_ARB_SESSION_TREND_BUCKETS", 6),
+./config/config.go:631:		PairArbCVDRangeSkipFrom:                            floatEnv("PAIR_ARB_CVD_RANGE_SKIP_FROM", 0),
+./config/config.go:632:		PairArbCVDRangeSkipTo:                              floatEnv("PAIR_ARB_CVD_RANGE_SKIP_TO", 0),
+./main.go:226:		Reverse:           cfg.PairArbReverseSignalEnabled,
+./main.go:545:	if cfg.PairArbCVDMomentumEnabled {
+./main.go:546:		cvdMomMaxEl := float64(cfg.PairArbCVDMomentumMaxElapsedSec)
+./main.go:550:		cvdMomMaxGap := cfg.PairArbCVDMomentumMaxGapUSD
+./main.go:554:		cvdMomMinCVD := cfg.PairArbCVDMomentumMinCVDBTC
+./main.go:618:		PairArbReverseSignalEnabled:         cfg.PairArbReverseSignalEnabled,
+./main.go:619:		PairArbReverseSignalMinGapUSD:       cfg.PairArbReverseSignalMinGapUSD,
+./main.go:620:		PairArbReverseSignalMaxGapUSD:       cfg.PairArbReverseSignalMaxGapUSD,
+./main.go:621:		PairArbReverseSignalMinVelocityUSD:  cfg.PairArbReverseSignalMinVelocityUSD,
+./main.go:622:		PairArbReverseSignalLookbackSec:     cfg.PairArbReverseSignalLookbackSec,
+./main.go:623:		PairArbReverseSignalMinShrinkUSD:    cfg.PairArbReverseSignalMinShrinkUSD,
+./main.go:634:		PairArbCVDMomentumEnabled:           cfg.PairArbCVDMomentumEnabled,
+./main.go:635:		PairArbCVDMomentumMaxElapsedSec:     cfg.PairArbCVDMomentumMaxElapsedSec,
+./main.go:636:		PairArbCVDMomentumMaxGapUSD:         cfg.PairArbCVDMomentumMaxGapUSD,
+./main.go:637:		PairArbCVDMomentumMinCVDBTC:         cfg.PairArbCVDMomentumMinCVDBTC,
+./main.go:638:		PairArbCVDMomentumLockedProfitCents: cfg.PairArbCVDMomentumLockedProfitCents,
+./main.go:639:		PairArbCVDMomentumMaxLeadDriftCents: cfg.PairArbCVDMomentumMaxLeadDriftCents,
+./main.go:640:		PairArbMinLockedProfitCents:         cfg.PairArbMinLockedProfitCents,
+./main.go:654:		PairArbSessionTrendFilterUSD:        cfg.PairArbSessionTrendFilterUSD,
+./main.go:655:		PairArbSessionTrendBuckets:          cfg.PairArbSessionTrendBuckets,
+./main.go:665:		PairArbCVDRangeSkipFrom:             cfg.PairArbCVDRangeSkipFrom,
+./main.go:666:		PairArbCVDRangeSkipTo:               cfg.PairArbCVDRangeSkipTo,
+./main.go:709:		PairArbMinLockedProfitCents:                        cfg.PairArbMinLockedProfitCents,
+./main.go:710:		PairArbCVDMomentumLockedProfitCents:                cfg.PairArbCVDMomentumLockedProfitCents,
+./main.go:711:		PairArbHedgeTimeoutSec:                             cfg.PairArbHedgeTimeoutSec,
+./main.go:712:		PairArbStopLossCents:                               cfg.PairArbStopLossCents,
+./main.go:713:		PairArbStopLossMinHoldSec:                          cfg.PairArbStopLossMinHoldSec,
+./main.go:714:		PairArbStopLossMinGapAgainstUSD:                    cfg.PairArbStopLossMinGapAgainstUSD,
+./main.go:720:		PairArbDualPrePlace:                                cfg.PairArbDualPrePlace,
+./main.go:1267:					if cfg.PairArbReverseSignalEnabled {
+./main.go:2141:			case strategy.SignalPairArbReverseLeadYes:
+./main.go:2157:							logger.Warn("trader.OnPairArbSignal(PairArbReverseLeadYes) skipped",
+./main.go:2164:						logger.Error("trader.OnPairArbSignal(PairArbReverseLeadYes)", zap.Error(err))
+./main.go:2172:			case strategy.SignalPairArbReverseLeadNo:
+./main.go:2188:							logger.Warn("trader.OnPairArbSignal(PairArbReverseLeadNo) skipped",
+./main.go:2195:						logger.Error("trader.OnPairArbSignal(PairArbReverseLeadNo)", zap.Error(err))
+
+=== HISTORY INVENTORY ===
+/home/ubuntu/ArboCos/control/signals.jsonl 19050448 bytes
+/home/ubuntu/ArboCos/control/trades.jsonl 18710 bytes
+/home/ubuntu/ArboCos/patched8088/signals-v1.jsonl 4834337 bytes
+/home/ubuntu/ArboCos/patched8088/signals.jsonl 1663519 bytes
+/home/ubuntu/ArboCos/patched8088/trades-v1.jsonl 5500 bytes
+/home/ubuntu/ArboCos/polyarbpro_2.4/signals.jsonl 1925701 bytes
+/home/ubuntu/ArboCos/polyarbpro_2.4/trades.jsonl 6620 bytes
+/home/ubuntu/ArboCos/realpaper/signals-v1.jsonl 4834337 bytes
+/home/ubuntu/ArboCos/realpaper/signals.jsonl 11227353 bytes
+/home/ubuntu/ArboCos/realpaper/trades-v1.jsonl 5500 bytes
+/home/ubuntu/ArboCos/wideband/signals.jsonl 305303 bytes
+/home/ubuntu/ArboCos/wideband/trades.jsonl 2722 bytes
