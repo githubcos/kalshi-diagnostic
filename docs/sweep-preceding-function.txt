@@ -1,0 +1,93 @@
+   540				for _, minCVD := range minCVDVals {
+   541					for _, minSpread := range minSpreadVals {
+   542						for _, minCBTI := range minCBTIVals {
+   543							for _, minOIDelta := range minOIDeltaVals {
+   544								for _, maxContraOIDelta := range maxContraOIDeltaVals {
+   545									candidate := cloneStringMap(baseConfig)
+   546									candidate["PAIR_ARB_MIN_WINDOW_SEC"] = "45"
+   547									candidate["PAIR_ARB_MAX_WINDOW_SEC"] = "180"
+   548									candidate["PAIR_ARB_MIN_TOKEN_PRICE"] = "0.35"
+   549									candidate["PAIR_ARB_MAX_TOKEN_PRICE"] = "0.60"
+   550									candidate["PAIR_ARB_MIN_BTC_GAP_USD"] = "10"
+   551									candidate["PAIR_ARB_MAX_BTC_GAP_USD"] = "180"
+   552									candidate["PAIR_ARB_MAX_HEDGE_DISTANCE_CENTS"] = "10"
+   553									candidate["PAIR_ARB_HEDGE_TIMEOUT_SEC"] = "6"
+   554									candidate["PAIR_ARB_HEDGE_DWELL_SEC"] = "0"
+   555	
+   556									candidate["PAIR_ARB_MIN_GAP_VELOCITY_USD"] = fmt.Sprintf("%.2f", minVelocity)
+   557									candidate["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"] = fmt.Sprintf("%.1f", minLocked)
+   558									candidate["PAIR_ARB_MIN_CVD_BTC"] = fmt.Sprintf("%.1f", minCVD)
+   559									candidate["PAIR_ARB_MIN_BOOK_IMBALANCE"] = "0.00"
+   560									candidate["PAIR_ARB_MIN_COINBASE_SPREAD_USD"] = fmt.Sprintf("%.1f", minSpread)
+   561									candidate["PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE"] = fmt.Sprintf("%.2f", minCBTI)
+   562									candidate["PAIR_ARB_MIN_OI_DELTA_USD"] = fmt.Sprintf("%.0f", minOIDelta)
+   563									candidate["PAIR_ARB_MAX_CONTRA_OI_DELTA_USD"] = fmt.Sprintf("%.0f", maxContraOIDelta)
+   564	
+   565									result := evaluatePairArbSweepCandidate(windows, candidate)
+   566									if result.Trades == 0 {
+   567										continue
+   568									}
+   569									results = append(results, result)
+   570								}
+   571							}
+   572						}
+   573		}
+   574	
+   575		if len(results) == 0 {
+   576			t.Fatal("v3 sweep produced no trades")
+   577		}
+   578	
+   579		baseline := evaluatePairArbSweepCandidate(windows, baseConfig)
+   580		t.Logf("v3 baseline: trades=%d wins=%d losses=%d win_rate=%.2f%% net=%.2f dd=%.2f stop=%d safe=%d timeout=%d score=%.3f",
+   581			baseline.Trades,
+   582			baseline.Wins,
+   583			baseline.Losses,
+   584			baseline.WinRate,
+   585			baseline.Net,
+   586			baseline.MaxDrawdown,
+   587			baseline.StopLossCount,
+   588			baseline.UnhedgedSafeExitCount,
+   589			baseline.UnhedgedTimeoutCount,
+   590			baseline.ObjectiveScore,
+   591		)
+   592	
+   593		sort.Slice(results, func(i, j int) bool {
+   594			if results[i].ObjectiveScore == results[j].ObjectiveScore {
+   595				if results[i].Net == results[j].Net {
+   596					return results[i].MaxDrawdown < results[j].MaxDrawdown
+   597				}
+   598				return results[i].Net > results[j].Net
+   599			}
+   600			return results[i].ObjectiveScore > results[j].ObjectiveScore
+   601		})
+   602	
+   603		topN := 20
+   604		if len(results) < topN {
+   605			topN = len(results)
+   606		}
+   607		for i := 0; i < topN; i++ {
+   608			r := results[i]
+   609			t.Logf("v3 rank=%d score=%.3f net=%.2f dd=%.2f trades=%d win_rate=%.2f%% losses=%d stop=%d safe=%d timeout=%d cfg={minVel=%s minLock=%s cvd=%s cbSpread=%s cbTI=%s minOI=%s maxContraOI=%s}",
+   610				i+1,
+   611				r.ObjectiveScore,
+   612				r.Net,
+   613				r.MaxDrawdown,
+   614				r.Trades,
+   615				r.WinRate,
+   616				r.Losses,
+   617				r.StopLossCount,
+   618				r.UnhedgedSafeExitCount,
+   619				r.UnhedgedTimeoutCount,
+   620				r.Config["PAIR_ARB_MIN_GAP_VELOCITY_USD"],
+   621				r.Config["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"],
+   622				r.Config["PAIR_ARB_MIN_CVD_BTC"],
+   623				r.Config["PAIR_ARB_MIN_COINBASE_SPREAD_USD"],
+   624				r.Config["PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE"],
+   625				r.Config["PAIR_ARB_MIN_OI_DELTA_USD"],
+   626				r.Config["PAIR_ARB_MAX_CONTRA_OI_DELTA_USD"],
+   627			)
+   628		}
+   629	}
+   630	
+   631	func TestLocalPairArbCompareProfilesV3(t *testing.T) {
+   632		if os.Getenv("RUN_LOCAL_PAIR_ARB_COMPARE_V3") != "1" {
