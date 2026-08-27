@@ -1,0 +1,71 @@
+		baseline.ObjectiveScore,
+	)
+
+	sort.Slice(results, func(i, j int) bool {
+		if results[i].ObjectiveScore == results[j].ObjectiveScore {
+			if results[i].Net == results[j].Net {
+				return results[i].MaxDrawdown < results[j].MaxDrawdown
+			}
+			return results[i].Net > results[j].Net
+		}
+		return results[i].ObjectiveScore > results[j].ObjectiveScore
+	})
+
+	topN := 20
+	if len(results) < topN {
+		topN = len(results)
+	}
+	for i := 0; i < topN; i++ {
+		r := results[i]
+		t.Logf("v3 rank=%d score=%.3f net=%.2f dd=%.2f trades=%d win_rate=%.2f%% losses=%d stop=%d safe=%d timeout=%d cfg={minVel=%s minLock=%s cvd=%s cbSpread=%s cbTI=%s minOI=%s maxContraOI=%s}",
+			i+1,
+			r.ObjectiveScore,
+			r.Net,
+			r.MaxDrawdown,
+			r.Trades,
+			r.WinRate,
+			r.Losses,
+			r.StopLossCount,
+			r.UnhedgedSafeExitCount,
+			r.UnhedgedTimeoutCount,
+			r.Config["PAIR_ARB_MIN_GAP_VELOCITY_USD"],
+			r.Config["PAIR_ARB_MIN_LOCKED_PROFIT_CENTS"],
+			r.Config["PAIR_ARB_MIN_CVD_BTC"],
+			r.Config["PAIR_ARB_MIN_COINBASE_SPREAD_USD"],
+			r.Config["PAIR_ARB_MIN_COINBASE_TAKER_IMBALANCE"],
+			r.Config["PAIR_ARB_MIN_OI_DELTA_USD"],
+			r.Config["PAIR_ARB_MAX_CONTRA_OI_DELTA_USD"],
+		)
+	}
+}
+
+func TestLocalPairArbCompareProfilesV3(t *testing.T) {
+	if os.Getenv("RUN_LOCAL_PAIR_ARB_COMPARE_V3") != "1" {
+		t.Skip("set RUN_LOCAL_PAIR_ARB_COMPARE_V3=1 to run local pair-arb v3 profile comparison")
+	}
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd: %v", err)
+	}
+	if chdirErr := os.Chdir(".."); chdirErr != nil {
+		t.Fatalf("Chdir(..): %v", chdirErr)
+	}
+	defer func() { _ = os.Chdir(cwd) }()
+
+	inputFiles := resolveBacktestInputFiles(".")
+	if len(inputFiles) == 0 {
+		t.Fatal("no input files for backtest")
+	}
+	windows, err := loadBacktestWindows(inputFiles, 0)
+	if err != nil {
+		t.Fatalf("loadBacktestWindows: %v", err)
+	}
+
+	baseConfig, err := mergedRuntimeConfig(nil)
+	if err != nil {
+		t.Fatalf("mergedRuntimeConfig: %v", err)
+	}
+	baseConfig["PAIR_ARB_ENABLED"] = "true"
+
+	type profile struct {
