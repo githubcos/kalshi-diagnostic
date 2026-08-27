@@ -1,0 +1,205 @@
+================ STOP/TIMEOUT ================
+=== RUN   TestLocalPairArbSweepStopLoss
+    strategy_backtest_sweep_test.go:924: stop-loss sweep: windows=14, stop_vals=11, timeout_vals=9, combos=99
+    strategy_backtest_sweep_test.go:953: ─────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:954: stop_loss  hedge_timeout  trades  wins  losses  win%%  net     avg_pnl  max_dd  stop_ct  score
+    strategy_backtest_sweep_test.go:955: ─────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:961:    18.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:     0.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    12.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    28.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    10.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    22.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    15.0¢      28s            6     4       2   66.7%   +1.61  +0.2700   1.12      0     0.738
+    strategy_backtest_sweep_test.go:961:    12.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:     0.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:    18.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:    10.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:    22.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:     8.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:     6.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:    28.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:    15.0¢      22s            6     4       2   66.7%   +1.26  +0.2100   1.17      0     0.358
+    strategy_backtest_sweep_test.go:961:     4.0¢      28s            6     4       2   66.7%   +1.13  +0.1900   1.60      1     -0.030
+    strategy_backtest_sweep_test.go:961:     2.0¢      28s            6     4       2   66.7%   +1.12  +0.1900   1.61      2     -0.046
+    strategy_backtest_sweep_test.go:961:     2.0¢      22s            6     4       2   66.7%   +0.82  +0.1400   1.61      2     -0.346
+    strategy_backtest_sweep_test.go:961:     6.0¢      28s            6     4       2   66.7%   +0.89  +0.1500   1.84      1     -0.414
+    strategy_backtest_sweep_test.go:961:     2.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      2     -0.596
+    strategy_backtest_sweep_test.go:961:     8.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:     6.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    15.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    22.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    12.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    10.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:     0.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    18.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:    28.0¢      18s            6     4       2   66.7%   +0.57  +0.1000   1.61      0     -0.596
+    strategy_backtest_sweep_test.go:961:     4.0¢      22s            6     4       2   66.7%   +0.66  +0.1100   1.77      1     -0.602
+    strategy_backtest_sweep_test.go:961:     8.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    22.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:     6.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    18.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:     0.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    10.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    28.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:     4.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    15.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:    12.0¢      12s            6     4       2   66.7%   +0.41  +0.0700   1.53      0     -0.708
+    strategy_backtest_sweep_test.go:961:     4.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:     6.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    22.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    12.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    15.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    18.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:     0.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:     8.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    28.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:    10.0¢      15s            6     4       2   66.7%   +0.35  +0.0600   1.57      0     -0.792
+    strategy_backtest_sweep_test.go:961:     2.0¢      12s            6     4       2   66.7%   +0.33  +0.0500   1.61      2     -0.836
+    strategy_backtest_sweep_test.go:961:     2.0¢      15s            6     4       2   66.7%   +0.31  +0.0500   1.61      2     -0.856
+    strategy_backtest_sweep_test.go:961:     8.0¢      28s            6     4       2   66.7%   +0.54  +0.0900   2.19      1     -0.974
+    strategy_backtest_sweep_test.go:961:     4.0¢      18s            6     4       2   66.7%   +0.33  +0.0600   1.85      1     -0.980
+    strategy_backtest_sweep_test.go:961:    10.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:     6.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:    12.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:     0.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:    28.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:    22.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:     4.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:    18.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:     8.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:    15.0¢      10s            6     3       3   50.0%   +0.09  +0.0100   1.56      0     -1.146
+    strategy_backtest_sweep_test.go:961:     2.0¢      10s            6     3       3   50.0%   -0.07  -0.0100   1.72      2     -1.402
+    strategy_backtest_sweep_test.go:961:     2.0¢       8s            6     2       4   33.3%   -0.69  -0.1200   1.88      2     -2.218
+    strategy_backtest_sweep_test.go:961:     6.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:     0.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    28.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:     8.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:     4.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    22.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    15.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    18.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    10.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    12.0¢       8s            6     2       4   33.3%   -0.81  -0.1400   2.00      0     -2.410
+    strategy_backtest_sweep_test.go:961:    22.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:    12.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:     6.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:    10.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:    28.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:    15.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:    18.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:     0.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:     8.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:     4.0¢       3s            6     1       5   16.7%   -1.10  -0.1800   1.95      0     -2.770
+    strategy_backtest_sweep_test.go:961:     2.0¢       5s            6     1       5   16.7%   -1.24  -0.2100   2.11      2     -3.006
+    strategy_backtest_sweep_test.go:961:     2.0¢       3s            6     1       5   16.7%   -1.34  -0.2200   2.19      1     -3.154
+    strategy_backtest_sweep_test.go:961:     4.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:     8.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    22.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    18.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    28.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    10.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:     6.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    12.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:    15.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:961:     0.0¢       5s            6     1       5   16.7%   -1.36  -0.2300   2.23      0     -3.198
+    strategy_backtest_sweep_test.go:975: ─────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:980: (live config: PAIR_ARB_STOP_LOSS_CENTS=0  PAIR_ARB_HEDGE_TIMEOUT_SEC=5)
+--- PASS: TestLocalPairArbSweepStopLoss (17.69s)
+PASS
+ok  	github.com/polyarb/web	17.708s
+
+================ CVD/BOOK ====================
+=== RUN   TestLocalPairArbSweepCVDFilter
+    strategy_backtest_sweep_test.go:1046: env override: PAIR_ARB_STOP_LOSS_CENTS=2
+    strategy_backtest_sweep_test.go:1046: env override: PAIR_ARB_HEDGE_TIMEOUT_SEC=8
+    strategy_backtest_sweep_test.go:1072: CVD filter sweep: windows=14, cvd_vals=10, book_vals=8, combos=80
+    strategy_backtest_sweep_test.go:1074: locked: PAIR_ARB_STOP_LOSS_CENTS=2  PAIR_ARB_HEDGE_TIMEOUT_SEC=8
+    strategy_backtest_sweep_test.go:1103: ──────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:1104: min_cvd  min_book  trades  wins  losses  win%%  net     avg_pnl  max_dd  stop_ct  score
+    strategy_backtest_sweep_test.go:1105: ──────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:1112:    1.00     0.000      1     1       0  100.0%   +0.01  +0.0100   0.00      0     0.010
+    strategy_backtest_sweep_test.go:1112:    4.00     0.000      1     1       0  100.0%   +0.01  +0.0100   0.00      0     0.010
+    strategy_backtest_sweep_test.go:1112:    3.00     0.000      1     1       0  100.0%   +0.01  +0.0100   0.00      0     0.010
+    strategy_backtest_sweep_test.go:1112:    2.00     0.000      1     1       0  100.0%   +0.01  +0.0100   0.00      0     0.010
+    strategy_backtest_sweep_test.go:1112:    1.50     0.000      1     1       0  100.0%   +0.01  +0.0100   0.00      0     0.010
+    strategy_backtest_sweep_test.go:1109:    3.00     0.200    -- zero trades --  (cvd=3.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.100    -- zero trades --  (cvd=6.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.200    -- zero trades --  (cvd=10.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.150    -- zero trades --  (cvd=10.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.030    -- zero trades --  (cvd=1.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.050    -- zero trades --  (cvd=1.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.080    -- zero trades --  (cvd=1.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.100    -- zero trades --  (cvd=1.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.120    -- zero trades --  (cvd=1.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.150    -- zero trades --  (cvd=1.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    1.00     0.200    -- zero trades --  (cvd=1.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.120    -- zero trades --  (cvd=10.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.030    -- zero trades --  (cvd=1.50 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.050    -- zero trades --  (cvd=1.50 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.080    -- zero trades --  (cvd=1.50 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.100    -- zero trades --  (cvd=1.50 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.120    -- zero trades --  (cvd=1.50 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.150    -- zero trades --  (cvd=1.50 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    1.50     0.200    -- zero trades --  (cvd=1.50 book=0.200)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.100    -- zero trades --  (cvd=10.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.030    -- zero trades --  (cvd=2.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.050    -- zero trades --  (cvd=2.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.080    -- zero trades --  (cvd=2.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.100    -- zero trades --  (cvd=2.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.120    -- zero trades --  (cvd=2.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.150    -- zero trades --  (cvd=2.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    2.00     0.200    -- zero trades --  (cvd=2.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.050    -- zero trades --  (cvd=4.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.030    -- zero trades --  (cvd=3.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.050    -- zero trades --  (cvd=3.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.080    -- zero trades --  (cvd=3.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.100    -- zero trades --  (cvd=3.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.120    -- zero trades --  (cvd=3.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    3.00     0.150    -- zero trades --  (cvd=3.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.080    -- zero trades --  (cvd=10.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.050    -- zero trades --  (cvd=10.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.030    -- zero trades --  (cvd=10.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.080    -- zero trades --  (cvd=4.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:   10.00     0.000    -- zero trades --  (cvd=10.00 book=0.000)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.100    -- zero trades --  (cvd=4.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.120    -- zero trades --  (cvd=4.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.150    -- zero trades --  (cvd=4.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.200    -- zero trades --  (cvd=4.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.000    -- zero trades --  (cvd=5.00 book=0.000)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.030    -- zero trades --  (cvd=5.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.050    -- zero trades --  (cvd=5.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.080    -- zero trades --  (cvd=5.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.100    -- zero trades --  (cvd=5.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.120    -- zero trades --  (cvd=5.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.150    -- zero trades --  (cvd=5.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    5.00     0.200    -- zero trades --  (cvd=5.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.000    -- zero trades --  (cvd=6.00 book=0.000)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.030    -- zero trades --  (cvd=6.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.050    -- zero trades --  (cvd=6.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.080    -- zero trades --  (cvd=6.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    4.00     0.030    -- zero trades --  (cvd=4.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.120    -- zero trades --  (cvd=6.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.150    -- zero trades --  (cvd=6.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    6.00     0.200    -- zero trades --  (cvd=6.00 book=0.200)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.000    -- zero trades --  (cvd=8.00 book=0.000)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.030    -- zero trades --  (cvd=8.00 book=0.030)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.050    -- zero trades --  (cvd=8.00 book=0.050)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.080    -- zero trades --  (cvd=8.00 book=0.080)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.100    -- zero trades --  (cvd=8.00 book=0.100)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.120    -- zero trades --  (cvd=8.00 book=0.120)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.150    -- zero trades --  (cvd=8.00 book=0.150)
+    strategy_backtest_sweep_test.go:1109:    8.00     0.200    -- zero trades --  (cvd=8.00 book=0.200)
+    strategy_backtest_sweep_test.go:1112:    0.00     0.000      6     2       4   33.3%   -0.69  -0.1200   1.88      2     -2.218
+    strategy_backtest_sweep_test.go:1112:    0.00     0.050      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.150      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.030      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.080      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.100      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.120      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1112:    0.00     0.200      3     1       2   33.3%   -1.22  -0.4100   1.61      2     -2.386
+    strategy_backtest_sweep_test.go:1126: ──────────────────────────────────────────────────────────────────────────────────────────────
+    strategy_backtest_sweep_test.go:1129: (live config: PAIR_ARB_MIN_CVD_BTC=0  PAIR_ARB_MIN_BOOK_IMBALANCE=0)
+--- PASS: TestLocalPairArbSweepCVDFilter (15.71s)
+PASS
+ok  	github.com/polyarb/web	15.724s
