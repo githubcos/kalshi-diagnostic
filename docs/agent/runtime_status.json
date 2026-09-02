@@ -1,5 +1,5 @@
 {
-  "utc": "2026-09-02T23:33:01+00:00",
+  "utc": "2026-09-02T23:33:09+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "kalshiarbo_pid": null,
@@ -25,7 +25,7 @@
     {
       "path": "/status",
       "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 4 ms: Couldn't connect to server"
+      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
     }
   ],
   "safe_config": {
