@@ -1,5 +1,5 @@
 {
-  "utc": "2026-09-03T01:41:06+00:00",
+  "utc": "2026-09-03T01:41:14+00:00",
   "mode": "PAPER",
   "live_orders_allowed": false,
   "kalshiarbo_pid": null,
@@ -10,12 +10,12 @@
     {
       "path": "/api/status",
       "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 1 ms: Couldn't connect to server"
     },
     {
       "path": "/api/bot/status",
       "code": "000",
-      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 0 ms: Couldn't connect to server"
+      "body": "curl: (7) Failed to connect to 127.0.0.1 port 8085 after 1 ms: Couldn't connect to server"
     },
     {
       "path": "/api/state",
